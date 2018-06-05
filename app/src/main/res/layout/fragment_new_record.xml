@@ -7,13 +7,6 @@
     tools:context=".NewRecordActivityFragment"
     tools:showIn="@layout/activity_new_record">
 
-    <android.support.constraint.Guideline
-        android:id="@+id/verticalGuideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.5" />
-
     <TextView
         android:id="@+id/plantTypeText"
         android:layout_width="wrap_content"
@@ -50,18 +43,21 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/plantTypeSpinner" />
 
+    <!--TODO: Make button view: show large image when clicked-->
     <ImageView
         android:id="@+id/plantPhoto"
         android:layout_width="wrap_content"
         android:layout_height="128dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:scaleType="centerInside"
         android:src="@drawable/plant"
         app:layout_constrainedWidth="true"
-        app:layout_constraintEnd_toStartOf="@id/verticalGuideline"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/PlantTypeDivider" />
+        app:layout_constraintStart_toEndOf="@+id/photoTypeSpinner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/PlantTypeDivider"
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/photoTypeText"
@@ -70,18 +66,29 @@
         android:layout_marginStart="16dp"
         android:text="@string/photo_type"
         android:textAppearance="@android:style/TextAppearance.Material.Small"
-        app:layout_constraintStart_toEndOf="@id/plantPhoto"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/plantPhoto" />
 
     <Spinner
         android:id="@+id/photoTypeSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginStart="16dp"
         android:entries="@array/photo_types"
-        app:layout_constraintStart_toEndOf="@id/plantPhoto"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/photoTypeText" />
+
+    <ImageButton
+        android:id="@+id/takePhotoButton"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/ic_camera_black_24dp"
+        app:layout_constraintEnd_toEndOf="@+id/photoTypeSpinner"
+        app:layout_constraintStart_toStartOf="@+id/photoTypeSpinner"
+        app:layout_constraintTop_toBottomOf="@+id/photoTypeSpinner"
+        tools:ignore="ContentDescription" />
 
     <View
         android:id="@+id/gpsTopDivider"
@@ -103,7 +110,8 @@
         android:layout_marginStart="16dp"
         android:src="@drawable/ic_gps_fixed_black_24dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/gpsTopDivider" />
+        app:layout_constraintTop_toBottomOf="@+id/gpsTopDivider"
+        tools:ignore="ContentDescription" />
 
 
     <TextView
@@ -202,8 +210,10 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:ems="10"
+        android:inputType="number"
         app:layout_constraintStart_toEndOf="@id/diameterText"
-        app:layout_constraintTop_toBottomOf="@+id/latinNameEditText" />
+        app:layout_constraintTop_toBottomOf="@+id/latinNameEditText"
+        tools:ignore="LabelFor" />
 
     <Spinner
         android:id="@+id/heightUnitsSpinner"
@@ -234,8 +244,10 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:ems="10"
+        android:inputType="number"
         app:layout_constraintStart_toEndOf="@id/diameterText"
-        app:layout_constraintTop_toBottomOf="@+id/heightEditText" />
+        app:layout_constraintTop_toBottomOf="@+id/heightEditText"
+        tools:ignore="LabelFor" />
 
     <Spinner
         android:id="@+id/trunkDiameterUnitsSpinner"

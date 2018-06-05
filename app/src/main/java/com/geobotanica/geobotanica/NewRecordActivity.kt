@@ -7,6 +7,10 @@ import android.view.Menu
 import android.view.MenuItem
 
 import kotlinx.android.synthetic.main.activity_new_record.*
+import timber.log.Timber
+import timber.log.Timber.DebugTree
+
+
 
 class NewRecordActivity : AppCompatActivity() {
 
@@ -19,6 +23,8 @@ class NewRecordActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
+        if (BuildConfig.DEBUG)
+            Timber.plant(DebugTree())
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

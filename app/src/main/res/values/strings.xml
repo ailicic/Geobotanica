@@ -25,7 +25,7 @@
         <item>Vine</item>
     </string-array>
     <string-array name="photo_types">
-        <item>Full</item>
+        <item>Complete</item>
         <item>Leaf</item>
         <item>Flower</item>
         <item>Fruit</item>
