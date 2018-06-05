@@ -1,4 +1,39 @@
 <resources>
     <string name="app_name">Geobotanica</string>
     <string name="action_settings">Settings</string>
+    <string name="photo_type">Photo Type</string>
+    <string name="common_name">Common Name</string>
+    <string name="hint_common_name">e.g. Hardy kiwi</string>
+    <string name="latin_name">Latin Name</string>
+    <string name="hint_latin_name">e.g. Actinidia arguta</string>
+    <string name="height">Height</string>
+    <string name="diameter">Diameter</string>
+    <string name="trunk_diameter">Trunk diameter</string>
+    <string name="plant_type">Plant Type</string>
+    <string name="tree">Tree</string>
+    <string name="shrub">Shrub</string>
+    <string name="herb">Herb</string>
+    <string name="vine">Vine</string>
+    <string name="precision">Precision: </string>
+    <string name="satellites">Satellites: </string>
+    <string name="button_gps">Save position</string>
+
+    <string-array name="plant_types">
+        <item>Tree</item>
+        <item>Shrub</item>
+        <item>Herb</item>
+        <item>Vine</item>
+    </string-array>
+    <string-array name="photo_types">
+        <item>Full</item>
+        <item>Leaf</item>
+        <item>Flower</item>
+        <item>Fruit</item>
+        <item>Stem</item>
+    </string-array>
+    <string-array name="measurement_units">
+        <item>cm</item>
+        <item>m</item>
+        <item>in</item>
+    </string-array>
 </resources>
