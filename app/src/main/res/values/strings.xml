@@ -1,3 +1,4 @@
+<!--suppress CheckTagEmptyBody -->
 <resources>
     <string name="app_name">Geobotanica</string>
     <string name="action_settings">Settings</string>
@@ -14,11 +15,13 @@
     <string name="shrub">Shrub</string>
     <string name="herb">Herb</string>
     <string name="vine">Vine</string>
-    <string name="precision">Precision: </string>
-    <string name="satellites">Satellites: </string>
+    <!--https://docs.oracle.com/javase/1.5.0/docs/api/java/util/Formatter.html-->
+    <string name="precision">Precision: ± %1$3.1f m</string>
+    <string name="satellites">Satellites: %1$d/%2$d</string>
     <string name="button_gps">Save position</string>
 
     <string-array name="plant_types">
+        <item></item>
         <item>Tree</item>
         <item>Shrub</item>
         <item>Herb</item>

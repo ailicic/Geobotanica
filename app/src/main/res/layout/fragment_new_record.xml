@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".NewRecordActivityFragment"
+    tools:context=".NewRecordFragment"
     tools:showIn="@layout/activity_new_record">
 
     <TextView
@@ -115,11 +115,10 @@
 
 
     <TextView
-        android:id="@+id/gpsPrecisionText"
+        android:id="@+id/precisionText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="@string/precision"
         android:textAppearance="@android:style/TextAppearance.Material.Small"
         app:layout_constraintStart_toEndOf="@+id/imageViewGpsCrossHair"
         app:layout_constraintTop_toTopOf="@+id/imageViewGpsCrossHair" />
@@ -129,7 +128,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="@string/satellites"
         android:textAppearance="@android:style/TextAppearance.Material.Small"
         app:layout_constraintBottom_toBottomOf="@+id/imageViewGpsCrossHair"
         app:layout_constraintStart_toEndOf="@id/imageViewGpsCrossHair" />

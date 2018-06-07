@@ -1,0 +1,6 @@
+<!--suppress DeprecatedClassUsageInspection -->
+<root>
+    <item name='android.location.GpsStatus GpsStatus()'>
+        <annotation name='java.lang.Deprecated' />
+    </item>
+</root>
