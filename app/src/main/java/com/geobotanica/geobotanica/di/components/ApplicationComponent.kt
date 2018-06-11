@@ -1,17 +1,17 @@
 package com.geobotanica.geobotanica.di.components
 
-import com.geobotanica.geobotanica.GeobotanicaApplication
+import android.app.Application
+import android.content.Context
+import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.di.modules.ApplicationModule
-import com.geobotanica.geobotanica.ui.new_record.NewRecordFragment
 import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(
-//        modules = [ApplicationModule::class, AndroidModule::class]
-    modules = [ApplicationModule::class]
-)
+@Component(modules = [ApplicationModule::class])
 interface ApplicationComponent {
-    fun inject(application: GeobotanicaApplication)
-    fun inject(newRecordFragment: NewRecordFragment)
+    fun inject(application: Application)
+
+    //Expose to sub-components
+    fun context(): Context
 }

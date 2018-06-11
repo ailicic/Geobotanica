@@ -12,7 +12,6 @@ class GeobotanicaApplication : Application() {
         super.onCreate()
         applicationComponent = DaggerApplicationComponent.builder()
                 .applicationModule(ApplicationModule(this))
-//                .androidModule(AndroidModule(this))
                 .build()
         applicationComponent.inject(this)
     }

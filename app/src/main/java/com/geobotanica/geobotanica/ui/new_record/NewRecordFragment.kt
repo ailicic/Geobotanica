@@ -22,8 +22,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import com.geobotanica.geobotanica.GeobotanicaApplication
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.android.location.Location
+import com.geobotanica.geobotanica.android.location.LocationService
+import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.fragment_new_record.*
 import java.io.File
@@ -37,6 +38,7 @@ class NewRecordFragment : Fragment() {
     @Inject lateinit  var locationService: LocationService
 //    @Inject lateinit  var cameraService: CameraService
 
+    private val requestFineLocationPermission = 1
     private val requestTakePhoto = 1
     private lateinit var photoFilePath: String
     private var oldPhotoFilePath: String = ""
@@ -45,26 +47,6 @@ class NewRecordFragment : Fragment() {
         super.onAttach(context)
         Lg.d("NewRecordFragment: onAttach()")
         // Context is now available
-
-        ContextCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION)
-        (activity!!.application as GeobotanicaApplication).applicationComponent.inject(this)
-    }
-
-    private val requestFineLocationPermission = 1
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>,
-                                            grantResults: IntArray) {
-        when (requestCode) {
-            requestFineLocationPermission -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    Lg.d("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_GRANTED")
-//                    requestGpsUpdates()
-                } else {
-                    Lg.d("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_DENIED")
-                }
-            }
-            else -> { } // Ignore all other requests.
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,25 +58,17 @@ class NewRecordFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         Lg.d("NewRecordFragment: onCreateView()")
 
-//        locationService.subscribe(::onLocation)
-//        locationService.subscribe(onLocationCallback)
-        locationService.subscribe { location: Location ->
-            with(location) {
-                Lg.d("onLocation(): " +
-                        "Type = $locationType, " +
-                        "Used satellitesInUse = ${satellitesInUse ?: ""}, " +
-                        "Visible satellitesInUse = ${satellitesInUse ?: ""}, " +
-                        "Precision = ${precision ?: ""}, " +
-                        "Lat = ${lat ?: ""}, " +
-                        "Long = ${long ?: ""}, " +
-                        "Alt = ${alt ?: ""}")
+        (activity as BaseActivity).activityComponent.inject(this)
 
-                precision?.let { precisionText.text = getString(R.string.precision, precision)}
-                satellitesInUse?.let { satellitesText?.text = getString(R.string.satellites, satellitesInUse, satellitesVisible) }
-            }
+        // TODO: Try to push this code into LocationService.
+        if(ContextCompat.checkSelfPermission(activity!!,
+                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            Lg.d("NewRecordFragment: GPS permissions already available. Subscribing now...")
+            locationService.subscribe(::onLocation)
+        } else {
+            Lg.d("NewRecordFragment: Requesting GPS permissions now...")
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), requestFineLocationPermission)
         }
-
-
 
         return inflater.inflate(R.layout.fragment_new_record, container, false)
     }
@@ -109,9 +83,6 @@ class NewRecordFragment : Fragment() {
             Toast.makeText(context, "Save position", Toast.LENGTH_SHORT).show()
         }
     }
-
-
-
 
     override fun onStart() {
         super.onStart()
@@ -146,6 +117,38 @@ class NewRecordFragment : Fragment() {
         locationService.unsubscribe(::onLocation)
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>,
+                                            grantResults: IntArray) {
+        when (requestCode) {
+            requestFineLocationPermission -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    Lg.d("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_GRANTED")
+                    locationService.subscribe(::onLocation)
+                } else {
+                    Lg.d("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_DENIED")
+                }
+            }
+            else -> { } // Ignore all other requests.
+        }
+    }
+
+    private fun onLocation(location: Location) {
+        with(location) {
+            Lg.d("NewRecordFragment: onLocation(): " +
+                    "Type = $locationType, " +
+                    "Used satellitesInUse = ${satellitesInUse ?: ""}, " +
+                    "Visible satellitesInUse = ${satellitesInUse ?: ""}, " +
+                    "Precision = ${precision ?: ""}, " +
+                    "Lat = ${lat ?: ""}, " +
+                    "Long = ${long ?: ""}, " +
+                    "Alt = ${alt ?: ""}")
+
+            precision?.let { precisionText.text = getString(R.string.precision, precision)}
+            satellitesInUse?.let { satellitesText?.text = getString(R.string.satellites, satellitesInUse, satellitesVisible) }
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             requestTakePhoto -> {
@@ -163,24 +166,6 @@ class NewRecordFragment : Fragment() {
                 }
             }
             else -> Toast.makeText(context, "Unrecognized request code", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    val onLocationCallback: (Location) -> Unit = this::onLocation
-
-    fun onLocation(location: Location) {
-        with(location) {
-            Lg.d("onLocation(): " +
-                    "Type = $locationType, " +
-                    "Used satellitesInUse = ${satellitesInUse ?: ""}, " +
-                    "Visible satellitesInUse = ${satellitesInUse ?: ""}, " +
-                    "Precision = ${precision ?: ""}, " +
-                    "Lat = ${lat ?: ""}, " +
-                    "Long = ${long ?: ""}, " +
-                    "Alt = ${alt ?: ""}")
-
-            precision?.let { precisionText.text = getString(R.string.precision, precision)}
-            satellitesInUse?.let { satellitesText?.text = getString(R.string.satellites, satellitesInUse, satellitesVisible) }
         }
     }
 

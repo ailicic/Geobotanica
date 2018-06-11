@@ -1,91 +1,71 @@
+@file:Suppress("DEPRECATION")
+
 package com.geobotanica.geobotanica.android.location
 
 import android.annotation.SuppressLint
-import android.app.Application
-import android.location.*
+import android.location.GnssStatus
+import android.location.GpsStatus
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresApi
-import android.support.v4.app.ActivityCompat.requestPermissions
 import com.geobotanica.geobotanica.util.Lg
 import javax.inject.Inject
 
-data class Location(
-        val locationType: LocationService.LocationType,
-        val lat: Double? = null,
-        val long: Double? = null,
-        val alt: Double? = null,
-        val precision: Float? = null,
-        val satellitesInUse: Int? = null,
-        val satellitesVisible: Int? = null,
-        val time: Long? = null
-)
-
-//class LocationService(val gpsService: GpsService, val networkLocationService: NetworkLocationService) {
-
 typealias LocationCallback = (Location) -> Unit
 
-class LocationService @Inject constructor (
-        private val application: Application,
-        private val locationManager: LocationManager)
-{
+class LocationService @Inject constructor (private val locationManager: LocationManager) {
     private val observers = mutableListOf<LocationCallback>()
-    private val requestFineLocationPermission = 1
-
-    enum class LocationType {
-        CURRENT_GPS_LOCATION,
-        BEST_GPS_LOCATION,
-        NETWORK_LOCATION,
-        CACHED_LOCATION;
-
-        override fun toString() =  when(this) {
-            CURRENT_GPS_LOCATION -> "Current GPS"
-            BEST_GPS_LOCATION-> "Best GPS"
-            NETWORK_LOCATION -> "Network"
-            CACHED_LOCATION -> "Cached"
-        }
-    }
+    private val gpsLocationListener:GpsLocationListener = GpsLocationListener()
+    private var gnssStatusCallback:GnssStatusCallback? = null
 
     init {
-        if (isGpsPermitted()) {
-            Lg.d("GPS already permitted")
-            requestGpsUpdates()
-        } else
-            Lg.d("Requesting GPS permissions now...")
-//        requestPermissions(activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), requestFineLocationPermission)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            gnssStatusCallback = GnssStatusCallback()
     }
 
     fun subscribe(callback: LocationCallback) {
-        Lg.d("LocationService: subscribe($callback)")
+        Lg.d("LocationService: subscribe()")
+        if(observers.isEmpty()) {
+            registerGpsUpdates()
+        }
         observers.add(callback)
     }
 
-    fun unsubscribe(callback: LocationCallback) = observers.remove(callback)
+    fun unsubscribe(callback: LocationCallback) {
+        observers.remove(callback)
+        if(observers.isEmpty())
+            unregisterGpsUpdates()
+    }
 
     private fun notify(location: Location) {
-        observers.apply { (location) }
+        observers.forEach { it(location) }
     }
 
-    private fun isGpsPermitted(): Boolean {
-//        return ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) ==
-//                PackageManager.PERMISSION_GRANTED
-        return true
+    @SuppressLint("MissingPermission")
+    private fun registerGpsUpdates() {
+        Lg.d("LocationService: registerGpsUpdates()")
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, gpsLocationListener)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Lg.d("Registering GPS status (API >= 24)")
+            locationManager.registerGnssStatusCallback(gnssStatusCallback)
+        } else {
+            Lg.d("Registering GPS status (API < 24)")
+            locationManager.addGpsStatusListener(::onGpsStatusChanged)
+        }
     }
 
-//    override fun onRequestPermissionsResult(requestCode: Int,
-//                                            permissions: Array<String>, grantResults: IntArray) {
-//        when (requestCode) {
-//            requestFineLocationPermission -> {
-//                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-//                    Lg.d("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_GRANTED")
-//                    requestGpsUpdates()
-//                } else {
-//                    Lg.d("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_DENIED")
-//                }
-//            }
-//            else -> { } // Ignore all other requests.
-//        }
-//    }
+    private fun unregisterGpsUpdates() {
+        Lg.d("LocationService: unregisterGpsUpdates()")
+        locationManager.removeUpdates(gpsLocationListener)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            locationManager.unregisterGnssStatusCallback(gnssStatusCallback)
+        } else {
+            locationManager.removeGpsStatusListener(::onGpsStatusChanged)
+        }
+    }
 
     private inner class GpsLocationListener : LocationListener {
         override fun onLocationChanged(location: android.location.Location) {
@@ -104,15 +84,18 @@ class LocationService @Inject constructor (
                 ))
             }
         }
-        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {   Lg.d("GpsLocation: OnStatusChanged") }
-        override fun onProviderEnabled(provider: String) {                              Lg.d("GpsLocation: OnProviderEnabled") }
-        override fun onProviderDisabled(provider: String) {                             Lg.d("GpsLocation: OnProviderDisabled") }
+        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
+            Lg.d("GpsLocationListener(): OnStatusChanged()")
+        }
 
+        override fun onProviderEnabled(provider: String) {
+            Lg.d("GpsLocationListener(): OnProviderEnabled()")
+        }
+
+        override fun onProviderDisabled(provider: String) {
+            Lg.d("GpsLocationListener(): OnProviderDisabled()")
+        }
     }
-
-    // TODO: Check if all GPS related callbacks/listeners need to be unregistered in fragment lifecycle
-    //        val locationManager: LocationManager = context?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    //        locationManager.removeUpdates(GpsLocationListener)
 
     @RequiresApi(Build.VERSION_CODES.N)
     private inner class GnssStatusCallback : GnssStatus.Callback() {
@@ -122,7 +105,8 @@ class LocationService @Inject constructor (
                 val satellitesVisible = status.satelliteCount
                 var satellitesInUse = 0
                 for(i in 0 until satellitesVisible) {
-                    satellitesInUse += if(status.usedInFix(i)) 1 else 0
+                    if(status.usedInFix(i))
+                        ++satellitesInUse
                 }
                 Lg.d("GnssStatus.Callback::onSatelliteStatusChanged(): $satellitesInUse/$satellitesVisible")
                 notify(Location(
@@ -169,21 +153,29 @@ class LocationService @Inject constructor (
             }
         }
     }
+}
 
-    // TODO: Verify the implications of this request. It appears it also triggers the permission request.
-    @SuppressLint("MissingPermission")
-    private fun requestGpsUpdates() {
-        Lg.d("Requesting GPS updates now...")
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, GpsLocationListener())
+data class Location(
+        val locationType: LocationType,
+        val lat: Double? = null,
+        val long: Double? = null,
+        val alt: Double? = null,
+        val precision: Float? = null,
+        val satellitesInUse: Int? = null,
+        val satellitesVisible: Int? = null,
+        val time: Long? = null
+)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Lg.d("Registering GPS status (API >= 24)")
-            locationManager.registerGnssStatusCallback(GnssStatusCallback())
-        } else {
-            Lg.d("Registering GPS status (API < 24)")
-            locationManager.addGpsStatusListener(::onGpsStatusChanged)
-        }
+enum class LocationType {
+    CURRENT_GPS_LOCATION,
+    BEST_GPS_LOCATION,
+    NETWORK_LOCATION,
+    CACHED_LOCATION;
 
-
+    override fun toString() =  when(this) {
+        CURRENT_GPS_LOCATION -> "Current GPS"
+        BEST_GPS_LOCATION-> "Best GPS"
+        NETWORK_LOCATION -> "Network"
+        CACHED_LOCATION -> "Cached"
     }
 }
