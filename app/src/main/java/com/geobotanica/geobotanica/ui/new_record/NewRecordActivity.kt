@@ -1,16 +1,17 @@
-package com.geobotanica.geobotanica
+package com.geobotanica.geobotanica.ui.new_record
 
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import com.geobotanica.geobotanica.R
 
 import kotlinx.android.synthetic.main.activity_new_record.*
 
 
 
-class MainActivity : AppCompatActivity() {
+class NewRecordActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
