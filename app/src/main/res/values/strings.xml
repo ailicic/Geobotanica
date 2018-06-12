@@ -39,4 +39,5 @@
         <item>m</item>
         <item>in</item>
     </string-array>
+    <string name="title_activity_map">MapActivity</string>
 </resources>

@@ -39,7 +39,7 @@ class NewRecordFragment : Fragment() {
 //    @Inject lateinit  var cameraService: CameraService
 
     private val requestFineLocationPermission = 1
-    private val requestTakePhoto = 1
+    private val requestTakePhoto = 2
     private lateinit var photoFilePath: String
     private var oldPhotoFilePath: String = ""
 
