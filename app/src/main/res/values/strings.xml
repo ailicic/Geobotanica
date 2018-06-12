@@ -1,6 +1,7 @@
 <!--suppress CheckTagEmptyBody -->
 <resources>
     <string name="app_name">Geobotanica</string>
+    <string name="newrecord_activity">New</string>
     <string name="action_settings">Settings</string>
     <string name="photo_type">Photo Type</string>
     <string name="common_name">Common Name</string>

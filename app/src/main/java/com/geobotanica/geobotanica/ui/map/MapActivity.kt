@@ -1,9 +1,13 @@
 package com.geobotanica.geobotanica.ui.map
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.AlarmClock.EXTRA_MESSAGE
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.appcompat.R.id.message
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.ui.new_record.NewRecordActivity
 
 import kotlinx.android.synthetic.main.activity_map.*
 
@@ -15,8 +19,10 @@ class MapActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+            val intent = Intent(this, NewRecordActivity::class.java).apply {
+                putExtra(EXTRA_MESSAGE, message)
+            }
+            startActivity(intent)
         }
     }
 
