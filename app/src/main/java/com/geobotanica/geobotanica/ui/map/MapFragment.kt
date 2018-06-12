@@ -15,7 +15,9 @@ import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.fragment_map.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
 
+// https://github.com/osmdroid/osmdroid/wiki/Offline-Map-Tiles
 
 /**
  * A placeholder fragment containing a simple view.
@@ -59,10 +61,10 @@ class MapFragment : Fragment() {
         map.setMultiTouchControls(true)
 
         // Set map start point
-//        val mapController = map.controller
-//        mapController.setZoom(9)
-//        val startPoint = GeoPoint(48.8583, 2.2944)
-//        mapController.setCenter(startPoint)
+        val mapController = map.controller
+        mapController.setZoom(14)
+        val startPoint = GeoPoint(49.477, -119.59)
+        mapController.setCenter(startPoint)
     }
 
     override fun onResume() {

@@ -10,11 +10,13 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresApi
+import com.geobotanica.geobotanica.di.PerActivity
 import com.geobotanica.geobotanica.util.Lg
 import javax.inject.Inject
 
 typealias LocationCallback = (Location) -> Unit
 
+@PerActivity
 class LocationService @Inject constructor (private val locationManager: LocationManager) {
     private val observers = mutableListOf<LocationCallback>()
     private val gpsLocationListener:GpsLocationListener = GpsLocationListener()

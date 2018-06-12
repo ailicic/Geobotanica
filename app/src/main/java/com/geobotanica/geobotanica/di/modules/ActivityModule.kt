@@ -16,8 +16,6 @@ class ActivityModule(private val activity: BaseActivity) {
         return activity.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     }
 
-    @Provides @PerActivity fun provideLocationService(locationManager: LocationManager): LocationService {
-//        return LocationService(activity, locationManager)
-        return LocationService(locationManager)
-    }
+    // Not required due to constructor injection:
+//    @Provides @PerActivity fun provideLocationService(locationManager: LocationManager) { ... }
 }
