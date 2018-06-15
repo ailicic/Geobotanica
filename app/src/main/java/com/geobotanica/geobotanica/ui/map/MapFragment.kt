@@ -9,12 +9,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data.dao.UserDao
-import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.util.Lg
-import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_map.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -26,9 +22,6 @@ import org.osmdroid.util.GeoPoint
  * A placeholder fragment containing a simple view.
  */
 class MapFragment : BaseFragment() {
-//    @Inject lateinit var activity: BaseActivity
-//    @Inject lateinit var sharedPrefs: SharedPreferences
-//    @Inject lateinit var gbDatabase: GbDatabase
     private val requestExternalStorage = 3
 
 
@@ -43,17 +36,6 @@ class MapFragment : BaseFragment() {
         //if no tiles are displayed, you can try overriding the cache path using Configuration.getInstance().setCachePath
         //see also StorageUtils
         //note, the load method also sets the HTTP User Agent to your application's package name, abusing osm's tile servers will get you banned based on this string
-
-        Observable.just(gbDatabase)
-                .subscribeOn(Schedulers.io())
-                .subscribe { gbDatabase ->
-                    val userDao: UserDao = gbDatabase.userDao()
-                    userDao.insert(User("Alan"))
-                    val users: List<User> = userDao.getAll()
-                    users.forEach{
-                        Lg.d(it.nickName)
-                    }
-                }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,

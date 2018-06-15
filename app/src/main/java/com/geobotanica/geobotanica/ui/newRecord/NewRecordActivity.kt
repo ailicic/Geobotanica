@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui.new_record
+package com.geobotanica.geobotanica.ui.newRecord
 
 import android.os.Bundle
 import android.support.design.widget.Snackbar

@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.geobotanica.geobotanica.ui.new_record
+package com.geobotanica.geobotanica.ui.newRecord
 
 import android.Manifest
 import android.app.Activity.RESULT_OK
@@ -22,6 +22,8 @@ import android.widget.Toast
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.Location
+import com.geobotanica.geobotanica.data.repo.LocationRepo
+import com.geobotanica.geobotanica.data.repo.PhotoRepo
 import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.util.Lg
@@ -32,8 +34,21 @@ import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 
+//Observable.just(gbDatabase)
+//.subscribeOn(Schedulers.io())
+//.subscribe { gbDatabase ->
+//    val userDao: UserDao = gbDatabase.userDao()
+//    userDao.insert(User("Alan"))
+//    val users: List<User> = userDao.getAll()
+//    users.forEach{
+//        Lg.d(it.nickname)
+//    }
+//}
 
 class NewRecordFragment : BaseFragment() {
+    @Inject lateinit var plantRepo: PhotoRepo
+    @Inject lateinit var locationRepo: LocationRepo
+    @Inject lateinit var photoRepo: PhotoRepo
     @Inject lateinit var locationService: LocationService
 //    @Inject lateinit  var cameraService: CameraService
 

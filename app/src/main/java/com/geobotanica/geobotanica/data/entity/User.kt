@@ -7,7 +7,7 @@ import android.support.annotation.NonNull
 
 @Entity (tableName = "users")
 data class User(
-    @NonNull val nickName: String,
+    @NonNull val nickname: String,
     @NonNull val timestamp: Long = 0
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0

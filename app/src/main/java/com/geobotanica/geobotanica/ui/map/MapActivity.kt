@@ -6,7 +6,7 @@ import android.provider.AlarmClock.EXTRA_MESSAGE
 import android.support.v7.appcompat.R.id.message
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.ui.BaseActivity
-import com.geobotanica.geobotanica.ui.new_record.NewRecordActivity
+import com.geobotanica.geobotanica.ui.newRecord.NewRecordActivity
 import kotlinx.android.synthetic.main.activity_map.*
 
 class MapActivity : BaseActivity() {

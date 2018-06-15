@@ -18,8 +18,6 @@ class ApplicationModule(private val context: Context) {
     @Provides @Singleton fun provideSharedPrefs(): SharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(context)
 
-    @Provides @Singleton fun provideDatabase(context: Context): GbDatabase = GbDatabase.getInstance(context)
-
     @Provides @Singleton fun provideLocationManager(): LocationManager =
          context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
