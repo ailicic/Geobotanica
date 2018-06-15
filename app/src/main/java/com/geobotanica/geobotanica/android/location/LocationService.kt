@@ -10,6 +10,7 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresApi
+import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.di.PerActivity
 import com.geobotanica.geobotanica.util.Lg
 import javax.inject.Inject
@@ -76,13 +77,11 @@ class LocationService @Inject constructor (private val locationManager: Location
                 Lg.d("GpsLocationListener(): Accuracy = $accuracy, Satellites = $satellites, " +
                         "Lat = $latitude, Long = $longitude, Alt = $altitude")
                 notify(Location(
-                        LocationType.CURRENT_GPS_LOCATION,
                         satellitesVisible = satellites,
                         precision = accuracy,
-                        lat = latitude,
-                        long = longitude,
-                        alt = altitude,
-                        time = time
+                        latitude = latitude,
+                        longitude = longitude,
+                        altitude = altitude
                 ))
             }
         }
@@ -112,7 +111,6 @@ class LocationService @Inject constructor (private val locationManager: Location
                 }
                 Lg.d("GnssStatus.Callback::onSatelliteStatusChanged(): $satellitesInUse/$satellitesVisible")
                 notify(Location(
-                        LocationType.CURRENT_GPS_LOCATION,
                         satellitesInUse = satellitesInUse,
                         satellitesVisible = satellitesVisible
                 ))
@@ -148,36 +146,10 @@ class LocationService @Inject constructor (private val locationManager: Location
                 val satellitesVisible = status.satellites.count()
                 Lg.d("GPS_EVENT_SATELLITE_STATUS: $satellitesInUse/$satellitesVisible")
                 notify(Location(
-                        LocationType.CURRENT_GPS_LOCATION,
                         satellitesInUse = satellitesInUse,
                         satellitesVisible = satellitesVisible
                 ))
             }
         }
-    }
-}
-
-data class Location(
-        val locationType: LocationType,
-        val lat: Double? = null,
-        val long: Double? = null,
-        val alt: Double? = null,
-        val precision: Float? = null,
-        val satellitesInUse: Int? = null,
-        val satellitesVisible: Int? = null,
-        val time: Long? = null
-)
-
-enum class LocationType {
-    CURRENT_GPS_LOCATION,
-    BEST_GPS_LOCATION,
-    NETWORK_LOCATION,
-    CACHED_LOCATION;
-
-    override fun toString() =  when(this) {
-        CURRENT_GPS_LOCATION -> "Current GPS"
-        BEST_GPS_LOCATION-> "Best GPS"
-        NETWORK_LOCATION -> "Network"
-        CACHED_LOCATION -> "Cached"
     }
 }

@@ -13,18 +13,17 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
-import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.FileProvider
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import com.geobotanica.geobotanica.GeobotanicaApplication
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.android.location.LocationService
+import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.ui.BaseActivity
+import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.fragment_new_record.*
 import java.io.File
@@ -34,8 +33,8 @@ import java.util.*
 import javax.inject.Inject
 
 
-class NewRecordFragment : Fragment() {
-    @Inject lateinit  var locationService: LocationService
+class NewRecordFragment : BaseFragment() {
+    @Inject lateinit var locationService: LocationService
 //    @Inject lateinit  var cameraService: CameraService
 
     private val requestFineLocationPermission = 1
@@ -43,10 +42,10 @@ class NewRecordFragment : Fragment() {
     private lateinit var photoFilePath: String
     private var oldPhotoFilePath: String = ""
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         Lg.d("NewRecordFragment: onAttach()")
-        // Context is now available
+        (getActivity() as BaseActivity).activityComponent.inject(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,10 +57,9 @@ class NewRecordFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         Lg.d("NewRecordFragment: onCreateView()")
 
-        (activity as BaseActivity).activityComponent.inject(this)
 
         // TODO: Try to push this code into LocationService.
-        if(ContextCompat.checkSelfPermission(activity!!,
+        if(ContextCompat.checkSelfPermission(activity,
                         Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             Lg.d("NewRecordFragment: GPS permissions already available. Subscribing now...")
             locationService.subscribe(::onLocation)
@@ -136,13 +134,12 @@ class NewRecordFragment : Fragment() {
     private fun onLocation(location: Location) {
         with(location) {
             Lg.d("NewRecordFragment: onLocation(): " +
-                    "Type = $locationType, " +
                     "Used satellitesInUse = ${satellitesInUse ?: ""}, " +
                     "Visible satellitesInUse = ${satellitesInUse ?: ""}, " +
                     "Precision = ${precision ?: ""}, " +
-                    "Lat = ${lat ?: ""}, " +
-                    "Long = ${long ?: ""}, " +
-                    "Alt = ${alt ?: ""}")
+                    "Lat = ${latitude ?: ""}, " +
+                    "Long = ${longitude ?: ""}, " +
+                    "Alt = ${altitude ?: ""}")
 
             precision?.let { precisionText.text = getString(R.string.precision, precision)}
             satellitesInUse?.let { satellitesText?.text = getString(R.string.satellites, satellitesInUse, satellitesVisible) }
@@ -178,9 +175,9 @@ class NewRecordFragment : Fragment() {
 
         try {
             val photoFile = createImageFile()
-            val authorities = "${context!!.packageName}.fileprovider"
+            val authorities = "${appContext.packageName}.fileprovider"
             Lg.d("authorities = $authorities")
-            val photoUri: Uri? = FileProvider.getUriForFile(context!!, authorities, photoFile)
+            val photoUri: Uri? = FileProvider.getUriForFile(appContext, authorities, photoFile)
             Lg.d("photoUri = ${photoUri?.path}")
             capturePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
             startActivityForResult(capturePhotoIntent, requestTakePhoto)

@@ -7,7 +7,7 @@ import com.geobotanica.geobotanica.di.components.ActivityComponent
 import com.geobotanica.geobotanica.di.components.DaggerActivityComponent
 import com.geobotanica.geobotanica.di.modules.ActivityModule
 
-abstract class BaseActivity : AppCompatActivity() {
+open class BaseActivity : AppCompatActivity() {
     lateinit var activityComponent: ActivityComponent
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,6 +16,5 @@ abstract class BaseActivity : AppCompatActivity() {
                 .applicationComponent((application as GeobotanicaApplication).applicationComponent)
                 .activityModule(ActivityModule(this))
                 .build()
-//        activityComponent.inject(this)
     }
 }
