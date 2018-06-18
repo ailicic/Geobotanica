@@ -20,12 +20,12 @@ import android.support.annotation.NonNull
         ]
 )
 data class Location(
-    @NonNull val plantId: Long = 0L,
+    @NonNull var plantId: Long = 0L,
     @NonNull val latitude: Double? = null,
     @NonNull val longitude: Double? = null,
     @NonNull val altitude: Double? = null,
     @NonNull val precision: Float? = null,
-    @NonNull val satellitesInUse: Int? = null,
+    @NonNull val satellitesInUse: Int = 0,
     @NonNull val satellitesVisible: Int
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0

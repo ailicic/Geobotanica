@@ -4,10 +4,10 @@ import android.arch.persistence.room.*
 
 @Dao
 interface BaseDao<T> {
-    @Insert fun insert(vararg obj: T)
+    @Insert fun insert(obj: T): Long
+    @Update fun update(obj: T): Int
+    @Delete fun delete(obj: T)
+    @Insert fun insert(vararg obj: T): LongArray
+    @Update fun update(vararg obj: T): Int
     @Delete fun delete(vararg obj: T)
-    @Update fun update(vararg obj: T)
-
-//    @Query fun get(id: Int): T
-//    @Query fun getAll(): List<T>
 }

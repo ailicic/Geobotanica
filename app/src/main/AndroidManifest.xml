@@ -35,8 +35,8 @@
         </activity>
 
         <activity
-            android:name=".ui.newRecord.NewRecordActivity"
-            android:label="@string/newrecord_activity"
+            android:name=".ui.newPlant.NewPlantActivity"
+            android:label="@string/newplant_activity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
 

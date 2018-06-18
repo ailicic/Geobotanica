@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.newRecord.NewRecordFragment"
-    tools:showIn="@layout/activity_new_record">
+    tools:context=".ui.newPlant.NewPlantFragment"
+    tools:showIn="@layout/activity_new_plant">
 
     <TextView
         android:id="@+id/plantTypeText"
@@ -91,17 +91,6 @@
         app:layout_constraintStart_toStartOf="@+id/photoTypeSpinner"
         app:layout_constraintTop_toBottomOf="@+id/photoTypeSpinner" />
 
-    <!--<ImageButton-->
-        <!--android:id="@+id/takePhotoButton"-->
-        <!--android:layout_width="64dp"-->
-        <!--android:layout_height="64dp"-->
-        <!--android:layout_marginTop="8dp"-->
-        <!--android:src="@drawable/ic_camera_black_24dp"-->
-        <!--app:layout_constraintEnd_toEndOf="@+id/photoTypeSpinner"-->
-        <!--app:layout_constraintStart_toStartOf="@+id/photoTypeSpinner"-->
-        <!--app:layout_constraintTop_toBottomOf="@+id/photoTypeSpinner"-->
-        <!--tools:ignore="ContentDescription" />-->
-
     <View
         android:id="@+id/gpsTopDivider"
         android:layout_width="match_parent"
@@ -114,6 +103,15 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/plantPhoto" />
 
+    <TextView
+        android:id="@+id/plantLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="@string/plant_location"
+        app:layout_constraintTop_toBottomOf="@+id/gpsTopDivider"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <ImageView
         android:id="@+id/imageViewGpsCrossHair"
         android:layout_width="48dp"
@@ -122,9 +120,8 @@
         android:layout_marginStart="16dp"
         android:src="@drawable/ic_gps_fixed_black_24dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/gpsTopDivider"
+        app:layout_constraintTop_toBottomOf="@+id/plantLocation"
         tools:ignore="ContentDescription" />
-
 
     <TextView
         android:id="@+id/precisionText"
@@ -144,14 +141,27 @@
         app:layout_constraintBottom_toBottomOf="@+id/imageViewGpsCrossHair"
         app:layout_constraintStart_toEndOf="@id/imageViewGpsCrossHair" />
 
-    <Button
-        android:id="@+id/gpsButton"
+    <TextView
+        android:id="@+id/holdPositionText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:text="@string/button_gps"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/imageViewGpsCrossHair" />
+        android:layout_marginBottom="8dp"
+        android:text="@string/hold_position"
+        app:layout_constraintBottom_toTopOf="@+id/gpsSwitch"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/gpsSwitch"
+        android:enabled="false"
+        android:checked="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/gpsBottomDivider"
+        app:layout_constraintStart_toStartOf="@id/holdPositionText"
+        app:layout_constraintEnd_toEndOf="@id/holdPositionText" />
 
     <View
         android:id="@+id/gpsBottomDivider"
@@ -163,7 +173,7 @@
         android:background="@android:color/darker_gray"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/gpsButton" />
+        app:layout_constraintTop_toBottomOf="@+id/imageViewGpsCrossHair" />
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/commonNameEditText"
@@ -174,12 +184,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/gpsBottomDivider">
 
-        <android.support.design.widget.TextInputEditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            android:hint="@string/common_name" />
+    <android.support.design.widget.TextInputEditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:hint="@string/common_name" />
+
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout

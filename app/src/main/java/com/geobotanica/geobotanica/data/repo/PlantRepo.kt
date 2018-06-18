@@ -6,14 +6,9 @@ import javax.inject.Inject
 
 
 class PlantRepo @Inject constructor(val plantDao: PlantDao) {
-    fun get(id: Int): Plant = plantDao.get(id)
+    fun get(id: Long): Plant = plantDao.get(id)
 
     fun getAll(): List<Plant> = plantDao.getAll()
 
-    fun save(plant: Plant) {
-        if (plant.id == 0L)
-            plantDao.insert(plant)
-        else
-            plantDao.update(plant)
-    }
+    fun insert(plant: Plant): Long = plantDao.insert(plant)
 }

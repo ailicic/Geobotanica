@@ -7,13 +7,13 @@ import com.geobotanica.geobotanica.data.entity.Plant
 @Dao
 interface PlantDao : BaseDao<Plant> {
     @Query("SELECT * FROM plants WHERE id=:id")
-    fun get(id: Int): Plant
+    fun get(id: Long): Plant
 
     @Query("SELECT * FROM plants")
     fun getAll(): List<Plant>
 
     @Query("SELECT plants.* FROM plants WHERE plants.userId = :userId")
-    fun getAllPlantsByUser(userId: Int): List<Plant>
+    fun getAllPlantsByUser(userId: Long): List<Plant>
 
     @Query("SELECT * FROM plants WHERE commonName = :commonName")
     fun getPlantsByCommonName(commonName: String): List<Plant>

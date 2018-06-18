@@ -1,9 +1,12 @@
 <!--suppress CheckTagEmptyBody -->
 <resources>
     <string name="app_name">Geobotanica</string>
-    <string name="newrecord_activity">New</string>
+    <string name="extra_user_id">com.geobotanica.user_id</string>
+    <string name="newplant_activity">New</string>
     <string name="action_settings">Settings</string>
     <string name="photo_type">Photo Type</string>
+    <string name="plant_location">Plant Location</string>
+    <string name="hold_position">Hold position</string>
     <string name="common_name">Common Name</string>
     <string name="hint_common_name">e.g. Hardy kiwi</string>
     <string name="latin_name">Latin Name</string>
@@ -19,7 +22,7 @@
     <!--https://docs.oracle.com/javase/1.5.0/docs/api/java/util/Formatter.html-->
     <string name="precision">Precision: ± %1$3.1f m</string>
     <string name="satellites">Satellites: %1$d/%2$d</string>
-    <string name="button_gps">Save position</string>
+    <string name="button_gps">Hold position</string>
 
     <string-array name="plant_types">
         <item></item>

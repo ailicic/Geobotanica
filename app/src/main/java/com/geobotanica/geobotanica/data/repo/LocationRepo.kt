@@ -5,12 +5,7 @@ import com.geobotanica.geobotanica.data.entity.Location
 import javax.inject.Inject
 
 class LocationRepo @Inject constructor(val locationDao: LocationDao) {
-    fun get(id: Int): Location = locationDao.get(id)
+    fun get(id: Long): Location = locationDao.get(id)
 
-    fun save(location: Location) {
-        if (location.id == 0L)
-            locationDao.insert(location)
-        else
-            locationDao.update(location)
-    }
+    fun insert(location: Location): Long = locationDao.insert(location)
 }

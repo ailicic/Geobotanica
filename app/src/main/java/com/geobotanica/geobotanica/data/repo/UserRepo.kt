@@ -6,19 +6,16 @@ import javax.inject.Inject
 
 
 class UserRepo @Inject constructor(val userDao: UserDao) {
-    fun get(id: Int): User = userDao.get(id)
+    fun get(id: Long): User = userDao.get(id)
 
     fun getAll(): List<User> = userDao.getAll()
 
-    fun save(user: User) {
-        if (user.id == 0L)
-            userDao.insert(user)
-        else
-            userDao.update(user)
-    }
+    fun getByNickname(nickname: String): List<User> = userDao.getByNickname(nickname)
 
-//    private fun contains(user: User): Boolean {
-//        return !userDao.getByNickname(user.nickname).isEmpty()
-//    }
+    fun insert(user: User): Long = userDao.insert(user)
+
+    fun contains(nickname: String): Boolean {
+        return !userDao.getByNickname(nickname).isEmpty()
+    }
 
 }

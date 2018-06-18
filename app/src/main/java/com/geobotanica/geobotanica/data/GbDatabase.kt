@@ -39,6 +39,7 @@ abstract class GbDatabase : RoomDatabase() {
                 Room.databaseBuilder(
                         context.applicationContext,
                         GbDatabase::class.java, "gb_db")
+                        .allowMainThreadQueries()   // TODO: Remove this after going RX
                         .build()
     }
 }

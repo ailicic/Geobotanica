@@ -1,27 +1,21 @@
-package com.geobotanica.geobotanica.ui.newRecord
+package com.geobotanica.geobotanica.ui.newPlant
 
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.view.Menu
 import android.view.MenuItem
 import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.R
 
-import kotlinx.android.synthetic.main.activity_new_record.*
+import kotlinx.android.synthetic.main.activity_new_plant.*
 
 
 
-class NewRecordActivity : BaseActivity() {
+class NewPlantActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_new_record)
+        setContentView(R.layout.activity_new_plant)
         setSupportActionBar(toolbar)
-
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

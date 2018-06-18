@@ -7,11 +7,11 @@ import com.geobotanica.geobotanica.data.entity.Photo
 @Dao
 interface PhotoDao : BaseDao<Photo> {
     @Query("SELECT * FROM photos WHERE id=:id")
-    fun get(id: Int): Photo
+    fun get(id: Long): Photo
 
     @Query("SELECT * FROM photos WHERE plantId=:plantId")
-    fun getAllPhotosOfPlant(plantId: Int): List<Photo>
+    fun getAllPhotosOfPlant(plantId: Long): List<Photo>
 
     @Query("SELECT * FROM photos WHERE userId=:userId")
-    fun getAllPhotosByUser(userId: Int): List<Photo>
+    fun getAllPhotosByUser(userId: Long): List<Photo>
 }

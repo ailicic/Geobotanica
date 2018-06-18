@@ -19,7 +19,7 @@ typealias LocationCallback = (Location) -> Unit
 
 @PerActivity
 class LocationService @Inject constructor (private val locationManager: LocationManager) {
-    private val observers = mutableListOf<LocationCallback>()
+    private val observers = mutableSetOf<LocationCallback>()
     private val gpsLocationListener:GpsLocationListener = GpsLocationListener()
     private var gnssStatusCallback:GnssStatusCallback? = null
 
@@ -29,17 +29,18 @@ class LocationService @Inject constructor (private val locationManager: Location
     }
 
     fun subscribe(callback: LocationCallback) {
-        Lg.d("LocationService: subscribe()")
         if(observers.isEmpty()) {
             registerGpsUpdates()
         }
-        observers.add(callback)
+        val isAdded = observers.add(callback)
+        Lg.d("LocationService:subscribe(): isAdded=$isAdded, observers=${observers.count()}, callback=$callback")
     }
 
     fun unsubscribe(callback: LocationCallback) {
-        observers.remove(callback)
+        val isRemoved = observers.remove(callback)
         if(observers.isEmpty())
             unregisterGpsUpdates()
+        Lg.d("LocationService:unsubscribe(): isRemoved=$isRemoved, observers=${observers.count()}")
     }
 
     private fun notify(location: Location) {

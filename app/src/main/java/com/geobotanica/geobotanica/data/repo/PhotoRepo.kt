@@ -6,16 +6,11 @@ import javax.inject.Inject
 
 
 class PhotoRepo @Inject constructor(val photoDao: PhotoDao) {
-    fun get(id: Int): Photo = photoDao.get(id)
+    fun get(id: Long): Photo = photoDao.get(id)
 
-    fun getAllPhotosOfPlant(plantId: Int) {
+    fun getAllPhotosOfPlant(plantId: Long) {
         photoDao.getAllPhotosOfPlant(plantId)
     }
 
-    fun save(plant: Photo) {
-        if (plant.id == 0L)
-            photoDao.insert(plant)
-        else
-            photoDao.update(plant)
-    }
+    fun insert(photo: Photo): Long = photoDao.insert(photo)
 }

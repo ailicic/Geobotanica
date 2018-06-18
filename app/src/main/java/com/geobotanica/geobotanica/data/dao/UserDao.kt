@@ -9,11 +9,11 @@ import com.geobotanica.geobotanica.data.entity.User
 @Dao
 interface UserDao : BaseDao<User> {
     @Query("SELECT * FROM users WHERE id=:id")
-    fun get(id: Int): User
+    fun get(id: Long): User
 
     @Query("SELECT * FROM users")
     fun getAll(): List<User>
 
-//    @Query( "SELECT * FROM users WHERE nickname=:nickname")
-//    fun getByNickname(nickname: String): List<User>
+    @Query( "SELECT * FROM users WHERE nickname=:nickname")
+    fun getByNickname(nickname: String): List<User>
 }
