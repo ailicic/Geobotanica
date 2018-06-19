@@ -64,7 +64,11 @@ class MapFragment : BaseFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_map, container, false)
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         // TODO: Try to push this code into LocationService.
         if (ContextCompat.checkSelfPermission(activity,
@@ -84,12 +88,6 @@ class MapFragment : BaseFragment() {
             requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), requestExternalStorage)
         }
 
-        return inflater.inflate(R.layout.fragment_map, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
         if (!locationService.isGpsEnabled()) {
             Lg.d("GPS disabled")
             Snackbar.make(activity.findViewById(android.R.id.content), "Please enable GPS", Snackbar.LENGTH_LONG).setAction("Action", null).show()
@@ -101,16 +99,19 @@ class MapFragment : BaseFragment() {
         map.setBuiltInZoomControls(true)
         map.setMultiTouchControls(true)
 
-        // Set map start point
         val mapController = map.controller
-        mapController.setZoom(14)
+        @Suppress("DEPRECATION") mapController.setZoom(14)
         val startPoint = GeoPoint(49.477, -119.59)
         mapController.setCenter(startPoint)
     }
 
     override fun onResume() {
         super.onResume()
-        locationService.subscribe(::onLocation)
+        if (ContextCompat.checkSelfPermission(activity,
+                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationService.subscribe(::onLocation)
+        }
+
         //this will refresh the osmdroid configuration on resuming.
         //if you make changes to the configuration, use
         //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -151,34 +152,31 @@ class MapFragment : BaseFragment() {
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun onLocation(location: Location) {
         currentLocation = location
         with(location) {
-            Lg.d("onLocation(): " +
-                    "Used satellitesInUse = ${satellitesInUse ?: ""}, " +
-                    "Visible satellitesInUse = ${satellitesInUse ?: ""}, " +
-                    "Precision = ${precision ?: ""}, " +
-                    "Lat = ${latitude ?: ""}, " +
-                    "Long = ${longitude ?: ""}, " +
-                    "Alt = ${altitude ?: ""}")
+            Lg.d("onLocation(): $this")
 
             if (latitude != null && longitude != null) {
+                val _latitude: Double = latitude!!
+                val _longitude: Double = longitude!!
                 if (locationMarker == null) {
                     locationMarker = Marker(map)
                     locationMarker?.apply {
                         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                         setIcon(activity.getResources().getDrawable(R.drawable.person))
-                        setOnMarkerClickListener { marker, mapView ->
+                        setOnMarkerClickListener { _, _ ->
                             Toast.makeText(appContext, "You are here", Toast.LENGTH_SHORT).show()
                             true
                         }
-                        position.setCoords(latitude, longitude)
+                        position.setCoords(_latitude, _longitude)
                         map.overlays.add(this)
-                        map.controller.setCenter(GeoPoint(latitude, longitude))
+                        map.controller.setCenter(GeoPoint(_latitude, _longitude))
                         map.invalidate()
                     }
                 } else
-                    locationMarker?.position?.setCoords(latitude, longitude)
+                    locationMarker?.position?.setCoords(_latitude, _longitude)
             }
         }
     }

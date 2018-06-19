@@ -20,7 +20,7 @@ class MapActivity : BaseActivity() {
 
         activityComponent.inject(this)
 
-        fab.setOnClickListener { view ->
+        fab.setOnClickListener { _ ->
             val intent = Intent(this, NewPlantActivity::class.java)
                     .putExtra(getString(R.string.extra_user_id), getGuestUserId())
             startActivity(intent)

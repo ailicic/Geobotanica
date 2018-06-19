@@ -2,6 +2,7 @@ package com.geobotanica.geobotanica.data.entity
 
 import android.arch.persistence.room.*
 import android.support.annotation.NonNull
+import org.threeten.bp.OffsetDateTime
 
 @Entity(tableName = "measurements",
         foreignKeys = [
@@ -17,7 +18,8 @@ import android.support.annotation.NonNull
                         onDelete = ForeignKey.CASCADE)
         ],
         indices = [
-                Index(value = ["plantId"])
+            Index(value = ["plantId"]),
+            Index(value = ["userId"])
         ]
 )
 data class Measurement(
@@ -25,7 +27,7 @@ data class Measurement(
     @NonNull val plantId: Long,
     @NonNull val type: Int,
     @NonNull val measurement: Float, // cm
-    @NonNull val timestamp: Long = 0L
+    @NonNull val timestamp: OffsetDateTime = OffsetDateTime.now()
 ) {
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0

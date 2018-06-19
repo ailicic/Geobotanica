@@ -3,6 +3,7 @@ package com.geobotanica.geobotanica.data
 import android.arch.persistence.room.Database
 import android.arch.persistence.room.Room
 import android.arch.persistence.room.RoomDatabase
+import android.arch.persistence.room.TypeConverters
 import android.content.Context
 import com.geobotanica.geobotanica.data.dao.*
 import com.geobotanica.geobotanica.data.entity.*
@@ -15,8 +16,10 @@ import com.geobotanica.geobotanica.data.entity.*
             Photo::class,
             Measurement::class
         ],
-        version = 3
+        exportSchema = false,
+        version = 7
 )
+@TypeConverters(DateTimeConverter::class)
 abstract class GbDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun plantDao(): PlantDao

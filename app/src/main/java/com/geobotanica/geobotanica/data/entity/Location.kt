@@ -5,6 +5,7 @@ import android.arch.persistence.room.ForeignKey
 import android.arch.persistence.room.Index
 import android.arch.persistence.room.PrimaryKey
 import android.support.annotation.NonNull
+import org.threeten.bp.OffsetDateTime
 
 @Entity(tableName = "locations",
         foreignKeys = [
@@ -20,16 +21,16 @@ import android.support.annotation.NonNull
         ]
 )
 data class Location(
-    @NonNull var plantId: Long = 0L,
-    @NonNull val latitude: Double? = null,
-    @NonNull val longitude: Double? = null,
-    @NonNull val altitude: Double? = null,
-    @NonNull val precision: Float? = null,
-    @NonNull val satellitesInUse: Int? = null,
-    @NonNull val satellitesVisible: Int
+    @NonNull var plantId: Long? = null,
+    @NonNull var latitude: Double? = null,
+    @NonNull var longitude: Double? = null,
+    @NonNull var altitude: Double? = null,
+    @NonNull var precision: Float? = null,
+    @NonNull var satellitesInUse: Int? = null,
+    @NonNull var satellitesVisible: Int,
+    @NonNull var timestamp: OffsetDateTime = OffsetDateTime.now()
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0L
-    @NonNull var timestamp: Long = 0L
 }
 
 //enum class LocationType {

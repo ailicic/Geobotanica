@@ -44,4 +44,5 @@ dependencies {
     implementation "android.arch.persistence.room:rxjava2:$room_version"
     testImplementation "android.arch.persistence.room:testing:$room_version"
 
+    implementation 'org.threeten:threetenbp:1.3.6'
 }

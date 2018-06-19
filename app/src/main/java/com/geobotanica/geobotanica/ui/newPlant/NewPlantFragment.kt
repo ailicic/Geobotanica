@@ -108,13 +108,7 @@ class NewPlantFragment : BaseFragment() {
     private fun onLocation(location: Location) {
         currentLocation = location
         with(location) {
-            Lg.d("NewPlantFragment: onLocation(): " +
-                    "Used satellitesInUse = satellitesInUse, " +
-                    "Visible satellitesInUse = satellitesInUse, " +
-                    "Precision = ${precision ?: ""}, " +
-                    "Lat = ${latitude ?: ""}, " +
-                    "Long = ${longitude ?: ""}, " +
-                    "Alt = ${altitude ?: ""}")
+            Lg.d("onLocation(): $this")
 
             precision?.let {
                 precisionText.text = getString(R.string.precision, precision)
@@ -191,15 +185,16 @@ class NewPlantFragment : BaseFragment() {
         return image
     }
 
+    // TODO: Push validation into the repo?
     private fun onSaveButtonPressed(view: View) {
         Lg.d("NewPlantFragment: onSaveButtonPressed()")
 
         val plantType = plantTypeSpinner.selectedItemId.toInt() - 1
         val photoType = photoTypeSpinner.selectedItemId.toInt()
-        val commonName = commonNameEditText.editText!!.text.toString()
-        val latinName = latinNameEditText.editText!!.text.toString()
-        val height = heightEditText.text.toString().toFloat()
-        val diameter = diameterEditText.text.toString().toFloat()
+        val commonName = commonNameEditText.editText!!.text.toString().trim()
+        val latinName = latinNameEditText.editText!!.text.toString().trim()
+        val height = heightEditText.text.toString().toFloatOrNull()
+        val diameter = diameterEditText.text.toString().toFloatOrNull()
 //        val trunkDiameter = trunkDiameterEditText.text.toString().toFloat()
         if (plantType == -1) {
             Snackbar.make(view, "Select the plant type", Snackbar.LENGTH_LONG).setAction("Action", null).show()
@@ -230,7 +225,7 @@ class NewPlantFragment : BaseFragment() {
         plant.id = plantRepo.insert(plant)
         Lg.d("Plant: $plant (id=${plant.id})")
 
-        val photo = Photo(user.id, plant.id, photoFilePath, photoType)
+        val photo = Photo(user.id, plant.id, photoType, photoFilePath)
         photo.id = photoRepo.insert(photo)
         Lg.d("Photo: $photo (id=${photo.id})")
 
@@ -241,8 +236,8 @@ class NewPlantFragment : BaseFragment() {
         }
 
         // TODO: Handle units (default units should be in settings, always store cm, present user default)
-        measurementRepo.insert(Measurement(user.id, plant.id, Measurement.Type.HEIGHT.ordinal, height))
-        measurementRepo.insert(Measurement(user.id, plant.id, Measurement.Type.DIAMETER.ordinal, diameter))
+        height?.let { measurementRepo.insert(Measurement(user.id, plant.id, Measurement.Type.HEIGHT.ordinal, height)) }
+        diameter?.let { measurementRepo.insert(Measurement(user.id, plant.id, Measurement.Type.DIAMETER.ordinal, diameter)) }
         measurementRepo.getAllMeasurementsOfPlant(plant.id).forEach {
             Lg.d("${Measurement.Type.values()[it.type]}=${it.measurement} cm, userId=${it.userId}, plantId=${it.plantId}, id=${it.id}")
         }

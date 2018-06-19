@@ -14,14 +14,21 @@ import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.di.PerActivity
 import com.geobotanica.geobotanica.util.Lg
 import javax.inject.Inject
+import kotlin.math.max
 
 typealias LocationCallback = (Location) -> Unit
 
 @PerActivity
 class LocationService @Inject constructor (private val locationManager: LocationManager) {
     private val observers = mutableSetOf<LocationCallback>()
-    private val gpsLocationListener:GpsLocationListener = GpsLocationListener()
     private var gnssStatusCallback:GnssStatusCallback? = null
+    private val gpsLocationListener:GpsLocationListener = GpsLocationListener()
+    private val gpsStatusListener = GpsStatusListener()
+
+    private var hasFirstFix = false
+    private var tempLocation: Location? = null
+    private var msSinceLastEvent = Long.MAX_VALUE
+    private val maxMsToMerge = 100L
 
     init {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
@@ -42,11 +49,39 @@ class LocationService @Inject constructor (private val locationManager: Location
         val isRemoved = observers.remove(callback)
         if(observers.isEmpty())
             unregisterGpsUpdates()
+            hasFirstFix = false
         Lg.d("LocationService: unsubscribe(): isRemoved=$isRemoved, observers=${observers.count()}")
     }
 
-    private fun notify(location: Location) {
-        observers.forEach { it(location) }
+    private fun onLocation(location: Location) {
+        location.latitude?.let { hasFirstFix = true }
+        if (!hasFirstFix) {
+            notify(location)
+        } else {
+            if (tempLocation == null) {
+                tempLocation = location
+                msSinceLastEvent = System.currentTimeMillis()
+            } else {
+                if (System.currentTimeMillis() - msSinceLastEvent  > maxMsToMerge) {
+                    // Discard tempLocation, wait for next event
+                    tempLocation = location
+                    msSinceLastEvent = System.currentTimeMillis()
+                } else {
+                    // Events arrived within 100 ms of eachother. Merge them and notify()
+                    notify( Location(
+                            null,
+                            location.latitude ?: tempLocation?.latitude,
+                            location.longitude ?: tempLocation?.longitude,
+                            location.altitude ?: tempLocation?.altitude,
+                            location.precision ?: tempLocation?.precision,
+                            location.satellitesInUse ?: tempLocation?.satellitesInUse,
+                            satellitesVisible = max(location.satellitesVisible, tempLocation?.satellitesVisible ?: 0)
+                    ))
+                    tempLocation = null
+                }
+            }
+
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -55,11 +90,11 @@ class LocationService @Inject constructor (private val locationManager: Location
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, gpsLocationListener)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Lg.d("Registering GPS status (API >= 24)")
-            locationManager.registerGnssStatusCallback(gnssStatusCallback)
+            val isAdded = locationManager.registerGnssStatusCallback(gnssStatusCallback)
+            Lg.d("Registering GPS status (API >= 24), isAdded=$isAdded, callback=$gnssStatusCallback")
         } else {
-            Lg.d("Registering GPS status (API < 24)")
-            locationManager.addGpsStatusListener(::onGpsStatusChanged)
+            val isAdded = locationManager.addGpsStatusListener(gpsStatusListener)
+            Lg.d("Registering GPS status (API < 24), isAdded=$isAdded, callback=$gpsStatusListener")
         }
     }
 
@@ -67,19 +102,26 @@ class LocationService @Inject constructor (private val locationManager: Location
         Lg.d("LocationService: unregisterGpsUpdates()")
         locationManager.removeUpdates(gpsLocationListener)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Lg.d("Unregistering GPS status (API >= 24), callback=$gnssStatusCallback")
             locationManager.unregisterGnssStatusCallback(gnssStatusCallback)
         } else {
-            locationManager.removeGpsStatusListener(::onGpsStatusChanged)
+            Lg.d("Unregistering GPS status (API < 24), callback=$gpsStatusListener")
+            locationManager.removeGpsStatusListener(gpsStatusListener)
         }
+    }
+
+    // TODO: Push merge code into Location repo: location.mergeWith(location)
+    private fun notify(location: Location) {
+        observers.forEach { it(location) }
     }
 
     private inner class GpsLocationListener : LocationListener {
         override fun onLocationChanged(location: android.location.Location) {
             with(location) {
-                val satellites = extras.getInt("satellitesInUse")  // Not used here. See GPS status listeners
+                val satellites = extras.getInt("satellitesInUse")
 //                Lg.v("GpsLocationListener(): Accuracy = $accuracy, Satellites = $satellites, " +
 //                        "Lat = $latitude, Long = $longitude, Alt = $altitude")
-                notify(Location(
+                onLocation(Location(
                         satellitesVisible = satellites,
                         precision = accuracy,
                         latitude = latitude,
@@ -101,7 +143,7 @@ class LocationService @Inject constructor (private val locationManager: Location
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
+    @RequiresApi(Build.VERSION_CODES.N) // API 24
     private inner class GnssStatusCallback : GnssStatus.Callback() {
         override fun onSatelliteStatusChanged(status: GnssStatus?) {
             super.onSatelliteStatusChanged(status)
@@ -113,7 +155,7 @@ class LocationService @Inject constructor (private val locationManager: Location
                         ++satellitesInUse
                 }
 //                Lg.v("GnssStatus.Callback::onSatelliteStatusChanged(): $satellitesInUse/$satellitesVisible")
-                notify(Location(
+                onLocation(Location(
                         satellitesInUse = satellitesInUse,
                         satellitesVisible = satellitesVisible
                 ))
@@ -136,22 +178,24 @@ class LocationService @Inject constructor (private val locationManager: Location
         }
     }
 
-    // For Android M and prior
+    // For Android M (API 23) and prior
     @SuppressLint("MissingPermission")
-    private fun onGpsStatusChanged(event: Int) {
-        when (event) {
-            GpsStatus.GPS_EVENT_STARTED-> Lg.d("GPS_EVENT_STARTED")
-            GpsStatus.GPS_EVENT_STOPPED-> Lg.d("GPS_EVENT_STOPPED")
-            GpsStatus.GPS_EVENT_FIRST_FIX-> Lg.d("GPS_EVENT_FIRST_FIX")
-            GpsStatus.GPS_EVENT_SATELLITE_STATUS-> {
-                val status = locationManager.getGpsStatus(null)
-                val satellitesInUse = status.satellites.filter {it.usedInFix()}.count()
-                val satellitesVisible = status.satellites.count()
-                Lg.d("GPS_EVENT_SATELLITE_STATUS: $satellitesInUse/$satellitesVisible")
-                notify(Location(
-                        satellitesInUse = satellitesInUse,
-                        satellitesVisible = satellitesVisible
-                ))
+    private inner class GpsStatusListener: GpsStatus.Listener {
+        override fun onGpsStatusChanged(event: Int) {
+            when (event) {
+                GpsStatus.GPS_EVENT_STARTED-> Lg.d("GPS_EVENT_STARTED")
+                GpsStatus.GPS_EVENT_STOPPED-> Lg.d("GPS_EVENT_STOPPED")
+                GpsStatus.GPS_EVENT_FIRST_FIX->  Lg.d("GPS_EVENT_FIRST_FIX")
+                GpsStatus.GPS_EVENT_SATELLITE_STATUS-> {
+                    val status = locationManager.getGpsStatus(null)
+                    val satellitesInUse = status.satellites.filter {it.usedInFix()}.count()
+                    val satellitesVisible = status.satellites.count()
+//                    Lg.d("GPS_EVENT_SATELLITE_STATUS: $satellitesInUse/$satellitesVisible")
+                    onLocation(Location(
+                            satellitesInUse = satellitesInUse,
+                            satellitesVisible = satellitesVisible
+                    ))
+                }
             }
         }
     }

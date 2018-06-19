@@ -2,6 +2,7 @@ package com.geobotanica.geobotanica.data.entity
 
 import android.arch.persistence.room.*
 import android.support.annotation.NonNull
+import org.threeten.bp.OffsetDateTime
 
 @Entity(tableName = "photos",
         foreignKeys = [
@@ -24,9 +25,9 @@ import android.support.annotation.NonNull
 data class Photo(
     @NonNull val userId: Long,
     @NonNull val plantId: Long,
-    @NonNull val fileName: String,
     @NonNull val type: Int,
-    @NonNull val timestamp: Long = 0L
+    @NonNull val fileName: String,
+    @NonNull val timestamp: OffsetDateTime = OffsetDateTime.now()
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0
 
