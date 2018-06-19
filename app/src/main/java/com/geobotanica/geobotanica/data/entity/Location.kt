@@ -25,10 +25,10 @@ data class Location(
     @NonNull val longitude: Double? = null,
     @NonNull val altitude: Double? = null,
     @NonNull val precision: Float? = null,
-    @NonNull val satellitesInUse: Int = 0,
+    @NonNull val satellitesInUse: Int? = null,
     @NonNull val satellitesVisible: Int
 ) {
-    @PrimaryKey(autoGenerate = true) var id: Long = 0
+    @PrimaryKey(autoGenerate = true) var id: Long = 0L
     @NonNull var timestamp: Long = 0L
 }
 

@@ -2,11 +2,9 @@
 
 package com.geobotanica.geobotanica.ui.newPlant
 
-import android.Manifest
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -14,7 +12,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.support.design.widget.Snackbar
-import android.support.v4.content.ContextCompat
 import android.support.v4.content.FileProvider
 import android.view.LayoutInflater
 import android.view.View
@@ -23,14 +20,8 @@ import android.widget.CompoundButton
 import android.widget.Toast
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.location.LocationService
-import com.geobotanica.geobotanica.data.entity.Location
-import com.geobotanica.geobotanica.data.entity.Photo
-import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.data.entity.User
-import com.geobotanica.geobotanica.data.repo.LocationRepo
-import com.geobotanica.geobotanica.data.repo.PhotoRepo
-import com.geobotanica.geobotanica.data.repo.PlantRepo
-import com.geobotanica.geobotanica.data.repo.UserRepo
+import com.geobotanica.geobotanica.data.entity.*
+import com.geobotanica.geobotanica.data.repo.*
 import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.util.Lg
@@ -47,11 +38,12 @@ class NewPlantFragment : BaseFragment() {
     @Inject lateinit var plantRepo: PlantRepo
     @Inject lateinit var locationRepo: LocationRepo
     @Inject lateinit var photoRepo: PhotoRepo
+    @Inject lateinit var measurementRepo: MeasurementRepo
     @Inject lateinit var locationService: LocationService
 //    @Inject lateinit  var cameraService: CameraService
 
+    override val name = this.javaClass.name.substringAfterLast('.')
     private lateinit var user: User
-    private val requestFineLocationPermission = 1
     private var currentLocation: Location? = null
     private val requestTakePhoto = 2
     private var photoFilePath: String = ""
@@ -59,32 +51,15 @@ class NewPlantFragment : BaseFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        Lg.d("NewPlantFragment: onAttach()")
         (getActivity() as BaseActivity).activityComponent.inject(this)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Lg.d("NewPlantFragment: onCreate()")
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        Lg.d("NewPlantFragment: onCreateView()")
-
         val userId = activity.intent. getLongExtra(getString(R.string.extra_user_id), 0L)
         user = userRepo.get(userId)
         Lg.d("User = $user (id=${user.id})")
 
-        // TODO: Try to push this code into LocationService.
-        if (ContextCompat.checkSelfPermission(activity,
-                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            Lg.d("NewPlantFragment: GPS permissions already available. Subscribing now...")
-            locationService.subscribe(::onLocation)
-        } else {
-            Lg.d("NewPlantFragment: Requesting GPS permissions now...")
-            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), requestFineLocationPermission)
-        }
 
         return inflater.inflate(R.layout.fragment_new_plant, container, false)
     }
@@ -92,7 +67,6 @@ class NewPlantFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // View elements are now available
-        Lg.d("NewPlantFragment: onViewCreated()")
 
 
         takePhotoButton.setOnClickListener(::takePhotoButtonClickListener)
@@ -101,57 +75,29 @@ class NewPlantFragment : BaseFragment() {
 
     override fun onStart() {
         super.onStart()
-        Lg.d("NewPlantFragment: onStart()")
         activity.savePlantButton.setOnClickListener(::onSaveButtonPressed)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Lg.d("NewPlantFragment: onPause()")
     }
 
     override fun onResume() {
         super.onResume()
-        Lg.d("NewPlantFragment: onResume()")
+        locationService.subscribe(::onLocation)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        locationService.unsubscribe(::onLocation)
     }
 
     override fun onStop() {
         super.onStop()
-        Lg.d("onStop()")
         takePhotoButton.setOnClickListener(null)
         gpsSwitch.setOnClickListener(null)
         locationService.unsubscribe(::onLocation)
 
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        Lg.d("NewPlantFragment: onDestroyView()")
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        Lg.d("NewPlantFragment: onDetach()")
-    }
-
-    // TODO: Move to MapFragment
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>,
-                                            grantResults: IntArray) {
-        when (requestCode) {
-            requestFineLocationPermission -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    Lg.d("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_GRANTED")
-                    locationService.subscribe(::onLocation)
-                } else {
-                    Lg.d("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_DENIED")
-                }
-            }
-            else -> { } // Ignore all other requests.
-        }
-    }
-
-    fun onToggleHoldPosition(buttonView: CompoundButton , isChecked: Boolean) {
+    @Suppress("UNUSED_PARAMETER")
+    private fun onToggleHoldPosition(buttonView: CompoundButton, isChecked: Boolean) {
         Lg.d("onToggleHoldPosition(): isChecked=$isChecked")
         if (isChecked)
             locationService.unsubscribe(::onLocation)
@@ -163,8 +109,8 @@ class NewPlantFragment : BaseFragment() {
         currentLocation = location
         with(location) {
             Lg.d("NewPlantFragment: onLocation(): " +
-                    "Used satellitesInUse = ${satellitesInUse ?: ""}, " +
-                    "Visible satellitesInUse = ${satellitesInUse ?: ""}, " +
+                    "Used satellitesInUse = satellitesInUse, " +
+                    "Visible satellitesInUse = satellitesInUse, " +
                     "Precision = ${precision ?: ""}, " +
                     "Lat = ${latitude ?: ""}, " +
                     "Long = ${longitude ?: ""}, " +
@@ -248,11 +194,14 @@ class NewPlantFragment : BaseFragment() {
     private fun onSaveButtonPressed(view: View) {
         Lg.d("NewPlantFragment: onSaveButtonPressed()")
 
-        val plantType = plantTypeSpinner.selectedItem.toString()
-        val photoType = photoTypeSpinner.selectedItem.toString()
+        val plantType = plantTypeSpinner.selectedItemId.toInt() - 1
+        val photoType = photoTypeSpinner.selectedItemId.toInt()
         val commonName = commonNameEditText.editText!!.text.toString()
         val latinName = latinNameEditText.editText!!.text.toString()
-        if (plantType.isEmpty()) {
+        val height = heightEditText.text.toString().toFloat()
+        val diameter = diameterEditText.text.toString().toFloat()
+//        val trunkDiameter = trunkDiameterEditText.text.toString().toFloat()
+        if (plantType == -1) {
             Snackbar.make(view, "Select the plant type", Snackbar.LENGTH_LONG).setAction("Action", null).show()
             return
         }
@@ -272,6 +221,10 @@ class NewPlantFragment : BaseFragment() {
             Snackbar.make(view, "Provide a plant name", Snackbar.LENGTH_LONG).setAction("Action", null).show()
             return
         }
+        if (height == 0F || diameter == 0F) {
+            Snackbar.make(view, "Provide plant dimensions", Snackbar.LENGTH_LONG).setAction("Action", null).show()
+            return
+        }
 
         val plant = Plant(user.id, plantType, commonName, latinName)
         plant.id = plantRepo.insert(plant)
@@ -285,6 +238,13 @@ class NewPlantFragment : BaseFragment() {
             it.plantId = plant.id
             it.id = locationRepo.insert(it)
             Lg.d("Location: $it (id=${it.id})")
+        }
+
+        // TODO: Handle units (default units should be in settings, always store cm, present user default)
+        measurementRepo.insert(Measurement(user.id, plant.id, Measurement.Type.HEIGHT.ordinal, height))
+        measurementRepo.insert(Measurement(user.id, plant.id, Measurement.Type.DIAMETER.ordinal, diameter))
+        measurementRepo.getAllMeasurementsOfPlant(plant.id).forEach {
+            Lg.d("${Measurement.Type.values()[it.type]}=${it.measurement} cm, userId=${it.userId}, plantId=${it.plantId}, id=${it.id}")
         }
 
         Toast.makeText(appContext, "Plant saved", Toast.LENGTH_SHORT).show()

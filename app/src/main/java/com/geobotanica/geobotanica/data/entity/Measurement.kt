@@ -3,7 +3,7 @@ package com.geobotanica.geobotanica.data.entity
 import android.arch.persistence.room.*
 import android.support.annotation.NonNull
 
-@Entity(tableName = "photos",
+@Entity(tableName = "measurements",
         foreignKeys = [
                 ForeignKey(
                         entity = User::class,
@@ -17,35 +17,32 @@ import android.support.annotation.NonNull
                         onDelete = ForeignKey.CASCADE)
         ],
         indices = [
-                Index(value = ["userId"]),
                 Index(value = ["plantId"])
         ]
 )
-data class Photo(
+data class Measurement(
     @NonNull val userId: Long,
     @NonNull val plantId: Long,
-    @NonNull val fileName: String,
     @NonNull val type: Int,
+    @NonNull val measurement: Float, // cm
     @NonNull val timestamp: Long = 0L
 ) {
-    @PrimaryKey(autoGenerate = true) var id: Long = 0
+    @PrimaryKey(autoGenerate = true)
+    var id: Long = 0
 
     enum class Type() {
-        COMPLETE,
-        LEAF,
+        HEIGHT,
+        DIAMETER,
+        TRUNK_DIAMETER,
         FLOWER,
-        FRUIT,
-        STEM,
-        TRUNK;
+        FRUIT;
 
-        // TODO: Don't repeat these strings in strings.xml
         override fun toString() = when (this) {
-            COMPLETE -> "Complete"
-            LEAF -> "Leaf"
+            HEIGHT -> "Height"
+            DIAMETER -> "Diameter"
+            TRUNK_DIAMETER -> "Trunk diameter"
             FLOWER -> "Flower"
             FRUIT -> "Fruit"
-            STEM -> "Stem"
-            TRUNK -> "Trunk"
         }
     }
 }

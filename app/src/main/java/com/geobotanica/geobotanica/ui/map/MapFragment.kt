@@ -4,30 +4,54 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.android.location.LocationService
+import com.geobotanica.geobotanica.data.entity.Location
+import com.geobotanica.geobotanica.data.repo.LocationRepo
+import com.geobotanica.geobotanica.data.repo.PhotoRepo
+import com.geobotanica.geobotanica.data.repo.PlantRepo
+import com.geobotanica.geobotanica.data.repo.UserRepo
+import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.fragment_map.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
+import javax.inject.Inject
+import org.osmdroid.views.overlay.Marker
 
+
+
+// TODO: Create download map activity and utilize offline map tiles
 // https://github.com/osmdroid/osmdroid/wiki/Offline-Map-Tiles
 
 /**
  * A placeholder fragment containing a simple view.
  */
 class MapFragment : BaseFragment() {
-    private val requestExternalStorage = 3
+    @Inject lateinit var userRepo: UserRepo
+    @Inject lateinit var plantRepo: PlantRepo
+    @Inject lateinit var locationRepo: LocationRepo
+    @Inject lateinit var photoRepo: PhotoRepo
+    @Inject lateinit var locationService: LocationService
+
+    override val name = this.javaClass.name.substringAfterLast('.')
+    private val requestFineLocationPermission = 1
+    private val requestExternalStorage = 2
+    private var currentLocation: Location? = null
+    private var locationMarker: Marker? = null
 
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-//        (getActivity() as BaseActivity).activityComponent.inject(this)
+        (getActivity() as BaseActivity).activityComponent.inject(this)
 
         //load/initialize the osmdroid configuration, this can be done
         Configuration.getInstance().load(context, sharedPrefs)
@@ -42,8 +66,17 @@ class MapFragment : BaseFragment() {
                               savedInstanceState: Bundle?): View? {
 
 
+        // TODO: Try to push this code into LocationService.
+        if (ContextCompat.checkSelfPermission(activity,
+                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            Lg.d("GPS permissions already available. Subscribing now...")
+        } else {
+            Lg.d("Requesting GPS permissions now...")
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), requestFineLocationPermission)
+        }
+
         if(ContextCompat.checkSelfPermission(activity,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
         {
             Lg.d("MapFragment: External storage permissions already available.")
         } else {
@@ -56,7 +89,13 @@ class MapFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //handle permissions first, before map is created. not depicted here
+
+        if (!locationService.isGpsEnabled()) {
+            Lg.d("GPS disabled")
+            Snackbar.make(activity.findViewById(android.R.id.content), "Please enable GPS", Snackbar.LENGTH_LONG).setAction("Action", null).show()
+        }
+        else
+            Lg.d("GPS enabled")
 
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setBuiltInZoomControls(true)
@@ -71,6 +110,7 @@ class MapFragment : BaseFragment() {
 
     override fun onResume() {
         super.onResume()
+        locationService.subscribe(::onLocation)
         //this will refresh the osmdroid configuration on resuming.
         //if you make changes to the configuration, use
         //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -80,6 +120,7 @@ class MapFragment : BaseFragment() {
 
     override fun onPause() {
         super.onPause()
+        locationService.unsubscribe(::onLocation)
         //this will refresh the osmdroid configuration on resuming.
         //if you make changes to the configuration, use
         //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -91,6 +132,14 @@ class MapFragment : BaseFragment() {
                                             permissions: Array<String>,
                                             grantResults: IntArray) {
         when (requestCode) {
+            requestFineLocationPermission -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    Lg.d("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_GRANTED")
+                    locationService.subscribe(::onLocation)
+                } else {
+                    Lg.d("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_DENIED")
+                }
+            }
             requestExternalStorage -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     Lg.d("onRequestPermissionsResult(): permission.WRITE_EXTERNAL_STORAGE: PERMISSION_GRANTED")
@@ -99,6 +148,38 @@ class MapFragment : BaseFragment() {
                 }
             }
             else -> { } // Ignore all other requests.
+        }
+    }
+
+    private fun onLocation(location: Location) {
+        currentLocation = location
+        with(location) {
+            Lg.d("onLocation(): " +
+                    "Used satellitesInUse = ${satellitesInUse ?: ""}, " +
+                    "Visible satellitesInUse = ${satellitesInUse ?: ""}, " +
+                    "Precision = ${precision ?: ""}, " +
+                    "Lat = ${latitude ?: ""}, " +
+                    "Long = ${longitude ?: ""}, " +
+                    "Alt = ${altitude ?: ""}")
+
+            if (latitude != null && longitude != null) {
+                if (locationMarker == null) {
+                    locationMarker = Marker(map)
+                    locationMarker?.apply {
+                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                        setIcon(activity.getResources().getDrawable(R.drawable.person))
+                        setOnMarkerClickListener { marker, mapView ->
+                            Toast.makeText(appContext, "You are here", Toast.LENGTH_SHORT).show()
+                            true
+                        }
+                        position.setCoords(latitude, longitude)
+                        map.overlays.add(this)
+                        map.controller.setCenter(GeoPoint(latitude, longitude))
+                        map.invalidate()
+                    }
+                } else
+                    locationMarker?.position?.setCoords(latitude, longitude)
+            }
         }
     }
 }

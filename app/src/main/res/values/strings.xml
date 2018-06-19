@@ -37,6 +37,7 @@
         <item>Flower</item>
         <item>Fruit</item>
         <item>Stem</item>
+        <item>Trunk</item>
     </string-array>
     <string-array name="measurement_units">
         <item>cm</item>

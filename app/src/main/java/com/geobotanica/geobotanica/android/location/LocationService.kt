@@ -28,6 +28,8 @@ class LocationService @Inject constructor (private val locationManager: Location
             gnssStatusCallback = GnssStatusCallback()
     }
 
+    fun isGpsEnabled(): Boolean = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+
     fun subscribe(callback: LocationCallback) {
         if(observers.isEmpty()) {
             registerGpsUpdates()
@@ -40,7 +42,7 @@ class LocationService @Inject constructor (private val locationManager: Location
         val isRemoved = observers.remove(callback)
         if(observers.isEmpty())
             unregisterGpsUpdates()
-        Lg.d("LocationService:unsubscribe(): isRemoved=$isRemoved, observers=${observers.count()}")
+        Lg.d("LocationService: unsubscribe(): isRemoved=$isRemoved, observers=${observers.count()}")
     }
 
     private fun notify(location: Location) {
@@ -75,8 +77,8 @@ class LocationService @Inject constructor (private val locationManager: Location
         override fun onLocationChanged(location: android.location.Location) {
             with(location) {
                 val satellites = extras.getInt("satellitesInUse")  // Not used here. See GPS status listeners
-                Lg.d("GpsLocationListener(): Accuracy = $accuracy, Satellites = $satellites, " +
-                        "Lat = $latitude, Long = $longitude, Alt = $altitude")
+//                Lg.v("GpsLocationListener(): Accuracy = $accuracy, Satellites = $satellites, " +
+//                        "Lat = $latitude, Long = $longitude, Alt = $altitude")
                 notify(Location(
                         satellitesVisible = satellites,
                         precision = accuracy,
@@ -110,7 +112,7 @@ class LocationService @Inject constructor (private val locationManager: Location
                     if(status.usedInFix(i))
                         ++satellitesInUse
                 }
-                Lg.d("GnssStatus.Callback::onSatelliteStatusChanged(): $satellitesInUse/$satellitesVisible")
+//                Lg.v("GnssStatus.Callback::onSatelliteStatusChanged(): $satellitesInUse/$satellitesVisible")
                 notify(Location(
                         satellitesInUse = satellitesInUse,
                         satellitesVisible = satellitesVisible
@@ -134,7 +136,7 @@ class LocationService @Inject constructor (private val locationManager: Location
         }
     }
 
-
+    // For Android M and prior
     @SuppressLint("MissingPermission")
     private fun onGpsStatusChanged(event: Int) {
         when (event) {
@@ -143,7 +145,7 @@ class LocationService @Inject constructor (private val locationManager: Location
             GpsStatus.GPS_EVENT_FIRST_FIX-> Lg.d("GPS_EVENT_FIRST_FIX")
             GpsStatus.GPS_EVENT_SATELLITE_STATUS-> {
                 val status = locationManager.getGpsStatus(null)
-                val satellitesInUse = status.satellites.filter({it.usedInFix()}).count()
+                val satellitesInUse = status.satellites.filter {it.usedInFix()}.count()
                 val satellitesVisible = status.satellites.count()
                 Lg.d("GPS_EVENT_SATELLITE_STATUS: $satellitesInUse/$satellitesVisible")
                 notify(Location(

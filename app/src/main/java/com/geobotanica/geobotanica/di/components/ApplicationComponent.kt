@@ -4,12 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.location.LocationManager
-import com.geobotanica.geobotanica.data.GbDatabase
-import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.data.repo.LocationRepo
-import com.geobotanica.geobotanica.data.repo.PhotoRepo
-import com.geobotanica.geobotanica.data.repo.PlantRepo
-import com.geobotanica.geobotanica.data.repo.UserRepo
+import com.geobotanica.geobotanica.data.repo.*
 import com.geobotanica.geobotanica.di.modules.ApplicationModule
 import com.geobotanica.geobotanica.di.modules.RepoModule
 import dagger.Component
@@ -29,4 +24,5 @@ interface ApplicationComponent {
     fun plantRepo(): PlantRepo
     fun locationRepo(): LocationRepo
     fun photoRepo(): PhotoRepo
+    fun measurementRepo(): MeasurementRepo
 }
