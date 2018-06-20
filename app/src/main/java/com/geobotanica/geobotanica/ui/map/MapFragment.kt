@@ -14,6 +14,7 @@ import android.widget.Toast
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.Location
+import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.repo.LocationRepo
 import com.geobotanica.geobotanica.data.repo.PhotoRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
@@ -106,10 +107,6 @@ class MapFragment : BaseFragment() {
         mapController.setCenter(startPoint)
     }
 
-//    inner class PlantInfoWindow: MarkerInfoWindow() {
-//
-//    }
-
     override fun onResume() {
         super.onResume()
         if (ContextCompat.checkSelfPermission(activity,
@@ -131,6 +128,14 @@ class MapFragment : BaseFragment() {
                 snippet = it.latinName
                 subDescription = it.timestamp.toString().substringBefore('T')
                 image = Drawable.createFromPath(photoRepo.getAllPhotosOfPlant(it.id)[0].fileName)
+                val icon = when (it.type) {
+                    Plant.Type.TREE.ordinal -> R.drawable.marker_purple
+                    Plant.Type.SHRUB.ordinal -> R.drawable.marker_blue
+                    Plant.Type.HERB.ordinal -> R.drawable.marker_green
+                    Plant.Type.VINE.ordinal -> R.drawable.marker_yellow
+                    else -> R.drawable.marker_yellow
+                }
+                setIcon(activity.getResources().getDrawable(icon))
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 setOnMarkerClickListener { marker: Marker, mapView: MapView ->
                     if (marker.isInfoWindowOpen)

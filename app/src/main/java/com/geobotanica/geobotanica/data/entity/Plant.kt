@@ -18,7 +18,7 @@ import org.threeten.bp.OffsetDateTime
 )
 data class Plant(
         @NonNull val userId: Long = 0L,
-        @NonNull val type: Int,
+        @NonNull val type: Int, // TODO: Make it of type Type and create Room converter. Then when statements don't need else
         @NonNull val commonName: String = "",
         @NonNull val latinName: String = "",
         @NonNull val timestamp: OffsetDateTime = OffsetDateTime.now()
