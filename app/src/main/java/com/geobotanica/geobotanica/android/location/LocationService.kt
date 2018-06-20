@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.support.annotation.RequiresApi
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.di.PerActivity
+import com.geobotanica.geobotanica.util.Emulator
 import com.geobotanica.geobotanica.util.Lg
 import javax.inject.Inject
 import kotlin.math.max
@@ -54,6 +55,10 @@ class LocationService @Inject constructor (private val locationManager: Location
     }
 
     private fun onLocation(location: Location) {
+        if (Emulator.isEmulator()) {
+            notify(location)
+            return
+        }
         location.latitude?.let { hasFirstFix = true }
         if (!hasFirstFix) {
             notify(location)

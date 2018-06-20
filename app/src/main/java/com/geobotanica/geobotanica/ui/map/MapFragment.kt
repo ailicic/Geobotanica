@@ -3,6 +3,7 @@ package com.geobotanica.geobotanica.ui.map
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
@@ -24,9 +25,9 @@ import kotlinx.android.synthetic.main.fragment_map.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
-import javax.inject.Inject
+import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
-
+import javax.inject.Inject
 
 
 // TODO: Create download map activity and utilize offline map tiles
@@ -100,16 +101,47 @@ class MapFragment : BaseFragment() {
         map.setMultiTouchControls(true)
 
         val mapController = map.controller
-        @Suppress("DEPRECATION") mapController.setZoom(14)
+        @Suppress("DEPRECATION") mapController.setZoom(16)
         val startPoint = GeoPoint(49.477, -119.59)
         mapController.setCenter(startPoint)
     }
+
+//    inner class PlantInfoWindow: MarkerInfoWindow() {
+//
+//    }
 
     override fun onResume() {
         super.onResume()
         if (ContextCompat.checkSelfPermission(activity,
                         Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationService.subscribe(::onLocation)
+        }
+
+        plantRepo.getAll().forEach {
+            Lg.d("Adding plant marker: (id=${it.id}) $it")
+            val location = locationRepo.getPlantLocation(it.id)
+            val plantMarker = Marker(map)
+
+            // TODO: Consider using a custom InfoWindow
+            // https://code.google.com/archive/p/osmbonuspack/wikis/Tutorial_2.wiki
+            // 7. Customizing the bubble behaviour:
+            // 9. Creating your own bubble layout
+            plantMarker?.apply {
+                title = it.commonName
+                snippet = it.latinName
+                subDescription = it.timestamp.toString().substringBefore('T')
+                image = Drawable.createFromPath(photoRepo.getAllPhotosOfPlant(it.id)[0].fileName)
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                setOnMarkerClickListener { marker: Marker, mapView: MapView ->
+                    if (marker.isInfoWindowOpen)
+                        marker.closeInfoWindow()
+                    else
+                        marker.showInfoWindow()
+                    true
+                }
+                position.setCoords(location.latitude!!, location.longitude!!)
+                map.overlays.add(this)
+            }
         }
 
         //this will refresh the osmdroid configuration on resuming.
@@ -173,11 +205,11 @@ class MapFragment : BaseFragment() {
                         position.setCoords(_latitude, _longitude)
                         map.overlays.add(this)
                         map.controller.setCenter(GeoPoint(_latitude, _longitude))
-                        map.invalidate()
                     }
                 } else
-                    locationMarker?.position?.setCoords(_latitude, _longitude)
+                    locationMarker?.position?.setCoords(latitude!!, longitude!!)
             }
         }
+        map.invalidate()
     }
 }

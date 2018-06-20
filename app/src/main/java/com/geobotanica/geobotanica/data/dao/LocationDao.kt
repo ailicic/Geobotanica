@@ -10,5 +10,5 @@ interface LocationDao : BaseDao<Location> {
     fun get(id: Long): Location
 
     @Query("SELECT * FROM locations WHERE plantId = :plantId ORDER BY timestamp ASC LIMIT 1")
-    fun plantLocation(plantId: Long): Location
+    fun getPlantLocation(plantId: Long): Location
 }

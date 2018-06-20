@@ -19,8 +19,8 @@ import org.threeten.bp.OffsetDateTime
 data class Plant(
         @NonNull val userId: Long = 0L,
         @NonNull val type: Int,
-        val commonName: String? = null,
-        val latinName: String? = null,
+        @NonNull val commonName: String = "",
+        @NonNull val latinName: String = "",
         @NonNull val timestamp: OffsetDateTime = OffsetDateTime.now()
 ) {
         @PrimaryKey(autoGenerate = true) var id: Long = 0
