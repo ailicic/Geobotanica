@@ -27,6 +27,7 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.activity_new_plant.*
 import kotlinx.android.synthetic.main.fragment_new_plant.*
+import kotlinx.android.synthetic.main.gps_compound_view.*
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -66,8 +67,6 @@ class NewPlantFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // View elements are now available
-
 
         takePhotoButton.setOnClickListener(::takePhotoButtonClickListener)
         gpsSwitch.setOnCheckedChangeListener(::onToggleHoldPosition)
@@ -76,16 +75,7 @@ class NewPlantFragment : BaseFragment() {
     override fun onStart() {
         super.onStart()
         activity.savePlantButton.setOnClickListener(::onSaveButtonPressed)
-    }
-
-    override fun onResume() {
-        super.onResume()
         locationService.subscribe(::onLocation)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        locationService.unsubscribe(::onLocation)
     }
 
     override fun onStop() {
@@ -204,7 +194,7 @@ class NewPlantFragment : BaseFragment() {
             Snackbar.make(view, "Take a photo of the plant", Snackbar.LENGTH_LONG).setAction("Action", null).show()
             return
         }
-        if (!gpsSwitch.isEnabled) {
+        if (gpsSwitch.isEnabled) {
             Snackbar.make(view, "Wait for GPS fix", Snackbar.LENGTH_LONG).setAction("Action", null).show()
             return
         }

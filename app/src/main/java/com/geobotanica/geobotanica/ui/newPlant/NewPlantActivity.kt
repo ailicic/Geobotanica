@@ -11,6 +11,7 @@ import kotlinx.android.synthetic.main.activity_new_plant.*
 
 
 class NewPlantActivity : BaseActivity() {
+    override val name = this.javaClass.name.substringAfterLast('.')
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

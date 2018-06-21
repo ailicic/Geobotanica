@@ -123,7 +123,7 @@ class MapFragment : BaseFragment() {
             // https://code.google.com/archive/p/osmbonuspack/wikis/Tutorial_2.wiki
             // 7. Customizing the bubble behaviour:
             // 9. Creating your own bubble layout
-            plantMarker?.apply {
+            plantMarker.apply {
                 title = it.commonName
                 snippet = it.latinName
                 subDescription = it.timestamp.toString().substringBefore('T')
@@ -137,7 +137,7 @@ class MapFragment : BaseFragment() {
                 }
                 setIcon(activity.getResources().getDrawable(icon))
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                setOnMarkerClickListener { marker: Marker, mapView: MapView ->
+                setOnMarkerClickListener { marker: Marker, _ ->
                     if (marker.isInfoWindowOpen)
                         marker.closeInfoWindow()
                     else

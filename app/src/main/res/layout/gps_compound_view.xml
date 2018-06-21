@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/gps">
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--tools:parentTag="android.support.constraint.ConstraintLayout"-->
+
+    <View
+        android:id="@+id/gpsTopDivider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:background="@android:color/darker_gray"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/GpsCrossHairImage" />
+
+    <ImageView
+        android:id="@+id/GpsCrossHairImage"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/ic_gps_fixed_black_24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/precisionText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textAppearance="@android:style/TextAppearance.Material.Small"
+        app:layout_constraintStart_toEndOf="@+id/GpsCrossHairImage"
+        app:layout_constraintTop_toTopOf="@+id/GpsCrossHairImage" />
+
+    <TextView
+        android:id="@+id/satellitesText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textAppearance="@android:style/TextAppearance.Material.Small"
+        app:layout_constraintBottom_toBottomOf="@+id/GpsCrossHairImage"
+        app:layout_constraintStart_toEndOf="@id/GpsCrossHairImage" />
+
+    <TextView
+        android:id="@+id/holdPositionText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/hold_position"
+        app:layout_constraintBottom_toTopOf="@+id/gpsSwitch"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/gpsSwitch"
+        android:enabled="false"
+        android:checked="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/GpsCrossHairImage"
+        app:layout_constraintStart_toStartOf="@id/holdPositionText"
+        app:layout_constraintEnd_toEndOf="@id/holdPositionText" />
+</merge>
