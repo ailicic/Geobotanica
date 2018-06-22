@@ -6,7 +6,7 @@ import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.data.repo.UserRepo
 import com.geobotanica.geobotanica.ui.BaseActivity
-import com.geobotanica.geobotanica.ui.NewPlantType.NewPlantTypeActivity
+import com.geobotanica.geobotanica.ui.new_plant_type.NewPlantTypeActivity
 import kotlinx.android.synthetic.main.activity_map.*
 import javax.inject.Inject
 

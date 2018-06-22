@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.geobotanica.geobotanica.ui.newPlant
+package com.geobotanica.geobotanica.ui.new_plant
 
 import android.app.Activity.RESULT_OK
 import android.content.Context

@@ -44,13 +44,8 @@
         </activity>
 
         <activity
-            android:name=".ui.newPlant.NewPlantActivity"
-            android:label="@string/activity_new_plant"
-            android:theme="@style/AppTheme.NoActionBar"/>
-
-        <activity
-            android:name=".ui.NewPlantType.NewPlantTypeActivity"
-            android:label="@string/activity_new_plant"/>
+            android:name=".ui.new_plant_type.NewPlantTypeActivity"
+            android:label="@string/activity_new_plant_type"/>
     </application>
 
 </manifest>

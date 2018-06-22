@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.newPlant.NewPlantFragment"
+    tools:context=".ui.new_plant.NewPlantFragment"
     tools:showIn="@layout/activity_new_plant">
 
     <TextView

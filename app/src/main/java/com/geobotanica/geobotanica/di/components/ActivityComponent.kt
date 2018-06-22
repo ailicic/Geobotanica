@@ -4,10 +4,9 @@ import com.geobotanica.geobotanica.di.PerActivity
 import com.geobotanica.geobotanica.di.modules.ActivityModule
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.GpsCompoundView
-import com.geobotanica.geobotanica.ui.NewPlantType.NewPlantTypeActivity
 import com.geobotanica.geobotanica.ui.map.MapActivity
 import com.geobotanica.geobotanica.ui.map.MapFragment
-import com.geobotanica.geobotanica.ui.newPlant.NewPlantFragment
+import com.geobotanica.geobotanica.ui.new_plant.NewPlantFragment
 import dagger.Component
 
 @PerActivity

@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui.newPlant
+package com.geobotanica.geobotanica.ui.new_plant
 
 import android.os.Bundle
 import android.view.Menu
