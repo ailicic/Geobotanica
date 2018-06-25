@@ -57,7 +57,7 @@ class NewPlantFragment : BaseFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val userId = activity.intent. getLongExtra(getString(R.string.extra_user_id), 0L)
+        val userId = activity.intent.getLongExtra(getString(R.string.extra_user_id), 0L)
         user = userRepo.get(userId)
         Lg.d("User = $user (id=${user.id})")
 
@@ -75,14 +75,14 @@ class NewPlantFragment : BaseFragment() {
     override fun onStart() {
         super.onStart()
         activity.savePlantButton.setOnClickListener(::onSaveButtonPressed)
-        locationService.subscribe(::onLocation)
+        locationService.subscribe(activity, ::onLocation)
     }
 
     override fun onStop() {
         super.onStop()
         takePhotoButton.setOnClickListener(null)
         gpsSwitch.setOnClickListener(null)
-        locationService.unsubscribe(::onLocation)
+        locationService.unsubscribe(activity)
 
     }
 
@@ -90,9 +90,9 @@ class NewPlantFragment : BaseFragment() {
     private fun onToggleHoldPosition(buttonView: CompoundButton, isChecked: Boolean) {
         Lg.d("onToggleHoldPosition(): isChecked=$isChecked")
         if (isChecked)
-            locationService.unsubscribe(::onLocation)
+            locationService.unsubscribe(activity)
         else
-            locationService.subscribe(::onLocation)
+            locationService.subscribe(activity, ::onLocation)
     }
 
     private fun onLocation(location: Location) {
@@ -194,7 +194,7 @@ class NewPlantFragment : BaseFragment() {
             Snackbar.make(view, "Take a photo of the plant", Snackbar.LENGTH_LONG).setAction("Action", null).show()
             return
         }
-        if (gpsSwitch.isEnabled) {
+        if (!gpsSwitch.isEnabled) {
             Snackbar.make(view, "Wait for GPS fix", Snackbar.LENGTH_LONG).setAction("Action", null).show()
             return
         }

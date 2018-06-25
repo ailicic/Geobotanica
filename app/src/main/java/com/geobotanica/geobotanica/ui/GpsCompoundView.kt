@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 // https://medium.com/@Sserra90/android-writing-a-compound-view-1eacbf1957fc
 
-// TODO: Try JVM overloads
+// TODO: Investigate when OnDetachedWindow() is called. Back button fires it but onStop of parent activity seems to not in NewPlant.
 class GpsCompoundView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
@@ -27,7 +27,7 @@ class GpsCompoundView @JvmOverloads constructor(
         get() = gpsSwitch.isSelected
 
     init {
-        Lg.d("GpsCompoundView()")
+        Lg.v("GpsCompoundView()")
         (context as BaseActivity).activityComponent.inject(this)
         inflate(getContext(), R.layout.gps_compound_view,this)
     }
@@ -35,7 +35,7 @@ class GpsCompoundView @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         Lg.d("GpsCompoundView: onAttachedToWindow()")
-        locationService.subscribe(::onLocation)
+        locationService.subscribe(context, ::onLocation)
         gpsSwitch.setOnCheckedChangeListener(::onToggleHoldPosition)
     }
 
@@ -43,13 +43,13 @@ class GpsCompoundView @JvmOverloads constructor(
         super.onDetachedFromWindow()
         Lg.d("GpsCompoundView: onDetachedFromWindow()")
         gpsSwitch.setOnClickListener(null)
-        locationService.unsubscribe(::onLocation)
+        locationService.unsubscribe(context)
     }
 
     private fun onLocation(location: Location) {
         currentLocation = location
         with(location) {
-            Lg.d("onLocation(): $this")
+//            Lg.v("onLocation(): $this")
 
             precision?.let {
                 precisionText.text = context.resources.getString(R.string.precision, precision)
@@ -63,8 +63,8 @@ class GpsCompoundView @JvmOverloads constructor(
     private fun onToggleHoldPosition(buttonView: CompoundButton, isChecked: Boolean) {
         Lg.d("onToggleHoldPosition(): isChecked=$isChecked")
         if (isChecked)
-            locationService.unsubscribe(::onLocation)
+            locationService.unsubscribe(context)
         else
-            locationService.subscribe(::onLocation)
+            locationService.subscribe(context, ::onLocation)
     }
 }

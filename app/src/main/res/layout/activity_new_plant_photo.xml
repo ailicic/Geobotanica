@@ -4,12 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.map.MapFragment"
-    tools:showIn="@layout/activity_map">
+    tools:context=".ui.new_plant_photo.NewPlantPhotoActivity">
 
-    <org.osmdroid.views.MapView
-        android:id="@+id/map"
-        tilesource="Mapnik"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
+    <com.geobotanica.geobotanica.ui.GpsCompoundView
+        android:id="@+id/gps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
 </android.support.constraint.ConstraintLayout>

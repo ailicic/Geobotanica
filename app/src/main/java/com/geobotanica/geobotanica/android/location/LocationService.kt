@@ -3,6 +3,7 @@
 package com.geobotanica.geobotanica.android.location
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.location.GnssStatus
 import android.location.GpsStatus
 import android.location.LocationListener
@@ -11,17 +12,17 @@ import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresApi
 import com.geobotanica.geobotanica.data.entity.Location
-import com.geobotanica.geobotanica.di.PerActivity
 import com.geobotanica.geobotanica.util.Emulator
 import com.geobotanica.geobotanica.util.Lg
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.max
 
 typealias LocationCallback = (Location) -> Unit
 
-@PerActivity
+@Singleton
 class LocationService @Inject constructor (private val locationManager: LocationManager) {
-    private val observers = mutableSetOf<LocationCallback>()
+    private val observers = mutableMapOf<Context, LocationCallback>()
     private var gnssStatusCallback:GnssStatusCallback? = null
     private val gpsLocationListener:GpsLocationListener = GpsLocationListener()
     private val gpsStatusListener = GpsStatusListener()
@@ -38,20 +39,26 @@ class LocationService @Inject constructor (private val locationManager: Location
 
     fun isGpsEnabled(): Boolean = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
-    fun subscribe(callback: LocationCallback) {
+    fun subscribe(context: Context, callback: LocationCallback) {
         if(observers.isEmpty()) {
             registerGpsUpdates()
         }
-        val isAdded = observers.add(callback)
-        Lg.d("LocationService:subscribe(): isAdded=$isAdded, observers=${observers.count()}, callback=$callback")
+        val isAdded = observers.put(context, callback) == null
+        Lg.d("LocationService: subscribe(): isAdded=$isAdded, observers=${observers.count()}, context=$context callback=$callback")
     }
 
-    fun unsubscribe(callback: LocationCallback) {
-        val isRemoved = observers.remove(callback)
-        if(observers.isEmpty())
+    fun unsubscribe(context: Context) {
+        val isRemoved = observers.remove(context) != null
+        if(observers.isEmpty()) {
             unregisterGpsUpdates()
             hasFirstFix = false
-        Lg.d("LocationService: unsubscribe(): isRemoved=$isRemoved, observers=${observers.count()}")
+        }
+        Lg.d("LocationService: unsubscribe(): isRemoved=$isRemoved, observers=${observers.count()}, context=$context\"")
+    }
+
+    // TODO: Push merge code into Location repo: location.mergeWith(location)
+    private fun notify(location: Location) {
+        observers.forEach { it.value(location) }
     }
 
     private fun onLocation(location: Location) {
@@ -113,11 +120,6 @@ class LocationService @Inject constructor (private val locationManager: Location
             Lg.d("Unregistering GPS status (API < 24), callback=$gpsStatusListener")
             locationManager.removeGpsStatusListener(gpsStatusListener)
         }
-    }
-
-    // TODO: Push merge code into Location repo: location.mergeWith(location)
-    private fun notify(location: Location) {
-        observers.forEach { it(location) }
     }
 
     private inner class GpsLocationListener : LocationListener {

@@ -11,8 +11,4 @@ import dagger.Provides
 @Module
 class ActivityModule(private val activity: BaseActivity) {
     @Provides @PerActivity fun provideActivity(): BaseActivity = activity
-
-//    @Provides @PerActivity fun provideLocationManager(): LocationManager {
-//        return activity.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-//    }
 }

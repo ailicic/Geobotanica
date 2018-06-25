@@ -29,6 +29,7 @@ data class Plant(
                 TREE,
                 SHRUB,
                 HERB,
+                GRASS,
                 VINE;
 
                 // TODO: Don't repeat these strings in strings.xml
@@ -36,6 +37,7 @@ data class Plant(
                         TREE -> "Tree"
                         SHRUB -> "Shrub"
                         HERB -> "Herb"
+                        GRASS -> "Grass"
                         VINE -> "Fruit"
                 }
         }

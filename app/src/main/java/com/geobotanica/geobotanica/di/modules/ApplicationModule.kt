@@ -1,12 +1,9 @@
 package com.geobotanica.geobotanica.di.modules
 
-import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.location.LocationManager
 import android.preference.PreferenceManager
-import com.geobotanica.geobotanica.data.GbDatabase
-import com.geobotanica.geobotanica.di.PerActivity
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton

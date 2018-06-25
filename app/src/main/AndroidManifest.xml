@@ -22,7 +22,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.geobotanica.geobotanica.fileprovider"
@@ -42,10 +41,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.new_plant_type.NewPlantTypeActivity"
-            android:label="@string/activity_new_plant_type"/>
+            android:label="@string/activity_new_plant_type" />
+        <activity
+            android:name=".ui.new_plant_photo.NewPlantPhotoActivity"
+            android:label="@string/activity_new_plant_photo" />
+        <activity
+            android:name=".ui.new_plant_name.NewPlantNameActivity"
+            android:label="@string/activity_new_plant_name" />
     </application>
 
 </manifest>

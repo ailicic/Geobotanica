@@ -38,7 +38,7 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
 
-    public override fun onStop() {
+    override fun onStop() {
         super.onStop()
         Lg.v("$name: onStop()")
     }

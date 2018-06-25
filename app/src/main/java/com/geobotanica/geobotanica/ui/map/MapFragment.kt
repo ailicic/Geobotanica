@@ -107,12 +107,16 @@ class MapFragment : BaseFragment() {
         mapController.setCenter(startPoint)
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
         if (ContextCompat.checkSelfPermission(activity,
                         Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationService.subscribe(::onLocation)
+            locationService.subscribe(activity, ::onLocation)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
 
         plantRepo.getAll().forEach {
             Lg.d("Adding plant marker: (id=${it.id}) $it")
@@ -158,12 +162,16 @@ class MapFragment : BaseFragment() {
 
     override fun onPause() {
         super.onPause()
-        locationService.unsubscribe(::onLocation)
         //this will refresh the osmdroid configuration on resuming.
         //if you make changes to the configuration, use
         //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         //Configuration.getInstance().save(this, prefs);
         map.onPause()  //needed for compass, my location overlays, v6.0.0 and up
+    }
+
+    override fun onStop() {
+        super.onStop()
+        locationService.unsubscribe(activity)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int,
@@ -173,7 +181,7 @@ class MapFragment : BaseFragment() {
             requestFineLocationPermission -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     Lg.d("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_GRANTED")
-                    locationService.subscribe(::onLocation)
+                    locationService.subscribe(activity, ::onLocation)
                 } else {
                     Lg.d("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_DENIED")
                 }

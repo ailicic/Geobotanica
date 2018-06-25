@@ -1,24 +1,26 @@
 package com.geobotanica.geobotanica.ui.new_plant_type
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.android.location.LocationService
+import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.ui.BaseActivity
+import com.geobotanica.geobotanica.ui.new_plant_photo.NewPlantPhotoActivity
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.activity_new_plant_type.*
-import javax.inject.Inject
 
 class NewPlantTypeActivity : BaseActivity() {
-    @Inject lateinit var locationService: LocationService
-
     override val name = this.javaClass.name.substringAfterLast('.')
+
+    private var userId = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        activityComponent.inject(this)
         setContentView(R.layout.activity_new_plant_type)
+        userId = intent.getLongExtra(getString(R.string.extra_user_id), -1L)
+        Lg.d("Intent extras: userId=$userId")
     }
 
     override fun onStart() {
@@ -32,15 +34,19 @@ class NewPlantTypeActivity : BaseActivity() {
     }
 
     fun onClickListener(view: View): Unit {
-        var message = ""
+        var plantType = Plant.Type.TREE
         when(view) {
-            buttonTree -> message = "Tree"
-            buttonShrub -> message = "Shrub"
-            buttonHerb -> message = "Herb"
-            buttonGrass -> message = "Grass"
-            buttonVine -> message = "Vine"
+            buttonTree -> plantType = Plant.Type.TREE
+            buttonShrub -> plantType = Plant.Type.SHRUB
+            buttonHerb -> plantType = Plant.Type.HERB
+            buttonGrass -> plantType = Plant.Type.GRASS
+            buttonVine -> plantType = Plant.Type.VINE
         }
-        Lg.d("onClickListener(): Clicked $message")
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        Lg.d("onClickListener(): Clicked $plantType")
+        val intent = Intent(this, NewPlantPhotoActivity::class.java)
+                .putExtra(getString(R.string.extra_user_id), userId)
+                .putExtra(getString(R.string.extra_plant_type), plantType.ordinal)
+        startActivity(intent)
+        finish()
     }
 }
