@@ -6,6 +6,7 @@
     <string name="extra_plant_photo_path">com.geobotanica.plant_photo_path</string>
     <string name="extra_plant_common_name">com.geobotanica.plant_common_name</string>
     <string name="extra_plant_latin_name">com.geobotanica.plant_latin_name</string>
+    <string name="extra_location">com.geobotanica.plant_latin_name</string>
     <string name="activity_new_plant_type">Select Plant Type</string>
     <string name="activity_new_plant_photo">Capture Photo</string>
     <string name="activity_new_plant_name">Plant Name</string>

@@ -26,7 +26,6 @@ import kotlinx.android.synthetic.main.fragment_map.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import javax.inject.Inject
 
@@ -139,7 +138,7 @@ class MapFragment : BaseFragment() {
                     Plant.Type.VINE.ordinal -> R.drawable.marker_yellow
                     else -> R.drawable.marker_yellow
                 }
-                setIcon(activity.getResources().getDrawable(icon))
+                @Suppress("DEPRECATION") setIcon(activity.resources.getDrawable(icon))
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 setOnMarkerClickListener { marker: Marker, _ ->
                     if (marker.isInfoWindowOpen)

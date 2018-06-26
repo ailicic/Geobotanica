@@ -9,6 +9,7 @@ import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.new_plant_photo.NewPlantPhotoActivity
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.activity_new_plant_type.*
+import kotlinx.android.synthetic.main.gps_compound_view.view.*
 
 class NewPlantTypeActivity : BaseActivity() {
     override val name = this.javaClass.name.substringAfterLast('.')
@@ -33,7 +34,7 @@ class NewPlantTypeActivity : BaseActivity() {
         buttonVine.setOnClickListener(::onClickListener)
     }
 
-    fun onClickListener(view: View): Unit {
+    private fun onClickListener(view: View) {
         var plantType = Plant.Type.TREE
         when(view) {
             buttonTree -> plantType = Plant.Type.TREE
@@ -46,6 +47,8 @@ class NewPlantTypeActivity : BaseActivity() {
         val intent = Intent(this, NewPlantPhotoActivity::class.java)
                 .putExtra(getString(R.string.extra_user_id), userId)
                 .putExtra(getString(R.string.extra_plant_type), plantType.ordinal)
+        if (gps.gpsSwitch.isChecked)
+            intent.putExtra(getString(R.string.extra_location), gps.currentLocation)
         startActivity(intent)
         finish()
     }

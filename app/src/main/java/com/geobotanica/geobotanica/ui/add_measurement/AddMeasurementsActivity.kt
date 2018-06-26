@@ -7,6 +7,7 @@ import android.widget.CompoundButton
 import android.widget.RadioGroup
 import android.widget.Toast
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.Measurement
 import com.geobotanica.geobotanica.data.entity.Photo
 import com.geobotanica.geobotanica.data.entity.Plant
@@ -21,7 +22,6 @@ import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import kotlinx.android.synthetic.main.measurement_compound_view.view.*
 import javax.inject.Inject
 
-// TODO: Carry location through if held prior
 class AddMeasurementsActivity : BaseActivity() {
     @Inject lateinit var plantRepo: PlantRepo
     @Inject lateinit var locationRepo: LocationRepo
@@ -34,6 +34,7 @@ class AddMeasurementsActivity : BaseActivity() {
     private var photoFilePath: String = ""
     private var commonName: String = ""
     private var latinName: String = ""
+    private var plantLocation: Location? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,8 +45,12 @@ class AddMeasurementsActivity : BaseActivity() {
         userId = intent.getLongExtra(getString(R.string.extra_user_id), -1L)
         plantType = intent.getIntExtra(getString(R.string.extra_plant_type), -1)
         photoFilePath = intent.getStringExtra(getString(R.string.extra_plant_photo_path))
-        commonName = intent.getStringExtra(getString(R.string.extra_plant_common_name))
-        latinName = intent.getStringExtra(getString(R.string.extra_plant_latin_name))
+        commonName = intent.getStringExtra(getString(R.string.extra_plant_common_name)) ?: ""
+        latinName = intent.getStringExtra(getString(R.string.extra_plant_latin_name)) ?: ""
+        plantLocation = intent.getSerializableExtra(getString(R.string.extra_location)) as? Location
+        Lg.d("Intent extras: userId=$userId, plantType=$plantType, commonName=$commonName, " +
+                "latinName=$latinName, plantLocation=$plantLocation, photoFilePath=$photoFilePath")
+        plantLocation?.let { gps.setLocation(it) }
     }
 
     override fun onStart() {
@@ -66,6 +71,7 @@ class AddMeasurementsActivity : BaseActivity() {
         fab.setOnClickListener(::onFabPressed)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onToggleAddMeasurement(buttonView: CompoundButton, isChecked: Boolean) {
         Lg.d("onToggleHoldPosition(): isChecked=$isChecked")
         if (isChecked) {
@@ -84,6 +90,7 @@ class AddMeasurementsActivity : BaseActivity() {
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onRadioButtonChecked(radioGroup: RadioGroup, checkedId: Int) {
         when (checkedId) {
             manualRadioButton.id -> {
@@ -100,7 +107,6 @@ class AddMeasurementsActivity : BaseActivity() {
                 diameterMeasure.visibility = View.GONE
                 trunkDiameterMeasure.visibility = View.GONE
             }
-
         }
     }
 
@@ -118,7 +124,7 @@ class AddMeasurementsActivity : BaseActivity() {
             Snackbar.make(view, "Provide plant measurements", Snackbar.LENGTH_LONG).setAction("Action", null).show()
             return
         }
-
+        Lg.d("Saving plant to database now...")
         val plant = Plant(userId, plantType, commonName, latinName)
         plant.id = plantRepo.insert(plant)
         Lg.d("Plant: $plant (id=${plant.id})")

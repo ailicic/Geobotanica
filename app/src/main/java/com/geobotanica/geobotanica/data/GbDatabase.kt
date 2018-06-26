@@ -17,7 +17,7 @@ import com.geobotanica.geobotanica.data.entity.*
             Measurement::class
         ],
         exportSchema = false,
-        version = 11
+        version = 12
 )
 @TypeConverters(DateTimeConverter::class)
 abstract class GbDatabase : RoomDatabase() {

@@ -23,8 +23,6 @@ class GpsCompoundView @JvmOverloads constructor(
     @Inject lateinit var locationService: LocationService
 
     var currentLocation: Location? = null
-    var isPositionHeld: Boolean = false
-        get() = gpsSwitch.isSelected
 
     init {
         Lg.v("GpsCompoundView()")
@@ -32,11 +30,22 @@ class GpsCompoundView @JvmOverloads constructor(
         inflate(getContext(), R.layout.gps_compound_view,this)
     }
 
+    fun setLocation(location: Location) { // Only called if Location object found in Activity intent in OnCreate()
+        currentLocation = location
+        gpsSwitch.isEnabled = true
+        gpsSwitch.isChecked = true
+        precisionText.text = context.resources.getString(R.string.precision, location.precision)
+        setSatellitesText(location.satellitesInUse ?: 0, location.satellitesVisible)
+//        locationService.unsubscribe(context) // Not required since always called before onAttachedToWindow()
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         Lg.d("GpsCompoundView: onAttachedToWindow()")
-        locationService.subscribe(context, ::onLocation)
         gpsSwitch.setOnCheckedChangeListener(::onToggleHoldPosition)
+        if (!gpsSwitch.isChecked) {
+            locationService.subscribe(context, ::onLocation)
+        }
     }
 
     override fun onDetachedFromWindow() {
@@ -55,7 +64,7 @@ class GpsCompoundView @JvmOverloads constructor(
                 precisionText.text = context.resources.getString(R.string.precision, precision)
                 gpsSwitch.isEnabled = true
             }
-            satellitesInUse?.let { satellitesText?.text = context.resources.getString(R.string.satellites, satellitesInUse, satellitesVisible) }
+            satellitesInUse?.let { setSatellitesText(satellitesInUse ?: 0, satellitesVisible) }
         }
     }
 
@@ -66,5 +75,9 @@ class GpsCompoundView @JvmOverloads constructor(
             locationService.unsubscribe(context)
         else
             locationService.subscribe(context, ::onLocation)
+    }
+
+    private fun setSatellitesText(satellitesInUse: Int, satellitesVisible: Int) {
+        satellitesText.text = context.resources.getString(R.string.satellites, satellitesInUse, satellitesVisible)
     }
 }

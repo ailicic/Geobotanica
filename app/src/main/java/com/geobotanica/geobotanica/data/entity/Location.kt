@@ -6,6 +6,7 @@ import android.arch.persistence.room.Index
 import android.arch.persistence.room.PrimaryKey
 import android.support.annotation.NonNull
 import org.threeten.bp.OffsetDateTime
+import java.io.Serializable
 
 @Entity(tableName = "locations",
         foreignKeys = [
@@ -29,7 +30,7 @@ data class Location(
     @NonNull var satellitesInUse: Int? = null,
     @NonNull var satellitesVisible: Int,
     @NonNull var timestamp: OffsetDateTime = OffsetDateTime.now()
-) {
+): Serializable {
     @PrimaryKey(autoGenerate = true) var id: Long = 0L
 }
 

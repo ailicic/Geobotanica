@@ -9,9 +9,12 @@ import android.provider.MediaStore
 import android.support.v4.content.FileProvider
 import android.widget.Toast
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.new_plant_name.NewPlantNameActivity
 import com.geobotanica.geobotanica.util.Lg
+import kotlinx.android.synthetic.main.activity_new_plant_photo.*
+import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -22,6 +25,7 @@ class NewPlantPhotoActivity : BaseActivity() {
 
     private var userId = 0L
     private var plantType = 0
+    private var plantLocation: Location? = null
     private val requestTakePhoto = 2
     private var photoFilePath: String = ""
     private var oldPhotoFilePath: String = ""
@@ -32,9 +36,10 @@ class NewPlantPhotoActivity : BaseActivity() {
 
         userId = intent.getLongExtra(getString(R.string.extra_user_id), -1L)
         plantType = intent.getIntExtra(getString(R.string.extra_plant_type), -1)
-        Lg.d("Intent extras: userId=$userId, plantType=$plantType")
+        plantLocation = intent.getSerializableExtra(getString(R.string.extra_location)) as? Location
+        Lg.d("Intent extras: userId=$userId, plantType=$plantType, plantLocation=$plantLocation")
 
-
+        plantLocation?.let { gps.setLocation(it) }
 
         val capturePhotoIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         capturePhotoIntent.resolveActivity(this.packageManager)
@@ -71,11 +76,13 @@ class NewPlantPhotoActivity : BaseActivity() {
                             .putExtra(getString(R.string.extra_user_id), userId)
                             .putExtra(getString(R.string.extra_plant_type), plantType)
                             .putExtra(getString(R.string.extra_plant_photo_path), photoFilePath)
+                    if (gps.gpsSwitch.isChecked)
+                        intent.putExtra(getString(R.string.extra_location), gps.currentLocation)
                     startActivity(intent)
                     finish()
 
                 } else {
-                    Toast.makeText(this, "Error taking photo", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Photo not captured", Toast.LENGTH_SHORT).show()
                 }
             }
             else -> Toast.makeText(this, "Unrecognized request code", Toast.LENGTH_SHORT).show()
