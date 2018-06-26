@@ -13,6 +13,7 @@
         android:required="true" />
     <uses-feature android:name="android.hardware.location.gps" />
 
+    <!--android:theme="@style/AppTheme.AppBarOverlay"-->
     <application
         android:name=".GeobotanicaApplication"
         android:allowBackup="false"
@@ -50,6 +51,9 @@
         <activity
             android:name=".ui.new_plant_name.NewPlantNameActivity"
             android:label="@string/activity_new_plant_name" />
+        <activity
+            android:name=".ui.add_measurement.AddMeasurementsActivity"
+            android:label="@string/activity_plant_measurements" />/>
     </application>
 
 </manifest>

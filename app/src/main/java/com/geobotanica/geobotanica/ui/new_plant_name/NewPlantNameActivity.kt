@@ -1,35 +1,21 @@
 package com.geobotanica.geobotanica.ui.new_plant_name
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.view.View
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
-import android.widget.CompoundButton
-import android.widget.Toast
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data.entity.Photo
-import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.data.repo.LocationRepo
-import com.geobotanica.geobotanica.data.repo.PhotoRepo
-import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.ui.BaseActivity
+import com.geobotanica.geobotanica.ui.add_measurement.AddMeasurementsActivity
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.activity_new_plant_name.*
-import kotlinx.android.synthetic.main.gps_compound_view.view.*
-import javax.inject.Inject
 
-// TODO: Fix white input text
-// TODO: Carry location through if held prior
 // TODO: Consider using Fragment in activity for Snackbar
 class NewPlantNameActivity : BaseActivity() {
-    @Inject lateinit var plantRepo: PlantRepo
-    @Inject lateinit var locationRepo: LocationRepo
-    @Inject lateinit var photoRepo: PhotoRepo
-
     override val name = this.javaClass.name.substringAfterLast('.')
-
     private var userId = 0L
     private var plantType = 0
     private var photoFilePath: String = ""
@@ -37,8 +23,6 @@ class NewPlantNameActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_plant_name)
-
-        activityComponent.inject(this)
 
         userId = intent.getLongExtra(getString(R.string.extra_user_id), -1L)
         plantType = intent.getIntExtra(getString(R.string.extra_plant_type), -1)
@@ -48,30 +32,20 @@ class NewPlantNameActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        val viewTreeObserver = plantPhoto.getViewTreeObserver()
-        if (viewTreeObserver.isAlive()) {
+        val viewTreeObserver = plantPhoto.viewTreeObserver
+        if (viewTreeObserver.isAlive) {
             viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
+                @Suppress("DEPRECATION")
                 override fun onGlobalLayout() {
-                    plantPhoto.getViewTreeObserver().removeGlobalOnLayoutListener(this)
+                    plantPhoto.viewTreeObserver.removeGlobalOnLayoutListener(this)
                     plantPhoto.setImageBitmap(getScaledBitmap())
                 }
             })
         }
-        measurementsSwitch.setOnCheckedChangeListener(::onToggleAddMeasurement)
         fab.setOnClickListener(::onFabPressed)
     }
 
 
-    private fun onToggleAddMeasurement(buttonView: CompoundButton, isChecked: Boolean) {
-        Lg.d("onToggleHoldPosition(): isChecked=$isChecked")
-        if (isChecked) {
-            manualRadioButton.isEnabled = true
-            assistedRadioButton.isEnabled = true
-        } else {
-            manualRadioButton.isEnabled = false
-            assistedRadioButton.isEnabled = false
-        }
-    }
 
     // TODO: Push validation into the repo?
     private fun onFabPressed(view: View) {
@@ -85,34 +59,14 @@ class NewPlantNameActivity : BaseActivity() {
             return
         }
 
-        if (measurementsSwitch.isChecked) {
-            Toast.makeText(this, "Measurements", Toast.LENGTH_SHORT).show()
-        } else {
-            if (!gps.gpsSwitch.isEnabled) {
-                Snackbar.make(view, "Wait for GPS fix", Snackbar.LENGTH_LONG).setAction("Action", null).show()
-                return
-            }
-            if (!gps.gpsSwitch.isChecked) {
-                Snackbar.make(view, "Plant position must be held", Snackbar.LENGTH_LONG).setAction("Action", null).show()
-                return
-            }
-            val plant = Plant(userId, plantType, commonName, latinName)
-            plant.id = plantRepo.insert(plant)
-            Lg.d("Plant: $plant (id=${plant.id})")
-
-            val photo = Photo(userId, plant.id, Photo.Type.COMPLETE.ordinal, photoFilePath)
-            photo.id = photoRepo.insert(photo)
-            Lg.d("Photo: $photo (id=${photo.id})")
-
-            gps.currentLocation?.let {
-                it.plantId = plant.id
-                it.id = locationRepo.insert(it)
-                Lg.d("Location: $it (id=${it.id})")
-            }
-
-            Toast.makeText(this, "Plant saved", Toast.LENGTH_SHORT).show()
-            finish()
-        }
+        val intent = Intent(this, AddMeasurementsActivity::class.java)
+                .putExtra(getString(R.string.extra_user_id), userId)
+                .putExtra(getString(R.string.extra_plant_type), plantType)
+                .putExtra(getString(R.string.extra_plant_photo_path), photoFilePath)
+                .putExtra(getString(R.string.extra_plant_common_name), commonName)
+                .putExtra(getString(R.string.extra_plant_latin_name), latinName)
+        startActivity(intent)
+        finish()
     }
 
     private fun getScaledBitmap(): Bitmap {

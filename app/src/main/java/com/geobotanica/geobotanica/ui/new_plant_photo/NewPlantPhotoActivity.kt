@@ -2,8 +2,6 @@ package com.geobotanica.geobotanica.ui.new_plant_photo
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -14,7 +12,6 @@ import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.new_plant_name.NewPlantNameActivity
 import com.geobotanica.geobotanica.util.Lg
-import kotlinx.android.synthetic.main.fragment_new_plant.*
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -51,7 +48,7 @@ class NewPlantPhotoActivity : BaseActivity() {
             capturePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
             startActivityForResult(capturePhotoIntent, requestTakePhoto)
         } catch (e: IOException) {
-            Toast.makeText(this, "Error creating file", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Photo not captured", Toast.LENGTH_SHORT).show()
         }
 
 

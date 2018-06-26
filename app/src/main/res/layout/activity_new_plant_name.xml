@@ -6,12 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".ui.new_plant_name.NewPlantNameActivity">
 
-    <com.geobotanica.geobotanica.ui.GpsCompoundView
-        android:id="@+id/gps"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent" />
-
     <!--TODO: Make button view: show large image when clicked-->
     <ImageView
         android:id="@+id/plantPhoto"
@@ -61,52 +55,6 @@
     </android.support.design.widget.TextInputLayout>
 
 
-    <TextView
-        android:id="@+id/addMeasurementsText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/add_measurements"
-        android:textColor="@color/colorBlack"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/latinNameEditText" />
-
-    <android.support.v7.widget.SwitchCompat
-        android:id="@+id/measurementsSwitch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintTop_toTopOf="@+id/addMeasurementsText"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-
-    <RadioGroup
-        android:id="@+id/measurementRadioGroup"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="16dp"
-        android:orientation="vertical"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/addMeasurementsText">
-
-        <RadioButton
-            android:id="@+id/assistedRadioButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:checked="true"
-            android:text="@string/assisted" />
-
-        <RadioButton
-            android:id="@+id/manualRadioButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:text="@string/manual" />
-    </RadioGroup>
-
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
@@ -116,15 +64,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_cab_done_mtrl_alpha" />
 
-</android.support.constraint.ConstraintLayout>
+    <com.geobotanica.geobotanica.ui.GpsCompoundView
+        android:id="@+id/gps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
-    <!--<android.support.constraint.Guideline-->
-    <!--android:id="@+id/photoGuideline"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:orientation="horizontal"-->
-    <!--app:layout_constraintHeight_percent="40"-->
-    <!--/>-->
-    <!--app:layout_constraintBottom_toBottomOf="parent"-->
-    <!--app:layout_constraintGuide_begin="309dp"-->
-    <!--app:layout_constraintTop_toTopOf="parent"-->
+</android.support.constraint.ConstraintLayout>

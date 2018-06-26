@@ -2,7 +2,6 @@ package com.geobotanica.geobotanica.data.dao
 
 import android.arch.persistence.room.Dao
 import android.arch.persistence.room.Query
-import android.provider.ContactsContract
 import com.geobotanica.geobotanica.data.entity.User
 
 
