@@ -3,6 +3,7 @@ package com.geobotanica.geobotanica.ui
 import android.content.Context
 import android.support.constraint.ConstraintLayout
 import android.util.AttributeSet
+import android.view.View
 import android.widget.CompoundButton
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.location.LocationService
@@ -32,10 +33,11 @@ class GpsCompoundView @JvmOverloads constructor(
 
     fun setLocation(location: Location) { // Only called if Location object found in Activity intent in OnCreate()
         currentLocation = location
-        gpsSwitch.isEnabled = true
         gpsSwitch.isChecked = true
         precisionText.text = context.resources.getString(R.string.precision, location.precision)
         setSatellitesText(location.satellitesInUse ?: 0, location.satellitesVisible)
+        holdText.visibility = View.VISIBLE
+        gpsSwitch.visibility = View.VISIBLE
 //        locationService.unsubscribe(context) // Not required since always called before onAttachedToWindow()
     }
 
@@ -62,7 +64,8 @@ class GpsCompoundView @JvmOverloads constructor(
 
             precision?.let {
                 precisionText.text = context.resources.getString(R.string.precision, precision)
-                gpsSwitch.isEnabled = true
+                holdText.visibility = View.VISIBLE
+                gpsSwitch.visibility = View.VISIBLE
             }
             satellitesInUse?.let { setSatellitesText(satellitesInUse ?: 0, satellitesVisible) }
         }
