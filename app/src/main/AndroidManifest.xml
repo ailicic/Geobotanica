@@ -13,7 +13,6 @@
         android:required="true" />
     <uses-feature android:name="android.hardware.location.gps" />
 
-    <!--android:theme="@style/AppTheme.AppBarOverlay"-->
     <application
         android:name=".GeobotanicaApplication"
         android:allowBackup="false"
@@ -43,17 +42,21 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.new_plant_type.NewPlantTypeActivity"
+            android:name=".ui.newplanttype.NewPlantTypeActivity"
             android:label="@string/activity_new_plant_type" />
         <activity
-            android:name=".ui.new_plant_photo.NewPlantPhotoActivity"
+            android:name=".ui.newplantphoto.NewPlantPhotoActivity"
             android:label="@string/activity_new_plant_photo" />
         <activity
-            android:name=".ui.new_plant_name.NewPlantNameActivity"
+            android:name=".ui.newplantname.NewPlantNameActivity"
             android:label="@string/activity_new_plant_name" />
         <activity
-            android:name=".ui.add_measurement.AddMeasurementsActivity"
-            android:label="@string/activity_plant_measurements" />/>
+            android:name=".ui.addmeasurement.AddMeasurementsActivity"
+            android:label="@string/activity_plant_measurements" />
+        <activity
+            android:name=".ui.plantdetail.PlantDetailActivity"
+            android:label="@string/activity_plant_details"
+            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

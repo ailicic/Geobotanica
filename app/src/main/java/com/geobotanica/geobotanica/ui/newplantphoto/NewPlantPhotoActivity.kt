@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui.new_plant_photo
+package com.geobotanica.geobotanica.ui.newplantphoto
 
 import android.app.Activity
 import android.content.Intent
@@ -11,7 +11,7 @@ import android.widget.Toast
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.ui.BaseActivity
-import com.geobotanica.geobotanica.ui.new_plant_name.NewPlantNameActivity
+import com.geobotanica.geobotanica.ui.newplantname.NewPlantNameActivity
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.activity_new_plant_photo.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
@@ -20,6 +20,7 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
+// TODO: Use Toolbar instead of ActionBar
 class NewPlantPhotoActivity : BaseActivity() {
     override val name = this.javaClass.name.substringAfterLast('.')
 

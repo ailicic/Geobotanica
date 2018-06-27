@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.new_plant_name.NewPlantNameActivity">
+    tools:context=".ui.newplantname.NewPlantNameActivity">
 
     <!--TODO: Make button view: show large image when clicked-->
     <ImageView

@@ -6,7 +6,7 @@ import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.data.repo.UserRepo
 import com.geobotanica.geobotanica.ui.BaseActivity
-import com.geobotanica.geobotanica.ui.new_plant_type.NewPlantTypeActivity
+import com.geobotanica.geobotanica.ui.newplanttype.NewPlantTypeActivity
 import kotlinx.android.synthetic.main.activity_map.*
 import javax.inject.Inject
 
@@ -14,6 +14,7 @@ class MapActivity : BaseActivity() {
     @Inject lateinit var userRepo: UserRepo
 
     override val name = this.javaClass.name.substringAfterLast('.')
+    var userId: Long = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,9 +23,10 @@ class MapActivity : BaseActivity() {
 
         activityComponent.inject(this)
 
+        userId = getGuestUserId()
         fab.setOnClickListener { _ ->
             val intent = Intent(this, NewPlantTypeActivity::class.java)
-                    .putExtra(getString(R.string.extra_user_id), getGuestUserId())
+                    .putExtra(getString(R.string.extra_user_id), userId)
             startActivity(intent)
         }
     }

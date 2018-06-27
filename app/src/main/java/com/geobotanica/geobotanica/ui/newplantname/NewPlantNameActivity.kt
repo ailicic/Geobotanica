@@ -1,8 +1,6 @@
-package com.geobotanica.geobotanica.ui.new_plant_name
+package com.geobotanica.geobotanica.ui.newplantname
 
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.view.View
@@ -10,12 +8,13 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.ui.BaseActivity
-import com.geobotanica.geobotanica.ui.add_measurement.AddMeasurementsActivity
+import com.geobotanica.geobotanica.ui.addmeasurement.AddMeasurementsActivity
 import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.setScaledBitmap
 import kotlinx.android.synthetic.main.activity_new_plant_name.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
 
-// TODO: Consider using Fragment in activity for Snackbar
+// TODO: Use Toolbar instead of ActionBar
 class NewPlantNameActivity : BaseActivity() {
     override val name = this.javaClass.name.substringAfterLast('.')
     private var userId = 0L
@@ -36,15 +35,15 @@ class NewPlantNameActivity : BaseActivity() {
         plantLocation?.let { gps.setLocation(it) }
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
         val viewTreeObserver = plantPhoto.viewTreeObserver
         if (viewTreeObserver.isAlive) {
             viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
-                @Suppress("DEPRECATION")
                 override fun onGlobalLayout() {
+                    @Suppress("DEPRECATION")
                     plantPhoto.viewTreeObserver.removeGlobalOnLayoutListener(this)
-                    plantPhoto.setImageBitmap(getScaledBitmap())
+                    plantPhoto.setScaledBitmap(photoFilePath)
                 }
             })
         }
@@ -69,29 +68,14 @@ class NewPlantNameActivity : BaseActivity() {
                 .putExtra(getString(R.string.extra_user_id), userId)
                 .putExtra(getString(R.string.extra_plant_type), plantType)
                 .putExtra(getString(R.string.extra_plant_photo_path), photoFilePath)
-                .putExtra(getString(R.string.extra_plant_common_name), commonName)
-                .putExtra(getString(R.string.extra_plant_latin_name), latinName)
+        if (commonName.isNotEmpty())
+                intent.putExtra(getString(R.string.extra_plant_common_name), commonName)
+        if (latinName.isNotEmpty())
+                intent.putExtra(getString(R.string.extra_plant_latin_name), latinName)
         if (gps.gpsSwitch.isChecked)
             intent.putExtra(getString(R.string.extra_location), gps.currentLocation)
         startActivity(intent)
         finish()
-    }
-
-    private fun getScaledBitmap(): Bitmap {
-        val imageViewWidth = plantPhoto.width
-        val imageViewHeight = plantPhoto.height
-
-        val bmOptions = BitmapFactory.Options()
-        bmOptions.inJustDecodeBounds = true
-        BitmapFactory.decodeFile(photoFilePath, bmOptions)
-        val bitmapWidth = bmOptions.outWidth
-        val bitmapHeight = bmOptions.outHeight
-        val scaleFactor = Math.min(bitmapWidth/imageViewWidth, bitmapHeight/imageViewHeight)
-
-        bmOptions.inJustDecodeBounds = false
-        bmOptions.inSampleSize = scaleFactor
-
-        return BitmapFactory.decodeFile(photoFilePath, bmOptions)
     }
 
 }

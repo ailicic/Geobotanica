@@ -9,7 +9,7 @@ interface PhotoDao : BaseDao<Photo> {
     @Query("SELECT * FROM photos WHERE id=:id")
     fun get(id: Long): Photo
 
-    @Query("SELECT * FROM photos WHERE plantId=:plantId")
+    @Query("SELECT * FROM photos WHERE plantId=:plantId ORDER BY timestamp DESC")
     fun getAllPhotosOfPlant(plantId: Long): List<Photo>
 
     @Query("SELECT * FROM photos WHERE userId=:userId")

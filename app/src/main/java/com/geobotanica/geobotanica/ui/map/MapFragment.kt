@@ -2,12 +2,14 @@ package com.geobotanica.geobotanica.ui.map
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
@@ -21,11 +23,13 @@ import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.data.repo.UserRepo
 import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
+import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailActivity
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.fragment_map.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import javax.inject.Inject
 
@@ -114,13 +118,22 @@ class MapFragment : BaseFragment() {
         }
     }
 
+    class GbMarker(val plantId: Long, map: MapView): Marker(map) {
+        var longPressCallback: () -> Unit = { }
+
+        override fun onLongPress(event: MotionEvent?, mapView: MapView?): Boolean {
+            longPressCallback()
+            return super.onLongPress(event, mapView)
+        }
+    }
+
     override fun onResume() {
         super.onResume()
 
         plantRepo.getAll().forEach {
             Lg.d("Adding plant marker: (id=${it.id}) $it")
             val location = locationRepo.getPlantLocation(it.id)
-            val plantMarker = Marker(map)
+            val plantMarker = GbMarker(it.id, map)
 
             // TODO: Consider using a custom InfoWindow
             // https://code.google.com/archive/p/osmbonuspack/wikis/Tutorial_2.wiki
@@ -147,6 +160,13 @@ class MapFragment : BaseFragment() {
                         marker.showInfoWindow()
                     true
                 }
+                longPressCallback = {
+                    val intent = Intent(activity, PlantDetailActivity::class.java)
+                            .putExtra(getString(R.string.extra_user_id), (activity as MapActivity).userId)
+                            .putExtra(getString(R.string.extra_plant_id), plantId)
+                    startActivity(intent)
+                }
+
                 position.setCoords(location.latitude!!, location.longitude!!)
                 map.overlays.add(this)
             }

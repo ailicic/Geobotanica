@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="measuredByText" type="id" />
+    <item name="createdByText" type="id" />
+    <item name="modifiedByText" type="id" />
+    <item name="measurementsDivider" type="id" />
+</resources>

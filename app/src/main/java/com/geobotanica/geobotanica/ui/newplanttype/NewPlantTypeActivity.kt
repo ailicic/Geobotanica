@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui.new_plant_type
+package com.geobotanica.geobotanica.ui.newplanttype
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,11 +6,12 @@ import android.view.View
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.ui.BaseActivity
-import com.geobotanica.geobotanica.ui.new_plant_photo.NewPlantPhotoActivity
+import com.geobotanica.geobotanica.ui.newplantphoto.NewPlantPhotoActivity
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.activity_new_plant_type.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
 
+// TODO: Use Toolbar instead of ActionBar
 class NewPlantTypeActivity : BaseActivity() {
     override val name = this.javaClass.name.substringAfterLast('.')
 

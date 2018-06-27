@@ -9,6 +9,6 @@ interface MeasurementDao : BaseDao<Measurement> {
     @Query("SELECT * FROM measurements WHERE id=:id")
     fun get(id: Long): Measurement
 
-    @Query("SELECT * FROM measurements WHERE plantId=:plantId")
+    @Query("SELECT * FROM measurements WHERE plantId=:plantId ORDER BY type ASC")
     fun getAllMeasurementsOfPlant(plantId: Long): List<Measurement>
 }

@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui.add_measurement
+package com.geobotanica.geobotanica.ui.addmeasurement
 
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -32,10 +32,12 @@ class AddMeasurementsActivity : BaseActivity() {
     private var userId = 0L
     private var plantType = 0
     private var photoFilePath: String = ""
-    private var commonName: String = ""
-    private var latinName: String = ""
+    private var commonName: String? = null
+    private var latinName: String? = null
     private var plantLocation: Location? = null
 
+    // TODO: Use Toolbar instead of ActionBar
+    // TODO: Handle back button better. Delete temp photo if needed, allow edit prev. activity, etc.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_measurements)
@@ -45,8 +47,8 @@ class AddMeasurementsActivity : BaseActivity() {
         userId = intent.getLongExtra(getString(R.string.extra_user_id), -1L)
         plantType = intent.getIntExtra(getString(R.string.extra_plant_type), -1)
         photoFilePath = intent.getStringExtra(getString(R.string.extra_plant_photo_path))
-        commonName = intent.getStringExtra(getString(R.string.extra_plant_common_name)) ?: ""
-        latinName = intent.getStringExtra(getString(R.string.extra_plant_latin_name)) ?: ""
+        commonName = intent.getStringExtra(getString(R.string.extra_plant_common_name))
+        latinName = intent.getStringExtra(getString(R.string.extra_plant_latin_name))
         plantLocation = intent.getSerializableExtra(getString(R.string.extra_location)) as? Location
         Lg.d("Intent extras: userId=$userId, plantType=$plantType, commonName=$commonName, " +
                 "latinName=$latinName, plantLocation=$plantLocation, photoFilePath=$photoFilePath")
@@ -148,8 +150,8 @@ class AddMeasurementsActivity : BaseActivity() {
             trunkDiameter?.let {
                 measurementRepo.insert(Measurement(userId, plant.id, Measurement.Type.TRUNK_DIAMETER.ordinal, trunkDiameter))
             }
-            measurementRepo.getAllMeasurementsOfPlant(plant.id).forEach {
-                Lg.d("Measurement: $it (id=${it.id})")
+            measurementRepo.getAllMeasurementsOfPlant(plant.id).forEachIndexed { i, measurement ->
+                Lg.d("#$i $measurement (id=${measurement.id})")
             }
         }
 
