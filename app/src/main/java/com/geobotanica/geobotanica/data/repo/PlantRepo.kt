@@ -11,4 +11,6 @@ class PlantRepo @Inject constructor(val plantDao: PlantDao) {
     fun getAll(): List<Plant> = plantDao.getAll()
 
     fun insert(plant: Plant): Long = plantDao.insert(plant)
+
+    fun delete(plant: Plant) = plantDao.delete(plant)
 }

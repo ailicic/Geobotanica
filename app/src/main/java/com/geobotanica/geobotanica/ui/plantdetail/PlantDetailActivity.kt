@@ -3,11 +3,13 @@ package com.geobotanica.geobotanica.ui.plantdetail
 import android.os.Bundle
 import android.support.constraint.ConstraintSet
 import android.support.design.widget.Snackbar
+import android.support.v7.app.AlertDialog
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.TextView
+import android.widget.Toast
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.Measurement
@@ -19,6 +21,7 @@ import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.setScaledBitmap
 import kotlinx.android.synthetic.main.activity_plant_detail.*
 import org.threeten.bp.format.DateTimeFormatter
+import java.io.File
 import javax.inject.Inject
 
 
@@ -30,7 +33,6 @@ class PlantDetailActivity : BaseActivity() {
     @Inject lateinit var measurementRepo: MeasurementRepo
 
     override val name = this.javaClass.name.substringAfterLast('.')
-    private var userId = 0L
     private lateinit  var plant: Plant
     private lateinit var location: Location
     private var photos = emptyList<Photo>()
@@ -44,9 +46,8 @@ class PlantDetailActivity : BaseActivity() {
 
         activityComponent.inject(this)
 
-        userId = intent.getLongExtra(getString(R.string.extra_user_id), -1L)
         val plantId = intent.getLongExtra(getString(R.string.extra_plant_id), -1)
-        Lg.d("Intent extras: userId=$userId, plantId=$plantId")
+        Lg.d("Intent extras: plantId=$plantId")
 
         plant = plantRepo.get(plantId)
         location = locationRepo.getPlantLocation(plantId)
@@ -61,6 +62,8 @@ class PlantDetailActivity : BaseActivity() {
         measurements.forEachIndexed { i, measurement ->
             Lg.d("Measurement #${i+1}: $measurement (id=${measurement.id})")
         }
+
+        deleteButton.setOnClickListener(::onDeleteButtonPressed)
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Add new photos/measurements", Snackbar.LENGTH_LONG)
@@ -190,6 +193,22 @@ class PlantDetailActivity : BaseActivity() {
             constraintSet.applyTo(constraintLayout)
 
         }
-//        val modifiedByText = TextView(this)
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onDeleteButtonPressed(view: View) {
+        AlertDialog.Builder(this).apply {
+            setTitle("Delete Plant")
+            setMessage("Are you sure you want to delete this plant and its photos?")
+            setPositiveButton("Yes") { _, _ ->
+                Lg.d("Deleting plant: $plant, Photo count=${photos.size}")
+                photos.forEach { File(it.fileName).delete() }
+                plantRepo.delete(plant)
+                Toast.makeText(context, "Plant deleted", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+            create()
+        }.show()
     }
 }

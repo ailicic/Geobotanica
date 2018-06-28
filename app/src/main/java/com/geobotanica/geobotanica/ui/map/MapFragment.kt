@@ -118,28 +118,32 @@ class MapFragment : BaseFragment() {
         }
     }
 
-    class GbMarker(val plantId: Long, map: MapView): Marker(map) {
-        var longPressCallback: () -> Unit = { }
-
-        override fun onLongPress(event: MotionEvent?, mapView: MapView?): Boolean {
-            longPressCallback()
-            return super.onLongPress(event, mapView)
-        }
-    }
-
     override fun onResume() {
         super.onResume()
 
+        map.overlays.clear()
+
         plantRepo.getAll().forEach {
             Lg.d("Adding plant marker: (id=${it.id}) $it")
+            val plantMarker = GbMarker(activity, it.id, map)
             val location = locationRepo.getPlantLocation(it.id)
-            val plantMarker = GbMarker(it.id, map)
 
             // TODO: Consider using a custom InfoWindow
             // https://code.google.com/archive/p/osmbonuspack/wikis/Tutorial_2.wiki
             // 7. Customizing the bubble behaviour:
             // 9. Creating your own bubble layout
             plantMarker.apply {
+                position.setCoords(location.latitude!!, location.longitude!!)
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+
+                setOnMarkerClickListener { marker: Marker, _ ->
+                    if (marker.isInfoWindowOpen)
+                        marker.closeInfoWindow()
+                    else
+                        marker.showInfoWindow()
+                    true
+                }
+
                 title = it.commonName
                 snippet = it.latinName
                 subDescription = it.timestamp.toString().substringBefore('T')
@@ -152,25 +156,12 @@ class MapFragment : BaseFragment() {
                     else -> R.drawable.marker_yellow
                 }
                 @Suppress("DEPRECATION") setIcon(activity.resources.getDrawable(icon))
-                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                setOnMarkerClickListener { marker: Marker, _ ->
-                    if (marker.isInfoWindowOpen)
-                        marker.closeInfoWindow()
-                    else
-                        marker.showInfoWindow()
-                    true
-                }
-                longPressCallback = {
-                    val intent = Intent(activity, PlantDetailActivity::class.java)
-                            .putExtra(getString(R.string.extra_user_id), (activity as MapActivity).userId)
-                            .putExtra(getString(R.string.extra_plant_id), plantId)
-                    startActivity(intent)
-                }
 
-                position.setCoords(location.latitude!!, location.longitude!!)
                 map.overlays.add(this)
             }
         }
+
+        locationMarker?.let { map.overlays.add(locationMarker) }
 
         //this will refresh the osmdroid configuration on resuming.
         //if you make changes to the configuration, use
@@ -243,5 +234,19 @@ class MapFragment : BaseFragment() {
             }
         }
         map.invalidate()
+    }
+
+    class GbMarker(val activity: BaseActivity, val plantId: Long, map: MapView): Marker(map) {
+
+        override fun onLongPress(event: MotionEvent?, mapView: MapView?): Boolean {
+            Lg.d("Opening plant detail: id=$plantId")
+            val touched = hitTest(event, mapView)
+            if (touched) {
+                val intent = Intent(activity, PlantDetailActivity::class.java)
+                        .putExtra(activity.getString(R.string.extra_plant_id), plantId)
+                activity.startActivity(intent)
+            }
+            return touched
+        }
     }
 }
