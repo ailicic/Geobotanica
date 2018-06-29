@@ -25,7 +25,7 @@ data class Plant(
 ) {
         @PrimaryKey(autoGenerate = true) var id: Long = 0
 
-        enum class Type() {
+        enum class Type {
                 TREE,
                 SHRUB,
                 HERB,

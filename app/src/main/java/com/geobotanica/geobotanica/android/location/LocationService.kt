@@ -68,8 +68,8 @@ class LocationService @Inject constructor (private val locationManager: Location
         }
         location.latitude?.let { hasFirstFix = true }
         if (!hasFirstFix) {
-            notify(location)
-        } else {
+            notify(location) // Send out satellite data
+        } else { // Send out merged lat/long + sat data events only if received within 100 ms
             if (tempLocation == null) {
                 tempLocation = location
                 msSinceLastEvent = System.currentTimeMillis()

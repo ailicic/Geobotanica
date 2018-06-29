@@ -1,16 +1,15 @@
 package com.geobotanica.geobotanica.ui.plantdetail
 
 import android.os.Bundle
-import android.support.constraint.ConstraintSet
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
-import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.TextView
 import android.widget.Toast
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.R.id.measurementsDivider
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.Measurement
 import com.geobotanica.geobotanica.data.entity.Photo
@@ -18,6 +17,8 @@ import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.repo.*
 import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.addToConstraintLayout
+import com.geobotanica.geobotanica.util.pixelsPerDp
 import com.geobotanica.geobotanica.util.setScaledBitmap
 import kotlinx.android.synthetic.main.activity_plant_detail.*
 import org.threeten.bp.format.DateTimeFormatter
@@ -46,6 +47,38 @@ class PlantDetailActivity : BaseActivity() {
 
         activityComponent.inject(this)
 
+        bindClickListeners()
+        fetchData()
+        addWidgets()
+    }
+
+    private fun bindClickListeners() {
+        deleteButton.setOnClickListener(::onDeleteButtonPressed)
+
+        fab.setOnClickListener { view ->
+            Snackbar.make(view, "Add new photos/measurements", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show()
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onDeleteButtonPressed(view: View) {
+        AlertDialog.Builder(this).apply {
+            setTitle("Delete Plant")
+            setMessage("Are you sure you want to delete this plant and its photos?")
+            setPositiveButton("Yes") { _, _ ->
+                Lg.d("Deleting plant: $plant, Photo count=${photos.size}")
+                photos.forEach { File(it.fileName).delete() }
+                plantRepo.delete(plant)
+                Toast.makeText(context, "Plant deleted", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+            create()
+        }.show()
+    }
+
+    private fun fetchData() {
         val plantId = intent.getLongExtra(getString(R.string.extra_plant_id), -1)
         Lg.d("Intent extras: plantId=$plantId")
 
@@ -57,23 +90,14 @@ class PlantDetailActivity : BaseActivity() {
         Lg.d("$plant (id=${plant.id})")
         Lg.d("$location (id=${location.id})")
         photos.forEachIndexed { i, photo ->
-            Lg.d("Photo #${i+1}: $photo (id=${photo.id})")
+            Lg.d("Photo #${i + 1}: $photo (id=${photo.id})")
         }
         measurements.forEachIndexed { i, measurement ->
-            Lg.d("Measurement #${i+1}: $measurement (id=${measurement.id})")
-        }
-
-        deleteButton.setOnClickListener(::onDeleteButtonPressed)
-
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Add new photos/measurements", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+            Lg.d("Measurement #${i + 1}: $measurement (id=${measurement.id})")
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-
+    private fun addWidgets() {
         val viewTreeObserver = plantPhoto.viewTreeObserver
         if (viewTreeObserver.isAlive) {
             viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
@@ -94,9 +118,6 @@ class PlantDetailActivity : BaseActivity() {
             latinNameText.visibility = View.VISIBLE
         }
 
-
-        val fourDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f,
-                resources.displayMetrics).toInt()
         val measurementId = View.generateViewId()
         measurements.forEachIndexed { index, measurement ->
             val measurementText = TextView(this)
@@ -108,20 +129,10 @@ class PlantDetailActivity : BaseActivity() {
                         measurement.measurement))
                 @Suppress("DEPRECATION")
                 setTextColor(resources.getColor(R.color.colorBlack))
-
-                constraintLayout.addView(this)
-
-                val constraintSet = ConstraintSet()
-                constraintSet.clone(constraintLayout)
-
-                if (index == 0) {
-                    constraintSet.connect(id, ConstraintSet.TOP, R.id.nameDivider, ConstraintSet.BOTTOM, fourDp)
-                } else {
-                    constraintSet.connect(id, ConstraintSet.TOP, id - 1, ConstraintSet.BOTTOM, fourDp)
-
-                }
-                constraintSet.connect(id, ConstraintSet.LEFT, constraintLayout.id, ConstraintSet.LEFT, 4 * fourDp)
-                constraintSet.applyTo(constraintLayout)
+                addToConstraintLayout(constraintLayout,
+                        below = if (index == 0) nameDivider.id else id - 1,
+                        startAt = constraintLayout.id,
+                        topMarginDp = 4)
             }
 
             val dateText = TextView(this)
@@ -129,14 +140,10 @@ class PlantDetailActivity : BaseActivity() {
                 id = measurementText.id + 64
                 Lg.d("dateText #${index + 1}: id=$id")
                 text = (measurement.timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE))
-
-                constraintLayout.addView(this)
-
-                val constraintSet = ConstraintSet()
-                constraintSet.clone(constraintLayout)
-                constraintSet.connect(id, ConstraintSet.TOP, measurementText.id, ConstraintSet.TOP)
-                constraintSet.connect(id, ConstraintSet.RIGHT, constraintLayout.id, ConstraintSet.RIGHT, 4 * fourDp)
-                constraintSet.applyTo(constraintLayout)
+                addToConstraintLayout(constraintLayout,
+                        topAt = measurementText.id,
+                        endAt = constraintLayout.id,
+                        topMarginDp = 0)
             }
         }
 
@@ -145,14 +152,10 @@ class PlantDetailActivity : BaseActivity() {
             measuredByText.apply {
                 id = R.id.measuredByText
                 text = resources.getString(R.string.measured_by, userRepo.get(measurements[0].userId).nickname)
-
-                constraintLayout.addView(this)
-
-                val constraintSet = ConstraintSet()
-                constraintSet.clone(constraintLayout)
-                constraintSet.connect(id, ConstraintSet.TOP, measurementId + measurements.size - 1, ConstraintSet.BOTTOM)
-                constraintSet.connect(id, ConstraintSet.RIGHT, constraintLayout.id, ConstraintSet.RIGHT, 4 * fourDp)
-                constraintSet.applyTo(constraintLayout)
+                addToConstraintLayout(constraintLayout,
+                        below = measurementId + measurements.size - 1,
+                        endAt = constraintLayout.id,
+                        topMarginDp = 4)
             }
 
             val measurementsDivider = View(this)
@@ -160,55 +163,37 @@ class PlantDetailActivity : BaseActivity() {
                 id = R.id.measurementsDivider
                 layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        fourDp / 4)
+                        pixelsPerDp.toInt())
                 @Suppress("DEPRECATION")
                 setBackgroundColor(resources.getColor(R.color.colorDarkGrey))
-
-                constraintLayout.addView(this)
-
-                val constraintSet = ConstraintSet()
-                constraintSet.clone(constraintLayout)
-                constraintSet.connect(id, ConstraintSet.TOP, R.id.measuredByText, ConstraintSet.BOTTOM, 2 * fourDp)
-                constraintSet.connect(id, ConstraintSet.RIGHT, constraintLayout.id, ConstraintSet.RIGHT, 4 * fourDp)
-                constraintSet.connect(id, ConstraintSet.LEFT, constraintLayout.id, ConstraintSet.LEFT, 4 * fourDp)
-                constraintSet.applyTo(constraintLayout)
+                addToConstraintLayout(constraintLayout,
+                        below = measuredByText.id,
+                        startAt = constraintLayout.id,
+                        endAt = constraintLayout.id)
             }
         }
+
+        val locationText = TextView(this)
+        locationText.apply {
+            id = R.id.locationText
+            text =  resources.getString(R.string.location,
+                    location.precision,
+                    location.satellitesInUse,
+                    location.satellitesVisible)
+            addToConstraintLayout(constraintLayout,
+                    below = if (measurements.isNotEmpty()) measurementsDivider else nameDivider.id,
+                    endAt = constraintLayout.id)
+        }
+
         val createdByText = TextView(this)
         createdByText.apply {
             id = R.id.createdByText
             text =  resources.getString(R.string.created_by,
                     userRepo.get(plant.userId).nickname,
                     plant.timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE))
-
-            constraintLayout.addView(this)
-
-            val constraintSet = ConstraintSet()
-            constraintSet.clone(constraintLayout)
-            if ( measurements.isEmpty())
-                constraintSet.connect(id, ConstraintSet.TOP, R.id.nameDivider, ConstraintSet.BOTTOM, 2 * fourDp)
-            else
-                constraintSet.connect(id, ConstraintSet.TOP, R.id.measurementsDivider, ConstraintSet.BOTTOM, 2 * fourDp)
-            constraintSet.connect(id, ConstraintSet.RIGHT, constraintLayout.id, ConstraintSet.RIGHT, 4 * fourDp)
-            constraintSet.applyTo(constraintLayout)
-
+            addToConstraintLayout(constraintLayout,
+                    below = locationText.id,
+                    endAt = constraintLayout.id)
         }
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    private fun onDeleteButtonPressed(view: View) {
-        AlertDialog.Builder(this).apply {
-            setTitle("Delete Plant")
-            setMessage("Are you sure you want to delete this plant and its photos?")
-            setPositiveButton("Yes") { _, _ ->
-                Lg.d("Deleting plant: $plant, Photo count=${photos.size}")
-                photos.forEach { File(it.fileName).delete() }
-                plantRepo.delete(plant)
-                Toast.makeText(context, "Plant deleted", Toast.LENGTH_SHORT).show()
-                finish()
-            }
-            setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
-            create()
-        }.show()
     }
 }

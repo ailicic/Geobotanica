@@ -22,7 +22,7 @@ import java.io.Serializable
         ]
 )
 data class Location(
-    @NonNull var plantId: Long? = null,
+    @NonNull var plantId: Long? = null, // TODO: Consider excluding and creating PlantLocation entity with Location embedded
     @NonNull var latitude: Double? = null,
     @NonNull var longitude: Double? = null,
     @NonNull var altitude: Double? = null,
