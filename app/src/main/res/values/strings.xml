@@ -75,5 +75,7 @@
         <item>cm</item>
         <item>m</item>
         <item>in</item>
+        <item>ft</item>
     </string-array>
+    <string name="inches">in</string>
 </resources>

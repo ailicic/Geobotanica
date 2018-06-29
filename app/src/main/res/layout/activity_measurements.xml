@@ -52,7 +52,7 @@
             android:text="@string/manual" />
     </RadioGroup>
 
-    <include layout="@layout/measurement_compound_view"
+    <com.geobotanica.geobotanica.ui.MeasurementCompoundView
         android:id="@+id/heightMeasure"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -60,7 +60,7 @@
         app:layout_constraintTop_toBottomOf="@id/measurementRadioGroup"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <include layout="@layout/measurement_compound_view"
+    <com.geobotanica.geobotanica.ui.MeasurementCompoundView
         android:id="@+id/diameterMeasure"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -68,7 +68,7 @@
         app:layout_constraintTop_toBottomOf="@id/heightMeasure"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <include layout="@layout/measurement_compound_view"
+    <com.geobotanica.geobotanica.ui.MeasurementCompoundView
         android:id="@+id/trunkDiameterMeasure"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

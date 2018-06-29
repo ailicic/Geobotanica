@@ -142,14 +142,13 @@ class AddMeasurementsActivity : BaseActivity() {
         }
 
         if (measurementsSwitch.isChecked) {
-            val height = heightMeasure.editText.text.toString().toFloat()
-            val diameter = diameterMeasure.editText.text.toString().toFloat()
-            val trunkDiameter = trunkDiameterMeasure.editText.text.toString().toFloatOrNull()
+            val height = heightMeasure.getInCentimeters()
+            val diameter = diameterMeasure.getInCentimeters()
+            val trunkDiameter = trunkDiameterMeasure.getInCentimeters()
             measurementRepo.insert(Measurement(userId, plant.id, Measurement.Type.HEIGHT.ordinal, height))
             measurementRepo.insert(Measurement(userId, plant.id, Measurement.Type.DIAMETER.ordinal, diameter))
-            trunkDiameter?.let {
+            if (trunkDiameter != 0F)
                 measurementRepo.insert(Measurement(userId, plant.id, Measurement.Type.TRUNK_DIAMETER.ordinal, trunkDiameter))
-            }
             measurementRepo.getAllMeasurementsOfPlant(plant.id).forEachIndexed { i, measurement ->
                 Lg.d("#$i $measurement (id=${measurement.id})")
             }

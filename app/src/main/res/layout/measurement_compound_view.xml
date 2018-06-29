@@ -12,19 +12,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/editText"
-        app:layout_constraintStart_toStartOf="@id/measurement" />
+        android:textColor="@color/colorBlack"
+        app:layout_constraintStart_toStartOf="@id/measurement"
+        app:layout_constraintBottom_toBottomOf="@+id/editText" />
 
     <EditText
         android:id="@+id/editText"
         android:layout_width="64dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
         android:ems="10"
         android:inputType="numberDecimal"
-        app:layout_constraintStart_toEndOf="@id/textView"
         app:layout_constraintTop_toTopOf="@id/measurement"
+        app:layout_constraintStart_toEndOf="@id/textView"
         tools:ignore="LabelFor" />
 
     <Spinner
@@ -33,6 +33,31 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:entries="@array/measurement_units"
-        app:layout_constraintBottom_toBottomOf="@+id/editText"
-        app:layout_constraintStart_toEndOf="@+id/editText" />
+        app:layout_constraintStart_toEndOf="@+id/editText"
+        app:layout_constraintBottom_toBottomOf="@+id/editText" />
+
+    <EditText
+        android:id="@+id/inchesEditText"
+        android:layout_width="64dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="numberDecimal"
+        android:visibility="invisible"
+        app:layout_constraintTop_toTopOf="@id/measurement"
+        app:layout_constraintStart_toEndOf="@id/unitsSpinner"
+        tools:ignore="LabelFor" />
+
+    <TextView
+        android:id="@+id/inchesTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/inches"
+        android:textSize="16sp"
+        android:textColor="@color/colorBlack"
+        android:visibility="invisible"
+        app:layout_constraintStart_toEndOf="@id/inchesEditText"
+        app:layout_constraintBottom_toBottomOf="@+id/editText" />
+
 </android.support.constraint.ConstraintLayout>

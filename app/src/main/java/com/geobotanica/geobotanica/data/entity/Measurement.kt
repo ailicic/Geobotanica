@@ -32,7 +32,7 @@ data class Measurement(
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0
 
-    enum class Type() {
+    enum class Type {
         HEIGHT,
         DIAMETER,
         TRUNK_DIAMETER,
@@ -47,4 +47,6 @@ data class Measurement(
             FRUIT -> "Fruit"
         }
     }
+
+    enum class Unit { CM, M, IN, FT }
 }
