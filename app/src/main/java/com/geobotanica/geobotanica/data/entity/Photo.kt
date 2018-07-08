@@ -23,9 +23,9 @@ import org.threeten.bp.OffsetDateTime
         ]
 )
 data class Photo(
-    @NonNull val userId: Long,
-    @NonNull val plantId: Long,
-    @NonNull val type: Int,
+    val userId: Long,
+    val plantId: Long,
+    val type: Int,
     @NonNull val fileName: String,
     @NonNull val timestamp: OffsetDateTime = OffsetDateTime.now()
 ) {

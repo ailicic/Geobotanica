@@ -17,10 +17,10 @@ import org.threeten.bp.OffsetDateTime
         indices = [ Index(value = ["userId"]) ]
 )
 data class Plant(
-        @NonNull val userId: Long = 0L,
-        @NonNull val type: Int, // TODO: Make it of type Type and create Room converter. Then when statements don't need else
-        val commonName: String? = null,
-        val latinName: String? = null,
+        val userId: Long = 0L,
+        val type: Int, // TODO: Make it of type Type and create Room converter. Then when statements don't need else
+        @NonNull val commonName: String? = null,
+        @NonNull val latinName: String? = null,
         @NonNull val timestamp: OffsetDateTime = OffsetDateTime.now()
 ) {
         @PrimaryKey(autoGenerate = true) var id: Long = 0

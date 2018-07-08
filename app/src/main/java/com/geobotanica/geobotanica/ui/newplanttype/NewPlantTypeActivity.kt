@@ -19,7 +19,6 @@ class NewPlantTypeActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        activityComponent.inject(this)
         setContentView(R.layout.activity_new_plant_type)
         userId = intent.getLongExtra(getString(R.string.extra_user_id), -1L)
         Lg.d("Intent extras: userId=$userId")

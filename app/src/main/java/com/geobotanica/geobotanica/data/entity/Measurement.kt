@@ -23,10 +23,10 @@ import org.threeten.bp.OffsetDateTime
         ]
 )
 data class Measurement(
-    @NonNull val userId: Long,
-    @NonNull val plantId: Long,
-    @NonNull val type: Int,
-    @NonNull val measurement: Float, // cm
+    val userId: Long,
+    val plantId: Long,
+    val type: Int,
+    val measurement: Float, // cm
     @NonNull val timestamp: OffsetDateTime = OffsetDateTime.now()
 ) {
     @PrimaryKey(autoGenerate = true)
