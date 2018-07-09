@@ -7,7 +7,7 @@ import com.geobotanica.geobotanica.ui.GpsCompoundView
 import com.geobotanica.geobotanica.ui.addmeasurement.AddMeasurementsActivity
 import com.geobotanica.geobotanica.ui.map.MapActivity
 import com.geobotanica.geobotanica.ui.map.MapFragment
-import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailActivity
+import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailFragment
 import dagger.Component
 
 @PerActivity
@@ -21,6 +21,6 @@ interface ActivityComponent {
     fun inject(gpsViewGroup: GpsCompoundView)
     fun inject(mapFragment: MapFragment)
     fun inject(addMeasurementsActivity: AddMeasurementsActivity)
-    fun inject(plantDetail: PlantDetailActivity)
+    fun inject(plantDetailFragment: PlantDetailFragment)
 
 }
