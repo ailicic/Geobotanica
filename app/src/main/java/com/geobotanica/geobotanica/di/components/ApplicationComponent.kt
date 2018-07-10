@@ -7,11 +7,13 @@ import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.repo.*
 import com.geobotanica.geobotanica.di.modules.ApplicationModule
 import com.geobotanica.geobotanica.di.modules.RepoModule
+import com.geobotanica.geobotanica.di.modules.ViewModelModule
+import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailViewModelFactory
 import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [ApplicationModule::class, RepoModule::class])
+@Component(modules = [ApplicationModule::class, RepoModule::class, ViewModelModule::class])
 interface ApplicationComponent {
     fun inject(application: Application)
 
@@ -25,4 +27,6 @@ interface ApplicationComponent {
     fun locationRepo(): LocationRepo
     fun photoRepo(): PhotoRepo
     fun measurementRepo(): MeasurementRepo
+
+//    fun plantDetailViewModelFactory(): PlantDetailViewModelFactory // Not required?
 }

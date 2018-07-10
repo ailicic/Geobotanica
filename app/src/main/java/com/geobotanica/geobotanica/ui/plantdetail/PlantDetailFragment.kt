@@ -1,5 +1,6 @@
 package com.geobotanica.geobotanica.ui.plantdetail
 
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
@@ -26,8 +27,12 @@ import kotlinx.android.synthetic.main.fragment_plant_detail.*
 import org.threeten.bp.format.DateTimeFormatter
 import java.io.File
 import javax.inject.Inject
+import android.databinding.DataBindingUtil
+import com.geobotanica.geobotanica.databinding.FragmentPlantDetailBinding
+
 
 class PlantDetailFragment : BaseFragment() {
+    @Inject lateinit var plantDetailViewModelFactory: PlantDetailViewModelFactory
     @Inject lateinit var userRepo: UserRepo
     @Inject lateinit var plantRepo: PlantRepo
     @Inject lateinit var locationRepo: LocationRepo
@@ -36,6 +41,7 @@ class PlantDetailFragment : BaseFragment() {
 
     override val name = this.javaClass.name.substringAfterLast('.')
 
+    private var plantId = 0L
     private lateinit  var plant: Plant
     private lateinit var location: Location
     private var photos = emptyList<Photo>()
@@ -49,7 +55,19 @@ class PlantDetailFragment : BaseFragment() {
     // TODO: Show plant type as icon (not shown anywhere yet)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_plant_detail, container, false)
+
+        plantId = activity.intent.getLongExtra(getString(R.string.extra_plant_id), -1)
+        Lg.d("Intent extras: plantId=$plantId")
+        plantDetailViewModelFactory.plantId = plantId
+        val plantDetailViewModel = ViewModelProviders.of(this, plantDetailViewModelFactory).get(PlantDetailViewModel::class.java)
+        plantDetailViewModel.plantId = plantId
+
+        val binding = DataBindingUtil.inflate<FragmentPlantDetailBinding>(
+                layoutInflater, R.layout.fragment_plant_detail, container, false).apply {
+            viewModel = plantDetailViewModel
+            setLifecycleOwner(this@PlantDetailFragment)
+        }
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -81,8 +99,6 @@ class PlantDetailFragment : BaseFragment() {
     }
 
     private fun fetchData() {
-        val plantId = activity.intent.getLongExtra(getString(R.string.extra_plant_id), -1)
-        Lg.d("Intent extras: plantId=$plantId")
 
         plant = plantRepo.get(plantId)
         location = locationRepo.getPlantLocation(plantId)
@@ -150,7 +166,7 @@ class PlantDetailFragment : BaseFragment() {
         if (measurements.isNotEmpty()) {
             val measuredByText = TextView(activity).apply {
                 id = R.id.measuredByText
-                text = resources.getString(R.string.measured_by, userRepo.get(measurements[0].userId).nickname)
+//                text = resources.getString(R.string.measured_by, userRepo.get(measurements[0].userId).nickname)
                 addToConstraintLayout(constraintLayout,
                         below = measurementId + measurements.size - 1,
                         endAt = fragment.id,
@@ -184,9 +200,9 @@ class PlantDetailFragment : BaseFragment() {
 
         val createdByText = TextView(activity).apply {
             id = R.id.createdByText
-            text =  resources.getString(R.string.created_by,
-                    userRepo.get(plant.userId).nickname,
-                    plant.timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE))
+//            text =  resources.getString(R.string.created_by,
+//                    userRepo.get(plant.userId).nickname,
+//                    plant.timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE))
             addToConstraintLayout(constraintLayout,
                     below = locationText.id,
                     endAt = fragment.id)

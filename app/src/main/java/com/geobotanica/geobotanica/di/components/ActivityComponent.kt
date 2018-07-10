@@ -22,5 +22,4 @@ interface ActivityComponent {
     fun inject(mapFragment: MapFragment)
     fun inject(addMeasurementsActivity: AddMeasurementsActivity)
     fun inject(plantDetailFragment: PlantDetailFragment)
-
 }
