@@ -7,19 +7,18 @@ import com.geobotanica.geobotanica.data.entity.User
 import javax.inject.Inject
 
 
-class UserRepo @Inject constructor(val userDao: UserDao) {
+class UserRepo @Inject constructor(private val userDao: UserDao) {
     fun get(id: Long): LiveData<User> = userDao.get(id)
 
     fun getAll(): LiveData<List<User>> = userDao.getAll()
 
-    fun getByNickname(nickname: String): List<User> = userDao.getByNickname(nickname)
+//    fun getByNickname(nickname: String): LiveData<User> = userDao.getByNickname(nickname)
 
     fun insert(user: User): Long = userDao.insert(user)
 
-    fun contains(nickname: String): Boolean {
-        return !userDao.getByNickname(nickname).isEmpty()
-    }
-
+//    fun contains(nickname: String): Boolean {
+//        return !userDao.getByNickname(nickname).isEmpty()
+//    }
 }
 
 

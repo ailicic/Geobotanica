@@ -17,9 +17,13 @@ import com.geobotanica.geobotanica.data.entity.*
             Measurement::class
         ],
         exportSchema = false,
-        version = 16
+        version = 17
 )
-@TypeConverters(DateTimeConverter::class)
+@TypeConverters(
+        DateTimeConverter::class,
+        MeasurementTypeConverter::class,
+        PhotoTypeConverter::class,
+        PlantTypeConverter::class )
 abstract class GbDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun plantDao(): PlantDao

@@ -19,3 +19,7 @@ object DateTimeConverter {
     fun fromOffsetDateTime(date: OffsetDateTime): String = date.format(formatter)
 }
 
+/**
+ * Converts OffsetDateTime to a String formatted as YYYY-MM-DD
+ */
+fun OffsetDateTime.toSimpleDate(): String = this.format(DateTimeFormatter.ISO_LOCAL_DATE)

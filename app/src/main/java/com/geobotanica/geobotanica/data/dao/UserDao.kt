@@ -8,14 +8,14 @@ import com.geobotanica.geobotanica.data.entity.User
 
 @Dao
 interface UserDao : BaseDao<User> {
-    @Query("SELECT * FROM users WHERE id=:id")
+    @Query("SELECT * FROM users WHERE id = :id")
     fun get(id: Long): LiveData<User>
 
     @Query("SELECT * FROM users")
     fun getAll(): LiveData<List<User>>
 
-    @Query( "SELECT * FROM users WHERE nickname=:nickname")
-    fun getByNickname(nickname: String): List<User>
+//    @Query( "SELECT * FROM users WHERE nickname = :nickname" LIMIT 1)
+//    fun getByNickname(nickname: String): User
 }
 
 

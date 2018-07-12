@@ -1,5 +1,6 @@
 package com.geobotanica.geobotanica.ui.map
 
+import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
 import com.geobotanica.geobotanica.R
@@ -23,7 +24,7 @@ class MapActivity : BaseActivity() {
 
         activityComponent.inject(this)
 
-        userId = getGuestUserId()
+        createGuestUser()
         fab.setOnClickListener { _ ->
             val intent = Intent(this, NewPlantTypeActivity::class.java)
                     .putExtra(getString(R.string.extra_user_id), userId)
@@ -31,11 +32,13 @@ class MapActivity : BaseActivity() {
         }
     }
 
-    private fun getGuestUserId(): Long {
-        val guestUserNickname: String = "Guest"
-        return if (userRepo.contains(guestUserNickname))
-            userRepo.getByNickname(guestUserNickname)[0].id
-        else
-            userRepo.insert(User(guestUserNickname))
+    private fun createGuestUser() {
+        userRepo.get(1).observe(this, Observer<User> {
+            userId = if (it != null) {
+                it.id
+            } else {
+                userRepo.insert(User("Guest"))
+            }
+        })
     }
 }

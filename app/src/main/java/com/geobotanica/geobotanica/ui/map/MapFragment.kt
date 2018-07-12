@@ -1,6 +1,7 @@
 package com.geobotanica.geobotanica.ui.map
 
 import android.Manifest
+import android.arch.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -16,6 +17,7 @@ import android.widget.Toast
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.Location
+import com.geobotanica.geobotanica.data.entity.Photo
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.repo.LocationRepo
 import com.geobotanica.geobotanica.data.repo.PhotoRepo
@@ -36,6 +38,8 @@ import javax.inject.Inject
 
 // TODO: Create download map activity and utilize offline map tiles
 // https://github.com/osmdroid/osmdroid/wiki/Offline-Map-Tiles
+
+// TODO: Group nearby markers into clusters
 
 /**
  * A placeholder fragment containing a simple view.
@@ -121,47 +125,55 @@ class MapFragment : BaseFragment() {
     override fun onResume() {
         super.onResume()
 
-        map.overlays.clear()
+        plantRepo.getAll().observe(this, Observer<List<Plant>> {
+            map.overlays.clear()
+            it?.forEach {
+                Lg.d("Adding plant marker: (id=${it.id}) $it")
+                val plantMarker = GbMarker(activity, it.id, map)
+                val location = locationRepo.getPlantLocation(it.id)
 
-        plantRepo.getAll().forEach {
-            Lg.d("Adding plant marker: (id=${it.id}) $it")
-            val plantMarker = GbMarker(activity, it.id, map)
-            val location = locationRepo.getPlantLocation(it.id)
+                // TODO: Consider using a custom InfoWindow
+                // https://code.google.com/archive/p/osmbonuspack/wikis/Tutorial_2.wiki
+                // 7. Customizing the bubble behaviour:
+                // 9. Creating your own bubble layout
+                plantMarker.run {
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
 
-            // TODO: Consider using a custom InfoWindow
-            // https://code.google.com/archive/p/osmbonuspack/wikis/Tutorial_2.wiki
-            // 7. Customizing the bubble behaviour:
-            // 9. Creating your own bubble layout
-            plantMarker.apply {
-                position.setCoords(location.latitude!!, location.longitude!!)
-                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                    setOnMarkerClickListener { marker: Marker, _ ->
+                        if (marker.isInfoWindowOpen)
+                            marker.closeInfoWindow()
+                        else
+                            marker.showInfoWindow()
+                        true
+                    }
 
-                setOnMarkerClickListener { marker: Marker, _ ->
-                    if (marker.isInfoWindowOpen)
-                        marker.closeInfoWindow()
-                    else
-                        marker.showInfoWindow()
-                    true
+                    title = it.commonName
+                    snippet = it.latinName
+                    subDescription = it.timestamp.toString().substringBefore('T')
+
+                    val icon = when (it.type) {
+                        Plant.Type.TREE -> R.drawable.marker_purple
+                        Plant.Type.SHRUB -> R.drawable.marker_blue
+                        Plant.Type.HERB -> R.drawable.marker_green
+                        Plant.Type.GRASS -> R.drawable.marker_light_green
+                        Plant.Type.VINE -> R.drawable.marker_yellow
+                    }
+
+                    location.observe(this@MapFragment, Observer<Location> { location ->
+                        position.setCoords(location?.latitude!!, location.longitude!!)
+                    })
+
+                    photoRepo.getMainPhotoOfPlant(plantId).observe(this@MapFragment, Observer<Photo> { photo ->
+                        image = Drawable.createFromPath(photo?.fileName)
+                    })
+                    @Suppress("DEPRECATION") setIcon(activity.resources.getDrawable(icon))
+
+                    map.overlays.add(this)
                 }
-
-                title = it.commonName
-                snippet = it.latinName
-                subDescription = it.timestamp.toString().substringBefore('T')
-                image = Drawable.createFromPath(photoRepo.getAllPhotosOfPlant(it.id)[0].fileName)
-                val icon = when (it.type) {
-                    Plant.Type.TREE.ordinal -> R.drawable.marker_purple
-                    Plant.Type.SHRUB.ordinal -> R.drawable.marker_blue
-                    Plant.Type.HERB.ordinal -> R.drawable.marker_green
-                    Plant.Type.VINE.ordinal -> R.drawable.marker_yellow
-                    else -> R.drawable.marker_yellow
-                }
-                @Suppress("DEPRECATION") setIcon(activity.resources.getDrawable(icon))
-
-                map.overlays.add(this)
             }
-        }
-
-        locationMarker?.let { map.overlays.add(locationMarker) }
+            locationMarker?.let { map.overlays.add(locationMarker) }
+            map.postInvalidate()
+        })
 
         //this will refresh the osmdroid configuration on resuming.
         //if you make changes to the configuration, use
@@ -218,7 +230,7 @@ class MapFragment : BaseFragment() {
                 val _longitude: Double = longitude!!
                 if (locationMarker == null) {
                     locationMarker = Marker(map)
-                    locationMarker?.apply {
+                    locationMarker?.run {
                         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                         setIcon(activity.getResources().getDrawable(R.drawable.person))
                         setOnMarkerClickListener { _, _ ->

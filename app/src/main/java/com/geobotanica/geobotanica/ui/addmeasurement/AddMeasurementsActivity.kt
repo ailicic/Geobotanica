@@ -7,10 +7,7 @@ import android.widget.CompoundButton
 import android.widget.RadioGroup
 import android.widget.Toast
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data.entity.Location
-import com.geobotanica.geobotanica.data.entity.Measurement
-import com.geobotanica.geobotanica.data.entity.Photo
-import com.geobotanica.geobotanica.data.entity.Plant
+import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.data.repo.LocationRepo
 import com.geobotanica.geobotanica.data.repo.MeasurementRepo
 import com.geobotanica.geobotanica.data.repo.PhotoRepo
@@ -30,13 +27,13 @@ class AddMeasurementsActivity : BaseActivity() {
 
     override val name = this.javaClass.name.substringAfterLast('.')
     private var userId = 0L
-    private var plantType = 0
-    private var photoFilePath: String = ""
+    private lateinit var plantType: Plant.Type
+    private lateinit var photoFilePath: String
     private var commonName: String? = null
     private var latinName: String? = null
     private var plantLocation: Location? = null
 
-    // TODO: Use Toolbar instead of ActionBar
+    // TODO: Use Toolbar instead of ActionBar. Maybe use single activity, multiple fragments for new plant creation
     // TODO: Handle back button better. Delete temp photo if needed, allow edit prev. activity, etc.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +42,7 @@ class AddMeasurementsActivity : BaseActivity() {
         activityComponent.inject(this)
 
         userId = intent.getLongExtra(getString(R.string.extra_user_id), -1L)
-        plantType = intent.getIntExtra(getString(R.string.extra_plant_type), -1)
+        plantType = PlantTypeConverter.toPlantType(intent.getIntExtra(getString(R.string.extra_plant_type), -1))
         photoFilePath = intent.getStringExtra(getString(R.string.extra_plant_photo_path))
         commonName = intent.getStringExtra(getString(R.string.extra_plant_common_name))
         latinName = intent.getStringExtra(getString(R.string.extra_plant_latin_name))
@@ -60,7 +57,7 @@ class AddMeasurementsActivity : BaseActivity() {
 
         heightMeasure.textView.text = resources.getString(R.string.height)
         diameterMeasure.textView.text = resources.getString(R.string.diameter)
-        if (plantType == Plant.Type.TREE.ordinal)
+        if (plantType == Plant.Type.TREE)
             trunkDiameterMeasure.textView.text = resources.getString(R.string.trunk_diameter)
         else
             trunkDiameterMeasure.visibility = View.GONE
@@ -81,7 +78,7 @@ class AddMeasurementsActivity : BaseActivity() {
             assistedRadioButton.isEnabled = true
             heightMeasure.visibility = View.VISIBLE
             diameterMeasure.visibility = View.VISIBLE
-            if (plantType == Plant.Type.TREE.ordinal)
+            if (plantType == Plant.Type.TREE)
                 trunkDiameterMeasure.visibility = View.VISIBLE
         } else {
             manualRadioButton.isEnabled = false
@@ -100,7 +97,7 @@ class AddMeasurementsActivity : BaseActivity() {
                 heightMeasure.visibility = View.VISIBLE
                 diameterMeasure.visibility = View.VISIBLE
 
-                if (plantType == Plant.Type.TREE.ordinal)
+                if (plantType == Plant.Type.TREE)
                     trunkDiameterMeasure.visibility = View.VISIBLE
             }
             assistedRadioButton.id -> {
@@ -131,7 +128,7 @@ class AddMeasurementsActivity : BaseActivity() {
         plant.id = plantRepo.insert(plant)
         Lg.d("Plant: $plant (id=${plant.id})")
 
-        val photo = Photo(userId, plant.id, Photo.Type.COMPLETE.ordinal, photoFilePath)
+        val photo = Photo(userId, plant.id, Photo.Type.COMPLETE, photoFilePath)
         photo.id = photoRepo.insert(photo)
         Lg.d("Photo: $photo (id=${photo.id})")
 
@@ -145,13 +142,13 @@ class AddMeasurementsActivity : BaseActivity() {
             val height = heightMeasure.getInCentimeters()
             val diameter = diameterMeasure.getInCentimeters()
             val trunkDiameter = trunkDiameterMeasure.getInCentimeters()
-            measurementRepo.insert(Measurement(userId, plant.id, Measurement.Type.HEIGHT.ordinal, height))
-            measurementRepo.insert(Measurement(userId, plant.id, Measurement.Type.DIAMETER.ordinal, diameter))
+            measurementRepo.insert(Measurement(userId, plant.id, Measurement.Type.HEIGHT, height))
+            measurementRepo.insert(Measurement(userId, plant.id, Measurement.Type.DIAMETER, diameter))
             if (trunkDiameter != 0F)
-                measurementRepo.insert(Measurement(userId, plant.id, Measurement.Type.TRUNK_DIAMETER.ordinal, trunkDiameter))
-            measurementRepo.getAllMeasurementsOfPlant(plant.id).forEachIndexed { i, measurement ->
-                Lg.d("#$i $measurement (id=${measurement.id})")
-            }
+                measurementRepo.insert(Measurement(userId, plant.id, Measurement.Type.TRUNK_DIAMETER, trunkDiameter))
+//            measurementRepo.getAllMeasurementsOfPlant(plant.id).forEachIndexed { i, measurement ->
+//                Lg.d("#$i $measurement (id=${measurement.id})")
+//            }
         }
 
         Toast.makeText(this, "Plant saved", Toast.LENGTH_SHORT).show()
@@ -161,6 +158,6 @@ class AddMeasurementsActivity : BaseActivity() {
     private fun isMeasurementEmpty(): Boolean {
         return heightMeasure.editText.text.isEmpty() ||
                 diameterMeasure.editText.text.isEmpty() ||
-                (plantType == Plant.Type.TREE.ordinal && trunkDiameterMeasure.editText.text.isEmpty() )
+                (plantType == Plant.Type.TREE && trunkDiameterMeasure.editText.text.isEmpty() )
     }
 }

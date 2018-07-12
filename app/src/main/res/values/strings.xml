@@ -54,29 +54,11 @@
     <string name="photo_type_flower">Flower</string>
     <string name="photo_type_fruit">Fruit</string>
     <string name="photo_type_trunk">Trunk</string>
-
-
-    <string-array name="plant_types">
-        <item></item>
-        <item>Tree</item>
-        <item>Shrub</item>
-        <item>Herb</item>
-        <item>Grass</item>
-        <item>Vine</item>
-    </string-array>
-    <string-array name="photo_types">
-        <item>Complete</item>
-        <item>Leaf</item>
-        <item>Buds</item>
-        <item>Flower</item>
-        <item>Fruit</item>
-        <item>Trunk</item>
-    </string-array>
+    <string name="inches">in</string>
     <string-array name="measurement_units">
         <item>cm</item>
         <item>m</item>
         <item>in</item>
         <item>ft</item>
     </string-array>
-    <string name="inches">in</string>
 </resources>

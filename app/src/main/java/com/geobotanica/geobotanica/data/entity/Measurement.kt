@@ -5,27 +5,27 @@ import android.support.annotation.NonNull
 import org.threeten.bp.OffsetDateTime
 
 @Entity(tableName = "measurements",
-        foreignKeys = [
-                ForeignKey(
-                        entity = User::class,
-                        parentColumns = ["id"],
-                        childColumns = ["userId"],
-                        onDelete = ForeignKey.CASCADE),
-                ForeignKey(
-                        entity = Plant::class,
-                        parentColumns = ["id"],
-                        childColumns = ["plantId"],
-                        onDelete = ForeignKey.CASCADE)
-        ],
-        indices = [
-            Index(value = ["plantId"]),
-            Index(value = ["userId"])
-        ]
+    foreignKeys = [
+        ForeignKey(
+            entity = User::class,
+            parentColumns = ["id"],
+            childColumns = ["userId"],
+            onDelete = ForeignKey.CASCADE),
+        ForeignKey(
+            entity = Plant::class,
+            parentColumns = ["id"],
+            childColumns = ["plantId"],
+            onDelete = ForeignKey.CASCADE)
+    ],
+    indices = [
+        Index(value = ["plantId"]),
+        Index(value = ["userId"])
+    ]
 )
 data class Measurement(
     val userId: Long,
     val plantId: Long,
-    val type: Int,
+    val type: Type,
     val measurement: Float, // cm
     @NonNull val timestamp: OffsetDateTime = OffsetDateTime.now()
 ) {
@@ -49,4 +49,12 @@ data class Measurement(
     }
 
     enum class Unit { CM, M, IN, FT }
+}
+
+object MeasurementTypeConverter {
+    @TypeConverter @JvmStatic
+    fun toMeasurementType(ordinal: Int): Measurement.Type = Measurement.Type.values()[ordinal]
+
+    @TypeConverter @JvmStatic
+    fun fromMeasurementType(type: Measurement.Type): Int = type.ordinal
 }

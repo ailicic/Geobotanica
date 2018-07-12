@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="android.view.View"/>
         <variable
             name="viewModel"
             type="com.geobotanica.geobotanica.ui.plantdetail.PlantDetailViewModel" />
@@ -25,7 +26,6 @@
             android:layout_height="192dp"
             android:layout_marginTop="16dp"
             android:scaleType="centerInside"
-            android:src="@drawable/plant_type_tree"
             app:layout_constrainedWidth="true"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -37,10 +37,10 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            android:visibility="gone"
+            android:visibility="@{ viewModel.plant.commonName != null ? View.VISIBLE : View.GONE }"
             android:textColor="@color/colorBlack"
             android:textSize="18sp"
-            android:text="@{viewModel.user.nickname}"
+            android:text="@{ viewModel.plant.commonName }"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/plantPhoto" />
@@ -50,9 +50,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:visibility="gone"
+            android:visibility="@{ viewModel.plant.latinName != null ? View.VISIBLE : View.GONE}"
             android:textColor="@color/colorBlack"
             android:textSize="18sp"
+            android:text="@{ viewModel.plant.latinName }"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/commonNameText" />
@@ -70,6 +71,112 @@
             app:layout_constraintTop_toBottomOf="@+id/latinNameText" />
 
 
+        <TextView
+            android:id="@+id/heightText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="16dp"
+            android:textColor="@color/colorBlack"
+            android:visibility="@{ viewModel.height != null ? View.VISIBLE : View.GONE }"
+            android:text="@{ @string/measurement(viewModel.height.type, viewModel.height.measurement) }"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/nameDivider" />
+
+        <TextView
+            android:id="@+id/heightDateText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:visibility="@{ viewModel.height != null ? View.VISIBLE : View.GONE }"
+            android:text="@{ viewModel.heightDateText }"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/heightText" />
+
+        <TextView
+            android:id="@+id/diameterText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:visibility="@{ viewModel.diameter != null ? View.VISIBLE : View.GONE }"
+            android:textColor="@color/colorBlack"
+            android:text="@{ @string/measurement(viewModel.diameter.type, viewModel.diameter.measurement) }"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/heightText" />
+
+        <TextView
+            android:id="@+id/diameterDateText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:visibility="@{ viewModel.diameter != null ? View.VISIBLE : View.GONE }"
+            android:text="@{ viewModel.diameterDateText }"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/diameterText" />
+
+        <TextView
+            android:id="@+id/trunkDiameterText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:visibility="@{ viewModel.trunkDiameter != null ? View.VISIBLE : View.GONE }"
+            android:textColor="@color/colorBlack"
+            android:text="@{ @string/measurement(viewModel.trunkDiameter.type, viewModel.trunkDiameter.measurement) }"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/diameterText" />
+
+        <TextView
+            android:id="@+id/trunkDiameterDateText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:visibility="@{ viewModel.trunkDiameter != null ? View.VISIBLE : View.GONE }"
+            android:text="@{ viewModel.trunkDiameterDateText }"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/trunkDiameterText" />
+
+        <TextView
+            android:id="@+id/measuredByText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:visibility="@{ viewModel.height != null ? View.VISIBLE : View.GONE }"
+            android:text="@{ @string/measured_by(viewModel.measuredByUser) }"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/trunkDiameterText" />
+
+        <View
+            android:id="@+id/measurementsDivider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@android:color/darker_gray"
+            android:visibility="@{ viewModel.height != null ? View.VISIBLE : View.GONE }"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/measuredByText" />
+
+        <TextView
+            android:id="@+id/locationText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="4dp"
+            android:text="@{ @string/location(viewModel.location.precision, viewModel.location.satellitesInUse, viewModel.location.satellitesVisible) }"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/measurementsDivider" />
+
+        <TextView
+            android:id="@+id/createdByText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:text="@{ @string/created_by(viewModel.user.nickname, viewModel.createdDateText) }"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/locationText" />
+
         <Button
             android:id="@+id/deleteButton"
             android:layout_width="wrap_content"
@@ -84,5 +191,6 @@
             style="@style/Widget.AppCompat.Button.Borderless"/>
 
     </android.support.constraint.ConstraintLayout>
+
 
 </layout>
