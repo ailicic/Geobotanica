@@ -16,7 +16,7 @@ import com.geobotanica.geobotanica.data.entity.*
             Photo::class,
             Measurement::class
         ],
-        exportSchema = false,
+        exportSchema = true,
         version = 18
 )
 @TypeConverters(

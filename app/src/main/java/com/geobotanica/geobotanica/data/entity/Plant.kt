@@ -1,7 +1,6 @@
 package com.geobotanica.geobotanica.data.entity
 
 import android.arch.persistence.room.*
-import android.support.annotation.NonNull
 import org.threeten.bp.OffsetDateTime
 
 @Entity(tableName = "plants",
@@ -18,7 +17,7 @@ data class  Plant(
     val type: Type,
     val commonName: String? = null,
     val latinName: String? = null,
-    @NonNull val timestamp: OffsetDateTime = OffsetDateTime.now()
+    val timestamp: OffsetDateTime = OffsetDateTime.now()
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0
 

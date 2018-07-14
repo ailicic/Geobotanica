@@ -1,18 +1,17 @@
 package com.geobotanica.geobotanica.data.entity
 
 import android.arch.persistence.room.*
-import android.support.annotation.NonNull
 import org.threeten.bp.OffsetDateTime
 import java.io.Serializable
 
 data class Location(
-    @NonNull var latitude: Double? = null,
-    @NonNull var longitude: Double? = null,
-    @NonNull var altitude: Double? = null,
-    @NonNull var precision: Float? = null,
-    @NonNull var satellitesInUse: Int? = null,
-    @NonNull var satellitesVisible: Int, // Before GPS fix, visible satellites are always available
-    @NonNull var timestamp: OffsetDateTime = OffsetDateTime.now()
+    var latitude: Double? = null,
+    var longitude: Double? = null,
+    var altitude: Double? = null,
+    var precision: Float? = null,
+    var satellitesInUse: Int? = null,
+    var satellitesVisible: Int, // Before GPS fix, visible satellites are always available
+    var timestamp: OffsetDateTime = OffsetDateTime.now()
 ): Serializable
 
 
@@ -31,7 +30,7 @@ data class Location(
 )
 data class PlantLocation(
     var plantId: Long,
-    @Embedded @NonNull var location: Location
+    @Embedded var location: Location
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0L
 }
