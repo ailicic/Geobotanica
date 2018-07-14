@@ -38,7 +38,7 @@ class NewPlantPhotoActivity : BaseActivity() {
         userId = intent.getLongExtra(getString(R.string.extra_user_id), -1L)
         plantType = intent.getIntExtra(getString(R.string.extra_plant_type), -1)
         plantLocation = intent.getSerializableExtra(getString(R.string.extra_location)) as? Location
-        Lg.d("Intent extras: userId=$userId, plantType=$plantType, plantLocation=$plantLocation")
+        Lg.d("Intent extras: userId=$userId, plantType=$plantType, location=$plantLocation")
 
         plantLocation?.let { gps.setLocation(it) }
 

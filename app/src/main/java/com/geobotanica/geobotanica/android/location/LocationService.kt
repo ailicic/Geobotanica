@@ -81,7 +81,6 @@ class LocationService @Inject constructor (private val locationManager: Location
                 } else {
                     // Events arrived within 100 ms of eachother. Merge them and notify()
                     notify( Location(
-                            null,
                             location.latitude ?: tempLocation?.latitude,
                             location.longitude ?: tempLocation?.longitude,
                             location.altitude ?: tempLocation?.altitude,

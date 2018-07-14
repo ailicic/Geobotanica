@@ -8,7 +8,7 @@ import android.widget.RadioGroup
 import android.widget.Toast
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.*
-import com.geobotanica.geobotanica.data.repo.LocationRepo
+import com.geobotanica.geobotanica.data.repo.PlantLocationRepo
 import com.geobotanica.geobotanica.data.repo.MeasurementRepo
 import com.geobotanica.geobotanica.data.repo.PhotoRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
@@ -21,7 +21,7 @@ import javax.inject.Inject
 
 class AddMeasurementsActivity : BaseActivity() {
     @Inject lateinit var plantRepo: PlantRepo
-    @Inject lateinit var locationRepo: LocationRepo
+    @Inject lateinit var plantLocationRepo: PlantLocationRepo
     @Inject lateinit var photoRepo: PhotoRepo
     @Inject lateinit var measurementRepo: MeasurementRepo
 
@@ -48,19 +48,19 @@ class AddMeasurementsActivity : BaseActivity() {
         latinName = intent.getStringExtra(getString(R.string.extra_plant_latin_name))
         plantLocation = intent.getSerializableExtra(getString(R.string.extra_location)) as? Location
         Lg.d("Intent extras: userId=$userId, plantType=$plantType, commonName=$commonName, " +
-                "latinName=$latinName, plantLocation=$plantLocation, photoFilePath=$photoFilePath")
+                "latinName=$latinName, location=$plantLocation, photoFilePath=$photoFilePath")
         plantLocation?.let { gps.setLocation(it) }
     }
 
     override fun onStart() {
         super.onStart()
 
-        heightMeasure.textView.text = resources.getString(R.string.height)
-        diameterMeasure.textView.text = resources.getString(R.string.diameter)
+        heightMeasurement.textView.text = resources.getString(R.string.height)
+        diameterMeasurement.textView.text = resources.getString(R.string.diameter)
         if (plantType == Plant.Type.TREE)
-            trunkDiameterMeasure.textView.text = resources.getString(R.string.trunk_diameter)
+            trunkDiameterMeasurement.textView.text = resources.getString(R.string.trunk_diameter)
         else
-            trunkDiameterMeasure.visibility = View.GONE
+            trunkDiameterMeasurement.visibility = View.GONE
     }
 
     override fun onResume() {
@@ -76,16 +76,16 @@ class AddMeasurementsActivity : BaseActivity() {
         if (isChecked) {
             manualRadioButton.isEnabled = true
             assistedRadioButton.isEnabled = true
-            heightMeasure.visibility = View.VISIBLE
-            diameterMeasure.visibility = View.VISIBLE
+            heightMeasurement.visibility = View.VISIBLE
+            diameterMeasurement.visibility = View.VISIBLE
             if (plantType == Plant.Type.TREE)
-                trunkDiameterMeasure.visibility = View.VISIBLE
+                trunkDiameterMeasurement.visibility = View.VISIBLE
         } else {
             manualRadioButton.isEnabled = false
             assistedRadioButton.isEnabled = false
-            heightMeasure.visibility = View.GONE
-            diameterMeasure.visibility = View.GONE
-            trunkDiameterMeasure.visibility = View.GONE
+            heightMeasurement.visibility = View.GONE
+            diameterMeasurement.visibility = View.GONE
+            trunkDiameterMeasurement.visibility = View.GONE
         }
     }
 
@@ -94,17 +94,17 @@ class AddMeasurementsActivity : BaseActivity() {
         when (checkedId) {
             manualRadioButton.id -> {
                 Lg.d("onRadioButtonChecked(): Manual")
-                heightMeasure.visibility = View.VISIBLE
-                diameterMeasure.visibility = View.VISIBLE
+                heightMeasurement.visibility = View.VISIBLE
+                diameterMeasurement.visibility = View.VISIBLE
 
                 if (plantType == Plant.Type.TREE)
-                    trunkDiameterMeasure.visibility = View.VISIBLE
+                    trunkDiameterMeasurement.visibility = View.VISIBLE
             }
             assistedRadioButton.id -> {
                 Lg.d("onRadioButtonChecked(): Assisted")
-                heightMeasure.visibility = View.GONE
-                diameterMeasure.visibility = View.GONE
-                trunkDiameterMeasure.visibility = View.GONE
+                heightMeasurement.visibility = View.GONE
+                diameterMeasurement.visibility = View.GONE
+                trunkDiameterMeasurement.visibility = View.GONE
             }
         }
     }
@@ -133,15 +133,15 @@ class AddMeasurementsActivity : BaseActivity() {
         Lg.d("Photo: $photo (id=${photo.id})")
 
         gps.currentLocation?.let {
-            it.plantId = plant.id
-            it.id = locationRepo.insert(it)
-            Lg.d("Location: $it (id=${it.id})")
+            val plantLocation = PlantLocation(plant.id, it)
+            plantLocation.id = plantLocationRepo.insert(plantLocation)
+            Lg.d("PlantLocation: $plantLocation (id=${plantLocation.id})")
         }
 
         if (measurementsSwitch.isChecked) {
-            val height = heightMeasure.getInCentimeters()
-            val diameter = diameterMeasure.getInCentimeters()
-            val trunkDiameter = trunkDiameterMeasure.getInCentimeters()
+            val height = heightMeasurement.getInCentimeters()
+            val diameter = diameterMeasurement.getInCentimeters()
+            val trunkDiameter = trunkDiameterMeasurement.getInCentimeters()
             measurementRepo.insert(Measurement(userId, plant.id, Measurement.Type.HEIGHT, height))
             measurementRepo.insert(Measurement(userId, plant.id, Measurement.Type.DIAMETER, diameter))
             if (trunkDiameter != 0F)
@@ -156,8 +156,8 @@ class AddMeasurementsActivity : BaseActivity() {
     }
 
     private fun isMeasurementEmpty(): Boolean {
-        return heightMeasure.editText.text.isEmpty() ||
-                diameterMeasure.editText.text.isEmpty() ||
-                (plantType == Plant.Type.TREE && trunkDiameterMeasure.editText.text.isEmpty() )
+        return heightMeasurement.editText.text.isEmpty() ||
+                diameterMeasurement.editText.text.isEmpty() ||
+                (plantType == Plant.Type.TREE && trunkDiameterMeasurement.editText.text.isEmpty() )
     }
 }

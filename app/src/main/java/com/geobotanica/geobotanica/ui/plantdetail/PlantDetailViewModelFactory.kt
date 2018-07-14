@@ -8,7 +8,7 @@ import com.geobotanica.geobotanica.data.repo.*
 class PlantDetailViewModelFactory @Inject constructor(
         private val userRepo: UserRepo,
         private val plantRepo: PlantRepo,
-        private val  locationRepo: LocationRepo,
+        private val  plantLocationRepo: PlantLocationRepo,
         private val  photoRepo: PhotoRepo,
         private val  measurementRepo: MeasurementRepo
 ) : ViewModelProvider.Factory {
@@ -16,7 +16,7 @@ class PlantDetailViewModelFactory @Inject constructor(
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return PlantDetailViewModel(userRepo, plantRepo, locationRepo, photoRepo, measurementRepo).apply {
+        return PlantDetailViewModel(userRepo, plantRepo, plantLocationRepo, photoRepo, measurementRepo).apply {
             plantId = this@PlantDetailViewModelFactory.plantId  // Manual field injection of dynamic dependency (better approaches exist)
         } as T
     }

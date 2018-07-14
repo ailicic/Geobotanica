@@ -53,7 +53,7 @@
     </RadioGroup>
 
     <com.geobotanica.geobotanica.ui.MeasurementCompoundView
-        android:id="@+id/heightMeasure"
+        android:id="@+id/heightMeasurement"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -61,19 +61,19 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <com.geobotanica.geobotanica.ui.MeasurementCompoundView
-        android:id="@+id/diameterMeasure"
+        android:id="@+id/diameterMeasurement"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        app:layout_constraintTop_toBottomOf="@id/heightMeasure"
+        app:layout_constraintTop_toBottomOf="@id/heightMeasurement"
         app:layout_constraintStart_toStartOf="parent" />
 
     <com.geobotanica.geobotanica.ui.MeasurementCompoundView
-        android:id="@+id/trunkDiameterMeasure"
+        android:id="@+id/trunkDiameterMeasurement"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        app:layout_constraintTop_toBottomOf="@id/diameterMeasure"
+        app:layout_constraintTop_toBottomOf="@id/diameterMeasurement"
         app:layout_constraintStart_toStartOf="parent" />
 
     <android.support.design.widget.FloatingActionButton

@@ -43,12 +43,14 @@ class MeasurementCompoundView @JvmOverloads constructor(
 
     fun getInCentimeters(): Float {
         val value = editText.text.toString().toFloatOrNull() ?: 0F
-        val inches = inchesEditText.text.toString().toFloatOrNull() ?: 0F
         return when (unitsSpinner.selectedItemId.toInt()) {
             Measurement.Unit.CM.ordinal -> value
             Measurement.Unit.M.ordinal -> 100 * value
             Measurement.Unit.IN.ordinal -> 2.54F * value
-            Measurement.Unit.FT.ordinal -> 2.54F * (12 * value + inches)
+            Measurement.Unit.FT.ordinal -> {
+                val inches = inchesEditText.text.toString().toFloatOrNull() ?: 0F
+                2.54F * (12 * value + inches)
+            }
             else -> { // TODO: Maybe use enum in spinner to avoid else?
                 Lg.d("getInCentimeters(): Error"); return 0F
             }

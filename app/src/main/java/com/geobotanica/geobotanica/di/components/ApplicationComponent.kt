@@ -8,7 +8,6 @@ import com.geobotanica.geobotanica.data.repo.*
 import com.geobotanica.geobotanica.di.modules.ApplicationModule
 import com.geobotanica.geobotanica.di.modules.RepoModule
 import com.geobotanica.geobotanica.di.modules.ViewModelModule
-import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailViewModelFactory
 import dagger.Component
 import javax.inject.Singleton
 
@@ -24,7 +23,7 @@ interface ApplicationComponent {
 
     fun userRepo(): UserRepo
     fun plantRepo(): PlantRepo
-    fun locationRepo(): LocationRepo
+    fun plantLocationRepo(): PlantLocationRepo
     fun photoRepo(): PhotoRepo
     fun measurementRepo(): MeasurementRepo
 

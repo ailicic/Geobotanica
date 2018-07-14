@@ -12,11 +12,11 @@ class ViewModelModule {
     fun providePlantDetailViewModelFactory(
             userRepo: UserRepo,
             plantRepo: PlantRepo,
-            locationRepo: LocationRepo,
+            plantLocationRepo: PlantLocationRepo,
             photoRepo: PhotoRepo,
             measurementRepo: MeasurementRepo
     ): PlantDetailViewModelFactory
     {
-        return PlantDetailViewModelFactory(userRepo, plantRepo,  locationRepo, photoRepo, measurementRepo)
+        return PlantDetailViewModelFactory(userRepo, plantRepo,  plantLocationRepo, photoRepo, measurementRepo)
     }
 }

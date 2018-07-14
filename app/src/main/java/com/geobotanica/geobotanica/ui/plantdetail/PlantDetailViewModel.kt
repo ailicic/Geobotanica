@@ -14,7 +14,7 @@ import javax.inject.Inject
 class PlantDetailViewModel @Inject constructor(
         private var userRepo: UserRepo,
         private var plantRepo: PlantRepo,
-        private var locationRepo: LocationRepo,
+        private var plantLocationRepo: PlantLocationRepo,
         private var photoRepo: PhotoRepo,
         private var measurementRepo: MeasurementRepo
 ): ViewModel() {
@@ -50,7 +50,9 @@ class PlantDetailViewModel @Inject constructor(
         Lg.d("PlantDetailViewModel: init()")
         plant = plantRepo.get(plantId)
         user = switchMap(plant) { userRepo.get(it.userId) }
-        location = switchMap(plant) { locationRepo.getPlantLocation(it.id) }
+        location = switchMap(plant) { plant ->
+            map( plantLocationRepo.getPlantLocation(plant.id) ) { it.location }
+        }
         photos = switchMap(plant) { photoRepo.getAllPhotosOfPlant(it.id) }
         mainPhoto = photoRepo.getMainPhotoOfPlant(plantId)
 
@@ -74,7 +76,7 @@ class PlantDetailViewModel @Inject constructor(
 
         plant.observeForever { it?.let { Lg.d("$it (id=${it.id})") } }
         user.observeForever { it?.let { Lg.d("$it (id=${it.id})") } }
-        location.observeForever { it?.let { Lg.d("$it (id=${it.id})") } }
+        location.observeForever { it?.let { Lg.d("$it") } }
         photos.observeForever {
             it?.forEachIndexed { i, photo ->
                 Lg.d("Photo #${i + 1}: $photo (id=${photo.id})")

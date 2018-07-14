@@ -12,7 +12,7 @@ class RepoModule() {
     @Provides @Singleton fun provideDatabase(context: Context): GbDatabase = GbDatabase.getInstance(context)
     @Provides @Singleton fun provideUserDao(gbDatabase: GbDatabase): UserDao = gbDatabase.userDao()
     @Provides @Singleton fun providePlantDao(gbDatabase: GbDatabase): PlantDao = gbDatabase.plantDao()
-    @Provides @Singleton fun provideLocationDao(gbDatabase: GbDatabase): LocationDao = gbDatabase.locationDao()
+    @Provides @Singleton fun providePlantLocationDao(gbDatabase: GbDatabase): PlantLocationDao = gbDatabase.plantLocationDao()
     @Provides @Singleton fun providePhotoDao(gbDatabase: GbDatabase): PhotoDao = gbDatabase.photoDao()
     @Provides @Singleton fun provideMeasurementDao(gbDatabase: GbDatabase): MeasurementDao = gbDatabase.measurementDao()
 }

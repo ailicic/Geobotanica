@@ -19,8 +19,9 @@ import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.Photo
 import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.data.repo.LocationRepo
+import com.geobotanica.geobotanica.data.entity.PlantLocation
 import com.geobotanica.geobotanica.data.repo.PhotoRepo
+import com.geobotanica.geobotanica.data.repo.PlantLocationRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.data.repo.UserRepo
 import com.geobotanica.geobotanica.ui.BaseActivity
@@ -47,7 +48,7 @@ import javax.inject.Inject
 class MapFragment : BaseFragment() {
     @Inject lateinit var userRepo: UserRepo
     @Inject lateinit var plantRepo: PlantRepo
-    @Inject lateinit var locationRepo: LocationRepo
+    @Inject lateinit var plantLocationRepo: PlantLocationRepo
     @Inject lateinit var photoRepo: PhotoRepo
     @Inject lateinit var locationService: LocationService
 
@@ -130,7 +131,7 @@ class MapFragment : BaseFragment() {
             it?.forEach {
                 Lg.d("Adding plant marker: (id=${it.id}) $it")
                 val plantMarker = GbMarker(activity, it.id, map)
-                val location = locationRepo.getPlantLocation(it.id)
+                val plantLocation = plantLocationRepo.getPlantLocation(it.id)
 
                 // TODO: Consider using a custom InfoWindow
                 // https://code.google.com/archive/p/osmbonuspack/wikis/Tutorial_2.wiki
@@ -159,8 +160,8 @@ class MapFragment : BaseFragment() {
                         Plant.Type.VINE -> R.drawable.marker_yellow
                     }
 
-                    location.observe(this@MapFragment, Observer<Location> { location ->
-                        position.setCoords(location?.latitude!!, location.longitude!!)
+                    plantLocation.observe(this@MapFragment, Observer<PlantLocation> { plantLocation ->
+                        position.setCoords(plantLocation?.location?.latitude!!, plantLocation?.location?.longitude!!)
                     })
 
                     photoRepo.getMainPhotoOfPlant(plantId).observe(this@MapFragment, Observer<Photo> { photo ->
