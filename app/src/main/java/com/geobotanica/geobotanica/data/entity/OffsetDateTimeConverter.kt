@@ -7,7 +7,7 @@ import org.threeten.bp.format.DateTimeFormatter
 // https://medium.com/@chrisbanes/room-time-2b4cf9672b98
 // http://www.threeten.org/threetenbp/apidocs/org/threeten/bp/OffsetDateTime.html
 
-object DateTimeConverter {
+object OffsetDateTimeConverter {
     private val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
 
     @TypeConverter

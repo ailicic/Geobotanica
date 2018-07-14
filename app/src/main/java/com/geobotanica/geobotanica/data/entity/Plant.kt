@@ -13,7 +13,7 @@ import org.threeten.bp.OffsetDateTime
     ],
     indices = [ Index(value = ["userId"]) ]
 )
-data class Plant(
+data class  Plant(
     val userId: Long = 0L,
     val type: Type,
     val commonName: String? = null,
@@ -30,15 +30,14 @@ data class Plant(
         VINE;
 
         override fun toString() = when (this) {
-                TREE -> "Tree"
-                SHRUB -> "Shrub"
-                HERB -> "Herb"
-                GRASS -> "Grass"
-                VINE -> "Fruit"
+            TREE -> "Tree"
+            SHRUB -> "Shrub"
+            HERB -> "Herb"
+            GRASS -> "Grass"
+            VINE -> "Fruit"
         }
     }
 }
-
 
 object PhotoTypeConverter {
     @TypeConverter @JvmStatic

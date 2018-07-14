@@ -72,19 +72,9 @@ class PlantDetailViewModel @Inject constructor(
         }
         createdDateText = map(plant) { it.timestamp.toSimpleDate() }
 
-
-
-        plant.observeForever { it?.let { Lg.d("$it (id=${it.id})") } }
-        user.observeForever { it?.let { Lg.d("$it (id=${it.id})") } }
-        location.observeForever { it?.let { Lg.d("$it") } }
-        photos.observeForever {
-            it?.forEachIndexed { i, photo ->
-                Lg.d("Photo #${i + 1}: $photo (id=${photo.id})")
-            }
+        plantRepo.getPlantComposite(plantId).observeForever {
+            it?.let { Lg.d("$it") }
         }
-        height.observeForever { it?.let { Lg.d("Height: $it (id=${it.id})") } }
-        diameter.observeForever { it?.let { Lg.d("Diameter: $it (id=${it.id})") } }
-        trunkDiameter.observeForever { it?.let { Lg.d("Trunk diameter: $it (id=${it.id})") } }
     }
 
     fun deletePlant() {

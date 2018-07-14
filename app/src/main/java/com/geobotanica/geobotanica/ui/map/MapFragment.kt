@@ -16,10 +16,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.location.LocationService
-import com.geobotanica.geobotanica.data.entity.Location
-import com.geobotanica.geobotanica.data.entity.Photo
-import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.data.entity.PlantLocation
+import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.data.repo.PhotoRepo
 import com.geobotanica.geobotanica.data.repo.PlantLocationRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
@@ -126,18 +123,35 @@ class MapFragment : BaseFragment() {
     override fun onResume() {
         super.onResume()
 
-        plantRepo.getAll().observe(this, Observer<List<Plant>> {
+        plantRepo.getAllPlantComposites().observe(this, Observer<List<PlantComposite>> {
             map.overlays.clear()
             it?.forEach {
-                Lg.d("Adding plant marker: (id=${it.id}) $it")
-                val plantMarker = GbMarker(activity, it.id, map)
-                val plantLocation = plantLocationRepo.getPlantLocation(it.id)
+                Lg.d("Adding plant marker: (id=${it.plant.id}) $it")
+                val plantMarker = GbMarker(activity, it.plant.id, map)
+                val plantLocation = plantLocationRepo.getPlantLocation(it.locations.first().id) // TODO: Take newest location
 
                 // TODO: Consider using a custom InfoWindow
                 // https://code.google.com/archive/p/osmbonuspack/wikis/Tutorial_2.wiki
                 // 7. Customizing the bubble behaviour:
                 // 9. Creating your own bubble layout
+
+                var icon = 0
                 plantMarker.run {
+                    it.plant.let {
+                        title = it.commonName
+                        snippet = it.latinName
+                        subDescription = it.timestamp.toString().substringBefore('T')
+
+                        icon = when (it.type) {
+                            Plant.Type.TREE -> R.drawable.marker_purple
+                            Plant.Type.SHRUB -> R.drawable.marker_blue
+                            Plant.Type.HERB -> R.drawable.marker_green
+                            Plant.Type.GRASS -> R.drawable.marker_light_green
+                            Plant.Type.VINE -> R.drawable.marker_yellow
+                        }
+                    }
+                    @Suppress("DEPRECATION") setIcon(activity.resources.getDrawable(icon))
+
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
 
                     setOnMarkerClickListener { marker: Marker, _ ->
@@ -148,26 +162,13 @@ class MapFragment : BaseFragment() {
                         true
                     }
 
-                    title = it.commonName
-                    snippet = it.latinName
-                    subDescription = it.timestamp.toString().substringBefore('T')
-
-                    val icon = when (it.type) {
-                        Plant.Type.TREE -> R.drawable.marker_purple
-                        Plant.Type.SHRUB -> R.drawable.marker_blue
-                        Plant.Type.HERB -> R.drawable.marker_green
-                        Plant.Type.GRASS -> R.drawable.marker_light_green
-                        Plant.Type.VINE -> R.drawable.marker_yellow
-                    }
-
                     plantLocation.observe(this@MapFragment, Observer<PlantLocation> { plantLocation ->
-                        position.setCoords(plantLocation?.location?.latitude!!, plantLocation?.location?.longitude!!)
+                        position.setCoords(plantLocation?.location?.latitude!!, plantLocation.location.longitude!!)
                     })
 
                     photoRepo.getMainPhotoOfPlant(plantId).observe(this@MapFragment, Observer<Photo> { photo ->
                         image = Drawable.createFromPath(photo?.fileName)
                     })
-                    @Suppress("DEPRECATION") setIcon(activity.resources.getDrawable(icon))
 
                     map.overlays.add(this)
                 }
