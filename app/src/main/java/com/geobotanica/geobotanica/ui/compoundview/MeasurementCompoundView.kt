@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui
+package com.geobotanica.geobotanica.ui.compoundview
 
 import android.content.Context
 import androidx.constraintlayout.widget.ConstraintLayout

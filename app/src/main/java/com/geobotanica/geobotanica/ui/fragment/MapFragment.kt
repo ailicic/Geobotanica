@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui.map
+package com.geobotanica.geobotanica.ui.fragment
 
 import android.Manifest
 import androidx.lifecycle.Observer
@@ -14,6 +14,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.navigation.Navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.*
@@ -23,7 +24,6 @@ import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.data.repo.UserRepo
 import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
-import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailActivity
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.fragment_map.*
 import org.osmdroid.config.Configuration
@@ -256,9 +256,11 @@ class MapFragment : BaseFragment() {
             Lg.d("Opening plant detail: id=$plantId")
             val touched = hitTest(event, mapView)
             if (touched) {
-                val intent = Intent(activity, PlantDetailActivity::class.java)
-                        .putExtra(activity.getString(R.string.extra_plant_id), plantId)
-                activity.startActivity(intent)
+                val navController = findNavController(activity, R.id.fragment)
+                navController.navigate(R.id.plantDetailFragment)
+//                val intent = Intent(activity, PlantDetailActivity::class.java)
+//                        .putExtra(activity.getString(R.string.extra_plant_id), plantId)
+//                activity.startActivity(intent)
             }
             return touched
         }

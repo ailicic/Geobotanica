@@ -52,7 +52,7 @@
             android:text="@string/manual" />
     </RadioGroup>
 
-    <com.geobotanica.geobotanica.ui.MeasurementCompoundView
+    <com.geobotanica.geobotanica.ui.compoundview.MeasurementCompoundView
         android:id="@+id/heightMeasurement"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -60,7 +60,7 @@
         app:layout_constraintTop_toBottomOf="@id/measurementRadioGroup"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <com.geobotanica.geobotanica.ui.MeasurementCompoundView
+    <com.geobotanica.geobotanica.ui.compoundview.MeasurementCompoundView
         android:id="@+id/diameterMeasurement"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -68,7 +68,7 @@
         app:layout_constraintTop_toBottomOf="@id/heightMeasurement"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <com.geobotanica.geobotanica.ui.MeasurementCompoundView
+    <com.geobotanica.geobotanica.ui.compoundview.MeasurementCompoundView
         android:id="@+id/trunkDiameterMeasurement"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -85,7 +85,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_cab_done_mtrl_alpha" />
 
-    <com.geobotanica.geobotanica.ui.GpsCompoundView
+    <com.geobotanica.geobotanica.ui.compoundview.GpsCompoundView
         android:id="@+id/gps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

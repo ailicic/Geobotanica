@@ -64,7 +64,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_cab_done_mtrl_alpha" />
 
-    <com.geobotanica.geobotanica.ui.GpsCompoundView
+    <com.geobotanica.geobotanica.ui.compoundview.GpsCompoundView
         android:id="@+id/gps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

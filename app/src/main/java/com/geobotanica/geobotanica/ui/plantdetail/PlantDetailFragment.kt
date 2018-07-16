@@ -28,7 +28,8 @@ class PlantDetailFragment : BaseFragment() {
 
     override val name = this.javaClass.name.substringAfterLast('.')
 
-    private var plantId = 0L
+//    private var plantId = 0L
+    private var plantId = 1L
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -39,7 +40,7 @@ class PlantDetailFragment : BaseFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
 
-        plantId = activity.intent.getLongExtra(getString(R.string.extra_plant_id), -1)
+//        plantId = activity.intent.getLongExtra(getString(R.string.extra_plant_id), -1)
         Lg.d("Intent extras: plantId=$plantId")
 
         plantDetailViewModelFactory.plantId = plantId

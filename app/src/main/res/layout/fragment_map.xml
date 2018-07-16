@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.map.MapFragment"
-    tools:showIn="@layout/activity_map">
+    tools:context=".ui.fragment.MapFragment"
+    tools:showIn="@layout/activity_main">
 
     <org.osmdroid.views.MapView
         android:id="@+id/map"

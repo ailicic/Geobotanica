@@ -6,6 +6,7 @@ local.properties
 .idea/workspace.xml
 .idea/caches/
 .idea/vcs.xml
+.idea/navEditor.xml
 .DS_Store
 /build
 /captures

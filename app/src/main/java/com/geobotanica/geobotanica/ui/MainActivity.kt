@@ -1,17 +1,18 @@
-package com.geobotanica.geobotanica.ui.map
+package com.geobotanica.geobotanica.ui
 
 import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
+import androidx.navigation.findNavController
+import androidx.navigation.ui.NavigationUI.setupActionBarWithNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.data.repo.UserRepo
-import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.newplanttype.NewPlantTypeActivity
-import kotlinx.android.synthetic.main.activity_map.*
+import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
-class MapActivity : BaseActivity() {
+class MainActivity : BaseActivity() { // TODO: Get rid of BaseActivity (single activity app now)
     @Inject lateinit var userRepo: UserRepo
 
     override val name = this.javaClass.name.substringAfterLast('.')
@@ -19,10 +20,13 @@ class MapActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_map)
+        setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
         activityComponent.inject(this)
+
+        val navController = findNavController(R.id.fragment)
+        setupActionBarWithNavController(this, navController)
 
         createGuestUser()
         fab.setOnClickListener { _ ->

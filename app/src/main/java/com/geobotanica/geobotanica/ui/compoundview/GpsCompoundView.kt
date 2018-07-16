@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui
+package com.geobotanica.geobotanica.ui.compoundview
 
 import android.content.Context
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -8,6 +8,7 @@ import android.widget.CompoundButton
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.Location
+import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import javax.inject.Inject
