@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui.plantdetail
+package com.geobotanica.geobotanica.ui.fragment
 
 import android.content.Context
 import android.os.Bundle
@@ -16,8 +16,11 @@ import com.geobotanica.geobotanica.data.entity.Photo
 import com.geobotanica.geobotanica.databinding.FragmentPlantDetailBinding
 import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
+import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailViewModel
+import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailViewModelFactory
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.setScaledBitmap
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_plant_detail.*
 import javax.inject.Inject
 
@@ -28,8 +31,7 @@ class PlantDetailFragment : BaseFragment() {
 
     override val name = this.javaClass.name.substringAfterLast('.')
 
-//    private var plantId = 0L
-    private var plantId = 1L
+    private var plantId = 0L
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -40,7 +42,7 @@ class PlantDetailFragment : BaseFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
 
-//        plantId = activity.intent.getLongExtra(getString(R.string.extra_plant_id), -1)
+        plantId = arguments?.getLong("plantId", 0L) ?: 0L
         Lg.d("Intent extras: plantId=$plantId")
 
         plantDetailViewModelFactory.plantId = plantId
@@ -72,6 +74,11 @@ class PlantDetailFragment : BaseFragment() {
 
     private fun bindClickListeners() {
         deleteButton.setOnClickListener(::onDeleteButtonClicked)
+
+        fab.setOnClickListener { view ->
+            Snackbar.make(view, "Add new photos/measurements", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show()
+        }
     }
 
     @Suppress("UNUSED_PARAMETER")

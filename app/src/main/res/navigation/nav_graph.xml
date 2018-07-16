@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.geobotanica.geobotanica.ui.fragment.MapFragment"
-        android:label="fragment_map"
+        android:label="Geobotanica"
         tools:layout="@layout/fragment_map" >
         <action
             android:id="@+id/action_mapFragment_to_plantDetailFragment"
@@ -21,6 +21,8 @@
     </fragment>
     <fragment
         android:id="@+id/plantDetailFragment"
-        android:name="com.geobotanica.geobotanica.ui.plantdetail.PlantDetailFragment"
-        android:label="PlantDetailFragment" />
+        android:name="com.geobotanica.geobotanica.ui.fragment.PlantDetailFragment"
+        android:label="Plant Details" >
+        <argument android:name="plantId" />
+    </fragment>
 </navigation>

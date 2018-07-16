@@ -1,20 +1,20 @@
 package com.geobotanica.geobotanica.ui.fragment
 
 import android.Manifest
-import androidx.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
-import androidx.core.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.navigation.Navigation.findNavController
+import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
+import androidx.lifecycle.Observer
+import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.*
@@ -24,7 +24,9 @@ import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.data.repo.UserRepo
 import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
+import com.geobotanica.geobotanica.ui.newplanttype.NewPlantTypeActivity
 import com.geobotanica.geobotanica.util.Lg
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_map.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -49,7 +51,11 @@ class MapFragment : BaseFragment() {
     @Inject lateinit var photoRepo: PhotoRepo
     @Inject lateinit var locationService: LocationService
 
+
+
+
     override val name = this.javaClass.name.substringAfterLast('.')
+    private var userId: Long = 0
     private val requestFineLocationPermission = 1
     private val requestExternalStorage = 2
     private var currentLocation: Location? = null
@@ -60,6 +66,8 @@ class MapFragment : BaseFragment() {
         super.onAttach(context)
         (getActivity() as BaseActivity).activityComponent.inject(this)
 
+        getGuestUserId()
+
         //load/initialize the osmdroid configuration, this can be done
         Configuration.getInstance().load(context, sharedPrefs)
         //setting this before the layout is inflated is a good idea
@@ -67,6 +75,16 @@ class MapFragment : BaseFragment() {
         //if no tiles are displayed, you can try overriding the cache path using Configuration.getInstance().setCachePath
         //see also StorageUtils
         //note, the load method also sets the HTTP User Agent to your application's package name, abusing osm's tile servers will get you banned based on this string
+    }
+
+    private fun getGuestUserId() {
+        userRepo.get(1).observe(this, Observer<User> {
+            userId = if (it != null) {
+                it.id
+            } else {
+                userRepo.insert(User("Guest"))
+            }
+        })
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -123,6 +141,7 @@ class MapFragment : BaseFragment() {
     override fun onResume() {
         super.onResume()
 
+        // TODO: Fix bug due to multiple setOnClickListerner() calls on Markers (crash when long press marker after reload)
         plantRepo.getAllPlantComposites().observe(this, Observer<List<PlantComposite>> {
             map.overlays.clear()
             it?.forEach {
@@ -177,6 +196,11 @@ class MapFragment : BaseFragment() {
             map.postInvalidate()
         })
 
+        fab.setOnClickListener { _ ->
+            val intent = Intent(activity, NewPlantTypeActivity::class.java)
+                    .putExtra(getString(R.string.extra_user_id), userId)
+            startActivity(intent)
+        }
         //this will refresh the osmdroid configuration on resuming.
         //if you make changes to the configuration, use
         //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -256,11 +280,9 @@ class MapFragment : BaseFragment() {
             Lg.d("Opening plant detail: id=$plantId")
             val touched = hitTest(event, mapView)
             if (touched) {
-                val navController = findNavController(activity, R.id.fragment)
-                navController.navigate(R.id.plantDetailFragment)
-//                val intent = Intent(activity, PlantDetailActivity::class.java)
-//                        .putExtra(activity.getString(R.string.extra_plant_id), plantId)
-//                activity.startActivity(intent)
+                var bundle = bundleOf("plantId" to plantId)
+                val navController = activity.findNavController(R.id.fragment)
+                navController.navigate(R.id.plantDetailFragment, bundle)
             }
             return touched
         }
