@@ -1,16 +1,16 @@
 package com.geobotanica.geobotanica.ui.plantdetail
 
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import android.content.Context
-import androidx.databinding.DataBindingUtil
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.core.view.doOnPreDraw
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Photo
 import com.geobotanica.geobotanica.databinding.FragmentPlantDetailBinding
@@ -59,19 +59,11 @@ class PlantDetailFragment : BaseFragment() {
         bindClickListeners()
     }
 
-    // TODO: Find a better way to load the photo
     private fun setPlantPhoto() {
-        val viewTreeObserver = plantPhoto.viewTreeObserver
-        if (viewTreeObserver.isAlive) {
-            viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    @Suppress("DEPRECATION")
-                    plantPhoto.viewTreeObserver.removeGlobalOnLayoutListener(this)
-                    viewModel.mainPhoto.observe(this@PlantDetailFragment, Observer<Photo> {
-                        it?.let {photo ->
-                            plantPhoto.setScaledBitmap(photo.fileName)
-                        }
-                    })
+        plantPhoto.doOnPreDraw {
+            viewModel.mainPhoto.observe(this, Observer<Photo> {
+                it?.let { photo ->
+                    plantPhoto.setScaledBitmap(photo.fileName)
                 }
             })
         }

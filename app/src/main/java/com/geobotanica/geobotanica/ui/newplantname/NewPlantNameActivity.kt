@@ -2,15 +2,15 @@ package com.geobotanica.geobotanica.ui.newplantname
 
 import android.content.Intent
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
 import android.view.View
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import androidx.core.view.doOnPreDraw
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.addmeasurement.AddMeasurementsActivity
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.setScaledBitmap
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_new_plant_name.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
 
@@ -37,16 +37,7 @@ class NewPlantNameActivity : BaseActivity() {
 
     override fun onStart() {
         super.onStart()
-        val viewTreeObserver = plantPhoto.viewTreeObserver
-        if (viewTreeObserver.isAlive) {
-            viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    @Suppress("DEPRECATION")
-                    plantPhoto.viewTreeObserver.removeGlobalOnLayoutListener(this)
-                    plantPhoto.setScaledBitmap(photoFilePath)
-                }
-            })
-        }
+        plantPhoto.doOnPreDraw { plantPhoto.setScaledBitmap(photoFilePath) }
         fab.setOnClickListener(::onFabPressed)
     }
 
