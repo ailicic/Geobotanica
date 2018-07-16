@@ -1,7 +1,7 @@
 package com.geobotanica.geobotanica.data.entity
 
-import android.arch.persistence.room.Embedded
-import android.arch.persistence.room.Relation
+import androidx.room.Embedded
+import androidx.room.Relation
 
 class PlantComposite {
     @Embedded lateinit var plant: Plant

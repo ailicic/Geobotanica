@@ -1,7 +1,7 @@
 package com.geobotanica.geobotanica.ui
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import com.geobotanica.geobotanica.GeobotanicaApplication
 import com.geobotanica.geobotanica.di.components.ActivityComponent
 import com.geobotanica.geobotanica.di.components.DaggerActivityComponent

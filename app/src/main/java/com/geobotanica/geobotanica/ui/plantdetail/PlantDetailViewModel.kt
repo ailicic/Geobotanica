@@ -1,10 +1,10 @@
 package com.geobotanica.geobotanica.ui.plantdetail
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Transformations.map
-import android.arch.lifecycle.Transformations.switchMap
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations.map
+import androidx.lifecycle.Transformations.switchMap
+import androidx.lifecycle.ViewModel
 import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.data.repo.*
 import com.geobotanica.geobotanica.util.Lg

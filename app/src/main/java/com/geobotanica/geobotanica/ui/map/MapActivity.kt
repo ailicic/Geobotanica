@@ -1,6 +1,6 @@
 package com.geobotanica.geobotanica.ui.map
 
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
 import com.geobotanica.geobotanica.R

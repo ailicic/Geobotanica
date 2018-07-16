@@ -1,7 +1,7 @@
 package com.geobotanica.geobotanica.ui.plantdetail
 
 import android.os.Bundle
-import android.support.design.widget.Snackbar
+import com.google.android.material.snackbar.Snackbar
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.ui.BaseActivity
 import kotlinx.android.synthetic.main.activity_plant_detail.*

@@ -13,7 +13,7 @@
             type="com.geobotanica.geobotanica.data.entity.Location" /> <!--Included to shorten characters for databinding-->
     </data>
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/constraintLayout"
@@ -193,7 +193,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             style="@style/Widget.AppCompat.Button.Borderless"/>
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </layout>

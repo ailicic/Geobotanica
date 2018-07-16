@@ -1,6 +1,6 @@
 package com.geobotanica.geobotanica.data.entity
 
-import android.arch.persistence.room.*
+import androidx.room.*
 import org.threeten.bp.OffsetDateTime
 
 @Entity(tableName = "measurements",

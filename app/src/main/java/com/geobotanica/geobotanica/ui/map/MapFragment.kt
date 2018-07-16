@@ -1,14 +1,14 @@
 package com.geobotanica.geobotanica.ui.map
 
 import android.Manifest
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v4.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
+import androidx.core.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View

@@ -1,6 +1,6 @@
 package com.geobotanica.geobotanica.data.repo
 
-import android.arch.lifecycle.LiveData
+import androidx.lifecycle.LiveData
 import com.geobotanica.geobotanica.data.dao.MeasurementDao
 import com.geobotanica.geobotanica.data.entity.Measurement
 import javax.inject.Inject

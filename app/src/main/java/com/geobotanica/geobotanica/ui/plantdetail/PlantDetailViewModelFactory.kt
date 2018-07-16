@@ -1,8 +1,8 @@
 package com.geobotanica.geobotanica.ui.plantdetail
 
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.ViewModel
 import javax.inject.Inject
-import android.arch.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider
 import com.geobotanica.geobotanica.data.repo.*
 
 class PlantDetailViewModelFactory @Inject constructor(

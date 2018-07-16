@@ -10,7 +10,7 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
-import android.support.annotation.RequiresApi
+import androidx.annotation.RequiresApi
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.util.Emulator
 import com.geobotanica.geobotanica.util.Lg

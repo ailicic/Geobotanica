@@ -1,6 +1,6 @@
 package com.geobotanica.geobotanica.data.entity
 
-import android.arch.persistence.room.TypeConverter
+import androidx.room.TypeConverter
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.format.DateTimeFormatter
 

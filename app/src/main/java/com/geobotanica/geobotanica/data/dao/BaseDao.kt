@@ -1,6 +1,6 @@
 package com.geobotanica.geobotanica.data.dao
 
-import android.arch.persistence.room.*
+import androidx.room.*
 
 @Dao
 interface BaseDao<T> {

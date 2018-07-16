@@ -1,6 +1,6 @@
 package com.geobotanica.geobotanica.data.repo
 
-import android.arch.lifecycle.LiveData
+import androidx.lifecycle.LiveData
 import com.geobotanica.geobotanica.data.dao.PlantCompositeDao
 import com.geobotanica.geobotanica.data.dao.PlantDao
 import com.geobotanica.geobotanica.data.entity.Plant
