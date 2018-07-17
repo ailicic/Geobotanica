@@ -1,19 +1,18 @@
 package com.geobotanica.geobotanica.ui.newplanttype
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
-import com.geobotanica.geobotanica.ui.newplantphoto.NewPlantPhotoActivity
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.fragment_new_plant_type.*
-import kotlinx.android.synthetic.main.gps_compound_view.view.*
 
 
 class NewPlantTypeFragment : BaseFragment() {
@@ -28,14 +27,11 @@ class NewPlantTypeFragment : BaseFragment() {
 
         userId = arguments?.getLong("userId", 0L) ?: 0L
         Lg.d("Fragment args: userId=$userId")
-//        userId = intent.getLongExtra(getString(R.string.extra_user_id), -1L)
-//        Lg.d("Intent extras: userId=$userId")
     }
 
     // TODO: Show plant type as icon (not shown anywhere yet)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-
 
 //        plantDetailViewModelFactory.plantId = plantId
 //        viewModel = ViewModelProviders.of(this, plantDetailViewModelFactory).get(PlantDetailViewModel::class.java)
@@ -53,7 +49,6 @@ class NewPlantTypeFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         bindClickListeners()
     }
-
 
     private fun bindClickListeners() {
         buttonTree.setOnClickListener(::onClickListener)
@@ -73,12 +68,13 @@ class NewPlantTypeFragment : BaseFragment() {
             buttonVine -> plantType = Plant.Type.VINE
         }
         Lg.d("onClickListener(): Clicked $plantType")
-        val intent = Intent(activity, NewPlantPhotoActivity::class.java)
-                .putExtra(getString(R.string.extra_user_id), userId)
-                .putExtra(getString(R.string.extra_plant_type), plantType.ordinal)
-        if (gps.gpsSwitch.isChecked)
-            intent.putExtra(getString(R.string.extra_location), gps.currentLocation)
-        startActivity(intent)
+
+        var bundle = bundleOf(
+                "userId" to userId,
+                "plantType" to plantType,
+                "plantLocation" to gps.currentLocation)
+        val navController = activity.findNavController(R.id.fragment)
+        navController.navigate(R.id.newPlantPhotoFragment, bundle)
     }
 
 }
