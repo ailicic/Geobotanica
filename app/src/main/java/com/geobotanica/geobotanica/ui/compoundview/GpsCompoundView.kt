@@ -54,12 +54,11 @@ class GpsCompoundView @JvmOverloads constructor(
         super.onDetachedFromWindow()
         Lg.d("GpsCompoundView: onDetachedFromWindow()")
         gpsSwitch.setOnClickListener(null)
-        locationService.unsubscribe(context)
+        locationService.unsubscribe(this)
     }
 
     private fun onLocation(location: Location) {
-        currentLocation = location
-        with(location) {
+        currentLocation = location.apply {
 //            Lg.v("onLocation(): $this")
 
             precision?.let {

@@ -11,6 +11,7 @@ import androidx.core.view.doOnPreDraw
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Photo
 import com.geobotanica.geobotanica.databinding.FragmentPlantDetailBinding
@@ -87,7 +88,9 @@ class PlantDetailFragment : BaseFragment() {
             setPositiveButton("Yes") { _, _ ->
                 viewModel.deletePlant()
                 Toast.makeText(context, "Plant deleted", Toast.LENGTH_SHORT).show()
-                activity.finish()
+
+                val navController = activity.findNavController(R.id.fragment)
+                navController.popBackStack()
             }
             setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
             create()

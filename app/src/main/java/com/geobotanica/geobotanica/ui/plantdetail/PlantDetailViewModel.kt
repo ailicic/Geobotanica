@@ -11,7 +11,6 @@ import com.geobotanica.geobotanica.util.Lg
 import java.io.File
 import javax.inject.Inject
 
-// TODO: Fix crash after delete plant
 
 class PlantDetailViewModel @Inject constructor(
         private var userRepo: UserRepo,
@@ -51,11 +50,19 @@ class PlantDetailViewModel @Inject constructor(
     private fun init() {
         Lg.d("PlantDetailViewModel: init()")
         plant = plantRepo.get(plantId)
-        user = switchMap(plant) { userRepo.get(it.userId) }
-        location = switchMap(plant) { plant ->
-            map( plantLocationRepo.getPlantLocation(plant.id) ) { it.location }
+        user = switchMap(plant) {
+            it?.let { userRepo.get(it.userId) }
         }
-        photos = switchMap(plant) { photoRepo.getAllPhotosOfPlant(it.id) }
+
+        location = switchMap(plant) {
+            it?.let { plant ->
+                map( plantLocationRepo.getPlantLocation(plant.id) ) { it.location }
+            }
+        }
+
+        photos = switchMap(plant) {
+            it?.let { photoRepo.getAllPhotosOfPlant(it.id) }
+        }
         mainPhoto = photoRepo.getMainPhotoOfPlant(plantId)
 
         height = measurementRepo.getHeightOfPlant(plantId)
@@ -68,11 +75,13 @@ class PlantDetailViewModel @Inject constructor(
         trunkDiameterDateText = map(trunkDiameter) { it?.timestamp?.toSimpleDate() ?: "" }
 
         measuredByUser = switchMap(height) { height ->
-            height?.let {
+            height?.let { height ->
                 map(userRepo.get(height.userId)) { it.nickname }
             } ?: MutableLiveData<String>().apply { value = "" }
         }
-        createdDateText = map(plant) { it.timestamp.toSimpleDate() }
+        createdDateText = map(plant) {
+            it?.run { timestamp.toSimpleDate() }
+        }
 
         plantRepo.getPlantComposite(plantId).observeForever {
             it?.let { Lg.d("$it") }
@@ -80,16 +89,13 @@ class PlantDetailViewModel @Inject constructor(
     }
 
     fun deletePlant() {
-        photos.observeForever { photos ->
-            Lg.d("Deleting ${photos?.size} photos")
-            photos?.forEach { File(it.fileName).delete() }
+        photos.value?.forEach {
+            Lg.d("Deleting photo: ${it.fileName}")
+            File(it.fileName).delete()
         }
-        plant.observeForever {
-            it?.let {
-                Lg.d("Deleting plant: $it")
-                plantRepo.delete(it)
-            }
-        }
+
+        Lg.d("Deleting plant: ${plant.value!!}")
+        plantRepo.delete(plant.value!!)
     }
 }
 

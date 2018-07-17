@@ -33,6 +33,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import javax.inject.Inject
 
+// TODO: After ViewModel is in place, center map on previous position when returning to map
 
 // TODO: Create download map activity and utilize offline map tiles
 // https://github.com/osmdroid/osmdroid/wiki/Offline-Map-Tiles
@@ -137,14 +138,14 @@ class MapFragment : BaseFragment() {
     override fun onResume() {
         super.onResume()
 
-        // TODO: Fix bug: current location icon not present after second visit to map
         // TODO: Fix bug due to multiple setOnClickListerner() calls on Markers (crash when long press marker after reload)
         plantRepo.getAllPlantComposites().observe(this, Observer<List<PlantComposite>> {
             map.overlays.clear()
             it?.forEach {
                 Lg.d("Adding plant marker: (id=${it.plant.id}) $it")
                 val plantMarker = GbMarker(activity, it.plant.id, map)
-                val plantLocation = plantLocationRepo.getPlantLocation(it.locations.first().id) // TODO: Take newest location
+                val plantLocation = it.locations.first().location // TODO: Filter by newest location
+                val plantPhoto = it.photos.first()
 
                 // TODO: Consider using a custom InfoWindow
                 // https://code.google.com/archive/p/osmbonuspack/wikis/Tutorial_2.wiki
@@ -172,29 +173,23 @@ class MapFragment : BaseFragment() {
 
                     setOnMarkerClickListener { marker: Marker, _ ->
                         if (marker.isInfoWindowOpen)
-                            marker.closeInfoWindow()
+                            marker.closeInfoWindow() // TODO: Destroy drawable here
                         else
-                            marker.showInfoWindow()
+                            marker.showInfoWindow() // TODO: Create drawable here
                         true
                     }
 
-                    plantLocation.observe(this@MapFragment, Observer<PlantLocation> { plantLocation ->
-                        position.setCoords(plantLocation?.location?.latitude!!, plantLocation.location.longitude!!)
-                    })
-
-                    photoRepo.getMainPhotoOfPlant(plantId).observe(this@MapFragment, Observer<Photo> { photo ->
-                        image = Drawable.createFromPath(photo?.fileName)
-                    })
-
+                    position.setCoords(plantLocation.latitude!!, plantLocation.longitude!!)
+                    image = Drawable.createFromPath(plantPhoto.fileName)
                     map.overlays.add(this)
                 }
             }
-            locationMarker?.let { map.overlays.add(locationMarker) }
+            currentLocation?.let { createAndAddLocationMarker() }
             map.postInvalidate()
         })
 
         fab.setOnClickListener { _ ->
-            var bundle = bundleOf("userId" to userId)
+            val bundle = bundleOf("userId" to userId)
             val navController = activity.findNavController(R.id.fragment)
             navController.navigate(R.id.newPlantTypeFragment, bundle)
         }
@@ -242,33 +237,40 @@ class MapFragment : BaseFragment() {
         }
     }
 
-    @Suppress("DEPRECATION")
     private fun onLocation(location: Location) {
-        currentLocation = location
-        with(location) {
-            Lg.d("onLocation(): $this")
+        Lg.d("onLocation(): $location")
 
-            if (latitude != null && longitude != null) {
-                val _latitude: Double = latitude!!
-                val _longitude: Double = longitude!!
-                if (locationMarker == null) {
-                    locationMarker = Marker(map)
-                    locationMarker?.run {
-                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                        setIcon(activity.getResources().getDrawable(R.drawable.person))
-                        setOnMarkerClickListener { _, _ ->
-                            Toast.makeText(appContext, "You are here", Toast.LENGTH_SHORT).show()
-                            true
-                        }
-                        position.setCoords(_latitude, _longitude)
-                        map.overlays.add(this)
-                        map.controller.setCenter(GeoPoint(_latitude, _longitude))
-                    }
-                } else
-                    locationMarker?.position?.setCoords(latitude!!, longitude!!)
-            }
+        if (location.latitude != null && location.longitude != null) {
+            currentLocation = location
+            if (locationMarker == null) {
+                createAndAddLocationMarker()
+                centerMapOnCurrentLocation()
+            } else
+                updateLocationMarkerPosition()
         }
         map.invalidate()
+    }
+
+    @Suppress("DEPRECATION")
+    private fun createAndAddLocationMarker() {
+        locationMarker = Marker(map).apply {
+            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            setIcon(activity.resources.getDrawable(R.drawable.person))
+            setOnMarkerClickListener { _, _ ->
+                Toast.makeText(appContext, "You are here", Toast.LENGTH_SHORT).show()
+                true
+            }
+            map.overlays.add(this)
+        }
+        updateLocationMarkerPosition()
+    }
+
+    private fun centerMapOnCurrentLocation() {
+        currentLocation?.let { map.controller.setCenter( GeoPoint(it.latitude!!, it.longitude!!) ) }
+    }
+
+    private fun updateLocationMarkerPosition() {
+        currentLocation?.let { locationMarker?.position?.setCoords(it.latitude!!, it.longitude!!) }
     }
 
     class GbMarker(val activity: BaseActivity, val plantId: Long, map: MapView): Marker(map) {
@@ -277,7 +279,7 @@ class MapFragment : BaseFragment() {
             Lg.d("Opening plant detail: id=$plantId")
             val touched = hitTest(event, mapView)
             if (touched) {
-                var bundle = bundleOf("plantId" to plantId)
+                val bundle = bundleOf("plantId" to plantId)
                 val navController = activity.findNavController(R.id.fragment)
                 navController.navigate(R.id.plantDetailFragment, bundle)
             }
