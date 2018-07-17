@@ -22,7 +22,7 @@ typealias LocationCallback = (Location) -> Unit
 
 @Singleton
 class LocationService @Inject constructor (private val locationManager: LocationManager) {
-    private val observers = mutableMapOf<Context, LocationCallback>()
+    private val observers = mutableMapOf<Any, LocationCallback>()
     private var gnssStatusCallback:GnssStatusCallback? = null
     private val gpsLocationListener:GpsLocationListener = GpsLocationListener()
     private val gpsStatusListener = GpsStatusListener()
@@ -39,21 +39,21 @@ class LocationService @Inject constructor (private val locationManager: Location
 
     fun isGpsEnabled(): Boolean = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
-    fun subscribe(context: Context, callback: LocationCallback) {
+    fun subscribe(observer: Any, callback: LocationCallback) {
         if(observers.isEmpty()) {
             registerGpsUpdates()
         }
-        val isAdded = observers.put(context, callback) == null
-        Lg.d("LocationService: subscribe(): isAdded=$isAdded, observers=${observers.count()}, context=$context callback=$callback")
+        val isAdded = observers.put(observer, callback) == null
+        Lg.d("LocationService: subscribe(): isAdded=$isAdded, observers=${observers.count()}, observer=$observer callback=$callback")
     }
 
-    fun unsubscribe(context: Context) {
-        val isRemoved = observers.remove(context) != null
+    fun unsubscribe(observer: Any) {
+        val isRemoved = observers.remove(observer) != null
         if(observers.isEmpty()) {
             unregisterGpsUpdates()
             hasFirstFix = false
         }
-        Lg.d("LocationService: unsubscribe(): isRemoved=$isRemoved, observers=${observers.count()}, context=$context\"")
+        Lg.d("LocationService: unsubscribe(): isRemoved=$isRemoved, observers=${observers.count()}, observer=$observer\"")
     }
 
     // TODO: Push merge code into Location repo: location.mergeWith(location)

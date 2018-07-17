@@ -27,7 +27,7 @@ class PlantDetailFragment : BaseFragment() {
     @Inject lateinit var plantDetailViewModelFactory: PlantDetailViewModelFactory
     private lateinit var viewModel: PlantDetailViewModel
 
-    override val name = this.javaClass.name.substringAfterLast('.')
+    override val className = this.javaClass.name.substringAfterLast('.')
 
     private var plantId = 0L
 

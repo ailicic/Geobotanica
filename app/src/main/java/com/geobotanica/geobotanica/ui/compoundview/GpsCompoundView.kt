@@ -32,23 +32,22 @@ class GpsCompoundView @JvmOverloads constructor(
         inflate(getContext(), R.layout.gps_compound_view,this)
     }
 
-    fun setLocation(location: Location) { // Only called if Location object found in Activity intent in OnCreate()
+    fun setLocation(location: Location) { // Only called if Location object found in Navigation arguments
         currentLocation = location
         gpsSwitch.isChecked = true
         precisionText.text = context.resources.getString(R.string.precision, location.precision)
         setSatellitesText(location.satellitesInUse ?: 0, location.satellitesVisible)
         holdText.visibility = View.VISIBLE
         gpsSwitch.visibility = View.VISIBLE
-//        locationService.unsubscribe(context) // Not required since always called before onAttachedToWindow()
+//        locationService.unsubscribe(this) // Not required since always called before onAttachedToWindow()
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         Lg.d("GpsCompoundView: onAttachedToWindow()")
         gpsSwitch.setOnCheckedChangeListener(::onToggleHoldPosition)
-        if (!gpsSwitch.isChecked) {
-            locationService.subscribe(context, ::onLocation)
-        }
+        if (!gpsSwitch.isChecked)
+            locationService.subscribe(this, ::onLocation)
     }
 
     override fun onDetachedFromWindow() {
@@ -76,9 +75,9 @@ class GpsCompoundView @JvmOverloads constructor(
     private fun onToggleHoldPosition(buttonView: CompoundButton, isChecked: Boolean) {
         Lg.d("onToggleHoldPosition(): isChecked=$isChecked")
         if (isChecked)
-            locationService.unsubscribe(context)
+            locationService.unsubscribe(this)
         else
-            locationService.subscribe(context, ::onLocation)
+            locationService.subscribe(this, ::onLocation)
     }
 
     private fun setSatellitesText(satellitesInUse: Int, satellitesVisible: Int) {

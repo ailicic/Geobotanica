@@ -20,6 +20,7 @@ import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.fragment_new_plant_type.*
+import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -28,11 +29,11 @@ import java.util.*
 
 class NewPlantPhotoFragment : BaseFragment() {
 
-    override val name = this.javaClass.name.substringAfterLast('.')
+    override val className = this.javaClass.name.substringAfterLast('.')
 
     private var userId = 0L
     private var plantType = 0
-    private var plantLocation: Location? = null
+    private var location: Location? = null
     private val requestTakePhoto = 2
     private var photoFilePath: String = ""
     private var oldPhotoFilePath: String = ""
@@ -40,9 +41,6 @@ class NewPlantPhotoFragment : BaseFragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         (getActivity() as BaseActivity).activityComponent.inject(this)
-
-        getArgs()
-        capturePhoto()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -59,13 +57,19 @@ class NewPlantPhotoFragment : BaseFragment() {
         return inflater.inflate(R.layout.fragment_new_plant_photo, container, false)
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        getArgs()
+        capturePhoto()
+    }
+
     private fun getArgs() {
         arguments?.let {
             userId = it.getLong("userId")
             plantType = it.getInt("plantType")
-            plantLocation = it.getSerializable("plantLocation") as Location?
-            plantLocation?.let { gps.setLocation(it) }
-            Lg.d("Fragment args: userId=$userId, plantType=$plantType, location=$plantLocation")
+            location = it.getSerializable("location") as Location?
+            location?.let { gps.setLocation(it) }
+            Lg.d("Fragment args: userId=$userId, plantType=$plantType, location=$location")
         }
     }
 
@@ -103,8 +107,9 @@ class NewPlantPhotoFragment : BaseFragment() {
                     var bundle = bundleOf(
                             "userId" to userId,
                             "plantType" to plantType,
-                            "photoFilePath" to photoFilePath,
-                            "plantLocation" to plantLocation )
+                            "photoFilePath" to photoFilePath )
+                    if (gps.gpsSwitch.isChecked)
+                        bundle.putSerializable("location", gps.currentLocation)
                     val navController = activity.findNavController(R.id.fragment)
                     navController.navigate(R.id.newPlantNameFragment, bundle)
                 } else {

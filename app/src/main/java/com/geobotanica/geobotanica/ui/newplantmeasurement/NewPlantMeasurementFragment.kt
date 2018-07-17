@@ -1,59 +1,68 @@
-package com.geobotanica.geobotanica.ui.addmeasurement
+package com.geobotanica.geobotanica.ui.newplantmeasurement
 
+import android.content.Context
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.RadioGroup
 import android.widget.Toast
+import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.*
-import com.geobotanica.geobotanica.data.repo.PlantLocationRepo
 import com.geobotanica.geobotanica.data.repo.MeasurementRepo
 import com.geobotanica.geobotanica.data.repo.PhotoRepo
+import com.geobotanica.geobotanica.data.repo.PlantLocationRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.ui.BaseActivity
+import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.util.Lg
-import kotlinx.android.synthetic.main.activity_measurements.*
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.fragment_new_plant_measurement.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import kotlinx.android.synthetic.main.measurement_compound_view.view.*
 import javax.inject.Inject
 
-class AddMeasurementsActivity : BaseActivity() {
+
+// TODO: Handle back button better. Delete temp photo if needed, allow edit prev. activity, etc.
+
+class NewPlantMeasurementFragment : BaseFragment() {
     @Inject lateinit var plantRepo: PlantRepo
     @Inject lateinit var plantLocationRepo: PlantLocationRepo
     @Inject lateinit var photoRepo: PhotoRepo
     @Inject lateinit var measurementRepo: MeasurementRepo
 
-    override val name = this.javaClass.name.substringAfterLast('.')
+    override val className = this.javaClass.name.substringAfterLast('.')
     private var userId = 0L
     private lateinit var plantType: Plant.Type
     private lateinit var photoFilePath: String
     private var commonName: String? = null
     private var latinName: String? = null
-    private var plantLocation: Location? = null
+    private var location: Location? = null
 
-    // TODO: Use Toolbar instead of ActionBar. Maybe use single activity, multiple fragments for new plant creation
-    // TODO: Handle back button better. Delete temp photo if needed, allow edit prev. activity, etc.
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_measurements)
-
-        activityComponent.inject(this)
-
-        userId = intent.getLongExtra(getString(R.string.extra_user_id), -1L)
-        plantType = PlantTypeConverter.toPlantType(intent.getIntExtra(getString(R.string.extra_plant_type), -1))
-        photoFilePath = intent.getStringExtra(getString(R.string.extra_plant_photo_path))
-        commonName = intent.getStringExtra(getString(R.string.extra_plant_common_name))
-        latinName = intent.getStringExtra(getString(R.string.extra_plant_latin_name))
-        plantLocation = intent.getSerializableExtra(getString(R.string.extra_location)) as? Location
-        Lg.d("Intent extras: userId=$userId, plantType=$plantType, commonName=$commonName, " +
-                "latinName=$latinName, location=$plantLocation, photoFilePath=$photoFilePath")
-        plantLocation?.let { gps.setLocation(it) }
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        (getActivity() as BaseActivity).activityComponent.inject(this)
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+//        plantDetailViewModelFactory.plantId = plantId
+//        viewModel = ViewModelProviders.of(this, plantDetailViewModelFactory).get(PlantDetailViewModel::class.java)
+
+//        val binding = DataBindingUtil.inflate<FragmentPlantDetailBinding>(
+//                layoutInflater, R.layout.fragment_new_plant_type, container, false).apply {
+//            viewModel = this@NewPlantTypeFragment.viewModel
+//            setLifecycleOwner(this@NewPlantTypeFragment)
+//        }
+//        return binding.root
+        return inflater.inflate(R.layout.fragment_new_plant_measurement, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        getArgs()
 
         heightMeasurement.textView.text = resources.getString(R.string.height)
         diameterMeasurement.textView.text = resources.getString(R.string.diameter)
@@ -61,6 +70,22 @@ class AddMeasurementsActivity : BaseActivity() {
             trunkDiameterMeasurement.textView.text = resources.getString(R.string.trunk_diameter)
         else
             trunkDiameterMeasurement.visibility = View.GONE
+
+        fab.setOnClickListener(::onFabPressed)
+    }
+
+    private fun getArgs() {
+        arguments?.let {
+            userId = it.getLong("userId")
+            plantType = PlantTypeConverter.toPlantType( it.getInt("plantType") )
+            photoFilePath = it.getString("photoFilePath")
+            commonName = it.getString("commonName")
+            latinName = it.getString("latinName")
+            location = it.getSerializable("location") as Location?
+            location?.let { gps.setLocation(it) }
+            Lg.d("Fragment args: userId=$userId, plantType=$plantType, commonName=$commonName, " +
+                    "latinName=$latinName, location=$location, photoFilePath=$photoFilePath")
+        }
     }
 
     override fun onResume() {
@@ -151,8 +176,10 @@ class AddMeasurementsActivity : BaseActivity() {
 //            }
         }
 
-        Toast.makeText(this, "Plant saved", Toast.LENGTH_SHORT).show()
-        finish()
+        Toast.makeText(activity, "Plant saved", Toast.LENGTH_SHORT).show()
+
+        val navController = activity.findNavController(R.id.fragment)
+        navController.popBackStack(R.id.mapFragment, false)
     }
 
     private fun isMeasurementEmpty(): Boolean {

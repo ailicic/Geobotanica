@@ -13,11 +13,12 @@ import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.fragment_new_plant_type.*
+import kotlinx.android.synthetic.main.gps_compound_view.view.*
 
 
 class NewPlantTypeFragment : BaseFragment() {
 
-    override val name = this.javaClass.name.substringAfterLast('.')
+    override val className = this.javaClass.name.substringAfterLast('.')
 
     private var userId = 0L
 
@@ -71,8 +72,9 @@ class NewPlantTypeFragment : BaseFragment() {
 
         var bundle = bundleOf(
                 "userId" to userId,
-                "plantType" to plantType,
-                "plantLocation" to gps.currentLocation)
+                "plantType" to plantType.ordinal)
+        if (gps.gpsSwitch.isChecked)
+            bundle.putSerializable("location", gps.currentLocation)
         val navController = activity.findNavController(R.id.fragment)
         navController.navigate(R.id.newPlantPhotoFragment, bundle)
     }

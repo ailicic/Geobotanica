@@ -52,7 +52,7 @@
             android:name=".ui.newplantname.NewPlantNameActivity"
             android:label="@string/activity_new_plant_name" />
         <activity
-            android:name=".ui.addmeasurement.AddMeasurementsActivity"
+            android:name=".ui.newplantmeasurement.AddMeasurementsActivity"
             android:label="@string/activity_plant_measurements" />
         <activity
             android:name=".ui.plantdetail.PlantDetailActivity"

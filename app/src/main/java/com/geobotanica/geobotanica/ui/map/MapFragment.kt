@@ -51,7 +51,7 @@ class MapFragment : BaseFragment() {
     @Inject lateinit var photoRepo: PhotoRepo
     @Inject lateinit var locationService: LocationService
 
-    override val name = this.javaClass.name.substringAfterLast('.')
+    override val className = this.javaClass.name.substringAfterLast('.')
     private var userId: Long = 0
     private val requestFineLocationPermission = 1
     private val requestExternalStorage = 2
@@ -130,13 +130,14 @@ class MapFragment : BaseFragment() {
         super.onStart()
         if (ContextCompat.checkSelfPermission(activity,
                         Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationService.subscribe(activity, ::onLocation)
+            locationService.subscribe(this, ::onLocation)
         }
     }
 
     override fun onResume() {
         super.onResume()
 
+        // TODO: Fix bug: current location icon not present after second visit to map
         // TODO: Fix bug due to multiple setOnClickListerner() calls on Markers (crash when long press marker after reload)
         plantRepo.getAllPlantComposites().observe(this, Observer<List<PlantComposite>> {
             map.overlays.clear()
@@ -215,7 +216,7 @@ class MapFragment : BaseFragment() {
 
     override fun onStop() {
         super.onStop()
-        locationService.unsubscribe(activity)
+        locationService.unsubscribe(this)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int,
@@ -225,7 +226,7 @@ class MapFragment : BaseFragment() {
             requestFineLocationPermission -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     Lg.d("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_GRANTED")
-                    locationService.subscribe(activity, ::onLocation)
+                    locationService.subscribe(this, ::onLocation)
                 } else {
                     Lg.d("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_DENIED")
                 }
