@@ -25,7 +25,7 @@ class NewPlantTypeFragment : BaseFragment() {
         super.onAttach(context)
         (getActivity() as BaseActivity).activityComponent.inject(this)
 
-        userId = arguments?.getLong("userId", 0L) ?: 0L
+        userId = arguments?.getLong("userId") ?: 0L
         Lg.d("Fragment args: userId=$userId")
     }
 

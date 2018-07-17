@@ -12,14 +12,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.FileProvider
+import androidx.core.os.bundleOf
+import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
-import com.geobotanica.geobotanica.ui.newplantname.NewPlantNameActivity
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.fragment_new_plant_type.*
-import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -61,8 +61,8 @@ class NewPlantPhotoFragment : BaseFragment() {
 
     private fun getArgs() {
         arguments?.let {
-            userId = it.getLong("userId", 0L) ?: 0L
-            plantType = it.getInt("plantType", 0) ?: 0
+            userId = it.getLong("userId")
+            plantType = it.getInt("plantType")
             plantLocation = it.getSerializable("plantLocation") as Location?
             plantLocation?.let { gps.setLocation(it) }
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, location=$plantLocation")
@@ -100,21 +100,13 @@ class NewPlantPhotoFragment : BaseFragment() {
                     oldPhotoFilePath = photoFilePath
 
 
-//                    var bundle = bundleOf(
-//                            "userId" to userId,
-//                            "plantType" to plantType,
-//                            "photoFilePath" to photoFilePath,
-//                            "plantLocation" to plantLocation )
-//                    val navController = activity.findNavController(R.id.fragment)
-//                    navController.navigate(R.id.new, bundle)
-
-                    val intent = Intent(activity, NewPlantNameActivity::class.java)
-                            .putExtra(getString(R.string.extra_user_id), userId)
-                            .putExtra(getString(R.string.extra_plant_type), plantType)
-                            .putExtra(getString(R.string.extra_plant_photo_path), photoFilePath)
-                    if (gps.gpsSwitch.isChecked)
-                        intent.putExtra(getString(R.string.extra_location), gps.currentLocation)
-                    startActivity(intent)
+                    var bundle = bundleOf(
+                            "userId" to userId,
+                            "plantType" to plantType,
+                            "photoFilePath" to photoFilePath,
+                            "plantLocation" to plantLocation )
+                    val navController = activity.findNavController(R.id.fragment)
+                    navController.navigate(R.id.newPlantNameFragment, bundle)
                 } else {
                     Toast.makeText(activity, "Photo not captured", Toast.LENGTH_SHORT).show()
                 }

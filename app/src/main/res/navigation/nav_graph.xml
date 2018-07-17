@@ -37,7 +37,7 @@
     <fragment
         android:id="@+id/newPlantTypeFragment"
         android:name="com.geobotanica.geobotanica.ui.newplanttype.NewPlantTypeFragment"
-        android:label="NewPlantTypeFragment" >
+        android:label="Plant Type" >
         <argument android:name="userId" />
         <action
             android:id="@+id/action_newPlantTypeFragment_to_newPlantPhotoFragment"
@@ -50,9 +50,27 @@
     <fragment
         android:id="@+id/newPlantPhotoFragment"
         android:name="com.geobotanica.geobotanica.ui.newplantphoto.NewPlantPhotoFragment"
-        android:label="NewPlantPhotoFragment" >
+        android:label="Plant Photo" >
         <argument android:name="userId" />
         <argument android:name="plantType" />
+        <argument
+            android:name="plantLocation"
+            android:defaultValue="null" />
+        <action
+            android:id="@+id/action_newPlantPhotoFragment_to_newPlantNameFragment"
+            app:destination="@id/newPlantNameFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+    <fragment
+        android:id="@+id/newPlantNameFragment"
+        android:name="com.geobotanica.geobotanica.ui.newplantname.NewPlantNameFragment"
+        android:label="Plant Name" >
+        <argument android:name="userId" />
+        <argument android:name="plantType" />
+        <argument android:name="photoFilePath" />
         <argument
             android:name="plantLocation"
             android:defaultValue="null" />

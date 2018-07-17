@@ -11,6 +11,8 @@ import com.geobotanica.geobotanica.util.Lg
 import java.io.File
 import javax.inject.Inject
 
+// TODO: Fix crash after delete plant
+
 class PlantDetailViewModel @Inject constructor(
         private var userRepo: UserRepo,
         private var plantRepo: PlantRepo,
