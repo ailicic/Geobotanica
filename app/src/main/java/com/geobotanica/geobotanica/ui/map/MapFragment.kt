@@ -1,8 +1,7 @@
-package com.geobotanica.geobotanica.ui.fragment
+package com.geobotanica.geobotanica.ui.map
 
 import android.Manifest
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -24,7 +23,6 @@ import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.data.repo.UserRepo
 import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
-import com.geobotanica.geobotanica.ui.newplanttype.NewPlantTypeActivity
 import com.geobotanica.geobotanica.util.Lg
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_map.*
@@ -41,6 +39,8 @@ import javax.inject.Inject
 
 // TODO: Group nearby markers into clusters
 
+// TODO: Double check proper placement of methods in lifecycle callbacks
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -51,16 +51,12 @@ class MapFragment : BaseFragment() {
     @Inject lateinit var photoRepo: PhotoRepo
     @Inject lateinit var locationService: LocationService
 
-
-
-
     override val name = this.javaClass.name.substringAfterLast('.')
     private var userId: Long = 0
     private val requestFineLocationPermission = 1
     private val requestExternalStorage = 2
     private var currentLocation: Location? = null
     private var locationMarker: Marker? = null
-
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -197,9 +193,9 @@ class MapFragment : BaseFragment() {
         })
 
         fab.setOnClickListener { _ ->
-            val intent = Intent(activity, NewPlantTypeActivity::class.java)
-                    .putExtra(getString(R.string.extra_user_id), userId)
-            startActivity(intent)
+            var bundle = bundleOf("userId" to userId)
+            val navController = activity.findNavController(R.id.fragment)
+            navController.navigate(R.id.newPlantTypeFragment, bundle)
         }
         //this will refresh the osmdroid configuration on resuming.
         //if you make changes to the configuration, use

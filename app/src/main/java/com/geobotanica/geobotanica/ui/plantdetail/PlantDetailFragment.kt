@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui.fragment
+package com.geobotanica.geobotanica.ui.plantdetail
 
 import android.content.Context
 import android.os.Bundle
@@ -16,8 +16,6 @@ import com.geobotanica.geobotanica.data.entity.Photo
 import com.geobotanica.geobotanica.databinding.FragmentPlantDetailBinding
 import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
-import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailViewModel
-import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailViewModelFactory
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.setScaledBitmap
 import com.google.android.material.snackbar.Snackbar
@@ -43,7 +41,7 @@ class PlantDetailFragment : BaseFragment() {
                               savedInstanceState: Bundle?): View? {
 
         plantId = arguments?.getLong("plantId", 0L) ?: 0L
-        Lg.d("Intent extras: plantId=$plantId")
+        Lg.d("Fragment args: plantId=$plantId")
 
         plantDetailViewModelFactory.plantId = plantId
         viewModel = ViewModelProviders.of(this, plantDetailViewModelFactory).get(PlantDetailViewModel::class.java)

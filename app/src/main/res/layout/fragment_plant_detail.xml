@@ -18,7 +18,7 @@
         android:layout_height="match_parent"
         android:id="@+id/constraintLayout"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context=".ui.fragment.PlantDetailFragment"
+        tools:context=".ui.plantdetail.PlantDetailFragment"
         tools:showIn="@layout/activity_plant_detail">
 
 

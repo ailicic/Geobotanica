@@ -6,8 +6,8 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.compoundview.GpsCompoundView
 import com.geobotanica.geobotanica.ui.addmeasurement.AddMeasurementsActivity
 import com.geobotanica.geobotanica.ui.MainActivity
-import com.geobotanica.geobotanica.ui.fragment.MapFragment
-import com.geobotanica.geobotanica.ui.fragment.PlantDetailFragment
+import com.geobotanica.geobotanica.ui.map.MapFragment
+import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailFragment
 import dagger.Component
 
 @PerActivity
