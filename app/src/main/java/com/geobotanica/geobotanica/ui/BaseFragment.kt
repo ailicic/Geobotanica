@@ -3,16 +3,15 @@ package com.geobotanica.geobotanica.ui
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.geobotanica.geobotanica.util.Lg
 import javax.inject.Inject
 
 abstract class BaseFragment : Fragment() {
-    @Inject lateinit var appContext: Context
-    @Inject lateinit var activity: BaseActivity
+    @Inject lateinit var activity: MainActivity
     @Inject lateinit var sharedPrefs: SharedPreferences
 
     abstract val className: String
@@ -20,7 +19,7 @@ abstract class BaseFragment : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         Lg.v("$className: onAttach()")
-        (getActivity() as BaseActivity).activityComponent.inject(this)
+        (context as MainActivity).applicationComponent.inject(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

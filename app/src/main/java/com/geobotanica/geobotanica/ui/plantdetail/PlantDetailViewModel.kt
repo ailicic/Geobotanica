@@ -74,8 +74,8 @@ class PlantDetailViewModel @Inject constructor(
         trunkDiameter = measurementRepo.getTrunkDiameterOfPlant(plantId)
         trunkDiameterDateText = map(trunkDiameter) { it?.timestamp?.toSimpleDate() ?: "" }
 
-        measuredByUser = switchMap(height) { height ->
-            height?.let { height ->
+        measuredByUser = switchMap(height) {
+            it?.let { height ->
                 map(userRepo.get(height.userId)) { it.nickname }
             } ?: MutableLiveData<String>().apply { value = "" }
         }

@@ -15,7 +15,6 @@ import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Photo
 import com.geobotanica.geobotanica.databinding.FragmentPlantDetailBinding
-import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.setScaledBitmap
@@ -34,7 +33,7 @@ class PlantDetailFragment : BaseFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        (getActivity() as BaseActivity).activityComponent.inject(this)
+        activity.applicationComponent.inject(this)
     }
 
     // TODO: Show plant type as icon (not shown anywhere yet)

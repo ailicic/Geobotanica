@@ -10,7 +10,6 @@ import androidx.core.view.doOnPreDraw
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Location
-import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.setScaledBitmap
@@ -29,7 +28,7 @@ class NewPlantNameFragment : BaseFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        (getActivity() as BaseActivity).activityComponent.inject(this)
+        activity.applicationComponent.inject(this)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -90,5 +89,4 @@ class NewPlantNameFragment : BaseFragment() {
         val navController = activity.findNavController(R.id.fragment)
         navController.navigate(R.id.newPlantMeasurementFragment, bundle)
     }
-
 }

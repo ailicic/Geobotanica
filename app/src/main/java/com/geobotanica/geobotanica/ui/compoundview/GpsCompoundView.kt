@@ -1,14 +1,14 @@
 package com.geobotanica.geobotanica.ui.compoundview
 
 import android.content.Context
-import androidx.constraintlayout.widget.ConstraintLayout
 import android.util.AttributeSet
 import android.view.View
 import android.widget.CompoundButton
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.Location
-import com.geobotanica.geobotanica.ui.BaseActivity
+import com.geobotanica.geobotanica.ui.MainActivity
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import javax.inject.Inject
@@ -28,7 +28,8 @@ class GpsCompoundView @JvmOverloads constructor(
 
     init {
         Lg.v("GpsCompoundView()")
-        (context as BaseActivity).activityComponent.inject(this)
+
+        (context as MainActivity).applicationComponent.inject(this)
         inflate(getContext(), R.layout.gps_compound_view,this)
     }
 

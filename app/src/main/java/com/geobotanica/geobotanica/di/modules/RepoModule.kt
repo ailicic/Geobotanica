@@ -8,7 +8,7 @@ import dagger.Provides
 import javax.inject.Singleton
 
 @Module
-class RepoModule() {
+class RepoModule {
     @Provides @Singleton fun provideDatabase(context: Context): GbDatabase = GbDatabase.getInstance(context)
     @Provides @Singleton fun provideUserDao(gbDatabase: GbDatabase): UserDao = gbDatabase.userDao()
     @Provides @Singleton fun providePlantDao(gbDatabase: GbDatabase): PlantDao = gbDatabase.plantDao()

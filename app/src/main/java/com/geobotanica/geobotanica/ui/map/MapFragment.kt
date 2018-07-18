@@ -10,19 +10,21 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.location.LocationService
-import com.geobotanica.geobotanica.data.entity.*
-import com.geobotanica.geobotanica.data.repo.PhotoRepo
-import com.geobotanica.geobotanica.data.repo.PlantLocationRepo
+import com.geobotanica.geobotanica.data.entity.Location
+import com.geobotanica.geobotanica.data.entity.Plant
+import com.geobotanica.geobotanica.data.entity.PlantComposite
+import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.data.repo.UserRepo
-import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
+import com.geobotanica.geobotanica.ui.MainActivity
 import com.geobotanica.geobotanica.util.Lg
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_map.*
@@ -48,8 +50,6 @@ import javax.inject.Inject
 class MapFragment : BaseFragment() {
     @Inject lateinit var userRepo: UserRepo
     @Inject lateinit var plantRepo: PlantRepo
-    @Inject lateinit var plantLocationRepo: PlantLocationRepo
-    @Inject lateinit var photoRepo: PhotoRepo
     @Inject lateinit var locationService: LocationService
 
     override val className = this.javaClass.name.substringAfterLast('.')
@@ -61,7 +61,7 @@ class MapFragment : BaseFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        (getActivity() as BaseActivity).activityComponent.inject(this)
+        activity.applicationComponent.inject(this)
 
         getGuestUserId()
 
@@ -257,7 +257,7 @@ class MapFragment : BaseFragment() {
             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
             setIcon(activity.resources.getDrawable(R.drawable.person))
             setOnMarkerClickListener { _, _ ->
-                Toast.makeText(appContext, "You are here", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, "You are here", Toast.LENGTH_SHORT).show()
                 true
             }
             map.overlays.add(this)
@@ -273,7 +273,7 @@ class MapFragment : BaseFragment() {
         currentLocation?.let { locationMarker?.position?.setCoords(it.latitude!!, it.longitude!!) }
     }
 
-    class GbMarker(val activity: BaseActivity, val plantId: Long, map: MapView): Marker(map) {
+    class GbMarker(val activity: AppCompatActivity, val plantId: Long, map: MapView): Marker(map) {
 
         override fun onLongPress(event: MotionEvent?, mapView: MapView?): Boolean {
             Lg.d("Opening plant detail: id=$plantId")

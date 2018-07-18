@@ -9,7 +9,6 @@ import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.fragment_new_plant_type.*
@@ -24,7 +23,7 @@ class NewPlantTypeFragment : BaseFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        (getActivity() as BaseActivity).activityComponent.inject(this)
+        activity.applicationComponent.inject(this)
 
         userId = arguments?.getLong("userId") ?: 0L
         Lg.d("Fragment args: userId=$userId")

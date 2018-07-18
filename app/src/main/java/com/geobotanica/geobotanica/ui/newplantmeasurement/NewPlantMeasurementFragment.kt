@@ -15,8 +15,8 @@ import com.geobotanica.geobotanica.data.repo.MeasurementRepo
 import com.geobotanica.geobotanica.data.repo.PhotoRepo
 import com.geobotanica.geobotanica.data.repo.PlantLocationRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
-import com.geobotanica.geobotanica.ui.BaseActivity
 import com.geobotanica.geobotanica.ui.BaseFragment
+import com.geobotanica.geobotanica.ui.MainActivity
 import com.geobotanica.geobotanica.util.Lg
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_new_plant_measurement.*
@@ -43,7 +43,7 @@ class NewPlantMeasurementFragment : BaseFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        (getActivity() as BaseActivity).activityComponent.inject(this)
+        activity.applicationComponent.inject(this)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,

@@ -1,31 +1,33 @@
 package com.geobotanica.geobotanica.di.components
 
-import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
-import com.geobotanica.geobotanica.android.location.LocationService
-import com.geobotanica.geobotanica.data.repo.*
 import com.geobotanica.geobotanica.di.modules.ApplicationModule
 import com.geobotanica.geobotanica.di.modules.RepoModule
 import com.geobotanica.geobotanica.di.modules.ViewModelModule
+import com.geobotanica.geobotanica.ui.BaseFragment
+import com.geobotanica.geobotanica.ui.compoundview.GpsCompoundView
+import com.geobotanica.geobotanica.ui.map.MapFragment
+import com.geobotanica.geobotanica.ui.newplantmeasurement.NewPlantMeasurementFragment
+import com.geobotanica.geobotanica.ui.newplantname.NewPlantNameFragment
+import com.geobotanica.geobotanica.ui.newplantphoto.NewPlantPhotoFragment
+import com.geobotanica.geobotanica.ui.newplanttype.NewPlantTypeFragment
+import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailFragment
 import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [ApplicationModule::class, RepoModule::class, ViewModelModule::class])
+@Component(modules = [
+            ApplicationModule::class,
+            RepoModule::class,
+            ViewModelModule::class] )
 interface ApplicationComponent {
-    fun inject(application: Application)
+    fun inject(baseFragment: BaseFragment)
 
-    //Expose to dependants of this component
-    fun context(): Context
-    fun sharedPrefs(): SharedPreferences
-    fun locationService(): LocationService
+    fun inject(mapFragment: MapFragment)
+    fun inject(newPlantTypeFragment: NewPlantTypeFragment)
+    fun inject(newPlantPhotoFragment: NewPlantPhotoFragment)
+    fun inject(newPlantNameFragment: NewPlantNameFragment)
+    fun inject(newPlantMeasurementFragment: NewPlantMeasurementFragment)
+    fun inject(plantDetailFragment: PlantDetailFragment)
 
-    fun userRepo(): UserRepo
-    fun plantRepo(): PlantRepo
-    fun plantLocationRepo(): PlantLocationRepo
-    fun photoRepo(): PhotoRepo
-    fun measurementRepo(): MeasurementRepo
-
-//    fun plantDetailViewModelFactory(): PlantDetailViewModelFactory // Not required?
+    fun inject(gpsCompoundView: GpsCompoundView)
 }
