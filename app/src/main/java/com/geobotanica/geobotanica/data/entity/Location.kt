@@ -5,13 +5,13 @@ import org.threeten.bp.OffsetDateTime
 import java.io.Serializable
 
 data class Location(
-    var latitude: Double? = null,
-    var longitude: Double? = null,
-    var altitude: Double? = null,
-    var precision: Float? = null,
-    var satellitesInUse: Int? = null,
-    var satellitesVisible: Int, // Before GPS fix, visible satellites are always available
-    var timestamp: OffsetDateTime = OffsetDateTime.now()
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val altitude: Double? = null,
+    val precision: Float? = null,
+    val satellitesInUse: Int? = null,
+    val satellitesVisible: Int, // Before GPS fix, visible satellites are always available
+    val timestamp: OffsetDateTime = OffsetDateTime.now()
 ): Serializable
 
 
@@ -29,8 +29,8 @@ data class Location(
     ]
 )
 data class PlantLocation(
-    var plantId: Long,
-    @Embedded var location: Location
+    val plantId: Long,
+    @Embedded val location: Location
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0L
 }

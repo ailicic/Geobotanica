@@ -16,7 +16,6 @@ import com.geobotanica.geobotanica.data.repo.PhotoRepo
 import com.geobotanica.geobotanica.data.repo.PlantLocationRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.ui.BaseFragment
-import com.geobotanica.geobotanica.ui.MainActivity
 import com.geobotanica.geobotanica.util.Lg
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_new_plant_measurement.*
@@ -160,7 +159,7 @@ class NewPlantMeasurementFragment : BaseFragment() {
         gps.currentLocation?.let {
             val plantLocation = PlantLocation(plant.id, it)
             plantLocation.id = plantLocationRepo.insert(plantLocation)
-            Lg.d("PlantLocation: $plantLocation (id=${plantLocation.id})")
+            Lg.d("$plantLocation (id=${plantLocation.id})")
         }
 
         if (measurementsSwitch.isChecked) {

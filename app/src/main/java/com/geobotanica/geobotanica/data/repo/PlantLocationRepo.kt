@@ -10,5 +10,7 @@ class PlantLocationRepo @Inject constructor(private val plantLocationDao: PlantL
 
     fun get(id: Long): LiveData<PlantLocation> = plantLocationDao.get(id)
 
-    fun getPlantLocation(plantId: Long): LiveData<PlantLocation> = plantLocationDao.getPlantLocation(plantId)
+    fun getPlantLocations(plantId: Long): LiveData<List<PlantLocation>> = plantLocationDao.getPlantLocations(plantId)
+
+    fun getLastPlantLocation(plantId: Long): LiveData<PlantLocation> = plantLocationDao.getLastPlantLocation(plantId)
 }

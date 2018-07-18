@@ -50,19 +50,14 @@ class PlantDetailViewModel @Inject constructor(
     private fun init() {
         Lg.d("PlantDetailViewModel: init()")
         plant = plantRepo.get(plantId)
-        user = switchMap(plant) {
-            it?.let { userRepo.get(it.userId) }
+        user = switchMap(plant) { plant ->
+            plant?.let { userRepo.get(plant.userId) }
         }
 
-        location = switchMap(plant) {
-            it?.let { plant ->
-                map( plantLocationRepo.getPlantLocation(plant.id) ) { it.location }
-            }
-        }
+        location = map( plantLocationRepo.getLastPlantLocation(plantId) ) { it.location }
 
-        photos = switchMap(plant) {
-            it?.let { photoRepo.getAllPhotosOfPlant(it.id) }
-        }
+        photos = photoRepo.getAllPhotosOfPlant(plantId)
+
         mainPhoto = photoRepo.getMainPhotoOfPlant(plantId)
 
         height = measurementRepo.getHeightOfPlant(plantId)
@@ -81,10 +76,6 @@ class PlantDetailViewModel @Inject constructor(
         }
         createdDateText = map(plant) {
             it?.run { timestamp.toSimpleDate() }
-        }
-
-        plantRepo.getPlantComposite(plantId).observeForever {
-            it?.let { Lg.d("$it") }
         }
     }
 

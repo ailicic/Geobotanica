@@ -10,6 +10,9 @@ interface PlantLocationDao : BaseDao<PlantLocation> {
     @Query("SELECT * FROM plant_locations WHERE id = :id")
     fun get(id: Long): LiveData<PlantLocation>
 
+    @Query("SELECT * FROM plant_locations WHERE plantId = :plantId ORDER BY timestamp ASC") // TODO: Check ordering
+    fun getPlantLocations(plantId: Long): LiveData<List<PlantLocation>>
+
     @Query("SELECT * FROM plant_locations WHERE plantId = :plantId ORDER BY timestamp ASC LIMIT 1")
-    fun getPlantLocation(plantId: Long): LiveData<PlantLocation>
+    fun getLastPlantLocation(plantId: Long): LiveData<PlantLocation>
 }

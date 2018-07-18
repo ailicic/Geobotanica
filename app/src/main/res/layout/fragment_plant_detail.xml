@@ -8,9 +8,6 @@
         <variable
             name="viewModel"
             type="com.geobotanica.geobotanica.ui.plantdetail.PlantDetailViewModel" />
-        <variable
-            name="location"
-            type="com.geobotanica.geobotanica.data.entity.Location" /> <!--Included to shorten characters for databinding-->
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -167,7 +164,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:layout_marginTop="4dp"
-            android:text="@{ @string/location(location.precision, location.satellitesInUse, location.satellitesVisible) }"
+            android:text="@{ @string/location(viewModel.location.precision, viewModel.location.satellitesInUse, viewModel.location.satellitesVisible) }"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/measurementsDivider" />
 

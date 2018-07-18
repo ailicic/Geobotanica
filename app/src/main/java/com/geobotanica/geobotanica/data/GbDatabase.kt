@@ -20,10 +20,10 @@ import com.geobotanica.geobotanica.data.entity.*
         version = 18
 )
 @TypeConverters(
-        OffsetDateTimeConverter::class,
-        MeasurementTypeConverter::class,
+        PlantTypeConverter::class,
         PhotoTypeConverter::class,
-        PlantTypeConverter::class )
+        MeasurementTypeConverter::class,
+        OffsetDateTimeConverter::class )
 abstract class GbDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun plantDao(): PlantDao

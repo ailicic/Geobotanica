@@ -7,7 +7,7 @@ class PlantComposite {
     @Embedded lateinit var plant: Plant
 
     @Relation(parentColumn = "id", entityColumn = "plantId")
-    var locations: List<PlantLocation> = emptyList()
+    var plantLocations: List<PlantLocation> = emptyList()
 
     @Relation(parentColumn = "id", entityColumn = "plantId")
     var photos: List<Photo> = emptyList()
@@ -17,7 +17,7 @@ class PlantComposite {
 
     override fun toString(): String {
         val sb = StringBuilder("\n\n$plant (id=${plant.id})")
-        locations.forEach { sb.append("\n$it (id=${it.id})") }
+        plantLocations.forEach { sb.append("\n$it (id=${it.id})") }
         photos.forEach { sb.append("\n$it (id=${it.id})") }
         measurements.forEach { sb.append("\n$it (id=${it.id})") }
         return sb.toString()

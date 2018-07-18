@@ -24,7 +24,6 @@ import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.data.repo.UserRepo
 import com.geobotanica.geobotanica.ui.BaseFragment
-import com.geobotanica.geobotanica.ui.MainActivity
 import com.geobotanica.geobotanica.util.Lg
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_map.*
@@ -138,67 +137,21 @@ class MapFragment : BaseFragment() {
     override fun onResume() {
         super.onResume()
 
-        // TODO: Fix bug due to multiple setOnClickListerner() calls on Markers (crash when long press marker after reload)
-        plantRepo.getAllPlantComposites().observe(this, Observer<List<PlantComposite>> {
-            map.overlays.clear()
-            it?.forEach {
-                Lg.d("Adding plant marker: (id=${it.plant.id}) $it")
-                val plantMarker = GbMarker(activity, it.plant.id, map)
-                val plantLocation = it.locations.first().location // TODO: Filter by newest location
-                val plantPhoto = it.photos.first()
-
-                // TODO: Consider using a custom InfoWindow
-                // https://code.google.com/archive/p/osmbonuspack/wikis/Tutorial_2.wiki
-                // 7. Customizing the bubble behaviour:
-                // 9. Creating your own bubble layout
-
-                var icon = 0
-                plantMarker.run {
-                    it.plant.let {
-                        title = it.commonName
-                        snippet = it.latinName
-                        subDescription = it.timestamp.toString().substringBefore('T')
-
-                        icon = when (it.type) {
-                            Plant.Type.TREE -> R.drawable.marker_purple
-                            Plant.Type.SHRUB -> R.drawable.marker_blue
-                            Plant.Type.HERB -> R.drawable.marker_green
-                            Plant.Type.GRASS -> R.drawable.marker_light_green
-                            Plant.Type.VINE -> R.drawable.marker_yellow
-                        }
-                    }
-                    @Suppress("DEPRECATION") setIcon(activity.resources.getDrawable(icon))
-
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-
-                    setOnMarkerClickListener { marker: Marker, _ ->
-                        if (marker.isInfoWindowOpen)
-                            marker.closeInfoWindow() // TODO: Destroy drawable here
-                        else
-                            marker.showInfoWindow() // TODO: Create drawable here
-                        true
-                    }
-
-                    position.setCoords(plantLocation.latitude!!, plantLocation.longitude!!)
-                    image = Drawable.createFromPath(plantPhoto.fileName)
-                    map.overlays.add(this)
-                }
-            }
-            currentLocation?.let { createAndAddLocationMarker() }
-            map.postInvalidate()
-        })
+        addMapMarkers()
 
         fab.setOnClickListener { _ ->
             val bundle = bundleOf("userId" to userId)
             val navController = activity.findNavController(R.id.fragment)
             navController.navigate(R.id.newPlantTypeFragment, bundle)
         }
+
         //this will refresh the osmdroid configuration on resuming.
         //if you make changes to the configuration, use
         //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         //Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
         map.onResume() //needed for compass, my location overlays, v6.0.0 and up
     }
+
 
     override fun onPause() {
         super.onPause()
@@ -243,7 +196,7 @@ class MapFragment : BaseFragment() {
         if (location.latitude != null && location.longitude != null) {
             currentLocation = location
             if (locationMarker == null) {
-                createAndAddLocationMarker()
+                addLocationMarker()
                 centerMapOnCurrentLocation()
             } else
                 updateLocationMarkerPosition()
@@ -251,8 +204,59 @@ class MapFragment : BaseFragment() {
         map.invalidate()
     }
 
+    private fun addMapMarkers() {
+        plantRepo.getAllPlantComposites().observe(this, Observer<List<PlantComposite>> {
+            map.overlays.clear()
+            it?.forEach { plantComposite ->
+                Lg.d("Adding plant marker: $plantComposite")
+                val plantId = plantComposite.plant.id
+                val plantMarker = GbMarker(activity, plantId, map)
+                val plantLocation = plantComposite.plantLocations.first().location
+                val plantPhoto = plantComposite.photos.first()
+
+                // TODO: Consider using a custom InfoWindow
+                // https://code.google.com/archive/p/osmbonuspack/wikis/Tutorial_2.wiki
+                // 7. Customizing the bubble behaviour:
+                // 9. Creating your own bubble layout
+
+                var icon = 0
+                with(plantMarker) {
+                    plantComposite.plant.let {
+                        title = it.commonName
+                        snippet = it.latinName
+                        subDescription = it.timestamp.toString().substringBefore('T')
+
+                        icon = when (it.type) {
+                            Plant.Type.TREE -> R.drawable.marker_purple
+                            Plant.Type.SHRUB -> R.drawable.marker_blue
+                            Plant.Type.HERB -> R.drawable.marker_green
+                            Plant.Type.GRASS -> R.drawable.marker_light_green
+                            Plant.Type.VINE -> R.drawable.marker_yellow
+                        }
+                    }
+                    @Suppress("DEPRECATION") setIcon(activity.resources.getDrawable(icon))
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+
+                    setOnMarkerClickListener { marker: Marker, _ ->
+                        if (marker.isInfoWindowOpen)
+                            marker.closeInfoWindow() // TODO: Destroy drawable here
+                        else
+                            marker.showInfoWindow() // TODO: Create drawable here
+                        true
+                    }
+
+                    position.setCoords(plantLocation.latitude!!, plantLocation.longitude!!)
+                    image = Drawable.createFromPath(plantPhoto.fileName)
+                    map.overlays.add(this)
+                }
+            }
+            currentLocation?.let { addLocationMarker() }
+            map.postInvalidate()
+        })
+    }
+
     @Suppress("DEPRECATION")
-    private fun createAndAddLocationMarker() {
+    private fun addLocationMarker() {
         locationMarker = Marker(map).apply {
             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
             setIcon(activity.resources.getDrawable(R.drawable.person))
@@ -265,20 +269,20 @@ class MapFragment : BaseFragment() {
         updateLocationMarkerPosition()
     }
 
-    private fun centerMapOnCurrentLocation() {
-        currentLocation?.let { map.controller.setCenter( GeoPoint(it.latitude!!, it.longitude!!) ) }
-    }
-
     private fun updateLocationMarkerPosition() {
         currentLocation?.let { locationMarker?.position?.setCoords(it.latitude!!, it.longitude!!) }
+    }
+
+    private fun centerMapOnCurrentLocation() {
+        currentLocation?.let { map.controller.setCenter( GeoPoint(it.latitude!!, it.longitude!!) ) }
     }
 
     class GbMarker(val activity: AppCompatActivity, val plantId: Long, map: MapView): Marker(map) {
 
         override fun onLongPress(event: MotionEvent?, mapView: MapView?): Boolean {
-            Lg.d("Opening plant detail: id=$plantId")
             val touched = hitTest(event, mapView)
             if (touched) {
+                Lg.d("Opening plant detail: id=$plantId")
                 val bundle = bundleOf("plantId" to plantId)
                 val navController = activity.findNavController(R.id.fragment)
                 navController.navigate(R.id.plantDetailFragment, bundle)

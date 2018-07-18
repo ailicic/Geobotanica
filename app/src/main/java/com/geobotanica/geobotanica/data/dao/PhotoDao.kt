@@ -10,7 +10,7 @@ interface PhotoDao : BaseDao<Photo> {
     @Query("SELECT * FROM photos WHERE id = :id")
     fun get(id: Long): LiveData<Photo>
 
-    @Query("SELECT * FROM photos WHERE plantId = :plantId ORDER BY timestamp DESC")
+    @Query("SELECT * FROM photos WHERE plantId = :plantId ORDER BY timestamp DESC") // TODO: Check ordering
     fun getAllPhotosOfPlant(plantId: Long): LiveData<List<Photo>>
 
     @Query("SELECT * FROM photos WHERE plantId = :plantId AND type = :type ORDER BY timestamp DESC LIMIT 1")

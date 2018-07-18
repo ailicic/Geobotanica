@@ -9,8 +9,8 @@ import com.geobotanica.geobotanica.data.entity.PlantComposite
 
 @Dao
 interface PlantCompositeDao {
-    @Transaction @Query("SELECT * from plants WHERE id = :id")
-    fun get(id: Long): LiveData<PlantComposite>
+    @Transaction @Query("SELECT * from plants WHERE id = :plantId")
+    fun get(plantId: Long): LiveData<PlantComposite>
 
     @Transaction @Query("SELECT * from plants")
     fun getAll(): LiveData<List<PlantComposite>>
