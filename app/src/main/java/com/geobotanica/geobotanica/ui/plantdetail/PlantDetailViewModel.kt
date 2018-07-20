@@ -9,17 +9,16 @@ import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.data.repo.*
 import com.geobotanica.geobotanica.util.Lg
 import java.io.File
-import javax.inject.Inject
 
 
-class PlantDetailViewModel @Inject constructor(
-        private var userRepo: UserRepo,
-        private var plantRepo: PlantRepo,
-        private var plantLocationRepo: PlantLocationRepo,
-        private var photoRepo: PhotoRepo,
-        private var measurementRepo: MeasurementRepo
+class PlantDetailViewModel constructor(
+        private val userRepo: UserRepo,
+        private val plantRepo: PlantRepo,
+        private val plantLocationRepo: PlantLocationRepo,
+        private val photoRepo: PhotoRepo,
+        private val measurementRepo: MeasurementRepo
 ): ViewModel() {
-    var plantId = 0L    // Must be set externally after instantiation. Very ugly approach to injection of dynamic parameter.
+    var plantId = 0L    // Field injection of dynamic parameter.
         set(value) {
             field = value
             init()

@@ -1,6 +1,8 @@
 <!--suppress CheckTagEmptyBody -->
 <resources>
     <string name="app_name">Geobotanica</string>
+
+
     <string name="extra_user_id">com.geobotanica.user_id</string>
     <string name="extra_plant_id">com.geobotanica.plant_id</string>
     <string name="extra_plant_type">com.geobotanica.plant_type</string>
@@ -14,6 +16,11 @@
     <string name="activity_new_plant_photo">Capture Photo</string>
     <string name="activity_new_plant_name">Plant Name</string>
     <string name="activity_plant_measurements">Plant Measurements</string>
+
+
+    <string name="gps_must_be_enabled">GPS must be enabled</string>
+    <string name="enable_gps">Enable GPS</string>
+    <string name="got_it">Got it!</string>
     <string name="delete">Delete</string>
     <string name="action_settings">Settings</string>
     <string name="photo_type">Photo Type</string>

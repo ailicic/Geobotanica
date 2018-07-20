@@ -16,8 +16,8 @@ class PlantDetailViewModelFactory @Inject constructor(
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return PlantDetailViewModel(userRepo, plantRepo, plantLocationRepo, photoRepo, measurementRepo).apply {
-            plantId = this@PlantDetailViewModelFactory.plantId  // Manual field injection of dynamic dependency (better approaches exist)
+        return PlantDetailViewModel(userRepo, plantRepo, plantLocationRepo, photoRepo, measurementRepo).also {
+            it.plantId = this.plantId  // Manual field injection of dynamic dependency (better approaches exist)
         } as T
     }
 }

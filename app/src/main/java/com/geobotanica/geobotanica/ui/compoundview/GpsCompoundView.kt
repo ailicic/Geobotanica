@@ -67,7 +67,7 @@ class GpsCompoundView @JvmOverloads constructor(
                 holdText.visibility = View.VISIBLE
                 gpsSwitch.visibility = View.VISIBLE
             }
-            satellitesInUse?.let { setSatellitesText(satellitesInUse ?: 0, satellitesVisible) }
+            satellitesInUse?.let { setSatellitesText(satellitesInUse, satellitesVisible) }
         }
     }
 

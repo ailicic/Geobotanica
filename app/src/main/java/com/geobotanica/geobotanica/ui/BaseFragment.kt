@@ -11,8 +11,9 @@ import com.geobotanica.geobotanica.util.Lg
 import javax.inject.Inject
 
 abstract class BaseFragment : Fragment() {
+    @Inject lateinit var appContext: Context
     @Inject lateinit var activity: MainActivity
-    @Inject lateinit var sharedPrefs: SharedPreferences
+    @Inject lateinit var defaultSharedPrefs: SharedPreferences
 
     abstract val className: String
 

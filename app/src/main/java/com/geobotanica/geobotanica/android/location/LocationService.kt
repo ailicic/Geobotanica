@@ -44,7 +44,7 @@ class LocationService @Inject constructor (private val locationManager: Location
             registerGpsUpdates()
         }
         val isAdded = observers.put(observer, callback) == null
-        Lg.d("LocationService: subscribe(): isAdded=$isAdded, observers=${observers.count()}, observer=$observer callback=$callback")
+        Lg.v("LocationService: subscribe(): isAdded=$isAdded, observers=${observers.count()}, observer=$observer callback=$callback")
     }
 
     fun unsubscribe(observer: Any) {
@@ -53,7 +53,7 @@ class LocationService @Inject constructor (private val locationManager: Location
             unregisterGpsUpdates()
             hasFirstFix = false
         }
-        Lg.d("LocationService: unsubscribe(): isRemoved=$isRemoved, observers=${observers.count()}, observer=$observer\"")
+        Lg.v("LocationService: unsubscribe(): isRemoved=$isRemoved, observers=${observers.count()}, observer=$observer\"")
     }
 
     // TODO: Push merge code into Location repo: location.mergeWith(location)
@@ -102,10 +102,10 @@ class LocationService @Inject constructor (private val locationManager: Location
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val isAdded = locationManager.registerGnssStatusCallback(gnssStatusCallback)
-            Lg.d("Registering GPS status (API >= 24), isAdded=$isAdded, callback=$gnssStatusCallback")
+            Lg.v("Registering GPS status (API >= 24), isAdded=$isAdded, callback=$gnssStatusCallback")
         } else {
             val isAdded = locationManager.addGpsStatusListener(gpsStatusListener)
-            Lg.d("Registering GPS status (API < 24), isAdded=$isAdded, callback=$gpsStatusListener")
+            Lg.v("Registering GPS status (API < 24), isAdded=$isAdded, callback=$gpsStatusListener")
         }
     }
 
@@ -137,15 +137,15 @@ class LocationService @Inject constructor (private val locationManager: Location
             }
         }
         override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
-            Lg.d("GpsLocationListener(): OnStatusChanged()")
+            Lg.v("GpsLocationListener(): OnStatusChanged()")
         }
 
         override fun onProviderEnabled(provider: String) {
-            Lg.d("GpsLocationListener(): OnProviderEnabled()")
+            Lg.i("GpsLocationListener(): OnProviderEnabled()")
         }
 
         override fun onProviderDisabled(provider: String) {
-            Lg.d("GpsLocationListener(): OnProviderDisabled()")
+            Lg.i("GpsLocationListener(): OnProviderDisabled()")
         }
     }
 
@@ -170,17 +170,17 @@ class LocationService @Inject constructor (private val locationManager: Location
 
         override fun onStarted() {
             super.onStarted()
-            Lg.d("GnssStatus.Callback::onStarted()")
+            Lg.v("GnssStatus.Callback::onStarted()")
         }
 
         override fun onFirstFix(ttffMillis: Int) {
             super.onFirstFix(ttffMillis)
-            Lg.d("GnssStatus.Callback::onFirstFix()")
+            Lg.v("GnssStatus.Callback::onFirstFix()")
         }
 
         override fun onStopped() {
             super.onStopped()
-            Lg.d("GnssStatus.Callback::onStopped()")
+            Lg.v("GnssStatus.Callback::onStopped()")
         }
     }
 
@@ -189,9 +189,9 @@ class LocationService @Inject constructor (private val locationManager: Location
     private inner class GpsStatusListener: GpsStatus.Listener {
         override fun onGpsStatusChanged(event: Int) {
             when (event) {
-                GpsStatus.GPS_EVENT_STARTED-> Lg.d("GPS_EVENT_STARTED")
-                GpsStatus.GPS_EVENT_STOPPED-> Lg.d("GPS_EVENT_STOPPED")
-                GpsStatus.GPS_EVENT_FIRST_FIX->  Lg.d("GPS_EVENT_FIRST_FIX")
+                GpsStatus.GPS_EVENT_STARTED-> Lg.v("GPS_EVENT_STARTED")
+                GpsStatus.GPS_EVENT_STOPPED-> Lg.v("GPS_EVENT_STOPPED")
+                GpsStatus.GPS_EVENT_FIRST_FIX->  Lg.v("GPS_EVENT_FIRST_FIX")
                 GpsStatus.GPS_EVENT_SATELLITE_STATUS-> {
                     val status = locationManager.getGpsStatus(null)
                     val satellitesInUse = status.satellites.filter {it.usedInFix()}.count()
