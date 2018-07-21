@@ -3,7 +3,6 @@
 package com.geobotanica.geobotanica.android.location
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.location.GnssStatus
 import android.location.GpsStatus
 import android.location.LocationListener
@@ -38,10 +37,11 @@ class LocationService @Inject constructor (private val locationManager: Location
     }
 
     fun isGpsEnabled(): Boolean = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+    fun isGpsSubscribed(observer: Any): Boolean = observers.contains(observer)
 
-    fun subscribe(observer: Any, callback: LocationCallback) {
+    fun subscribe(observer: Any, callback: LocationCallback, minTime: Long = 0) {
         if(observers.isEmpty()) {
-            registerGpsUpdates()
+            registerGpsUpdates(minTime)
         }
         val isAdded = observers.put(observer, callback) == null
         Lg.v("LocationService: subscribe(): isAdded=$isAdded, observers=${observers.count()}, observer=$observer callback=$callback")
@@ -96,27 +96,27 @@ class LocationService @Inject constructor (private val locationManager: Location
     }
 
     @SuppressLint("MissingPermission")
-    private fun registerGpsUpdates() {
-        Lg.d("LocationService: registerGpsUpdates()")
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, gpsLocationListener)
+    private fun registerGpsUpdates(minTime: Long = 0) {
+//        Lg.d("LocationService: registerGpsUpdates()")
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, 0f, gpsLocationListener)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val isAdded = locationManager.registerGnssStatusCallback(gnssStatusCallback)
-            Lg.v("Registering GPS status (API >= 24), isAdded=$isAdded, callback=$gnssStatusCallback")
+//            Lg.v("Registering GPS status (API >= 24), isAdded=$isAdded, callback=$gnssStatusCallback")
         } else {
             val isAdded = locationManager.addGpsStatusListener(gpsStatusListener)
-            Lg.v("Registering GPS status (API < 24), isAdded=$isAdded, callback=$gpsStatusListener")
+//            Lg.v("Registering GPS status (API < 24), isAdded=$isAdded, callback=$gpsStatusListener")
         }
     }
 
     private fun unregisterGpsUpdates() {
-        Lg.d("LocationService: unregisterGpsUpdates()")
+//        Lg.d("LocationService: unregisterGpsUpdates()")
         locationManager.removeUpdates(gpsLocationListener)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Lg.d("Unregistering GPS status (API >= 24), callback=$gnssStatusCallback")
+//            Lg.v("Unregistering GPS status (API >= 24), callback=$gnssStatusCallback")
             locationManager.unregisterGnssStatusCallback(gnssStatusCallback)
         } else {
-            Lg.d("Unregistering GPS status (API < 24), callback=$gpsStatusListener")
+//            Lg.v("Unregistering GPS status (API < 24), callback=$gpsStatusListener")
             locationManager.removeGpsStatusListener(gpsStatusListener)
         }
     }
@@ -137,7 +137,7 @@ class LocationService @Inject constructor (private val locationManager: Location
             }
         }
         override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
-            Lg.v("GpsLocationListener(): OnStatusChanged()")
+            Lg.v("GpsLocationListener(): OnStatusChanged(): status=$status")
         }
 
         override fun onProviderEnabled(provider: String) {

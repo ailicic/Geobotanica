@@ -5,12 +5,11 @@ import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.util.Lg
-import org.osmdroid.util.GeoPoint
 
 
 class MapViewModel constructor(
-        private var plantRepo: PlantRepo,
-        private var locationService: LocationService
+        private val plantRepo: PlantRepo,
+        private val locationService: LocationService
 ): ViewModel() {
     var userId = 0L    // Field injection of dynamic parameter.
         set(value) {
@@ -24,26 +23,35 @@ class MapViewModel constructor(
     val currentLocation: LiveData<Location>
         get() = _currentLocation
 
-    var alreadyNotifiedGpsRequired = false
-    var mapWasCenteredOnCurrentLocationOnce = false // TODO: Remove this after GPS button is added to map
-    var mapZoomLevel: Double? = null
-    var mapPosition: GeoPoint? = null
+    // Map Defaults
+    private val defaultMapZoomLevel = 16.0
+    private val defaultMapLatitude = 49.477
+    private val defaultMapLongitude = -119.59
 
+    var wasNotifiedGpsRequired = false
+    var mapZoomLevel: Double = defaultMapZoomLevel
+    var mapLatitude: Double = defaultMapLatitude
+    var mapLongitude: Double = defaultMapLongitude
+    var wasGpsSubscribed = true
 
     private fun init() {
-        Lg.d("MapViewModel: init()")
+        Lg.d("MapViewModel: init(userId=$userId)")
         allPlantComposites = plantRepo.getAllPlantComposites()
     }
 
-    fun startGps() {
-        locationService.subscribe(this, ::onLocation)
+    fun subscribeGps() {
+        if (!isGpsSubscribed())
+            locationService.subscribe(this, ::onLocation, 5000)
     }
 
-    fun stopGps() {
-        locationService.unsubscribe(this)
+    fun unsubscribeGps() {
+        if (isGpsSubscribed())
+            locationService.unsubscribe(this)
     }
 
     fun isGpsEnabled(): Boolean = locationService.isGpsEnabled()
+
+    fun isGpsSubscribed(): Boolean = locationService.isGpsSubscribed(this)
 
     private fun onLocation(location: Location) {
 //        Lg.v("MapViewModel:onLocation(): $location")

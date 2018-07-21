@@ -12,7 +12,9 @@ data class Location(
     val satellitesInUse: Int? = null,
     val satellitesVisible: Int, // Before GPS fix, visible satellites are always available
     val timestamp: OffsetDateTime = OffsetDateTime.now()
-): Serializable
+): Serializable {
+    fun notCached(): Boolean = OffsetDateTime.now().minusSeconds(1).isBefore(this.timestamp)
+}
 
 
 @Entity(tableName = "plant_locations",

@@ -19,13 +19,13 @@ class MeasurementCompoundView @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
     init {
-        Lg.v("MeasurementCompoundView()")
+//        Lg.v("MeasurementCompoundView()")
         inflate(getContext(), R.layout.measurement_compound_view,this)
 
         unitsSpinner.onItemSelectedListener = object : OnItemSelectedListener {
 
             override fun onItemSelected(parentView: AdapterView<*>, selectedItemView: View, position: Int, id: Long) {
-                Lg.d("unitsSpinner.onItemSelected(): position=$position, id=$id")
+//                Lg.d("unitsSpinner.onItemSelected(): position=$position, id=$id")
                 if (id == Measurement.Unit.FT.ordinal.toLong()) {
                     inchesEditText.visibility = View.VISIBLE
                     inchesTextView.visibility = View.VISIBLE
@@ -52,7 +52,7 @@ class MeasurementCompoundView @JvmOverloads constructor(
                 2.54F * (12 * value + inches)
             }
             else -> { // TODO: Maybe use enum in spinner to avoid else?
-                Lg.d("getInCentimeters(): Error"); return 0F
+                Lg.e("getInCentimeters(): Error"); return 0F
             }
         }
     }

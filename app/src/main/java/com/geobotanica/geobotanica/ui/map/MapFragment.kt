@@ -30,24 +30,29 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import javax.inject.Inject
+import android.content.Intent
 
-// TODO: Add GPS button to bottom left of map to toggle GPS
+// TODO: Create SharedPrefs ext. fun for clean api with map syntax
+
+// TODO: Show shaded circle around current location for accuracy
 
 // TODO: Show snackbar after plant saved (pass as param in Navigate)
 
+// TODO: Show satellite stats too
+
 // TODO: Decide on Lg.v/d/i etc.
-
-// TODO: Create download map activity and utilize offline map tiles
-// https://github.com/osmdroid/osmdroid/wiki/Offline-Map-Tiles
-
-// TODO: Group nearby markers into clusters
 
 // TODO: Double check proper placement of methods in lifecycle callbacks
 
+// LONG TERM
+// TODO: Use vector graphics for all icons where possible
+// TODO: Group nearby markers into clusters
+// TODO: Create download map activity and utilize offline map tiles
+// https://github.com/osmdroid/osmdroid/wiki/Offline-Map-Tiles
 
-/**
- * A placeholder fragment containing a simple view.
- */
+
+
+
 class MapFragment : BaseFragment() {
     @Inject lateinit var mapViewModelFactory: MapViewModelFactory
     private lateinit var viewModel: MapViewModel
@@ -56,21 +61,17 @@ class MapFragment : BaseFragment() {
 
     private var locationMarker: Marker? = null
 
-    // Map Defaults
-    private val defaultMapZoomLevel = 16.0
-    private val defaultMapLatitude = 49.477
-    private val defaultMapLongitude = -119.59
-
     // Permissions
     private val requestFineLocationPermission = 1
     private val requestExternalStoragePermission = 2
 
     // SharedPrefs
     private val mapSharedPres = "MapSharedPrefs"
-    private val alreadyNotifiedGpsRequired = "alreadyNotifiedGpsRequired"
-    private val sharedPrefsMapLatitude = "sharedPrefsMapLatitude"
-    private val sharedPrefsMapLongitude = "sharedPrefsMapLongitude"
-    private val sharedPrefsMapZoomLevel = "sharedPrefsMapZoomLevel"
+    private val wasNotifiedGpsRequired = "wasNotifiedGpsRequired"
+    private val sharedPrefsMapLatitude = "MapLatitude"
+    private val sharedPrefsMapLongitude = "MapLongitude"
+    private val sharedPrefsMapZoomLevel = "MapZoomLevel"
+    private val sharedPrefsGpsUpdatesSubscribed = "gpsUpdatesSubscribed"
 
 
     override fun onAttach(context: Context) {
@@ -97,12 +98,12 @@ class MapFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        checkGpsEnabled()
         requestPermissions()
         initializeMap()
-        addPlantMarkers()
+        addMapMarkers()
         setClickListeners()
         observeLocation()
+        initGpsSuscribe()
     }
 
     override fun onResume() {
@@ -126,41 +127,41 @@ class MapFragment : BaseFragment() {
 
     override fun onStop() {
         super.onStop()
-        viewModel.stopGps()
-
         saveStateToViewModel()
+        viewModel.unsubscribeGps()
     }
 
     override fun onDetach() {
         super.onDetach()
-        saveSharedPrefs()
+        saveSharedPrefsFromViewModel()
     }
+
+    private fun saveSharedPrefsFromViewModel() {
+        val sharedPrefs = appContext.getSharedPreferences(mapSharedPres, MODE_PRIVATE).edit()
+        sharedPrefs.putBoolean(wasNotifiedGpsRequired, viewModel.wasNotifiedGpsRequired)
+        sharedPrefs.putDouble(sharedPrefsMapLatitude, viewModel.mapLatitude)
+        sharedPrefs.putDouble(sharedPrefsMapLongitude, viewModel.mapLongitude)
+        sharedPrefs.putDouble(sharedPrefsMapZoomLevel, viewModel.mapZoomLevel)
+        sharedPrefs.putBoolean(sharedPrefsGpsUpdatesSubscribed, viewModel.wasGpsSubscribed)
+        sharedPrefs.apply()
+    }
+
     private fun loadSharedPrefsToViewModel() {
         val sharedPrefs = activity.getSharedPreferences(mapSharedPres, MODE_PRIVATE)
-        viewModel.mapPosition = GeoPoint(
-                sharedPrefs.getDouble(sharedPrefsMapLatitude, defaultMapLatitude),
-                sharedPrefs.getDouble(sharedPrefsMapLongitude, defaultMapLongitude)
-        )
-        viewModel.mapZoomLevel = sharedPrefs.getDouble(sharedPrefsMapZoomLevel, defaultMapZoomLevel)
-        viewModel.alreadyNotifiedGpsRequired = sharedPrefs.getBoolean(alreadyNotifiedGpsRequired, false)
-        viewModel.mapWasCenteredOnCurrentLocationOnce = false
+        viewModel.mapLatitude = sharedPrefs.getDouble(sharedPrefsMapLatitude, viewModel.mapLatitude)
+        viewModel.mapLongitude = sharedPrefs.getDouble(sharedPrefsMapLongitude, viewModel.mapLongitude)
+        viewModel.mapZoomLevel = sharedPrefs.getDouble(sharedPrefsMapZoomLevel, viewModel.mapZoomLevel)
+        viewModel.wasNotifiedGpsRequired = sharedPrefs.getBoolean(
+                wasNotifiedGpsRequired, viewModel.wasNotifiedGpsRequired)
+        viewModel.wasGpsSubscribed = sharedPrefs.getBoolean(
+                sharedPrefsGpsUpdatesSubscribed, viewModel.wasGpsSubscribed)
     }
 
     private fun saveStateToViewModel() {
         viewModel.mapZoomLevel = map.zoomLevelDouble
-
-        viewModel.mapPosition = map.mapCenter as GeoPoint
-        Lg.d("Saved mapZoomLevel=${viewModel.mapZoomLevel}")
-        Lg.d("Saved mapPosition=${viewModel.mapPosition}")
-    }
-
-    private fun saveSharedPrefs() {
-        val sharedPrefs = appContext.getSharedPreferences(mapSharedPres, MODE_PRIVATE).edit()
-        sharedPrefs.putBoolean(alreadyNotifiedGpsRequired, viewModel.alreadyNotifiedGpsRequired)
-        sharedPrefs.putDouble(sharedPrefsMapLatitude, viewModel.mapPosition!!.latitude)
-        sharedPrefs.putDouble(sharedPrefsMapLongitude, viewModel.mapPosition!!.longitude)
-        sharedPrefs.putDouble(sharedPrefsMapZoomLevel, viewModel.mapZoomLevel!!)
-        sharedPrefs.apply()
+        viewModel.mapLatitude = map.mapCenter.latitude
+        viewModel.mapLongitude = map.mapCenter.longitude
+        viewModel.wasGpsSubscribed = viewModel.isGpsSubscribed()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
@@ -168,7 +169,8 @@ class MapFragment : BaseFragment() {
             requestFineLocationPermission -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     Lg.i("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_GRANTED")
-                    viewModel.startGps()
+                    if (viewModel.wasGpsSubscribed)
+                        subscribeGps()
                 } else {
                     Lg.i("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_DENIED")
                 }
@@ -184,25 +186,9 @@ class MapFragment : BaseFragment() {
         }
     }
 
-    private fun checkGpsEnabled() {
-        if (viewModel.isGpsEnabled()) {
-            Lg.d("GPS is already enabled")
-        } else {
-            Lg.d("GPS is disabled")
-            if (!viewModel.alreadyNotifiedGpsRequired) {
-                Snackbar.make(coordinator, R.string.gps_must_be_enabled, Snackbar.LENGTH_INDEFINITE)
-                        .setAction(R.string.got_it) { }.show()
-                viewModel.alreadyNotifiedGpsRequired = true
-            }
-
-        }
-    }
-
     private fun requestPermissions() {
-        if (ContextCompat.checkSelfPermission(activity,
-                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            Lg.d("GPS permissions already available. Starting GPS...")
-            viewModel.startGps()
+        if (wasGpsPermissionGranted()) {
+            Lg.d("GPS permissions already available.")
         } else {
             Lg.d("GPS permissions not available. Requesting now...")
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), requestFineLocationPermission)
@@ -217,21 +203,26 @@ class MapFragment : BaseFragment() {
         }
     }
 
+    private fun wasGpsPermissionGranted(): Boolean = ContextCompat.checkSelfPermission(activity,
+            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
     private fun initializeMap() {
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setBuiltInZoomControls(true)
         map.setMultiTouchControls(true)
 
         val mapController = map.controller
-        mapController.setZoom(viewModel.mapZoomLevel!!)
-        mapController.setCenter(viewModel.mapPosition)
+        mapController.setZoom(viewModel.mapZoomLevel)
+        mapController.setCenter( GeoPoint(viewModel.mapLatitude, viewModel.mapLongitude) )
     }
 
-    private fun addPlantMarkers() {
+    private fun addMapMarkers() {
+        viewModel.allPlantComposites.removeObservers((this)) // Avoids multiple subscriptions to LiveData!
         viewModel.allPlantComposites.observe(this, Observer<List<PlantComposite>> {
+            Lg.d("addPlantMarkers(): Adding ${it.size} plants")
             map.overlays.clear()
             it?.forEach { plantComposite ->
-                Lg.d("Adding plant marker: $plantComposite")
+                Lg.v("Adding plant marker: $plantComposite")
                 val plantId = plantComposite.plant.id
                 val plantMarker = GbMarker(activity, plantId, map)
                 val plantLocation = plantComposite.plantLocations.first().location
@@ -273,35 +264,103 @@ class MapFragment : BaseFragment() {
                     map.overlays.add(this)
                 }
             }
+            locationMarker?.let { map.overlays.add(it) }
             map.postInvalidate()
         })
     }
 
+    @Suppress("DEPRECATION")
     private fun setClickListeners() {
-        fab.setOnClickListener { _ ->
-            val bundle = bundleOf("userId" to viewModel.userId)
-            val navController = activity.findNavController(R.id.fragment)
-            navController.navigate(R.id.newPlantTypeFragment, bundle)
+        fab_gps.setOnClickListener { _ ->
+            if (!wasGpsPermissionGranted())
+                requestPermissions()
+            else if (!viewModel.isGpsEnabled())
+                showGpsRequiredSnackbar(false)
+            else if (viewModel.isGpsSubscribed())
+                unsubscribeGps()
+            else
+                subscribeGps()
+        }
+        fab_new.setOnClickListener { _ ->
+            if (!wasGpsPermissionGranted())
+                requestPermissions()
+            else if (!viewModel.isGpsEnabled())
+                showGpsRequiredSnackbar(false)
+            else {
+                val bundle = bundleOf("userId" to viewModel.userId)
+                val navController = activity.findNavController(R.id.fragment)
+                navController.navigate(R.id.newPlantTypeFragment, bundle)
+            }
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun observeLocation() {
         locationMarker = null
+
         viewModel.currentLocation.observe(this, Observer<Location> {
             Lg.v("MapFragment:ObserveLocation = $it")
             if (it.latitude != null && it.longitude != null) {
                 if (locationMarker == null)
-                    createLocationMarker(it)
-                else
-                    updateLocationMarkerPosition(it)
+                    createLocationMarker()
+                updateLocationMarkerPosition(it)
+
+                if (it.notCached()) {
+                    setFabGpsIcon(FabGpsIcon.GPS_FIX)
+                    if (locationOffScreen(it))
+                        centerMapOnLocation(it)
+                }
                 map.invalidate()
             }
-            // Update satellitesInUse
+            // TODO: Update satellitesInUse
         })
     }
 
+    private fun initGpsSuscribe() {
+        val isGpsEnabled = viewModel.isGpsEnabled()
+        if (!viewModel.wasNotifiedGpsRequired && !isGpsEnabled) {
+            showGpsRequiredSnackbar(true)
+            viewModel.wasNotifiedGpsRequired = true
+        }
+        if (viewModel.wasGpsSubscribed && isGpsEnabled && wasGpsPermissionGranted())
+            subscribeGps()
+    }
+
+    private fun showGpsRequiredSnackbar(isPersistent: Boolean) {
+        if (isPersistent) {
+            Snackbar.make(coordinatorLayout, R.string.gps_must_be_enabled, Snackbar.LENGTH_INDEFINITE)
+                .setAction(R.string.got_it) { }
+                .show()
+        } else {
+            Snackbar.make(coordinatorLayout, R.string.gps_must_be_enabled, Snackbar.LENGTH_LONG)
+                .setAction(R.string.enable) {
+                    startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                }.show()
+        }
+    }
+
     @Suppress("DEPRECATION")
-    private fun createLocationMarker(currentLocation: Location) {
+    private fun setFabGpsIcon(gpsIcon: FabGpsIcon) {
+        when (gpsIcon) {
+            FabGpsIcon.GPS_OFF -> fab_gps.setImageDrawable(resources.getDrawable(R.drawable.gps_off))
+            FabGpsIcon.GPS_NO_FIX -> fab_gps.setImageDrawable(resources.getDrawable(R.drawable.gps_no_fix))
+            FabGpsIcon.GPS_FIX -> fab_gps.setImageDrawable(resources.getDrawable(R.drawable.gps_fix))
+        }
+
+    }
+
+    private fun subscribeGps() { @Suppress("DEPRECATION")
+        setFabGpsIcon(FabGpsIcon.GPS_NO_FIX)
+        viewModel.subscribeGps()
+    }
+
+    private fun unsubscribeGps() { @Suppress("DEPRECATION")
+        setFabGpsIcon(FabGpsIcon.GPS_OFF)
+        viewModel.unsubscribeGps()
+    }
+
+    @Suppress("DEPRECATION")
+    private fun createLocationMarker() {
         locationMarker = Marker(map).apply {
             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
             setIcon(resources.getDrawable(R.drawable.person))
@@ -311,18 +370,22 @@ class MapFragment : BaseFragment() {
             }
             map.overlays.add(this)
         }
-        updateLocationMarkerPosition(currentLocation)
-        if(!viewModel.mapWasCenteredOnCurrentLocationOnce) {
-            centerMapOnCurrentLocation(currentLocation)
-            viewModel.mapWasCenteredOnCurrentLocationOnce = true
-        }
     }
 
     private fun updateLocationMarkerPosition(currentLocation: Location) {
-        currentLocation.let { locationMarker?.position?.setCoords(it.latitude!!, it.longitude!!) }
+        currentLocation.let {
+            locationMarker?.position?.setCoords(it.latitude!!, it.longitude!!)
+        }
     }
 
-    private fun centerMapOnCurrentLocation(currentLocation: Location) {
-        currentLocation.let { map.controller.setCenter( GeoPoint(it.latitude!!, it.longitude!!) ) }
+    private fun locationOffScreen(location: Location): Boolean =
+        !map.projection.boundingBox.contains(location.latitude!!, location.longitude!!)
+
+    private fun centerMapOnLocation(location: Location) {
+        location.let { map.controller.animateTo( GeoPoint(it.latitude!!, it.longitude!!) ) }
+    }
+
+    enum class FabGpsIcon {
+        GPS_OFF, GPS_NO_FIX, GPS_FIX
     }
 }

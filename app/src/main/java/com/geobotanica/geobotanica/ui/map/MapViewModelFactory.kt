@@ -18,7 +18,8 @@ class MapViewModelFactory @Inject constructor(
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return MapViewModel(plantRepo, locationService).apply {
-            userId = userRepo.insert(User(1,"Guest"))  // Manual field injection of dynamic dependency (better approaches exist)
+            userRepo.insert(User(1,"Guest"))
+            userId = 1  // Manual field injection of dynamic dependency. TODO: Remove after Login Screen
         } as T
     }
 }

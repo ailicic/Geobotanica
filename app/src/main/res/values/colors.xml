@@ -6,5 +6,6 @@
     <color name="colorPaleGreen">#e4fcb5</color>
     <color name="colorGreen">#16ae0e</color>
     <color name="colorBlack">#000000</color>
+    <color name="colorWhite">#FFFFFF</color>
     <color name="colorDarkGrey">#aaa</color>
 </resources>

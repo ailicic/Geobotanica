@@ -27,8 +27,6 @@ class GpsCompoundView @JvmOverloads constructor(
     var currentLocation: Location? = null
 
     init {
-        Lg.v("GpsCompoundView()")
-
         (context as MainActivity).applicationComponent.inject(this)
         inflate(getContext(), R.layout.gps_compound_view,this)
     }
@@ -45,7 +43,7 @@ class GpsCompoundView @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        Lg.d("GpsCompoundView: onAttachedToWindow()")
+//        Lg.d("GpsCompoundView: onAttachedToWindow()")
         gpsSwitch.setOnCheckedChangeListener(::onToggleHoldPosition)
         if (!gpsSwitch.isChecked)
             locationService.subscribe(this, ::onLocation)
@@ -53,7 +51,7 @@ class GpsCompoundView @JvmOverloads constructor(
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        Lg.d("GpsCompoundView: onDetachedFromWindow()")
+//        Lg.d("GpsCompoundView: onDetachedFromWindow()")
         gpsSwitch.setOnClickListener(null)
         locationService.unsubscribe(this)
     }

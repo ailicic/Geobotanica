@@ -62,6 +62,7 @@
     <string name="photo_type_fruit">Fruit</string>
     <string name="photo_type_trunk">Trunk</string>
     <string name="inches">in</string>
+    <string name="enable">Enable</string>
     <string-array name="measurement_units">
         <item>cm</item>
         <item>m</item>
