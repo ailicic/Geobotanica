@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,20 +31,20 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
-// TODO: Show shaded circle around current location for accuracy
+// TODO: Use last known location immediately?
 
 // TODO: Show snackbar after plant saved (pass as param in Navigate)
 
 // TODO: Show satellite stats too
 
-// TODO: Decide on Lg.v/d/i etc.
-
-// TODO: Double check proper placement of methods in lifecycle callbacks
 
 // LONG TERM
 // TODO: Use vector graphics for all icons where possible
+// TODO: Decide on Lg.v/d/i etc.
+// TODO: Double check proper placement of methods in lifecycle callbacks
 // TODO: Group nearby markers into clusters
 // TODO: Create download map activity and utilize offline map tiles
 // https://github.com/osmdroid/osmdroid/wiki/Offline-Map-Tiles
@@ -58,6 +59,8 @@ class MapFragment : BaseFragment() {
     override val className = this.javaClass.name.substringAfterLast('.')
 
     private var locationMarker: Marker? = null
+    private var locationPrecisionCircle: Polygon? = null
+    private var staleGpsTimer: CountDownTimer? = null
 
     // Permissions
     private val requestFineLocationPermission = 1
@@ -93,15 +96,14 @@ class MapFragment : BaseFragment() {
         return inflater.inflate(R.layout.fragment_map, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
+    override fun onStart() {
+        super.onStart()
         requestPermissions()
-        initializeMap()
-        addMapMarkers()
-        setClickListeners()
+        initMap()
+        initMapMarkers()
         observeLocation()
         initGpsSuscribe()
+        setClickListeners()
     }
 
     override fun onResume() {
@@ -112,7 +114,6 @@ class MapFragment : BaseFragment() {
         //Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
         map.onResume() //needed for compass, my location overlays, v6.0.0 and up
     }
-
 
     override fun onPause() {
         super.onPause()
@@ -125,6 +126,7 @@ class MapFragment : BaseFragment() {
 
     override fun onStop() {
         super.onStop()
+        staleGpsTimer?.run { cancel(); staleGpsTimer = null }
         saveStateToViewModel()
         viewModel.unsubscribeGps()
     }
@@ -207,7 +209,7 @@ class MapFragment : BaseFragment() {
     private fun wasGpsPermissionGranted(): Boolean = ContextCompat.checkSelfPermission(activity,
             Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
-    private fun initializeMap() {
+    private fun initMap() {
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setBuiltInZoomControls(true)
         map.setMultiTouchControls(true)
@@ -217,7 +219,10 @@ class MapFragment : BaseFragment() {
         mapController.setCenter( GeoPoint(viewModel.mapLatitude, viewModel.mapLongitude) )
     }
 
-    private fun addMapMarkers() {
+    private fun initMapMarkers() {
+        locationMarker = null
+        locationPrecisionCircle = null
+
         viewModel.allPlantComposites.removeObservers((this)) // Avoids multiple subscriptions to LiveData!
         viewModel.allPlantComposites.observe(this, Observer<List<PlantComposite>> {
             Lg.d("addPlantMarkers(): Adding ${it.size} plants")
@@ -272,17 +277,19 @@ class MapFragment : BaseFragment() {
 
     @Suppress("DEPRECATION")
     private fun setClickListeners() {
-        fab_gps.setOnClickListener { _ ->
+        fabGps.setOnClickListener { _ ->
             if (!wasGpsPermissionGranted())
                 requestPermissions()
-            else if (!viewModel.isGpsEnabled())
+            else if (!viewModel.isGpsEnabled()) {
                 showGpsRequiredSnackbar(false)
+                setFabGpsIcon(FabGpsIcon.GPS_OFF)
+            }
             else if (viewModel.isGpsSubscribed())
                 unsubscribeGps()
             else
                 subscribeGps()
         }
-        fab_new.setOnClickListener { _ ->
+        fabNew.setOnClickListener { _ ->
             if (!wasGpsPermissionGranted())
                 requestPermissions()
             else if (!viewModel.isGpsEnabled())
@@ -297,24 +304,56 @@ class MapFragment : BaseFragment() {
 
     @Suppress("DEPRECATION")
     private fun observeLocation() {
-        locationMarker = null
-
         viewModel.currentLocation.observe(this, Observer<Location> {
             Lg.v("MapFragment:ObserveLocation = $it")
             if (it.latitude != null && it.longitude != null) {
-                if (locationMarker == null)
-                    createLocationMarker()
                 updateLocationMarkerPosition(it)
 
                 if (it.notCached()) {
                     setFabGpsIcon(FabGpsIcon.GPS_FIX)
+                    updateLocationPrecision(it)
                     if (locationOffScreen(it))
                         centerMapOnLocation(it)
+                    setStaleGpsLocationTimer()
                 }
                 map.invalidate()
             }
             // TODO: Update satellitesInUse
         })
+    }
+
+    private fun setStaleGpsLocationTimer() {
+        staleGpsTimer?.run { cancel(); staleGpsTimer = null }
+        staleGpsTimer = object: CountDownTimer(120000, 1000) {
+            override fun onTick(millisUntilFinished: Long) { }
+
+            override fun onFinish() {
+                Lg.d("staleGpsTimer finished.")
+                setFabGpsIcon(FabGpsIcon.GPS_NO_FIX)
+            }
+        }.start()
+    }
+
+    private fun updateLocationPrecision(location: Location) {
+        if (locationPrecisionCircle == null)
+            createLocationPrecisionCircle()
+        locationPrecisionCircle?.points = Polygon.pointsAsCircle(
+            GeoPoint(location.latitude!!, location.longitude!!),
+            location.precision!!.toDouble()
+        )
+    }
+
+    @Suppress("DEPRECATION")
+    private fun createLocationPrecisionCircle() {
+        locationPrecisionCircle = Polygon(map).apply {
+            fillColor = 0x12121212
+            strokeColor = resources.getColor(R.color.colorPrimaryDark)
+            strokeWidth = 3F
+            infoWindow = null
+            map.overlays.add(this)
+        }
+        map.overlays.remove(locationMarker)
+        map.overlays.add(locationMarker)
     }
 
     private fun initGpsSuscribe() {
@@ -343,9 +382,9 @@ class MapFragment : BaseFragment() {
     @Suppress("DEPRECATION")
     private fun setFabGpsIcon(gpsIcon: FabGpsIcon) {
         when (gpsIcon) {
-            FabGpsIcon.GPS_OFF -> fab_gps.setImageDrawable(resources.getDrawable(R.drawable.gps_off))
-            FabGpsIcon.GPS_NO_FIX -> fab_gps.setImageDrawable(resources.getDrawable(R.drawable.gps_no_fix))
-            FabGpsIcon.GPS_FIX -> fab_gps.setImageDrawable(resources.getDrawable(R.drawable.gps_fix))
+            FabGpsIcon.GPS_OFF -> fabGps.setImageDrawable(resources.getDrawable(R.drawable.gps_off))
+            FabGpsIcon.GPS_NO_FIX -> fabGps.setImageDrawable(resources.getDrawable(R.drawable.gps_no_fix))
+            FabGpsIcon.GPS_FIX -> fabGps.setImageDrawable(resources.getDrawable(R.drawable.gps_fix))
         }
 
     }
@@ -363,7 +402,7 @@ class MapFragment : BaseFragment() {
     @Suppress("DEPRECATION")
     private fun createLocationMarker() {
         locationMarker = Marker(map).apply {
-            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
             setIcon(resources.getDrawable(R.drawable.person))
             setOnMarkerClickListener { _, _ ->
                 Toast.makeText(activity, "You are here", Toast.LENGTH_SHORT).show()
@@ -374,6 +413,8 @@ class MapFragment : BaseFragment() {
     }
 
     private fun updateLocationMarkerPosition(currentLocation: Location) {
+        if (locationMarker == null)
+            createLocationMarker()
         currentLocation.let {
             locationMarker?.position?.setCoords(it.latitude!!, it.longitude!!)
         }

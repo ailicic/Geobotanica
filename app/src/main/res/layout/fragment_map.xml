@@ -15,7 +15,7 @@
         android:layout_height="fill_parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_gps"
+        android:id="@+id/fabGps"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
@@ -25,7 +25,7 @@
         app:srcCompat="@drawable/gps_off" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_new"
+        android:id="@+id/fabNew"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"

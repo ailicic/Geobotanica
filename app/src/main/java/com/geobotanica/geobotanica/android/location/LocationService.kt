@@ -22,6 +22,7 @@ typealias LocationCallback = (Location) -> Unit
 @Singleton
 class LocationService @Inject constructor (private val locationManager: LocationManager) {
     private val observers = mutableMapOf<Any, LocationCallback>()
+    private var currentGpsMinTime = 0L
     private var gnssStatusCallback:GnssStatusCallback? = null
     private val gpsLocationListener:GpsLocationListener = GpsLocationListener()
     private val gpsStatusListener = GpsStatusListener()
@@ -40,12 +41,15 @@ class LocationService @Inject constructor (private val locationManager: Location
     fun isGpsSubscribed(observer: Any): Boolean = observers.contains(observer)
 
     fun subscribe(observer: Any, callback: LocationCallback, minTime: Long = 0) {
-        if(observers.isEmpty()) {
+        if (observers.isEmpty() || isMinTimeChanged(minTime)) {
             registerGpsUpdates(minTime)
+            currentGpsMinTime = minTime
         }
         val isAdded = observers.put(observer, callback) == null
-        Lg.v("LocationService: subscribe(): isAdded=$isAdded, observers=${observers.count()}, observer=$observer callback=$callback")
+        Lg.v("LocationService: subscribe(): isAdded=$isAdded, observers=${observers.count()}, minTime=$minTime, observer=$observer callback=$callback")
     }
+
+    private fun isMinTimeChanged(minTime: Long): Boolean = observers.isNotEmpty() && minTime != currentGpsMinTime
 
     fun unsubscribe(observer: Any) {
         val isRemoved = observers.remove(observer) != null
