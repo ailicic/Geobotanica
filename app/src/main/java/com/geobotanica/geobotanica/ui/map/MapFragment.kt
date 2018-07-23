@@ -3,6 +3,7 @@ package com.geobotanica.geobotanica.ui.map
 import android.Manifest
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -21,8 +22,8 @@ import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.PlantComposite
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.getDouble
-import com.geobotanica.geobotanica.util.putDouble
+import com.geobotanica.geobotanica.util.SharedPrefsExt.get
+import com.geobotanica.geobotanica.util.SharedPrefsExt.put
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_map.*
 import org.osmdroid.config.Configuration
@@ -30,9 +31,6 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import javax.inject.Inject
-import android.content.Intent
-
-// TODO: Create SharedPrefs ext. fun for clean api with map syntax
 
 // TODO: Show shaded circle around current location for accuracy
 
@@ -66,8 +64,8 @@ class MapFragment : BaseFragment() {
     private val requestExternalStoragePermission = 2
 
     // SharedPrefs
-    private val mapSharedPres = "MapSharedPrefs"
-    private val wasNotifiedGpsRequired = "wasNotifiedGpsRequired"
+    private val mapSharedPrefs = "MapSharedPrefs"
+    private val spWasNotifiedGpsRequired = "spWasNotifiedGpsRequired"
     private val sharedPrefsMapLatitude = "MapLatitude"
     private val sharedPrefsMapLongitude = "MapLongitude"
     private val sharedPrefsMapZoomLevel = "MapZoomLevel"
@@ -137,24 +135,27 @@ class MapFragment : BaseFragment() {
     }
 
     private fun saveSharedPrefsFromViewModel() {
-        val sharedPrefs = appContext.getSharedPreferences(mapSharedPres, MODE_PRIVATE).edit()
-        sharedPrefs.putBoolean(wasNotifiedGpsRequired, viewModel.wasNotifiedGpsRequired)
-        sharedPrefs.putDouble(sharedPrefsMapLatitude, viewModel.mapLatitude)
-        sharedPrefs.putDouble(sharedPrefsMapLongitude, viewModel.mapLongitude)
-        sharedPrefs.putDouble(sharedPrefsMapZoomLevel, viewModel.mapZoomLevel)
-        sharedPrefs.putBoolean(sharedPrefsGpsUpdatesSubscribed, viewModel.wasGpsSubscribed)
-        sharedPrefs.apply()
+        appContext.getSharedPreferences(mapSharedPrefs, MODE_PRIVATE).put(
+            mapOf(
+                spWasNotifiedGpsRequired to viewModel.wasNotifiedGpsRequired,
+                sharedPrefsMapLatitude to viewModel.mapLatitude,
+                sharedPrefsMapLongitude to viewModel.mapLongitude,
+                sharedPrefsMapZoomLevel to viewModel.mapZoomLevel,
+                sharedPrefsGpsUpdatesSubscribed to viewModel.wasGpsSubscribed
+            )
+        )
     }
 
     private fun loadSharedPrefsToViewModel() {
-        val sharedPrefs = activity.getSharedPreferences(mapSharedPres, MODE_PRIVATE)
-        viewModel.mapLatitude = sharedPrefs.getDouble(sharedPrefsMapLatitude, viewModel.mapLatitude)
-        viewModel.mapLongitude = sharedPrefs.getDouble(sharedPrefsMapLongitude, viewModel.mapLongitude)
-        viewModel.mapZoomLevel = sharedPrefs.getDouble(sharedPrefsMapZoomLevel, viewModel.mapZoomLevel)
-        viewModel.wasNotifiedGpsRequired = sharedPrefs.getBoolean(
-                wasNotifiedGpsRequired, viewModel.wasNotifiedGpsRequired)
-        viewModel.wasGpsSubscribed = sharedPrefs.getBoolean(
-                sharedPrefsGpsUpdatesSubscribed, viewModel.wasGpsSubscribed)
+        activity.getSharedPreferences(mapSharedPrefs, MODE_PRIVATE).let {
+            viewModel.let {vm ->
+                vm.mapLatitude = it.get(sharedPrefsMapLatitude, vm.mapLatitude)
+                vm.mapLongitude = it.get(sharedPrefsMapLongitude, vm.mapLongitude)
+                vm.mapZoomLevel = it.get(sharedPrefsMapZoomLevel, vm.mapZoomLevel)
+                vm.wasNotifiedGpsRequired = it.get(spWasNotifiedGpsRequired, vm.wasNotifiedGpsRequired)
+                vm.wasGpsSubscribed = it.get(sharedPrefsGpsUpdatesSubscribed, vm.wasGpsSubscribed)
+            }
+        }
     }
 
     private fun saveStateToViewModel() {

@@ -11,8 +11,8 @@ import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RequiresApi
 import com.geobotanica.geobotanica.data.entity.Location
-import com.geobotanica.geobotanica.util.Emulator
 import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.isEmulator
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.max
@@ -62,7 +62,7 @@ class LocationService @Inject constructor (private val locationManager: Location
     }
 
     private fun onLocation(location: Location) {
-        if (Emulator.isEmulator()) {
+        if (isEmulator()) {
             notify(location)
             return
         }

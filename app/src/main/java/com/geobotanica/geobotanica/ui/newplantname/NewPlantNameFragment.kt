@@ -12,7 +12,7 @@ import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.setScaledBitmap
+import com.geobotanica.geobotanica.util.ImageViewExt.setScaledBitmap
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_new_plant_name.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*

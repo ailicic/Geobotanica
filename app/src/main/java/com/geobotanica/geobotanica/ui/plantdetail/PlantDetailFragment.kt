@@ -17,7 +17,7 @@ import com.geobotanica.geobotanica.data.entity.Photo
 import com.geobotanica.geobotanica.databinding.FragmentPlantDetailBinding
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.setScaledBitmap
+import com.geobotanica.geobotanica.util.ImageViewExt.setScaledBitmap
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_plant_detail.*
 import javax.inject.Inject
