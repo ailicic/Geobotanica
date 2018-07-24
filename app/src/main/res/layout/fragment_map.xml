@@ -30,6 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
         android:layout_gravity="bottom|right"
-        app:srcCompat="@drawable/outline_add_white_48dp" />
+        app:tint="@color/colorWhite"
+        app:srcCompat="@drawable/plus" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

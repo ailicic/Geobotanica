@@ -197,7 +197,8 @@
             android:layout_margin="@dimen/fab_margin"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:srcCompat="@drawable/outline_add_white_48dp" />
+            app:tint="@color/colorWhite"
+            app:srcCompat="@drawable/plus" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
