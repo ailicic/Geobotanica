@@ -152,7 +152,7 @@ class NewPlantMeasurementFragment : BaseFragment() {
         plant.id = plantRepo.insert(plant)
         Lg.d("Plant: $plant (id=${plant.id})")
 
-        val photo = Photo(userId, plant.id, Photo.Type.COMPLETE, photoFilePath)
+        val photo = Photo(userId, plant.id, Photo.Type.COMPLETE, photoFilePath) // TODO: Store only relative path/filename
         photo.id = photoRepo.insert(photo)
         Lg.d("Photo: $photo (id=${photo.id})")
 

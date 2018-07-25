@@ -35,8 +35,6 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
-// TODO: Use last known location immediately?
-
 // TODO: Show snackbar after plant saved (pass as param in Navigate)
 
 // TODO: Show satellite stats too
@@ -69,6 +67,7 @@ class MapFragment : BaseFragment() {
 
     // SharedPrefs
     private val mapSharedPrefs = "MapSharedPrefs"
+    private val sharedPrefsIsFirstRun = "isFirstRun"
     private val spWasNotifiedGpsRequired = "spWasNotifiedGpsRequired"
     private val sharedPrefsMapLatitude = "MapLatitude"
     private val sharedPrefsMapLongitude = "MapLongitude"
@@ -142,6 +141,7 @@ class MapFragment : BaseFragment() {
     private fun saveSharedPrefsFromViewModel() {
         appContext.getSharedPreferences(mapSharedPrefs, MODE_PRIVATE).put(
             mapOf(
+                sharedPrefsIsFirstRun to false,
                 spWasNotifiedGpsRequired to viewModel.wasNotifiedGpsRequired,
                 sharedPrefsMapLatitude to viewModel.mapLatitude,
                 sharedPrefsMapLongitude to viewModel.mapLongitude,
@@ -154,6 +154,7 @@ class MapFragment : BaseFragment() {
     private fun loadSharedPrefsToViewModel() {
         activity.getSharedPreferences(mapSharedPrefs, MODE_PRIVATE).let {
             viewModel.let {vm ->
+                vm.isFirstRun = it.get(sharedPrefsIsFirstRun, vm.isFirstRun)
                 vm.mapLatitude = it.get(sharedPrefsMapLatitude, vm.mapLatitude)
                 vm.mapLongitude = it.get(sharedPrefsMapLongitude, vm.mapLongitude)
                 vm.mapZoomLevel = it.get(sharedPrefsMapZoomLevel, vm.mapZoomLevel)
@@ -175,8 +176,10 @@ class MapFragment : BaseFragment() {
             requestFineLocationPermission -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     Lg.i("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_GRANTED")
-                    if (viewModel.wasGpsSubscribed)
+                    if (viewModel.wasGpsSubscribed && viewModel.isGpsEnabled())
                         subscribeGps()
+                    if (viewModel.isFirstRun)
+                        viewModel.getLastLocation()?.also { centerMapOnLocation(it, false) }
                 } else {
                     Lg.i("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_DENIED")
                 }
@@ -426,8 +429,10 @@ class MapFragment : BaseFragment() {
     private fun locationOffScreen(location: Location): Boolean =
         !map.projection.boundingBox.contains(location.latitude!!, location.longitude!!)
 
-    private fun centerMapOnLocation(location: Location) {
-        location.let { map.controller.animateTo( GeoPoint(it.latitude!!, it.longitude!!) ) }
+    private fun centerMapOnLocation(location: Location, animate: Boolean = true) {
+        animate?.run {
+            location.let { map.controller.animateTo( GeoPoint(it.latitude!!, it.longitude!!) ) }
+        } ?: location.let { map.controller.setCenter( GeoPoint(it.latitude!!, it.longitude!!) ) }
     }
 
     enum class FabGpsIcon {

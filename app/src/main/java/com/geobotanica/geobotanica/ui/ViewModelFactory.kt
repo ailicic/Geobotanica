@@ -6,9 +6,7 @@ import androidx.lifecycle.ViewModelProviders
 import javax.inject.Inject
 
 
-class ViewModelFactory<VM : ViewModel> @Inject constructor(
-    private val viewModel: VM
-) : ViewModelProvider.Factory {
+class ViewModelFactory<VM : ViewModel> @Inject constructor( private val viewModel: VM) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(viewModelClass: Class<T>): T = viewModel as T

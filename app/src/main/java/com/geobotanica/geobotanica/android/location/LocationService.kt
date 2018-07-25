@@ -209,4 +209,26 @@ class LocationService @Inject constructor (private val locationManager: Location
             }
         }
     }
+
+    @SuppressLint("MissingPermission")
+    fun getLastLocation(): Location? { // USELESS: Always returns null
+        val extractLocation: (android.location.Location) -> Location = {
+            Location(
+                    latitude = it.latitude,
+                    longitude = it.longitude,
+                    altitude = it.altitude,
+                    satellitesVisible = 0
+            )
+        }
+        locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)?.let {
+            Lg.d("getLastLocation(GPS_PROVIDER): $it")
+            return extractLocation(it)
+        }
+        locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)?.let {
+            Lg.d("getLastLocation(NETWORK_PROVIDER): $it")
+            return extractLocation(it)
+        }
+        Lg.d("getLastLocation(): None available")
+        return null
+    }
 }

@@ -30,6 +30,7 @@ class MapViewModel @Inject constructor(
     private val defaultMapLatitude = 49.477
     private val defaultMapLongitude = -119.59
 
+    var isFirstRun = true
     var wasNotifiedGpsRequired = false
     var mapZoomLevel: Double = defaultMapZoomLevel
     var mapLatitude: Double = defaultMapLatitude
@@ -54,6 +55,8 @@ class MapViewModel @Inject constructor(
     fun isGpsEnabled(): Boolean = locationService.isGpsEnabled()
 
     fun isGpsSubscribed(): Boolean = locationService.isGpsSubscribed(this)
+
+    fun getLastLocation(): Location? = locationService.getLastLocation()
 
     private fun onLocation(location: Location) {
 //        Lg.v("MapViewModel:onLocation(): $location")

@@ -59,7 +59,7 @@ class NewPlantPhotoFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         getArgs()
-        capturePhoto()
+        startPhotoIntent()
     }
 
     private fun getArgs() {
@@ -72,7 +72,7 @@ class NewPlantPhotoFragment : BaseFragment() {
         }
     }
 
-    private fun capturePhoto() {
+    private fun startPhotoIntent() {
         val capturePhotoIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         capturePhotoIntent.resolveActivity(activity.packageManager)
 
@@ -128,5 +128,4 @@ class NewPlantPhotoFragment : BaseFragment() {
         photoFilePath = image.absolutePath
         return image
     }
-
 }
