@@ -10,21 +10,22 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.view.doOnPreDraw
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Photo
 import com.geobotanica.geobotanica.databinding.FragmentPlantDetailBinding
 import com.geobotanica.geobotanica.ui.BaseFragment
-import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.ui.ViewModelFactory
+import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.util.ImageViewExt.setScaledBitmap
+import com.geobotanica.geobotanica.util.Lg
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_plant_detail.*
 import javax.inject.Inject
 
 
 class PlantDetailFragment : BaseFragment() {
-    @Inject lateinit var plantDetailViewModelFactory: PlantDetailViewModelFactory
+    @Inject lateinit var viewModelFactory: ViewModelFactory<PlantDetailViewModel>
     private lateinit var viewModel: PlantDetailViewModel
 
     override val className = this.javaClass.name.substringAfterLast('.')
@@ -43,8 +44,9 @@ class PlantDetailFragment : BaseFragment() {
         plantId = arguments?.getLong("plantId", 0L) ?: 0L
         Lg.d("Fragment args: plantId=$plantId")
 
-        plantDetailViewModelFactory.plantId = plantId
-        viewModel = ViewModelProviders.of(this, plantDetailViewModelFactory).get(PlantDetailViewModel::class.java)
+        viewModel = getViewModel(viewModelFactory) {
+            plantId = this@PlantDetailFragment.plantId
+        }
 
         val binding = DataBindingUtil.inflate<FragmentPlantDetailBinding>(
                 layoutInflater, R.layout.fragment_plant_detail, container, false).apply {

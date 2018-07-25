@@ -5,9 +5,11 @@ import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.util.Lg
+import javax.inject.Inject
+import javax.inject.Singleton
 
-
-class MapViewModel constructor(
+@Singleton
+class MapViewModel @Inject constructor(
         private val plantRepo: PlantRepo,
         private val locationService: LocationService
 ): ViewModel() {

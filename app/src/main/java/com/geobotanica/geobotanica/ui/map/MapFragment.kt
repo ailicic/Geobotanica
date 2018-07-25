@@ -15,13 +15,14 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.PlantComposite
 import com.geobotanica.geobotanica.ui.BaseFragment
+import com.geobotanica.geobotanica.ui.ViewModelFactory
+import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SharedPrefsExt.get
 import com.geobotanica.geobotanica.util.SharedPrefsExt.put
@@ -53,7 +54,7 @@ import javax.inject.Inject
 
 
 class MapFragment : BaseFragment() {
-    @Inject lateinit var mapViewModelFactory: MapViewModelFactory
+    @Inject lateinit var viewModelFactory: ViewModelFactory<MapViewModel>
     private lateinit var viewModel: MapViewModel
 
     override val className = this.javaClass.name.substringAfterLast('.')
@@ -72,14 +73,16 @@ class MapFragment : BaseFragment() {
     private val sharedPrefsMapLatitude = "MapLatitude"
     private val sharedPrefsMapLongitude = "MapLongitude"
     private val sharedPrefsMapZoomLevel = "MapZoomLevel"
-    private val sharedPrefsGpsUpdatesSubscribed = "gpsUpdatesSubscribed"
+    private val sharedPrefsWasGpsSubscribed = "gpsUpdatesSubscribed"
 
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
-        viewModel = ViewModelProviders.of(this, mapViewModelFactory).get(MapViewModel::class.java)
+        viewModel = getViewModel(viewModelFactory) {
+            userId = 1L // TODO: Retrieve userId from LoginFragment Navigation bundle
+        }
         loadSharedPrefsToViewModel()
 
         //load/initialize the osmdroid configuration, this can be done
@@ -143,7 +146,7 @@ class MapFragment : BaseFragment() {
                 sharedPrefsMapLatitude to viewModel.mapLatitude,
                 sharedPrefsMapLongitude to viewModel.mapLongitude,
                 sharedPrefsMapZoomLevel to viewModel.mapZoomLevel,
-                sharedPrefsGpsUpdatesSubscribed to viewModel.wasGpsSubscribed
+                sharedPrefsWasGpsSubscribed to viewModel.wasGpsSubscribed
             )
         )
     }
@@ -155,7 +158,7 @@ class MapFragment : BaseFragment() {
                 vm.mapLongitude = it.get(sharedPrefsMapLongitude, vm.mapLongitude)
                 vm.mapZoomLevel = it.get(sharedPrefsMapZoomLevel, vm.mapZoomLevel)
                 vm.wasNotifiedGpsRequired = it.get(spWasNotifiedGpsRequired, vm.wasNotifiedGpsRequired)
-                vm.wasGpsSubscribed = it.get(sharedPrefsGpsUpdatesSubscribed, vm.wasGpsSubscribed)
+                vm.wasGpsSubscribed = it.get(sharedPrefsWasGpsSubscribed, vm.wasGpsSubscribed)
             }
         }
     }

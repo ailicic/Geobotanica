@@ -9,9 +9,10 @@ import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.data.repo.*
 import com.geobotanica.geobotanica.util.Lg
 import java.io.File
+import javax.inject.Inject
 
 
-class PlantDetailViewModel constructor(
+class PlantDetailViewModel @Inject constructor(
         private val userRepo: UserRepo,
         private val plantRepo: PlantRepo,
         private val plantLocationRepo: PlantLocationRepo,
@@ -47,7 +48,7 @@ class PlantDetailViewModel constructor(
     lateinit var createdDateText: LiveData<String>
 
     private fun init() {
-        Lg.d("PlantDetailViewModel: init()")
+        Lg.d("PlantDetailViewModel: init(plantId=$plantId)")
         plant = plantRepo.get(plantId)
         user = switchMap(plant) { plant ->
             plant?.let { userRepo.get(plant.userId) }

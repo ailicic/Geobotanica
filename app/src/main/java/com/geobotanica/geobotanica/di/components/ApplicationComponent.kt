@@ -2,7 +2,6 @@ package com.geobotanica.geobotanica.di.components
 
 import com.geobotanica.geobotanica.di.modules.ApplicationModule
 import com.geobotanica.geobotanica.di.modules.RepoModule
-import com.geobotanica.geobotanica.di.modules.ViewModelModule
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.compoundview.GpsCompoundView
 import com.geobotanica.geobotanica.ui.map.MapFragment
@@ -15,10 +14,7 @@ import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [
-            ApplicationModule::class,
-            RepoModule::class,
-            ViewModelModule::class] )
+@Component( modules = [ApplicationModule::class, RepoModule::class] )
 interface ApplicationComponent {
     fun inject(baseFragment: BaseFragment)
 

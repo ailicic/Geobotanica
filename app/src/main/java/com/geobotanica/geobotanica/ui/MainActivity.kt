@@ -9,7 +9,6 @@ import com.geobotanica.geobotanica.di.components.ApplicationComponent
 import com.geobotanica.geobotanica.di.components.DaggerApplicationComponent
 import com.geobotanica.geobotanica.di.modules.ApplicationModule
 import com.geobotanica.geobotanica.di.modules.RepoModule
-import com.geobotanica.geobotanica.di.modules.ViewModelModule
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.isEmulator
 import kotlinx.android.synthetic.main.activity_main.*
@@ -32,7 +31,6 @@ class MainActivity : AppCompatActivity() {
         applicationComponent = DaggerApplicationComponent.builder()
                 .applicationModule(ApplicationModule(applicationContext, this))
                 .repoModule(RepoModule())
-                .viewModelModule(ViewModelModule())
                 .build()
 
         if (isEmulator())
