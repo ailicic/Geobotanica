@@ -17,6 +17,15 @@ abstract class BaseFragment : Fragment() {
 
     abstract val className: String
 
+    // Navigation bundle keys
+    protected val bundleUserId = "userId"
+    protected val bundlePlantId = "plantId"
+    protected val bundlePlantType = "plantType"
+    protected val bundleCommonName = "commonName"
+    protected val bundleLatinName = "plantLatinName"
+    protected val bundlePhotoUri = "plantPhoto"
+    protected val bundleLocation = "location"
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         Lg.v("$className: onAttach()")

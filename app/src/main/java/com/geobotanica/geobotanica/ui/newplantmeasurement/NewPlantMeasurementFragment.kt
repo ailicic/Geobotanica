@@ -75,12 +75,12 @@ class NewPlantMeasurementFragment : BaseFragment() {
 
     private fun getArgs() {
         arguments?.let {
-            userId = it.getLong("userId")
-            plantType = PlantTypeConverter.toPlantType( it.getInt("plantType") )
-            photoFilePath = it.getString("photoFilePath")
-            commonName = it.getString("commonName")
-            latinName = it.getString("latinName")
-            location = it.getSerializable("location") as Location?
+            userId = it.getLong(bundleUserId)
+            plantType = PlantTypeConverter.toPlantType( it.getInt(bundlePlantType) )
+            photoFilePath = it.getString(bundlePhotoUri)
+            commonName = it.getString(bundleCommonName)
+            latinName = it.getString(bundleLatinName)
+            location = it.getSerializable(bundleLocation) as Location?
             location?.let { gps.setLocation(it) }
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, commonName=$commonName, " +
                     "latinName=$latinName, location=$location, photoFilePath=$photoFilePath")

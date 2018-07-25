@@ -23,7 +23,7 @@ class NewPlantNameFragment : BaseFragment() {
 
     private var userId = 0L
     private var plantType = 0
-    private var photoFilePath: String = ""
+    private var photoUri: String = ""
     private var location: Location? = null
 
     override fun onAttach(context: Context) {
@@ -48,18 +48,18 @@ class NewPlantNameFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         getArgs()
-        plantPhoto.doOnPreDraw { plantPhoto.setScaledBitmap(photoFilePath) }
+        plantPhoto.doOnPreDraw { plantPhoto.setScaledBitmap(photoUri) }
         fab.setOnClickListener(::onFabPressed)
     }
 
     private fun getArgs() {
         arguments?.let {
-            userId = it.getLong("userId")
-            plantType = it.getInt("plantType")
-            photoFilePath = it.getString("photoFilePath")
-            location = it.getSerializable("location") as Location?
+            userId = it.getLong(bundleUserId)
+            plantType = it.getInt(bundlePlantType)
+            photoUri = it.getString(bundlePhotoUri)
+            location = it.getSerializable(bundleLocation) as Location?
             location?.let { gps.setLocation(it) }
-            Lg.d("Fragment args: userId=$userId, plantType=$plantType, photoFilePath=$photoFilePath, location=$location")
+            Lg.d("Fragment args: userId=$userId, plantType=$plantType, photoUri=$photoUri, location=$location")
         }
     }
 
@@ -76,16 +76,15 @@ class NewPlantNameFragment : BaseFragment() {
         }
 
         var bundle = bundleOf(
-                "userId" to userId,
-                "plantType" to plantType,
-                "photoFilePath" to photoFilePath,
-                "location" to location )
+                bundleUserId to userId,
+                bundlePlantType to plantType,
+                bundlePhotoUri to photoUri )
         if (commonName.isNotEmpty())
-            bundle.putString("commonName", commonName)
+            bundle.putString(bundleCommonName, commonName)
         if (latinName.isNotEmpty())
-            bundle.putString("latinName", latinName)
+            bundle.putString(bundleLatinName, latinName)
         if (gps.gpsSwitch.isChecked)
-            bundle.putSerializable("location", gps.currentLocation)
+            bundle.putSerializable(bundleLocation, gps.currentLocation)
         val navController = activity.findNavController(R.id.fragment)
         navController.navigate(R.id.newPlantMeasurementFragment, bundle)
     }

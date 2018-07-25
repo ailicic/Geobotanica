@@ -25,7 +25,7 @@ class NewPlantTypeFragment : BaseFragment() {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
-        userId = arguments?.getLong("userId") ?: 0L
+        userId = arguments?.getLong(bundleUserId) ?: 0L
         Lg.d("Fragment args: userId=$userId")
     }
 
@@ -70,10 +70,10 @@ class NewPlantTypeFragment : BaseFragment() {
         Lg.d("onClickListener(): Clicked $plantType")
 
         var bundle = bundleOf(
-                "userId" to userId,
-                "plantType" to plantType.ordinal)
+                bundleUserId to userId,
+                bundlePlantType to plantType.ordinal)
         if (gps.gpsSwitch.isChecked)
-            bundle.putSerializable("location", gps.currentLocation)
+            bundle.putSerializable(bundleLocation, gps.currentLocation)
         val navController = activity.findNavController(R.id.fragment)
         navController.navigate(R.id.newPlantPhotoFragment, bundle)
     }

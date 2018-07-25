@@ -17,12 +17,14 @@ import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.PlantComposite
+import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.ui.BaseFragment
-import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
+import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SharedPrefsExt.get
 import com.geobotanica.geobotanica.util.SharedPrefsExt.put
@@ -46,6 +48,7 @@ import javax.inject.Inject
 // TODO: Double check proper placement of methods in lifecycle callbacks
 // TODO: Group nearby markers into clusters
 // TODO: Create download map activity and utilize offline map tiles
+// TODO: Fix screen rotation crashes and consider landscape layouts
 // https://github.com/osmdroid/osmdroid/wiki/Offline-Map-Tiles
 
 
@@ -79,6 +82,7 @@ class MapFragment : BaseFragment() {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
+        GbDatabase.getInstance(appContext).userDao().insert(User(1, "Guest")) // TODO: Move to Login Screen
         viewModel = getViewModel(viewModelFactory) {
             userId = 1L // TODO: Retrieve userId from LoginFragment Navigation bundle
         }

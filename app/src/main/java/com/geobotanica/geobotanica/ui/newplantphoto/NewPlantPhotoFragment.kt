@@ -34,8 +34,8 @@ class NewPlantPhotoFragment : BaseFragment() {
     private var plantType = 0
     private var location: Location? = null
     private val requestTakePhoto = 2
-    private var photoFilePath: String = ""
-    private var oldPhotoFilePath: String = ""
+    private var photoUri: String = ""
+    private var oldPhotoUri: String = ""
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -64,9 +64,9 @@ class NewPlantPhotoFragment : BaseFragment() {
 
     private fun getArgs() {
         arguments?.let {
-            userId = it.getLong("userId")
-            plantType = it.getInt("plantType")
-            location = it.getSerializable("location") as Location?
+            userId = it.getLong(bundleUserId)
+            plantType = it.getInt(bundlePlantType)
+            location = it.getSerializable(bundleLocation) as Location?
             location?.let { gps.setLocation(it) }
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, location=$location")
         }
@@ -95,20 +95,20 @@ class NewPlantPhotoFragment : BaseFragment() {
                 if (resultCode == Activity.RESULT_OK) {
                     Lg.d("New photo received")
 //                    plantPhoto.setImageBitmap(getScaledBitmap())
-                    if (oldPhotoFilePath.isNotEmpty()) {
-                        Lg.d("Deleting old photo: $oldPhotoFilePath")
-                        Lg.d("Delete photo result = ${File(oldPhotoFilePath).delete()}")
-                        oldPhotoFilePath = ""
+                    if (oldPhotoUri.isNotEmpty()) {
+                        Lg.d("Deleting old photo: $oldPhotoUri")
+                        Lg.d("Delete photo result = ${File(oldPhotoUri).delete()}")
+                        oldPhotoUri = ""
                     }
-                    oldPhotoFilePath = photoFilePath
+                    oldPhotoUri = photoUri
 
 
                     var bundle = bundleOf(
-                            "userId" to userId,
-                            "plantType" to plantType,
-                            "photoFilePath" to photoFilePath )
+                            bundleUserId to userId,
+                            bundlePlantType to plantType,
+                            bundlePhotoUri to photoUri )
                     if (gps.gpsSwitch.isChecked)
-                        bundle.putSerializable("location", gps.currentLocation)
+                        bundle.putSerializable(bundleLocation, gps.currentLocation)
                     val navController = activity.findNavController(R.id.fragment)
                     navController.navigate(R.id.newPlantNameFragment, bundle)
                 } else {
@@ -125,7 +125,7 @@ class NewPlantPhotoFragment : BaseFragment() {
         val storageDir: File? = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
 //        /storage/emulated/0/Android/data/com.geobotanica/files/Pictures
         val image: File = File.createTempFile(fileName, ".jpg", storageDir)
-        photoFilePath = image.absolutePath
+        photoUri = image.absolutePath
         return image
     }
 }

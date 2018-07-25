@@ -6,19 +6,18 @@ import androidx.lifecycle.ViewModelProviders
 import javax.inject.Inject
 
 
-class ViewModelFactory<VM : ViewModel> @Inject constructor( private val viewModel: VM) : ViewModelProvider.Factory {
-
-    @Suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
+class ViewModelFactory<T : ViewModel> @Inject constructor(private val viewModel: T) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(viewModelClass: Class<T>): T = viewModel as T
 }
 
 object BaseFragmentExt {
-    inline fun <reified VM : ViewModel> BaseFragment.getViewModel(
-        viewModelFactory: ViewModelFactory<VM>,
-        inject: VM.() -> Unit
-    ): VM {
+    inline fun <reified T : ViewModel> BaseFragment.getViewModel(
+        viewModelFactory: ViewModelFactory<T>,
+        inject: T.() -> Unit
+    ): T {
         return ViewModelProviders.of(this, viewModelFactory)
-            .get(VM::class.java)
+            .get(T::class.java)
             .apply { inject() }
     }
 }
