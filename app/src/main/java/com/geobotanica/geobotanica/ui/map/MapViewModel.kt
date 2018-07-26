@@ -10,8 +10,8 @@ import javax.inject.Singleton
 
 @Singleton
 class MapViewModel @Inject constructor(
-        private val plantRepo: PlantRepo,
-        private val locationService: LocationService
+    private val plantRepo: PlantRepo,
+    private val locationService: LocationService
 ): ViewModel() {
     var userId = 0L    // Field injection of dynamic parameter.
         set(value) {

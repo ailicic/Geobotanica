@@ -2,7 +2,6 @@ package com.geobotanica.geobotanica.ui.map
 
 import android.Manifest
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
@@ -27,7 +26,8 @@ import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SharedPrefsExt.get
-import com.geobotanica.geobotanica.util.SharedPrefsExt.put
+import com.geobotanica.geobotanica.util.SharedPrefsExt.getSharedPrefs
+import com.geobotanica.geobotanica.util.SharedPrefsExt.putSharedPrefs
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_map.*
 import org.osmdroid.config.Configuration
@@ -37,18 +37,26 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
+
 // TODO: Show snackbar after plant saved (pass as param in Navigate)
 
 // TODO: Show satellite stats too
 
+// TODO: Learn how to use only the keyboard
+
+// TODO: Fix storage permissions no prompting immediately
 
 // LONG TERM
 // TODO: Use vector graphics for all icons where possible
 // TODO: Decide on Lg.v/d/i etc.
 // TODO: Double check proper placement of methods in lifecycle callbacks
+    // https://developer.android.com/guide/components/activities/activity-lifecycle
 // TODO: Group nearby markers into clusters
 // TODO: Create download map activity and utilize offline map tiles
 // TODO: Fix screen rotation crashes and consider landscape layouts
+// TODO: Figure out how to resume app state after onStop, then process death (e.g. home or switch app)
+    // https://medium.com/google-developers/viewmodels-persistence-onsaveinstancestate-restoring-ui-state-and-loaders-fc7cc4a6c090
+// TODO: Check if resume state is handled correctly: start app using AS, press home, kill app using AS, open app
 // https://github.com/osmdroid/osmdroid/wiki/Offline-Map-Tiles
 
 
@@ -69,11 +77,11 @@ class MapFragment : BaseFragment() {
     private val requestExternalStoragePermission = 2
 
     // SharedPrefs
-    private val mapSharedPrefs = "MapSharedPrefs"
+    override val sharedPrefsKey = "mapSharedPrefs"
     private val sharedPrefsIsFirstRun = "isFirstRun"
-    private val spWasNotifiedGpsRequired = "spWasNotifiedGpsRequired"
-    private val sharedPrefsMapLatitude = "MapLatitude"
-    private val sharedPrefsMapLongitude = "MapLongitude"
+    private val spWasNotifiedGpsRequired = "wasNotifiedGpsRequired"
+    private val sharedPrefsMapLatitude = "mapLatitude"
+    private val sharedPrefsMapLongitude = "mapLongitude"
     private val sharedPrefsMapZoomLevel = "MapZoomLevel"
     private val sharedPrefsWasGpsSubscribed = "gpsUpdatesSubscribed"
 
@@ -84,7 +92,7 @@ class MapFragment : BaseFragment() {
 
         GbDatabase.getInstance(appContext).userDao().insert(User(1, "Guest")) // TODO: Move to Login Screen
         viewModel = getViewModel(viewModelFactory) {
-            userId = 1L // TODO: Retrieve userId from LoginFragment Navigation bundle
+            userId = 1L // TODO: Retrieve userId from LoginFragment Navigation bundle (or shared prefs)
         }
         loadSharedPrefsToViewModel()
 
@@ -102,8 +110,8 @@ class MapFragment : BaseFragment() {
         return inflater.inflate(R.layout.fragment_map, container, false)
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         requestPermissions()
         initMap()
         initMapMarkers()
@@ -135,35 +143,29 @@ class MapFragment : BaseFragment() {
         staleGpsTimer?.run { cancel(); staleGpsTimer = null }
         saveStateToViewModel()
         viewModel.unsubscribeGps()
-    }
-
-    override fun onDetach() {
-        super.onDetach()
         saveSharedPrefsFromViewModel()
     }
 
     private fun saveSharedPrefsFromViewModel() {
-        appContext.getSharedPreferences(mapSharedPrefs, MODE_PRIVATE).put(
-            mapOf(
-                sharedPrefsIsFirstRun to false,
-                spWasNotifiedGpsRequired to viewModel.wasNotifiedGpsRequired,
-                sharedPrefsMapLatitude to viewModel.mapLatitude,
-                sharedPrefsMapLongitude to viewModel.mapLongitude,
-                sharedPrefsMapZoomLevel to viewModel.mapZoomLevel,
-                sharedPrefsWasGpsSubscribed to viewModel.wasGpsSubscribed
-            )
+        putSharedPrefs(sharedPrefsKey,
+            sharedPrefsIsFirstRun to false,
+            spWasNotifiedGpsRequired to viewModel.wasNotifiedGpsRequired,
+            sharedPrefsMapLatitude to viewModel.mapLatitude,
+            sharedPrefsMapLongitude to viewModel.mapLongitude,
+            sharedPrefsMapZoomLevel to viewModel.mapZoomLevel,
+            sharedPrefsWasGpsSubscribed to viewModel.wasGpsSubscribed
         )
     }
 
     private fun loadSharedPrefsToViewModel() {
-        activity.getSharedPreferences(mapSharedPrefs, MODE_PRIVATE).let {
+        getSharedPrefs(sharedPrefsKey).let { sp ->
             viewModel.let {vm ->
-                vm.isFirstRun = it.get(sharedPrefsIsFirstRun, vm.isFirstRun)
-                vm.mapLatitude = it.get(sharedPrefsMapLatitude, vm.mapLatitude)
-                vm.mapLongitude = it.get(sharedPrefsMapLongitude, vm.mapLongitude)
-                vm.mapZoomLevel = it.get(sharedPrefsMapZoomLevel, vm.mapZoomLevel)
-                vm.wasNotifiedGpsRequired = it.get(spWasNotifiedGpsRequired, vm.wasNotifiedGpsRequired)
-                vm.wasGpsSubscribed = it.get(sharedPrefsWasGpsSubscribed, vm.wasGpsSubscribed)
+                vm.isFirstRun = sp.get(sharedPrefsIsFirstRun, vm.isFirstRun)
+                vm.mapLatitude = sp.get(sharedPrefsMapLatitude, vm.mapLatitude)
+                vm.mapLongitude = sp.get(sharedPrefsMapLongitude, vm.mapLongitude)
+                vm.mapZoomLevel = sp.get(sharedPrefsMapZoomLevel, vm.mapZoomLevel)
+                vm.wasNotifiedGpsRequired = sp.get(spWasNotifiedGpsRequired, vm.wasNotifiedGpsRequired)
+                vm.wasGpsSubscribed = sp.get(sharedPrefsWasGpsSubscribed, vm.wasGpsSubscribed)
             }
         }
     }
@@ -434,9 +436,10 @@ class MapFragment : BaseFragment() {
         !map.projection.boundingBox.contains(location.latitude!!, location.longitude!!)
 
     private fun centerMapOnLocation(location: Location, animate: Boolean = true) {
-        animate?.run {
+        if (animate)
             location.let { map.controller.animateTo( GeoPoint(it.latitude!!, it.longitude!!) ) }
-        } ?: location.let { map.controller.setCenter( GeoPoint(it.latitude!!, it.longitude!!) ) }
+        else
+            location.let { map.controller.setCenter( GeoPoint(it.latitude!!, it.longitude!!) ) }
     }
 
     enum class FabGpsIcon {

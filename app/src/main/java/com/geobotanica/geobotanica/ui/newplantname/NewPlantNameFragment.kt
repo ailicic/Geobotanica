@@ -20,6 +20,7 @@ import kotlinx.android.synthetic.main.gps_compound_view.view.*
 
 class NewPlantNameFragment : BaseFragment() {
     override val className = this.javaClass.name.substringAfterLast('.')
+    override val sharedPrefsKey = "newPlantNameSharedPrefs"
 
     private var userId = 0L
     private var plantType = 0
@@ -54,10 +55,10 @@ class NewPlantNameFragment : BaseFragment() {
 
     private fun getArgs() {
         arguments?.let {
-            userId = it.getLong(bundleUserId)
-            plantType = it.getInt(bundlePlantType)
-            photoUri = it.getString(bundlePhotoUri)
-            location = it.getSerializable(bundleLocation) as Location?
+            userId = it.getLong(userIdKey)
+            plantType = it.getInt(plantTypeKey)
+            photoUri = it.getString(photoUriKey)
+            location = it.getSerializable(locationKey) as Location?
             location?.let { gps.setLocation(it) }
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, photoUri=$photoUri, location=$location")
         }
@@ -76,15 +77,15 @@ class NewPlantNameFragment : BaseFragment() {
         }
 
         var bundle = bundleOf(
-                bundleUserId to userId,
-                bundlePlantType to plantType,
-                bundlePhotoUri to photoUri )
+                userIdKey to userId,
+                plantTypeKey to plantType,
+                photoUriKey to photoUri )
         if (commonName.isNotEmpty())
-            bundle.putString(bundleCommonName, commonName)
+            bundle.putString(commonNameKey, commonName)
         if (latinName.isNotEmpty())
-            bundle.putString(bundleLatinName, latinName)
+            bundle.putString(latinNameKey, latinName)
         if (gps.gpsSwitch.isChecked)
-            bundle.putSerializable(bundleLocation, gps.currentLocation)
+            bundle.putSerializable(locationKey, gps.currentLocation)
         val navController = activity.findNavController(R.id.fragment)
         navController.navigate(R.id.newPlantMeasurementFragment, bundle)
     }

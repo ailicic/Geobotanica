@@ -10,44 +10,49 @@ import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.ui.BaseFragment
+import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
+import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.NavBundleExt.getFromBundleOrPrefs
+import com.geobotanica.geobotanica.util.SharedPrefsExt.putSharedPrefs
 import kotlinx.android.synthetic.main.fragment_new_plant_type.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
+import javax.inject.Inject
 
 
 class NewPlantTypeFragment : BaseFragment() {
+    @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantTypeViewModel>
+    private lateinit var viewModel: NewPlantTypeViewModel
+
+    // SharedPrefs
+    private val newPlantTypeSharedPrefs = "newPlantTypeSharedPrefs"
+    override val sharedPrefsKey = "userId"
 
     override val className = this.javaClass.name.substringAfterLast('.')
-
-    private var userId = 0L
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
-        userId = arguments?.getLong(bundleUserId) ?: 0L
-        Lg.d("Fragment args: userId=$userId")
+        viewModel = getViewModel(viewModelFactory) {
+            userId = getFromBundleOrPrefs(userIdKey, 0L)
+        }
+        Lg.d("Fragment args: userId=${viewModel.userId}")
     }
 
-    // TODO: Show plant type as icon (not shown anywhere yet)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-
-//        plantDetailViewModelFactory.plantId = plantId
-//        viewModel = ViewModelProviders.of(this, plantDetailViewModelFactory).get(PlantDetailViewModel::class.java)
-
-//        val binding = DataBindingUtil.inflate<FragmentPlantDetailBinding>(
-//                layoutInflater, R.layout.fragment_new_plant_type, container, false).apply {
-//            viewModel = this@NewPlantTypeFragment.viewModel
-//            setLifecycleOwner(this@NewPlantTypeFragment)
-//        }
-//        return binding.root
         return inflater.inflate(R.layout.fragment_new_plant_type, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         bindClickListeners()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        putSharedPrefs(newPlantTypeSharedPrefs, userIdKey to viewModel.userId)
     }
 
     private fun bindClickListeners() {
@@ -70,10 +75,10 @@ class NewPlantTypeFragment : BaseFragment() {
         Lg.d("onClickListener(): Clicked $plantType")
 
         var bundle = bundleOf(
-                bundleUserId to userId,
-                bundlePlantType to plantType.ordinal)
+            userIdKey to viewModel.userId,
+            plantTypeKey to plantType.ordinal)
         if (gps.gpsSwitch.isChecked)
-            bundle.putSerializable(bundleLocation, gps.currentLocation)
+            bundle.putSerializable(locationKey, gps.currentLocation)
         val navController = activity.findNavController(R.id.fragment)
         navController.navigate(R.id.newPlantPhotoFragment, bundle)
     }

@@ -15,16 +15,17 @@ abstract class BaseFragment : Fragment() {
     @Inject lateinit var activity: MainActivity
     @Inject lateinit var defaultSharedPrefs: SharedPreferences
 
-    abstract val className: String
+    protected abstract val className: String
+    abstract val sharedPrefsKey: String
 
-    // Navigation bundle keys
-    protected val bundleUserId = "userId"
-    protected val bundlePlantId = "plantId"
-    protected val bundlePlantType = "plantType"
-    protected val bundleCommonName = "commonName"
-    protected val bundleLatinName = "plantLatinName"
-    protected val bundlePhotoUri = "plantPhoto"
-    protected val bundleLocation = "location"
+    // NavBundle/SharedPrefs keys
+    protected val userIdKey = "userId"
+    protected val plantIdKey = "plantId"
+    protected val plantTypeKey = "plantType"
+    protected val commonNameKey = "commonName"
+    protected val latinNameKey = "plantLatinName"
+    protected val photoUriKey = "plantPhoto"
+    protected val locationKey = "location"
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

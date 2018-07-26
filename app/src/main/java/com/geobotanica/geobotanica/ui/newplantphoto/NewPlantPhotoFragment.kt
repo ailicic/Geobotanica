@@ -27,8 +27,8 @@ import java.util.*
 
 
 class NewPlantPhotoFragment : BaseFragment() {
-
     override val className = this.javaClass.name.substringAfterLast('.')
+    override val sharedPrefsKey = "newPlantPhotoSharedPrefs"
 
     private var userId = 0L
     private var plantType = 0
@@ -64,9 +64,9 @@ class NewPlantPhotoFragment : BaseFragment() {
 
     private fun getArgs() {
         arguments?.let {
-            userId = it.getLong(bundleUserId)
-            plantType = it.getInt(bundlePlantType)
-            location = it.getSerializable(bundleLocation) as Location?
+            userId = it.getLong(userIdKey)
+            plantType = it.getInt(plantTypeKey)
+            location = it.getSerializable(locationKey) as Location?
             location?.let { gps.setLocation(it) }
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, location=$location")
         }
@@ -104,11 +104,11 @@ class NewPlantPhotoFragment : BaseFragment() {
 
 
                     var bundle = bundleOf(
-                            bundleUserId to userId,
-                            bundlePlantType to plantType,
-                            bundlePhotoUri to photoUri )
+                            userIdKey to userId,
+                            plantTypeKey to plantType,
+                            photoUriKey to photoUri )
                     if (gps.gpsSwitch.isChecked)
-                        bundle.putSerializable(bundleLocation, gps.currentLocation)
+                        bundle.putSerializable(locationKey, gps.currentLocation)
                     val navController = activity.findNavController(R.id.fragment)
                     navController.navigate(R.id.newPlantNameFragment, bundle)
                 } else {

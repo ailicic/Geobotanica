@@ -29,6 +29,7 @@ class PlantDetailFragment : BaseFragment() {
     private lateinit var viewModel: PlantDetailViewModel
 
     override val className = this.javaClass.name.substringAfterLast('.')
+    override val sharedPrefsKey = "plantDetailSharedPrefs"
 
     private var plantId = 0L
 

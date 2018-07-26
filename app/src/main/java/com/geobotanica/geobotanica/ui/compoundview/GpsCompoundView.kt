@@ -15,6 +15,7 @@ import javax.inject.Inject
 
 // https://medium.com/@Sserra90/android-writing-a-compound-view-1eacbf1957fc
 
+// TODO: Forbid holding location if gps is fixed, held, then unheld (location is stale/absent and imprecise at this time)
 // TODO: Investigate when OnDetachedWindow() is called. Back button fires it but onStop of parent activity seems to not in NewPlant.
 class GpsCompoundView @JvmOverloads constructor(
         context: Context,

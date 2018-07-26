@@ -33,6 +33,8 @@ class NewPlantMeasurementFragment : BaseFragment() {
     @Inject lateinit var measurementRepo: MeasurementRepo
 
     override val className = this.javaClass.name.substringAfterLast('.')
+    override val sharedPrefsKey = "newPlantMeasurementSharedPrefs"
+
     private var userId = 0L
     private lateinit var plantType: Plant.Type
     private lateinit var photoFilePath: String
@@ -75,12 +77,12 @@ class NewPlantMeasurementFragment : BaseFragment() {
 
     private fun getArgs() {
         arguments?.let {
-            userId = it.getLong(bundleUserId)
-            plantType = PlantTypeConverter.toPlantType( it.getInt(bundlePlantType) )
-            photoFilePath = it.getString(bundlePhotoUri)
-            commonName = it.getString(bundleCommonName)
-            latinName = it.getString(bundleLatinName)
-            location = it.getSerializable(bundleLocation) as Location?
+            userId = it.getLong(userIdKey)
+            plantType = PlantTypeConverter.toPlantType( it.getInt(plantTypeKey) )
+            photoFilePath = it.getString(photoUriKey)
+            commonName = it.getString(commonNameKey)
+            latinName = it.getString(latinNameKey)
+            location = it.getSerializable(locationKey) as Location?
             location?.let { gps.setLocation(it) }
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, commonName=$commonName, " +
                     "latinName=$latinName, location=$location, photoFilePath=$photoFilePath")
