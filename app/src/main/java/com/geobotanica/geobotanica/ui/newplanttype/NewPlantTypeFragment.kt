@@ -13,8 +13,7 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.NavBundleExt.getFromBundleOrPrefs
-import com.geobotanica.geobotanica.util.SharedPrefsExt.putSharedPrefs
+import com.geobotanica.geobotanica.util.NavBundleExt.getFromBundle
 import kotlinx.android.synthetic.main.fragment_new_plant_type.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import javax.inject.Inject
@@ -24,18 +23,15 @@ class NewPlantTypeFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantTypeViewModel>
     private lateinit var viewModel: NewPlantTypeViewModel
 
-    // SharedPrefs
-    private val newPlantTypeSharedPrefs = "newPlantTypeSharedPrefs"
-    override val sharedPrefsKey = "userId"
-
     override val className = this.javaClass.name.substringAfterLast('.')
+    override val sharedPrefsKey = "newPlantTypeSharedPrefs"
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
         viewModel = getViewModel(viewModelFactory) {
-            userId = getFromBundleOrPrefs(userIdKey, 0L)
+            userId = getFromBundle(userIdKey)
         }
         Lg.d("Fragment args: userId=${viewModel.userId}")
     }
@@ -48,11 +44,6 @@ class NewPlantTypeFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         bindClickListeners()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        putSharedPrefs(newPlantTypeSharedPrefs, userIdKey to viewModel.userId)
     }
 
     private fun bindClickListeners() {
@@ -74,7 +65,7 @@ class NewPlantTypeFragment : BaseFragment() {
         }
         Lg.d("onClickListener(): Clicked $plantType")
 
-        var bundle = bundleOf(
+        val bundle = bundleOf(
             userIdKey to viewModel.userId,
             plantTypeKey to plantType.ordinal)
         if (gps.gpsSwitch.isChecked)
