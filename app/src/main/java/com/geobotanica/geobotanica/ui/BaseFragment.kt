@@ -15,8 +15,10 @@ abstract class BaseFragment : Fragment() {
     @Inject lateinit var activity: MainActivity
     @Inject lateinit var defaultSharedPrefs: SharedPreferences
 
-    protected abstract val className: String
-    abstract val sharedPrefsKey: String
+    val className: String by lazy { this.toString().substringBefore('{') }
+    val sharedPrefs: SharedPreferences by lazy {
+        activity.getSharedPreferences(className, Context.MODE_PRIVATE)
+    }
 
     // NavBundle/SharedPrefs keys
     protected val userIdKey = "userId"

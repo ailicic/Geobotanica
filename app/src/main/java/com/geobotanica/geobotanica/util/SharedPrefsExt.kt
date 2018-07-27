@@ -1,29 +1,25 @@
 package com.geobotanica.geobotanica.util
 
-import android.content.Context
 import android.content.SharedPreferences
 import com.geobotanica.geobotanica.ui.BaseFragment
 
 
 object SharedPrefsExt {
 
-    fun BaseFragment.getSharedPrefs(sharedPrefsKey: String): SharedPreferences =
-            activity.getSharedPreferences(sharedPrefsKey, Context.MODE_PRIVATE)
-
     inline fun <reified T: Any> SharedPreferences.get(key: String, defaultValue: T): T {
         return when (defaultValue) {
-            is Boolean -> { this.getBoolean(key, defaultValue) as T}
-            is Int -> { this.getInt(key, defaultValue)  as T}
-            is Long -> { this.getLong(key, defaultValue)  as T}
-            is Float -> { this.getFloat(key, defaultValue)  as T}
-            is Double -> { this.getDouble(key, defaultValue)  as T}
-            is String -> { this.getString(key, defaultValue)  as T}
+            is Boolean -> { getBoolean(key, defaultValue) as T}
+            is Int -> { getInt(key, defaultValue)  as T}
+            is Long -> { getLong(key, defaultValue)  as T}
+            is Float -> { getFloat(key, defaultValue)  as T}
+            is Double -> { getDouble(key, defaultValue)  as T}
+            is String -> { getString(key, defaultValue)  as T}
             else -> throw IllegalArgumentException("$key is of unknown type")
         }
     }
 
-    fun BaseFragment.putSharedPrefs(name: String, vararg pairs: Pair<String, Any>) {
-        appContext.getSharedPreferences(name, Context.MODE_PRIVATE).edit().run {
+    fun BaseFragment.putSharedPrefs(vararg pairs: Pair<String, Any>) {
+        sharedPrefs.edit().run {
             for ((key, value) in pairs) {
                 when (value) {
                     is Boolean -> { putBoolean(key, value) }

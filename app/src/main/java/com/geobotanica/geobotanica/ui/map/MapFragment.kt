@@ -26,7 +26,6 @@ import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SharedPrefsExt.get
-import com.geobotanica.geobotanica.util.SharedPrefsExt.getSharedPrefs
 import com.geobotanica.geobotanica.util.SharedPrefsExt.putSharedPrefs
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_map.*
@@ -66,8 +65,6 @@ class MapFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<MapViewModel>
     private lateinit var viewModel: MapViewModel
 
-    override val className = this.javaClass.name.substringAfterLast('.')
-
     private var locationMarker: Marker? = null
     private var locationPrecisionCircle: Polygon? = null
     private var staleGpsTimer: CountDownTimer? = null
@@ -77,7 +74,6 @@ class MapFragment : BaseFragment() {
     private val requestExternalStoragePermission = 2
 
     // SharedPrefs
-    override val sharedPrefsKey = "mapSharedPrefs"
     private val sharedPrefsIsFirstRun = "isFirstRun"
     private val spWasNotifiedGpsRequired = "wasNotifiedGpsRequired"
     private val sharedPrefsMapLatitude = "mapLatitude"
@@ -147,7 +143,7 @@ class MapFragment : BaseFragment() {
     }
 
     private fun saveSharedPrefsFromViewModel() {
-        putSharedPrefs(sharedPrefsKey,
+        putSharedPrefs(
             sharedPrefsIsFirstRun to false,
             spWasNotifiedGpsRequired to viewModel.wasNotifiedGpsRequired,
             sharedPrefsMapLatitude to viewModel.mapLatitude,
@@ -158,7 +154,7 @@ class MapFragment : BaseFragment() {
     }
 
     private fun loadSharedPrefsToViewModel() {
-        getSharedPrefs(sharedPrefsKey).let { sp ->
+        sharedPrefs.let { sp ->
             viewModel.let {vm ->
                 vm.isFirstRun = sp.get(sharedPrefsIsFirstRun, vm.isFirstRun)
                 vm.mapLatitude = sp.get(sharedPrefsMapLatitude, vm.mapLatitude)

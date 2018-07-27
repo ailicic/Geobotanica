@@ -23,9 +23,6 @@ class NewPlantTypeFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantTypeViewModel>
     private lateinit var viewModel: NewPlantTypeViewModel
 
-    override val className = this.javaClass.name.substringAfterLast('.')
-    override val sharedPrefsKey = "newPlantTypeSharedPrefs"
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity.applicationComponent.inject(this)

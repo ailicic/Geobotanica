@@ -28,9 +28,6 @@ class PlantDetailFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<PlantDetailViewModel>
     private lateinit var viewModel: PlantDetailViewModel
 
-    override val className = this.javaClass.name.substringAfterLast('.')
-    override val sharedPrefsKey = "plantDetailSharedPrefs"
-
     private var plantId = 0L
 
     override fun onAttach(context: Context) {

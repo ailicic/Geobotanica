@@ -34,9 +34,6 @@ class NewPlantPhotoFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantPhotoViewModel>
     private lateinit var viewModel: NewPlantPhotoViewModel
 
-    override val className = this.javaClass.name.substringAfterLast('.')
-    override val sharedPrefsKey = "newPlantPhotoSharedPrefs"
-
     private val requestTakePhoto = 2
 
     override fun onAttach(context: Context) {

@@ -32,9 +32,6 @@ class NewPlantMeasurementFragment : BaseFragment() {
     @Inject lateinit var photoRepo: PhotoRepo
     @Inject lateinit var measurementRepo: MeasurementRepo
 
-    override val className = this.javaClass.name.substringAfterLast('.')
-    override val sharedPrefsKey = "newPlantMeasurementSharedPrefs"
-
     private var userId = 0L
     private lateinit var plantType: Plant.Type
     private lateinit var photoFilePath: String
