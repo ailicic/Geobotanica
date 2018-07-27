@@ -33,8 +33,7 @@ class NewPlantTypeFragment : BaseFragment() {
         Lg.d("Fragment args: userId=${viewModel.userId}")
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_new_plant_type, container, false)
     }
 

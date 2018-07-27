@@ -43,12 +43,11 @@ class NewPlantPhotoFragment : BaseFragment() {
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
             plantType = getFromBundle(plantTypeKey)
+            Lg.d("Fragment args: userId=$userId, plantType=$plantType")
         }
-        Lg.d("Fragment args: userId=${viewModel.userId}, plantType=${viewModel.plantType}")
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_new_plant_photo, container, false)
     }
 
@@ -57,7 +56,6 @@ class NewPlantPhotoFragment : BaseFragment() {
         setGpsLocationFromBundle()
         startPhotoIntent()
     }
-
     private fun setGpsLocationFromBundle() =
         arguments?.getSerializable(locationKey)?.let { gps.setLocation(it as Location) }
 
@@ -68,7 +66,7 @@ class NewPlantPhotoFragment : BaseFragment() {
         try {
             val photoFile = createImageFile()
             val authorities = "${activity.packageName}.fileprovider"
-            Lg.d("authorities = $authorities")
+            Lg.v("authorities = $authorities")
             val photoUri: Uri? = FileProvider.getUriForFile(activity, authorities, photoFile)
             Lg.d("photoUri = ${photoUri?.path}")
             capturePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
@@ -93,9 +91,9 @@ class NewPlantPhotoFragment : BaseFragment() {
 
 
                     val bundle = bundleOf(
-                            userIdKey to viewModel.userId,
-                            plantTypeKey to viewModel.plantType,
-                            photoUriKey to viewModel.photoUri )
+                        userIdKey to viewModel.userId,
+                        plantTypeKey to viewModel.plantType,
+                        photoUriKey to viewModel.photoUri )
                     if (gps.gpsSwitch.isChecked)
                         bundle.putSerializable(locationKey, gps.currentLocation)
                     val navController = activity.findNavController(R.id.fragment)

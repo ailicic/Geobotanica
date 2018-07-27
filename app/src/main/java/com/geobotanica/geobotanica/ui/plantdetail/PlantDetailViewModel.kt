@@ -24,8 +24,6 @@ class PlantDetailViewModel @Inject constructor(
             field = value
             init()
         }
-    // More sophisticated approach to dynamic parameter injection
-    // https://brightinventions.pl/blog/android-viewmodel-injections-revisited/
 
     lateinit var plant: LiveData<Plant>
     lateinit var user: LiveData<User>

@@ -36,8 +36,7 @@ class PlantDetailFragment : BaseFragment() {
     }
 
     // TODO: Show plant type as icon (not shown anywhere yet)
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         plantId = arguments?.getLong("plantId", 0L) ?: 0L
         Lg.d("Fragment args: plantId=$plantId")

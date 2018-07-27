@@ -5,17 +5,20 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 
 object NavBundleExt {
 
-    inline fun <reified T: Any> BaseFragment.getFromBundle(key: String): T =
-        this.arguments?.getValue<T>(key) ?: createDefault()
+    inline fun <reified T: Any?> BaseFragment.getNullableFromBundle(key: String): T? =
+        this.arguments?.getValue<T>(key) ?: null
 
-    inline fun <reified T: Any> Bundle.getValue(key: String): T {
+    inline fun <reified T: Any> BaseFragment.getFromBundle(key: String, default: T = createDefault()): T =
+        this.arguments?.getValue<T>(key) ?: default
+
+    inline fun <reified T: Any?> Bundle.getValue(key: String): T? {
         return when (T::class) {
-            Boolean::class -> { this.getBoolean(key) as T}
-            Int::class -> { this.getInt(key) as T}
-            Long::class -> { this.getLong(key) as T}
-            Float::class -> { this.getFloat(key) as T}
-            Double::class -> { this.getDouble(key) as T}
-            String::class -> { this.getString(key) as T}
+            Boolean::class -> { this.getBoolean(key) as T?}
+            Int::class -> { this.getInt(key) as T? }
+            Long::class -> { this.getLong(key) as T? }
+            Float::class -> { this.getFloat(key) as T? }
+            Double::class -> { this.getDouble(key) as T? }
+            String::class -> { this.getString(key) as T? }
             else -> throw IllegalArgumentException("$key is of unknown type")
         }
     }
