@@ -39,6 +39,8 @@ class MainActivity : AppCompatActivity() {
             Lg.d("Running on device")
     }
 
+    override fun onSupportNavigateUp() = findNavController(R.id.fragment).navigateUp()
+
     override fun onStart() {
         super.onStart()
         Lg.v("$className: onStart()")

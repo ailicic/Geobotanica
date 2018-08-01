@@ -8,12 +8,12 @@ object SharedPrefsExt {
 
     inline fun <reified T: Any> SharedPreferences.get(key: String, defaultValue: T): T {
         return when (defaultValue) {
-            is Boolean -> { getBoolean(key, defaultValue) as T}
-            is Int -> { getInt(key, defaultValue)  as T}
-            is Long -> { getLong(key, defaultValue)  as T}
-            is Float -> { getFloat(key, defaultValue)  as T}
-            is Double -> { getDouble(key, defaultValue)  as T}
-            is String -> { getString(key, defaultValue)  as T}
+            is Boolean -> { getBoolean(key, defaultValue) as T }
+            is Int -> { getInt(key, defaultValue)  as T }
+            is Long -> { getLong(key, defaultValue)  as T }
+            is Float -> { getFloat(key, defaultValue)  as T }
+            is Double -> { getDouble(key, defaultValue)  as T }
+            is String -> { getString(key, defaultValue)  as T }
             else -> throw IllegalArgumentException("$key is of unknown type")
         }
     }

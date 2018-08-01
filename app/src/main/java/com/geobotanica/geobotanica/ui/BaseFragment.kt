@@ -50,6 +50,11 @@ abstract class BaseFragment : Fragment() {
         Lg.v("$className: onViewCreated()")
     }
 
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        Lg.v("$className: onActivityCreated()")
+    }
+
     override fun onStart() {
         super.onStart()
         Lg.v("$className: onStart()")
@@ -63,6 +68,11 @@ abstract class BaseFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         Lg.v("$className: onPause()")
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        Lg.v("$className: onSaveInstanceState()")
     }
 
     override fun onStop() {
