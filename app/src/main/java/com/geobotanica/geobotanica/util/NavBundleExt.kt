@@ -6,7 +6,7 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 object NavBundleExt {
 
     inline fun <reified T: Any?> BaseFragment.getNullableFromBundle(key: String): T? =
-        this.arguments?.getValue<T>(key) ?: null
+        this.arguments?.getValue<T>(key)
 
     inline fun <reified T: Any> BaseFragment.getFromBundle(key: String, default: T = createDefault()): T =
         this.arguments?.getValue<T>(key) ?: default
