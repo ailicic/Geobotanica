@@ -21,9 +21,9 @@ class MapViewModel @Inject constructor(
 
     lateinit var allPlantComposites: LiveData<List<PlantComposite>>
 
-    private val _currentLocation = MutableLiveData<Location>()
     val currentLocation: LiveData<Location>
         get() = _currentLocation
+    private val _currentLocation = MutableLiveData<Location>()
 
     // Map Defaults
     private val defaultMapZoomLevel = 16.0

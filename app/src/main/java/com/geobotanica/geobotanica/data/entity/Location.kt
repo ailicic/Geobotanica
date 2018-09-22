@@ -13,7 +13,7 @@ data class Location(
     val satellitesVisible: Int, // Before GPS fix, visible satellites are always available
     val timestamp: OffsetDateTime = OffsetDateTime.now()
 ): Serializable {
-    fun notCached(): Boolean = OffsetDateTime.now().minusSeconds(1).isBefore(this.timestamp)
+    fun isRecent(): Boolean = OffsetDateTime.now().minusSeconds(1).isBefore(this.timestamp)
 }
 
 

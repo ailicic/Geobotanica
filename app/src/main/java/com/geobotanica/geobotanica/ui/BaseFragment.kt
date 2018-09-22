@@ -1,11 +1,15 @@
 package com.geobotanica.geobotanica.ui
 
+import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
+import androidx.core.content.PermissionChecker.PERMISSION_GRANTED
 import androidx.fragment.app.Fragment
 import com.geobotanica.geobotanica.util.Lg
 import javax.inject.Inject
@@ -28,6 +32,21 @@ abstract class BaseFragment : Fragment() {
     protected val latinNameKey = "plantLatinName"
     protected val photoUriKey = "plantPhoto"
     protected val locationKey = "location"
+
+    protected fun requestPermission(permission: String) {
+        lazy { this }.run {
+            requestPermissions(arrayOf(permission), getRequestCode(permission))
+        }
+    }
+
+    protected fun wasPermissionGranted(permission: String) =
+        ContextCompat.checkSelfPermission(activity, permission) == PERMISSION_GRANTED
+
+    protected fun getRequestCode(permission: String) = when (permission) {
+        ACCESS_FINE_LOCATION -> 1
+        WRITE_EXTERNAL_STORAGE -> 2
+        else -> 0
+    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
