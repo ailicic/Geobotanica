@@ -16,21 +16,21 @@
         android:layout_height="fill_parent"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabGps"
+        android:id="@+id/gpsFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
-        android:layout_gravity="bottom|left"
+        android:layout_gravity="bottom|start"
         app:backgroundTint="@color/colorWhite"
         app:tint="@color/colorPrimaryDark"
         app:srcCompat="@drawable/gps_off" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabNew"
+        android:id="@+id/newPlantFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
-        android:layout_gravity="bottom|right"
+        android:layout_gravity="bottom|end"
         app:tint="@color/colorWhite"
         app:srcCompat="@drawable/plus" />
 

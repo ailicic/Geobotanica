@@ -52,7 +52,7 @@ class PlantDetailViewModel @Inject constructor(
             plant?.let { userRepo.get(plant.userId) }
         }
 
-        location = map( plantLocationRepo.getLastPlantLocation(plantId) ) { it.location }
+        location = map( plantLocationRepo.getLastPlantLocation(plantId) ) { it?.location }
 
         photos = photoRepo.getAllPhotosOfPlant(plantId)
 
@@ -77,7 +77,7 @@ class PlantDetailViewModel @Inject constructor(
         }
     }
 
-    fun deletePlant() {
+    fun deletePlant() { // TODO: Verify photos + locations are deleted (cascade policy)
         photos.value?.forEach {
             Lg.d("Deleting photo: ${it.fileName}")
             File(it.fileName).delete()
@@ -87,19 +87,3 @@ class PlantDetailViewModel @Inject constructor(
         plantRepo.delete(plant.value!!)
     }
 }
-
-
-// EXAMPLE OF RX -> LIVEDATA CONVERSION IN VIEWMODEL
-// https://github.com/googlesamples/android-architecture-components/issues/41
-//class UserListViewModel @Inject
-//constructor(@NonNull userRepository: UserRepository) : ViewModel() {
-//
-//    internal val userList: LiveData<Resource<List<User>>>
-//
-//    init {
-//        userList = LiveDataReactiveStreams.fromPublisher(userRepository
-//                .getUserList()
-//                .subscribeOn(Schedulers.newThread())
-//                .observeOn(AndroidSchedulers.mainThread()))
-//    }
-//}

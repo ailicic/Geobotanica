@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt' // Non-default
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt' // Non-default
 
 
 android {
@@ -68,7 +68,7 @@ dependencies {
     // Room
     implementation 'androidx.room:room-runtime:2.0.0-rc01'
     kapt 'androidx.room:room-compiler:2.0.0-rc01'
-    implementation 'androidx.room:room-rxjava2:2.0.0-rc01'
+//    implementation 'androidx.room:room-rxjava2:2.0.0-rc01'
     testImplementation 'androidx.room:room-testing:2.0.0-rc01'
 
     // LiveData
@@ -78,10 +78,15 @@ dependencies {
     // KTX
     implementation "androidx.core:core-ktx:1.0.0-rc02"
 
-    // Navigation
+    // Coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.26.0'
+
+    // Navigation TODO: Use androidx here
     implementation 'android.arch.navigation:navigation-fragment-ktx:1.0.0-alpha05'
     implementation 'android.arch.navigation:navigation-ui-ktx:1.0.0-alpha05'
 
     // OffsetDateTime
     implementation 'org.threeten:threetenbp:1.3.6'
 }
+
+kotlin { experimental { coroutines 'enable' } }

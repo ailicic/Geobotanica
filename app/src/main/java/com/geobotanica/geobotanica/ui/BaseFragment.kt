@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker.PERMISSION_GRANTED
 import androidx.fragment.app.Fragment
@@ -46,6 +47,10 @@ abstract class BaseFragment : Fragment() {
         ACCESS_FINE_LOCATION -> 1
         WRITE_EXTERNAL_STORAGE -> 2
         else -> 0
+    }
+
+    protected fun showToast(message: String) {
+        Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
     }
 
     override fun onAttach(context: Context) {

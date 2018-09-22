@@ -17,7 +17,7 @@ data class  Plant(
     val type: Type,
     val commonName: String? = null,
     val latinName: String? = null,
-    val timestamp: OffsetDateTime = OffsetDateTime.now()
+    val timestamp: OffsetDateTime = OffsetDateTime.now() // TODO: Rename to dateCreated?
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0
 
@@ -33,15 +33,15 @@ data class  Plant(
             SHRUB -> "Shrub"
             HERB -> "Herb"
             GRASS -> "Grass"
-            VINE -> "Fruit"
+            VINE -> "Vine"
         }
     }
 }
 
-object PhotoTypeConverter {
+object PlantTypeConverter {
     @TypeConverter @JvmStatic
-    fun toPhotoType(ordinal: Int): Photo.Type = Photo.Type.values()[ordinal]
+    fun toPlantType(ordinal: Int): Plant.Type = Plant.Type.values()[ordinal]
 
     @TypeConverter @JvmStatic
-    fun fromPhotoType(type: Photo.Type): Int = type.ordinal
+    fun fromPlantType(type: Plant.Type): Int = type.ordinal
 }

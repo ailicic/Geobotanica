@@ -49,10 +49,10 @@ data class Photo(
     }
 }
 
-object PlantTypeConverter {
+object PhotoTypeConverter {
     @TypeConverter @JvmStatic
-    fun toPlantType(ordinal: Int): Plant.Type = Plant.Type.values()[ordinal]
+    fun toPhotoType(ordinal: Int): Photo.Type = Photo.Type.values()[ordinal]
 
     @TypeConverter @JvmStatic
-    fun fromPlantType(type: Plant.Type): Int = type.ordinal
+    fun fromPhotoType(type: Photo.Type): Int = type.ordinal
 }
