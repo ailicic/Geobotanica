@@ -79,7 +79,8 @@ dependencies {
     implementation "androidx.core:core-ktx:1.0.0-rc02"
 
     // Coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.26.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.26.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:0.26.1'
 
     // Navigation TODO: Use androidx here
     implementation 'android.arch.navigation:navigation-fragment-ktx:1.0.0-alpha05'

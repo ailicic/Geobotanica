@@ -12,7 +12,10 @@ import com.geobotanica.geobotanica.data.entity.Plant.Type.*
 import com.geobotanica.geobotanica.data.entity.PlantComposite
 import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabState.*
+import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
+import com.geobotanica.geobotanica.util.Timer.schedule
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -32,6 +35,13 @@ class MapViewModel @Inject constructor(
         get() = _currentLocation
     private val _currentLocation = MutableLiveData<Location>()
 
+    val gpsFabIcon: LiveData<Int>
+        get() = _gpsFabIcon
+    private val _gpsFabIcon = MutableLiveData<Int>()
+
+    val showGpsRequiredSnackbar = SingleLiveEvent<Unit>()
+    val navigateToNewPlant = SingleLiveEvent<Unit>()
+
     private val defaultMapZoomLevel = 16.0
     private val defaultMapLatitude = 49.477
     private val defaultMapLongitude = -119.59
@@ -42,13 +52,8 @@ class MapViewModel @Inject constructor(
     var mapLongitude: Double = defaultMapLongitude
     var wasGpsSubscribed = true
 
-    val gpsFabIcon = SingleLiveEvent<Int>() // TODO: SingleLiveEvent not required here-> User MutableLiveData
-    val showGpsRequiredSnackbar = SingleLiveEvent<Unit>()
-    val navigateToNewPlant = SingleLiveEvent<Unit>()
-
-//    val gpsFabIcon: LiveData<FabGpsIcon>
-//        get() = _gpsFabIcon
-//    private val _gpsFabIcon = MutableLiveData<FabGpsIcon>()
+    private var staleGpsTimer: Timer? = null
+    private val staleGpsTimeout = 120_000L // ms
 
     enum class GpsFabState { GPS_OFF, GPS_NO_FIX, GPS_FIX }
     private val gpsFabIcons: Map<GpsFabState, Int> = mapOf(
@@ -59,7 +64,7 @@ class MapViewModel @Inject constructor(
 
     fun onClickGpsFab() {
         if (!isGpsEnabled()) {
-            gpsFabIcon.postValue(gpsFabIcons[GPS_OFF])
+            _gpsFabIcon.value = gpsFabIcons[GPS_OFF]
             showGpsRequiredSnackbar.call()
         }
         else if (isGpsSubscribed())
@@ -84,14 +89,15 @@ class MapViewModel @Inject constructor(
 
     fun unsubscribeGps() {
         if (isGpsSubscribed()) {
-            gpsFabIcon.postValue(gpsFabIcons[GPS_OFF])
+            _gpsFabIcon.postValue(gpsFabIcons[GPS_OFF])
             locationService.unsubscribe(this)
         }
+        staleGpsTimer?.run { cancel(); staleGpsTimer = null }
     }
 
     private fun subscribeGps() {
         if (!isGpsSubscribed()) {
-            gpsFabIcon.postValue(gpsFabIcons[GPS_NO_FIX])
+            _gpsFabIcon.value = gpsFabIcons[GPS_NO_FIX]
             locationService.subscribe(this, ::onLocation, 5000)
         }
     }
@@ -100,6 +106,15 @@ class MapViewModel @Inject constructor(
 
     private fun onLocation(location: Location) {
         _currentLocation.postValue(location)
+    }
+
+    fun setStaleGpsLocationTimer() {
+        staleGpsTimer?.cancel()
+        staleGpsTimer = Timer().schedule(staleGpsTimeout) {
+            Lg.d("staleGpsTimer finished.")
+            staleGpsTimer = null
+            _gpsFabIcon.postValue(gpsFabIcons[GPS_NO_FIX])
+        }
     }
 
 //    private fun getLastLocation(): Location? = locationService.getLastLocation()

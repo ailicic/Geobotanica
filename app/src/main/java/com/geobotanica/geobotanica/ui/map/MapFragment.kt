@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -65,7 +64,6 @@ class MapFragment : BaseFragment() {
 
     private var locationMarker: Marker? = null
     private var locationPrecisionCircle: Polygon? = null
-    private var staleGpsTimer: CountDownTimer? = null // TODO: Use java.util timer
 
     private val sharedPrefsIsFirstRun = "isFirstRun"
     private val sharedPrefsMapLatitude = "mapLatitude"
@@ -119,9 +117,6 @@ class MapFragment : BaseFragment() {
 
     override fun onStop() {
         super.onStop()
-
-        // TODO: Delete. Not required after timer in VM (see below)
-        staleGpsTimer?.run { cancel(); staleGpsTimer = null }
 
         // TODO: Remove this conditional after Login screen (permission check will happen there)
         if (wasPermissionGranted(ACCESS_FINE_LOCATION)) // Required for first boot if GPS permission denied
@@ -250,6 +245,8 @@ class MapFragment : BaseFragment() {
 
     private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkersData ->
         val gbMarkers = map.overlays.filterIsInstance<GbMarker>()
+
+        // TODO: Move all diff logic into VM, return a map of ADD/REMOVE/UPDATE collections
         if (gbMarkers.isEmpty()) { // Trivial case. Add all plant markers to map.
             map.overlays.addAll(newPlantMarkersData.map { GbMarker(it, activity, map) })
         } else { // Compute diffs and apply to existing plant markers.
@@ -262,6 +259,9 @@ class MapFragment : BaseFragment() {
             Lg.v("idsToRemove=${idsToRemove.count()}")
             Lg.v("idsToInsert: ${idsToInsert.count()}")
             Lg.v("idsNotChanged: ${idsNotChanged.count()}")
+
+
+
             with(map.overlays) {
                 addAll(
                     newPlantMarkersData
@@ -294,7 +294,7 @@ class MapFragment : BaseFragment() {
                 updateLocationPrecision(it)
                 if (isLocationOffScreen(it))
                     centerMapOnLocation(it)
-                setStaleGpsLocationTimer()
+                viewModel.setStaleGpsLocationTimer()
             }
             updateLocationMarker(it)
             map.invalidate()
@@ -302,20 +302,8 @@ class MapFragment : BaseFragment() {
         // TODO: Update satellitesInUse
     }
 
-//    // TODO: Move to VM (all should be fine if FabIcon has LiveData)
-    // -> MAYBE CAN USE JAVA TIMER? ->  	java.util.Timer
-    private fun setStaleGpsLocationTimer() {
-        staleGpsTimer?.run { cancel() }
-        staleGpsTimer = object: CountDownTimer(120000, 1000) {
-            override fun onTick(millisUntilFinished: Long) { }
-
-            override fun onFinish() {
-                Lg.d("staleGpsTimer finished.")
-                setFabGpsIcon(GPS_NO_FIX)
-            }
-        }.start()
-    }
-
+    // TODO: Center on LocationMarker
+//        locationMarker?.bounds -> Can use this?
     private fun updateLocationPrecision(location: Location) {
         if (locationPrecisionCircle == null)
             createLocationPrecisionCircle()
@@ -376,3 +364,9 @@ class MapFragment : BaseFragment() {
         }
     }
 }
+
+
+// COROUTINES EXAMPLE (Switch to main thread)
+//            GlobalScope.launch(Dispatchers.Main) {
+//                setFabGpsIcon(GPS_NO_FIX)
+//            }
