@@ -11,7 +11,8 @@ import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.Plant.Type.*
 import com.geobotanica.geobotanica.data.entity.PlantComposite
 import com.geobotanica.geobotanica.data.repo.PlantRepo
-import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabState.*
+import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_NO_FIX
+import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_OFF
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
 import com.geobotanica.geobotanica.util.Timer.schedule
@@ -19,8 +20,18 @@ import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
-// TODO: Identify more concise way to expose immutable LiveData objects to view
+data class PlantMarkerData(
+        val plantId: Long,
+        val commonName: String? = null,
+        val latinName: String? = null,
+        val latitude: Double? = null,
+        val longitude: Double? = null,
+        val photoPath: String? = null,
+        val dateCreated: String? = null,
+        val icon: Int? = null
+)
 
+// TODO: Identify more concise way to expose immutable LiveData objects to view
 @Singleton
 class MapViewModel @Inject constructor(
     private val plantRepo: PlantRepo,
@@ -55,16 +66,41 @@ class MapViewModel @Inject constructor(
     private var staleGpsTimer: Timer? = null
     private val staleGpsTimeout = 120_000L // ms
 
-    enum class GpsFabState { GPS_OFF, GPS_NO_FIX, GPS_FIX }
-    private val gpsFabIcons: Map<GpsFabState, Int> = mapOf(
-            GPS_OFF to R.drawable.gps_off,
-            GPS_NO_FIX to R.drawable.gps_no_fix,
-            GPS_FIX to R.drawable.gps_fix)
+    enum class GpsFabDrawable(val drawable: Int) {
+        GPS_OFF(R.drawable.gps_off),
+        GPS_NO_FIX(R.drawable.gps_no_fix),
+        GPS_FIX(R.drawable.gps_fix)
+    }
 
+    data class PlantMarkerDiffs (
+            val removeIds: List<Long> = emptyList(),
+            val insertIds: List<Long>
+    )
+
+    fun getPlantMarkerDiffs(currentIds: List<Long>, newIds: List<Long>): PlantMarkerDiffs {
+        if (currentIds.isEmpty()) { // Trivial case. Add all plant markers to map.
+            Lg.d("Plant markers: insert ${newIds.count()} ids")
+            return PlantMarkerDiffs(insertIds = newIds)
+        } else { // Compute diffs and apply to existing plant markers.
+            var idsToRemove = currentIds subtract newIds
+            var idsToInsert = newIds subtract currentIds
+            val idsToUpdate = emptyList<Long>()  // TODO: Need a deep comparison to detect updated markers
+            val idsNotChanged = currentIds intersect newIds
+            Lg.d("Plant markers:: remove ${idsToRemove.count()}")
+            Lg.d("Plant markers:: insert ${idsToInsert.count()}")
+            Lg.d("Plant markers:: update ${idsToUpdate.count()}")
+            Lg.d("Plant markers:: keep ${idsNotChanged.count()}")
+            idsToRemove += idsToUpdate // Updated markers get removed, then inserted
+            idsToInsert += idsToUpdate
+            return PlantMarkerDiffs(
+                    idsToRemove.toList(),
+                    idsToInsert.toList() )
+        }
+    }
 
     fun onClickGpsFab() {
         if (!isGpsEnabled()) {
-            _gpsFabIcon.value = gpsFabIcons[GPS_OFF]
+            _gpsFabIcon.value = GPS_OFF.drawable
             showGpsRequiredSnackbar.call()
         }
         else if (isGpsSubscribed())
@@ -81,7 +117,7 @@ class MapViewModel @Inject constructor(
         val isGpsEnabled = isGpsEnabled()
         if (!isGpsEnabled)
             showGpsRequiredSnackbar.call()
-        if (wasGpsSubscribed && isGpsEnabled )
+        else if (wasGpsSubscribed)
             subscribeGps()
     }
 
@@ -89,7 +125,7 @@ class MapViewModel @Inject constructor(
 
     fun unsubscribeGps() {
         if (isGpsSubscribed()) {
-            _gpsFabIcon.postValue(gpsFabIcons[GPS_OFF])
+            _gpsFabIcon.postValue(GPS_OFF.drawable)
             locationService.unsubscribe(this)
         }
         staleGpsTimer?.run { cancel(); staleGpsTimer = null }
@@ -97,7 +133,7 @@ class MapViewModel @Inject constructor(
 
     private fun subscribeGps() {
         if (!isGpsSubscribed()) {
-            _gpsFabIcon.value = gpsFabIcons[GPS_NO_FIX]
+            _gpsFabIcon.value = GPS_NO_FIX.drawable
             locationService.subscribe(this, ::onLocation, 5000)
         }
     }
@@ -113,7 +149,7 @@ class MapViewModel @Inject constructor(
         staleGpsTimer = Timer().schedule(staleGpsTimeout) {
             Lg.d("staleGpsTimer finished.")
             staleGpsTimer = null
-            _gpsFabIcon.postValue(gpsFabIcons[GPS_NO_FIX])
+            _gpsFabIcon.postValue(GPS_NO_FIX.drawable)
         }
     }
 
@@ -150,13 +186,4 @@ class MapViewModel @Inject constructor(
     }
 }
 
-data class PlantMarkerData(
-    val plantId: Long,
-    val commonName: String? = null,
-    val latinName: String? = null,
-    val latitude: Double? = null,
-    val longitude: Double? = null,
-    val photoPath: String? = null,
-    val dateCreated: String? = null,
-    val icon: Int? = null
-)
+

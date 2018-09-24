@@ -35,7 +35,7 @@ object SharedPrefsExt {
         }
     }
 
-    fun SharedPreferences.Editor.putDouble(key: String, value: Double): SharedPreferences.Editor =
+    private fun SharedPreferences.Editor.putDouble(key: String, value: Double): SharedPreferences.Editor =
             putLong(key, value.toRawBits())
 
     fun SharedPreferences.getDouble(key: String, defaultValue: Double) =

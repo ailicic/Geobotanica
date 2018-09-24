@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.Location
@@ -19,7 +20,6 @@ import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabState.*
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SharedPrefsExt.get
 import com.geobotanica.geobotanica.util.SharedPrefsExt.putSharedPrefs
@@ -35,11 +35,8 @@ import javax.inject.Inject
 
 
 // TODO: Show snackbar after plant saved (pass as param in Navigate)
-
 // TODO: Show satellite stats too
-
 // TODO: Learn how to use only the keyboard
-
 
 
 // LONG TERM
@@ -56,8 +53,6 @@ import javax.inject.Inject
 // TODO: Check if resume state is handled correctly: start app using AS, press home, kill app using AS, open app
 
 
-
-
 class MapFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<MapViewModel>
     private lateinit var viewModel: MapViewModel
@@ -71,7 +66,6 @@ class MapFragment : BaseFragment() {
     private val sharedPrefsMapZoomLevel = "MapZoomLevel"
     private val sharedPrefsWasGpsSubscribed = "gpsUpdatesSubscribed"
 
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
@@ -82,13 +76,8 @@ class MapFragment : BaseFragment() {
         }
         loadSharedPrefsToViewModel()
 
-        //load/initialize the osmdroid configuration, this can be done
+        //load/initialize the osmdroid configuration (should be before layout inflation)
         Configuration.getInstance().load(context, defaultSharedPrefs)
-        //setting this before the layout is inflated is a good idea
-        //it 'should' ensure that the map has a writable location for the map cache, even without permissions
-        //if no tiles are displayed, you can try overriding the cache path using Configuration.getInstance().setCachePath
-        //see also StorageUtils
-        //note, the load method also sets the HTTP User Agent to your application's package name, abusing osm's tile servers will get you banned based on this string
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -97,6 +86,10 @@ class MapFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initAfterPermissionsGranted()
+    }
+
+    private fun initAfterPermissionsGranted() {
         if (!wasPermissionGranted(WRITE_EXTERNAL_STORAGE))
             requestPermission(WRITE_EXTERNAL_STORAGE)
         else if (!wasPermissionGranted(ACCESS_FINE_LOCATION))
@@ -119,10 +112,22 @@ class MapFragment : BaseFragment() {
         super.onStop()
 
         // TODO: Remove this conditional after Login screen (permission check will happen there)
-        if (wasPermissionGranted(ACCESS_FINE_LOCATION)) // Required for first boot if GPS permission denied
+        if (wasPermissionGranted(ACCESS_FINE_LOCATION)) // Conditional required for first boot if GPS permission denied
             saveMapStateToViewModel()
         saveSharedPrefsFromViewModel()
-        viewModel.unsubscribeGps() // TODO: Cancel timer in this function
+        viewModel.unsubscribeGps()
+    }
+
+    private fun loadSharedPrefsToViewModel() {
+        sharedPrefs.let { sp ->
+            viewModel.let { vm ->
+                vm.isFirstRun = sp.get(sharedPrefsIsFirstRun, vm.isFirstRun)
+                vm.mapLatitude = sp.get(sharedPrefsMapLatitude, vm.mapLatitude)
+                vm.mapLongitude = sp.get(sharedPrefsMapLongitude, vm.mapLongitude)
+                vm.mapZoomLevel = sp.get(sharedPrefsMapZoomLevel, vm.mapZoomLevel)
+                vm.wasGpsSubscribed = sp.get(sharedPrefsWasGpsSubscribed, vm.wasGpsSubscribed)
+            }
+        }
     }
 
     private fun saveSharedPrefsFromViewModel() {
@@ -133,18 +138,6 @@ class MapFragment : BaseFragment() {
             sharedPrefsMapZoomLevel to viewModel.mapZoomLevel,
             sharedPrefsWasGpsSubscribed to viewModel.wasGpsSubscribed
         )
-    }
-
-    private fun loadSharedPrefsToViewModel() {
-        sharedPrefs.let { sp ->
-            viewModel.let {vm ->
-                vm.isFirstRun = sp.get(sharedPrefsIsFirstRun, vm.isFirstRun)
-                vm.mapLatitude = sp.get(sharedPrefsMapLatitude, vm.mapLatitude)
-                vm.mapLongitude = sp.get(sharedPrefsMapLongitude, vm.mapLongitude)
-                vm.mapZoomLevel = sp.get(sharedPrefsMapZoomLevel, vm.mapZoomLevel)
-                vm.wasGpsSubscribed = sp.get(sharedPrefsWasGpsSubscribed, vm.wasGpsSubscribed)
-            }
-        }
     }
 
     private fun saveMapStateToViewModel() {
@@ -158,26 +151,20 @@ class MapFragment : BaseFragment() {
         when (requestCode) {
             getRequestCode(WRITE_EXTERNAL_STORAGE) -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    Lg.i("onRequestPermissionsResult(): permission.WRITE_EXTERNAL_STORAGE: PERMISSION_GRANTED")
-                    if (!wasPermissionGranted(ACCESS_FINE_LOCATION))
-                        requestPermission(ACCESS_FINE_LOCATION)
-                    else
-                        init()
+                    Lg.i("permission.WRITE_EXTERNAL_STORAGE: PERMISSION_GRANTED")
+                    initAfterPermissionsGranted()
                 } else {
-                    Lg.i("onRequestPermissionsResult(): permission.WRITE_EXTERNAL_STORAGE: PERMISSION_DENIED")
+                    Lg.i("permission.WRITE_EXTERNAL_STORAGE: PERMISSION_DENIED")
                     showToast("External storage permission required")
                     activity.finish()
                 }
             }
             getRequestCode(ACCESS_FINE_LOCATION) -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    Lg.i("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_GRANTED")
-                    if (!wasPermissionGranted(WRITE_EXTERNAL_STORAGE))
-                        requestPermission(WRITE_EXTERNAL_STORAGE)
-                    else
-                        init()
+                    Lg.i("permission.ACCESS_FINE_LOCATION: PERMISSION_GRANTED")
+                    initAfterPermissionsGranted()
                 } else {
-                    Lg.i("onRequestPermissionsResult(): permission.ACCESS_FINE_LOCATION: PERMISSION_DENIED")
+                    Lg.i("permission.ACCESS_FINE_LOCATION: PERMISSION_DENIED")
                     showToast("GPS permission required")
                     activity.finish()
                 }
@@ -204,7 +191,7 @@ class MapFragment : BaseFragment() {
         }
         coordinatorLayout.visibility = View.VISIBLE // TODO: Remove this after LoginScreen implemented
         locationMarker = null
-        createLocationPrecisionCircle()
+        createLocationPrecisionCircle() // Add to map now to ensure always on bottom
 
 //        if (viewModel.isFirstRun)
 //            viewModel.getLastLocation()?.let { centerMapOnLocation(it, false) } // TODO: CHECK IF THIS SHOULD STAY (never worked)
@@ -238,72 +225,55 @@ class MapFragment : BaseFragment() {
     }
 
     private val onNavigateToNewPlant = Observer<Unit> {
-        val bundle = bundleOf("userId" to viewModel.userId)
-        val navController = activity.findNavController(R.id.fragment)
-        navController.navigate(R.id.newPlantTypeFragment, bundle)
+        findNavController().navigate(
+            R.id.newPlantTypeFragment,
+            bundleOf("userId" to viewModel.userId) )
     }
 
     private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkersData ->
-        val gbMarkers = map.overlays.filterIsInstance<GbMarker>()
+        val currentGbMarkers = map.overlays.filterIsInstance<GbMarker>()
+        val plantMarkerDiffs = viewModel.getPlantMarkerDiffs(
+                currentGbMarkers.map { it.plantId }, newPlantMarkersData.map { it.plantId })
 
-        // TODO: Move all diff logic into VM, return a map of ADD/REMOVE/UPDATE collections
-        if (gbMarkers.isEmpty()) { // Trivial case. Add all plant markers to map.
-            map.overlays.addAll(newPlantMarkersData.map { GbMarker(it, activity, map) })
-        } else { // Compute diffs and apply to existing plant markers.
-            val currentIds = gbMarkers.map { it.plantId }
-            val newIds = newPlantMarkersData.map { it.plantId }
-
-            val idsToRemove = currentIds subtract newIds
-            val idsToInsert = newIds subtract currentIds
-            val idsNotChanged = currentIds intersect newIds // TODO: Need a deep comparison to detect updated markers
-            Lg.v("idsToRemove=${idsToRemove.count()}")
-            Lg.v("idsToInsert: ${idsToInsert.count()}")
-            Lg.v("idsNotChanged: ${idsNotChanged.count()}")
-
-
-
-            with(map.overlays) {
-                addAll(
-                    newPlantMarkersData
-                        .filter { idsToInsert.contains(it.plantId) }
-                        .map { GbMarker(it, activity, map) }
-                )
-                removeAll(gbMarkers
-                        .filter { idsToRemove.contains(it.plantId) })
-            }
-        }
-
+        map.overlays.removeAll( // Must be before add (for updated markers)
+                currentGbMarkers.filter { plantMarkerDiffs.removeIds.contains(it.plantId) } )
+        map.overlays.addAll( // Must be after remove (for updated markers)
+                newPlantMarkersData
+                        .filter { plantMarkerDiffs.insertIds.contains(it.plantId) }
+                        .map { GbMarker(it, activity, map) } )
         // TODO: Consider using a custom InfoWindow
         // https://code.google.com/archive/p/osmbonuspack/wikis/Tutorial_2.wiki
         // 7. Customizing the bubble behaviour:
         // 9. Creating your own bubble layout
 
-        locationMarker?.let {// Force location marker on top of plant markers
-            map.overlays.remove(it)
-            map.overlays.add(it)
-        }
+        forceLocationMarkerOnTop()
         map.invalidate()
     }
 
-    // TODO: Identify opportunities to move logic into VM
+    private fun forceLocationMarkerOnTop() {
+        locationMarker?.let {
+            map.overlays.remove(it)
+            map.overlays.add(it)
+        }
+    }
+
+    // TODO: See if logic here can be pushed to VM
     private val onLocation = Observer<Location> {
         Lg.v("MapFragment: onLocation() = $it")
-        if (it.latitude != null && it.longitude != null) {
-            if (it.isRecent()) {
-                setFabGpsIcon(GPS_FIX)
-                updateLocationPrecision(it)
-                if (isLocationOffScreen(it))
-                    centerMapOnLocation(it)
-                viewModel.setStaleGpsLocationTimer()
+        if (it.latitude != null && it.longitude != null) { // OK in VM
+            if (it.isRecent()) { // OK in VM
+                gpsFab.setImageDrawable(resources.getDrawable(R.drawable.gps_fix)) // Could be LiveData
+                updateLocationPrecision(it) // Could be LiveData
+                if (isLocationOffScreen(it)) // Problem: Check requires map
+                    centerMapOnLocation(it) // Could be LiveData
+                viewModel.setStaleGpsLocationTimer() // OK in VM
             }
-            updateLocationMarker(it)
-            map.invalidate()
+            updateLocationMarker(it) // Could be LiveData
+            map.invalidate() // Could be LiveData
         }
         // TODO: Update satellitesInUse
     }
 
-    // TODO: Center on LocationMarker
-//        locationMarker?.bounds -> Can use this?
     private fun updateLocationPrecision(location: Location) {
         if (locationPrecisionCircle == null)
             createLocationPrecisionCircle()
@@ -325,7 +295,6 @@ class MapFragment : BaseFragment() {
     }
 
     private fun updateLocationMarker(currentLocation: Location) {
-        Lg.d("updateLocationMarker(): locationMarker=$locationMarker")
         if (locationMarker == null)
             createLocationMarker()
         locationMarker?.position?.setCoords(currentLocation.latitude!!, currentLocation.longitude!!)
@@ -352,16 +321,6 @@ class MapFragment : BaseFragment() {
             location.let { map.controller.animateTo( GeoPoint(it.latitude!!, it.longitude!!) ) }
         else
             location.let { map.controller.setCenter( GeoPoint(it.latitude!!, it.longitude!!) ) }
-    }
-
-    // TODO: Make icon reactive to LiveData in VM
-    @Suppress("DEPRECATION")
-    private fun setFabGpsIcon(gpsIcon: MapViewModel.GpsFabState) {
-        when (gpsIcon) {
-            GPS_OFF -> gpsFab.setImageDrawable(resources.getDrawable(R.drawable.gps_off))
-            GPS_NO_FIX -> gpsFab.setImageDrawable(resources.getDrawable(R.drawable.gps_no_fix))
-            GPS_FIX -> gpsFab.setImageDrawable(resources.getDrawable(R.drawable.gps_fix))
-        }
     }
 }
 

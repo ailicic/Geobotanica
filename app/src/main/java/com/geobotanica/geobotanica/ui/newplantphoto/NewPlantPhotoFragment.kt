@@ -43,6 +43,7 @@ class NewPlantPhotoFragment : BaseFragment() {
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
             plantType = getFromBundle(plantTypeKey)
+            oldPhotoUri = ""
             Lg.d("Fragment args: userId=$userId, plantType=$plantType")
         }
     }
