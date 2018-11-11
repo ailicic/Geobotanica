@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui
+package com.geobotanica.geobotanica
 
 
 import android.view.View
@@ -12,7 +12,7 @@ import androidx.test.filters.LargeTest
 import androidx.test.rule.ActivityTestRule
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.runner.AndroidJUnit4
-import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.ui.MainActivity
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf

@@ -72,32 +72,6 @@ class MapViewModel @Inject constructor(
         GPS_FIX(R.drawable.gps_fix)
     }
 
-    data class PlantMarkerDiffs (
-            val removeIds: List<Long> = emptyList(),
-            val insertIds: List<Long>
-    )
-
-    fun getPlantMarkerDiffs(currentIds: List<Long>, newIds: List<Long>): PlantMarkerDiffs {
-        if (currentIds.isEmpty()) { // Trivial case. Add all plant markers to map.
-            Lg.d("Plant markers: insert ${newIds.count()} ids")
-            return PlantMarkerDiffs(insertIds = newIds)
-        } else { // Compute diffs and apply to existing plant markers.
-            var idsToRemove = currentIds subtract newIds
-            var idsToInsert = newIds subtract currentIds
-            val idsToUpdate = emptyList<Long>()  // TODO: Need a deep comparison to detect updated markers
-            val idsNotChanged = currentIds intersect newIds
-            Lg.d("Plant markers:: remove ${idsToRemove.count()}")
-            Lg.d("Plant markers:: insert ${idsToInsert.count()}")
-            Lg.d("Plant markers:: update ${idsToUpdate.count()}")
-            Lg.d("Plant markers:: keep ${idsNotChanged.count()}")
-            idsToRemove += idsToUpdate // Updated markers get removed, then inserted
-            idsToInsert += idsToUpdate
-            return PlantMarkerDiffs(
-                    idsToRemove.toList(),
-                    idsToInsert.toList() )
-        }
-    }
-
     fun onClickGpsFab() {
         if (!isGpsEnabled()) {
             _gpsFabIcon.value = GPS_OFF.drawable
@@ -185,5 +159,3 @@ class MapViewModel @Inject constructor(
         }
     }
 }
-
-

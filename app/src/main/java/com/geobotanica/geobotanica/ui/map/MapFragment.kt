@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.GbDatabase
@@ -20,6 +19,7 @@ import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
+import com.geobotanica.geobotanica.util.Differ
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SharedPrefsExt.get
 import com.geobotanica.geobotanica.util.SharedPrefsExt.putSharedPrefs
@@ -37,7 +37,9 @@ import javax.inject.Inject
 // TODO: Show snackbar after plant saved (pass as param in Navigate)
 // TODO: Show satellite stats too
 // TODO: Learn how to use only the keyboard
-
+// TODO: Use code reformatter:
+    // Check tabs on fn params / data class
+    // Subclass in class declaration: colon needs space on both sides
 
 // LONG TERM
 // TODO: Use vector graphics for all icons where possible
@@ -232,8 +234,8 @@ class MapFragment : BaseFragment() {
 
     private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkersData ->
         val currentGbMarkers = map.overlays.filterIsInstance<GbMarker>()
-        val plantMarkerDiffs = viewModel.getPlantMarkerDiffs(
-                currentGbMarkers.map { it.plantId }, newPlantMarkersData.map { it.plantId })
+        val plantMarkerDiffs = Differ(
+                currentGbMarkers.map { it.plantId }, newPlantMarkersData.map { it.plantId }).getDiffs()
 
         map.overlays.removeAll( // Must be before add (for updated markers)
                 currentGbMarkers.filter { plantMarkerDiffs.removeIds.contains(it.plantId) } )
