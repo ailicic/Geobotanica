@@ -30,7 +30,7 @@ data class Photo(
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0
 
-    enum class Type() {
+    enum class Type {
         COMPLETE,
         LEAF,
         FLOWER,

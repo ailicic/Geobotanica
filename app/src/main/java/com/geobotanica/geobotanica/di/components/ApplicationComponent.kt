@@ -14,7 +14,7 @@ import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component( modules = [ApplicationModule::class, RepoModule::class] )
+@Component(modules = [ApplicationModule::class, RepoModule::class] )
 interface ApplicationComponent {
     fun inject(baseFragment: BaseFragment)
 

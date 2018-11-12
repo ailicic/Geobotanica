@@ -235,7 +235,8 @@ class MapFragment : BaseFragment() {
     private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkersData ->
         val currentGbMarkers = map.overlays.filterIsInstance<GbMarker>()
         val plantMarkerDiffs = Differ(
-                currentGbMarkers.map { it.plantId }, newPlantMarkersData.map { it.plantId }).getDiffs()
+                currentGbMarkers.map { it.plantId }, newPlantMarkersData.map { it.plantId }
+        ).getDiffs()
 
         map.overlays.removeAll( // Must be before add (for updated markers)
                 currentGbMarkers.filter { plantMarkerDiffs.removeIds.contains(it.plantId) } )

@@ -43,7 +43,7 @@ abstract class GbDatabase : RoomDatabase() {
                 Room.databaseBuilder(
                         context.applicationContext,
                         GbDatabase::class.java, "gb_db")
-                        .allowMainThreadQueries()   // TODO: Remove this after going RX
+                        .allowMainThreadQueries()   // TODO: Remove this, perform db ops on bg thread
                         .fallbackToDestructiveMigration() // TODO: Implement migrations after schema stagnates
                         .build()
     }
