@@ -14,6 +14,6 @@ class RepoModule {
     @Provides @Singleton fun providePlantDao(gbDatabase: GbDatabase): PlantDao = gbDatabase.plantDao()
     @Provides @Singleton fun providePlantCompositeDao(gbDatabase: GbDatabase): PlantCompositeDao = gbDatabase.plantCompositeDao()
     @Provides @Singleton fun providePlantLocationDao(gbDatabase: GbDatabase): PlantLocationDao = gbDatabase.plantLocationDao()
-    @Provides @Singleton fun providePhotoDao(gbDatabase: GbDatabase): PhotoDao = gbDatabase.photoDao()
-    @Provides @Singleton fun provideMeasurementDao(gbDatabase: GbDatabase): MeasurementDao = gbDatabase.measurementDao()
+    @Provides @Singleton fun providePhotoDao(gbDatabase: GbDatabase): PlantPhotoDao = gbDatabase.photoDao()
+    @Provides @Singleton fun provideMeasurementDao(gbDatabase: GbDatabase): PlantMeasurementDao = gbDatabase.measurementDao()
 }

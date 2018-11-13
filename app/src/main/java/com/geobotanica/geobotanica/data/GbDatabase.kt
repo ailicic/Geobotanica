@@ -13,8 +13,8 @@ import com.geobotanica.geobotanica.data.entity.*
             User::class,
             Plant::class,
             PlantLocation::class,
-            Photo::class,
-            Measurement::class
+            PlantPhoto::class,
+            PlantMeasurement::class
         ],
         exportSchema = true,
         version = 19
@@ -29,8 +29,8 @@ abstract class GbDatabase : RoomDatabase() {
     abstract fun plantDao(): PlantDao
     abstract fun plantCompositeDao(): PlantCompositeDao
     abstract fun plantLocationDao(): PlantLocationDao
-    abstract fun photoDao(): PhotoDao
-    abstract fun measurementDao(): MeasurementDao
+    abstract fun photoDao(): PlantPhotoDao
+    abstract fun measurementDao(): PlantMeasurementDao
 
     companion object {
         @Volatile private var gbDatabase: GbDatabase? = null

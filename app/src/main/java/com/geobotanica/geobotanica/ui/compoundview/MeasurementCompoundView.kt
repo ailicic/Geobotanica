@@ -6,10 +6,11 @@ import android.util.AttributeSet
 import android.view.View
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.Units
+import com.geobotanica.geobotanica.util.Measurement
 import kotlinx.android.synthetic.main.measurement_compound_view.view.*
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
-import com.geobotanica.geobotanica.data.entity.Measurement
 
 
 class MeasurementCompoundView @JvmOverloads constructor(
@@ -26,7 +27,7 @@ class MeasurementCompoundView @JvmOverloads constructor(
 
             override fun onItemSelected(parentView: AdapterView<*>, selectedItemView: View, position: Int, id: Long) {
 //                Lg.d("unitsSpinner.onItemSelected(): position=$position, id=$id")
-                if (id == Measurement.Unit.FT.ordinal.toLong()) {
+                if (id == Units.FT.ordinal.toLong()) {
                     inchesEditText.visibility = View.VISIBLE
                     inchesTextView.visibility = View.VISIBLE
                 } else {
@@ -43,21 +44,7 @@ class MeasurementCompoundView @JvmOverloads constructor(
 
     fun getInCentimeters(): Float {
         val value = editText.text.toString().toFloatOrNull() ?: 0F
-        return when (unitsSpinner.selectedItemId.toInt()) {
-            Measurement.Unit.CM.ordinal -> value
-            Measurement.Unit.M.ordinal -> 100 * value
-            Measurement.Unit.IN.ordinal -> 2.54F * value
-            Measurement.Unit.FT.ordinal -> {
-                val inches = inchesEditText.text.toString().toFloatOrNull() ?: 0F
-                2.54F * (12 * value + inches)
-            }
-            else -> { // TODO: Maybe use enum in spinner to avoid else?
-                Lg.e("getInCentimeters(): Error"); return 0F
-            }
-        }
+        val units = unitsSpinner.selectedItemId.toInt()
+        return Measurement(value, units).convert(Units.CM).value
     }
-
-
-
-
 }

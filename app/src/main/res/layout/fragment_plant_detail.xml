@@ -16,7 +16,7 @@
         android:id="@+id/constraintLayout"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:context=".ui.plantdetail.PlantDetailFragment"
-        tools:showIn="@layout/activity_plant_detail">
+        tools:showIn="@layout/fragment_plant_detail">
 
 
 
@@ -79,7 +79,7 @@
             android:layout_marginStart="16dp"
             android:textColor="@color/colorBlack"
             android:visibility="@{ viewModel.height != null ? View.VISIBLE : View.GONE }"
-            android:text="@{ @string/measurement(viewModel.height.type, viewModel.height.measurement) }"
+            android:text="@{ @string/plantMeasurement(viewModel.height.type, viewModel.height.measurement) }"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/nameDivider" />
 
@@ -100,7 +100,7 @@
             android:layout_marginStart="16dp"
             android:visibility="@{ viewModel.diameter != null ? View.VISIBLE : View.GONE }"
             android:textColor="@color/colorBlack"
-            android:text="@{ @string/measurement(viewModel.diameter.type, viewModel.diameter.measurement) }"
+            android:text="@{ @string/plantMeasurement(viewModel.diameter.type, viewModel.diameter.measurement) }"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/heightText" />
 
@@ -121,7 +121,7 @@
             android:layout_marginStart="16dp"
             android:visibility="@{ viewModel.trunkDiameter != null ? View.VISIBLE : View.GONE }"
             android:textColor="@color/colorBlack"
-            android:text="@{ @string/measurement(viewModel.trunkDiameter.type, viewModel.trunkDiameter.measurement) }"
+            android:text="@{ @string/plantMeasurement(viewModel.trunkDiameter.type, viewModel.trunkDiameter.measurement) }"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/diameterText" />
 

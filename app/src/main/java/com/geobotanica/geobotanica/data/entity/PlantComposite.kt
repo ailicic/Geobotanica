@@ -10,16 +10,16 @@ class PlantComposite {
     var plantLocations: List<PlantLocation> = emptyList()
 
     @Relation(parentColumn = "id", entityColumn = "plantId")
-    var photos: List<Photo> = emptyList()
+    var plantPhotos: List<PlantPhoto> = emptyList()
 
     @Relation(parentColumn = "id", entityColumn = "plantId")
-    var measurements: List<Measurement> = emptyList()
+    var plantMeasurements: List<PlantMeasurement> = emptyList()
 
     override fun toString(): String {
         val sb = StringBuilder("\n\n$plant (id=${plant.id})")
         plantLocations.forEach { sb.append("\n$it (id=${it.id})") }
-        photos.forEach { sb.append("\n$it (id=${it.id})") }
-        measurements.forEach { sb.append("\n$it (id=${it.id})") }
+        plantPhotos.forEach { sb.append("\n$it (id=${it.id})") }
+        plantMeasurements.forEach { sb.append("\n$it (id=${it.id})") }
         return sb.toString()
     }
 }

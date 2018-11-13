@@ -2,8 +2,8 @@ package com.geobotanica.geobotanica.ui.newplantmeasurement
 
 import androidx.lifecycle.ViewModel
 import com.geobotanica.geobotanica.data.entity.*
-import com.geobotanica.geobotanica.data.repo.MeasurementRepo
-import com.geobotanica.geobotanica.data.repo.PhotoRepo
+import com.geobotanica.geobotanica.data.repo.PlantMeasurementRepo
+import com.geobotanica.geobotanica.data.repo.PlantPhotoRepo
 import com.geobotanica.geobotanica.data.repo.PlantLocationRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.util.Lg
@@ -12,10 +12,10 @@ import javax.inject.Singleton
 
 @Singleton
 class NewPlantMeasurementViewModel @Inject constructor (
-    val plantRepo: PlantRepo,
-    val plantLocationRepo: PlantLocationRepo,
-    val photoRepo: PhotoRepo,
-    val measurementRepo: MeasurementRepo
+        val plantRepo: PlantRepo,
+        val plantLocationRepo: PlantLocationRepo,
+        val plantPhotoRepo: PlantPhotoRepo,
+        val plantMeasurementRepo: PlantMeasurementRepo
 ): ViewModel() {
 
     var userId = 0L
@@ -40,8 +40,8 @@ class NewPlantMeasurementViewModel @Inject constructor (
     }
 
     private fun savePlantPhoto(plant: Plant) {
-        val photo = Photo(userId, plant.id, Photo.Type.COMPLETE, photoUri) // TODO: Store only relative path/filename
-        photo.id = photoRepo.insert(photo)
+        val photo = PlantPhoto(userId, plant.id, PlantPhoto.Type.COMPLETE, photoUri) // TODO: Store only relative path/filename
+        photo.id = plantPhotoRepo.insert(photo)
         Lg.d("$photo (id=${photo.id})")
     }
 
@@ -53,18 +53,18 @@ class NewPlantMeasurementViewModel @Inject constructor (
 
     private fun savePlantMeasurements(plant: Plant) {
         height?.let {
-            val heightMeasurement = Measurement(userId, plant.id, Measurement.Type.HEIGHT, it)
-            heightMeasurement.id = measurementRepo.insert(heightMeasurement)
+            val heightMeasurement = PlantMeasurement(userId, plant.id, PlantMeasurement.Type.HEIGHT, it)
+            heightMeasurement.id = plantMeasurementRepo.insert(heightMeasurement)
             Lg.d("$heightMeasurement (id=${heightMeasurement.id})")
         }
         diameter?.let {
-            val diameterMeasurement = Measurement(userId, plant.id, Measurement.Type.DIAMETER, it)
-            diameterMeasurement.id = measurementRepo.insert(diameterMeasurement)
+            val diameterMeasurement = PlantMeasurement(userId, plant.id, PlantMeasurement.Type.DIAMETER, it)
+            diameterMeasurement.id = plantMeasurementRepo.insert(diameterMeasurement)
             Lg.d("$diameterMeasurement (id=${diameterMeasurement.id})")
         }
         trunkDiameter?.let {
-            val trunkDiameterMeasurement = Measurement(userId, plant.id, Measurement.Type.DIAMETER, it)
-            trunkDiameterMeasurement.id = measurementRepo.insert(trunkDiameterMeasurement)
+            val trunkDiameterMeasurement = PlantMeasurement(userId, plant.id, PlantMeasurement.Type.DIAMETER, it)
+            trunkDiameterMeasurement.id = plantMeasurementRepo.insert(trunkDiameterMeasurement)
             Lg.d("$trunkDiameterMeasurement (id=${trunkDiameterMeasurement.id})")
         }
     }

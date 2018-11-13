@@ -16,8 +16,8 @@ class PlantDetailViewModel @Inject constructor(
         private val userRepo: UserRepo,
         private val plantRepo: PlantRepo,
         private val plantLocationRepo: PlantLocationRepo,
-        private val photoRepo: PhotoRepo,
-        private val measurementRepo: MeasurementRepo
+        private val plantPhotoRepo: PlantPhotoRepo,
+        private val plantMeasurementRepo: PlantMeasurementRepo
 ): ViewModel() {
     var plantId = 0L    // Field injection of dynamic parameter.
         set(value) {
@@ -29,16 +29,16 @@ class PlantDetailViewModel @Inject constructor(
     lateinit var user: LiveData<User>
     lateinit var location: LiveData<Location>
 
-    lateinit var photos: LiveData<List<Photo>>
-    lateinit var mainPhoto: LiveData<Photo>
+    lateinit var plantPhotos: LiveData<List<PlantPhoto>>
+    lateinit var mainPhoto: LiveData<PlantPhoto>
 
-    lateinit var height: LiveData<Measurement>
+    lateinit var height: LiveData<PlantMeasurement>
     lateinit var heightDateText: LiveData<String>
 
-    lateinit var diameter: LiveData<Measurement>
+    lateinit var diameter: LiveData<PlantMeasurement>
     lateinit var diameterDateText: LiveData<String>
 
-    lateinit var trunkDiameter: LiveData<Measurement>
+    lateinit var trunkDiameter: LiveData<PlantMeasurement>
     lateinit var trunkDiameterDateText: LiveData<String>
 
     lateinit var measuredByUser: LiveData<String>
@@ -54,17 +54,17 @@ class PlantDetailViewModel @Inject constructor(
 
         location = map( plantLocationRepo.getLastPlantLocation(plantId) ) { it?.location }
 
-        photos = photoRepo.getAllPhotosOfPlant(plantId)
+        plantPhotos = plantPhotoRepo.getAllPhotosOfPlant(plantId)
 
-        mainPhoto = photoRepo.getMainPhotoOfPlant(plantId)
+        mainPhoto = plantPhotoRepo.getMainPhotoOfPlant(plantId)
 
-        height = measurementRepo.getHeightOfPlant(plantId)
+        height = plantMeasurementRepo.getHeightOfPlant(plantId)
         heightDateText = map(height) { it?.timestamp?.toSimpleDate() ?: "" }
 
-        diameter = measurementRepo.getDiameterOfPlant(plantId)
+        diameter = plantMeasurementRepo.getDiameterOfPlant(plantId)
         diameterDateText = map(diameter) { it?.timestamp?.toSimpleDate() ?: "" }
 
-        trunkDiameter = measurementRepo.getTrunkDiameterOfPlant(plantId)
+        trunkDiameter = plantMeasurementRepo.getTrunkDiameterOfPlant(plantId)
         trunkDiameterDateText = map(trunkDiameter) { it?.timestamp?.toSimpleDate() ?: "" }
 
         measuredByUser = switchMap(height) {
@@ -78,7 +78,7 @@ class PlantDetailViewModel @Inject constructor(
     }
 
     fun deletePlant() { // TODO: Verify photos + locations are deleted (cascade policy)
-        photos.value?.forEach {
+        plantPhotos.value?.forEach {
             Lg.d("Deleting photo: ${it.fileName}")
             File(it.fileName).delete()
         }

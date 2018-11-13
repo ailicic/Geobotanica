@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/measurement" >
+    android:id="@+id/plantMeasurement" >
 
     <TextView
         android:id="@+id/textView"
@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:textColor="@color/colorBlack"
-        app:layout_constraintStart_toStartOf="@id/measurement"
+        app:layout_constraintStart_toStartOf="@id/plantMeasurement"
         app:layout_constraintBottom_toBottomOf="@+id/editText" />
 
     <EditText
@@ -23,7 +23,7 @@
         android:layout_marginStart="16dp"
         android:ems="10"
         android:inputType="numberDecimal"
-        app:layout_constraintTop_toTopOf="@id/measurement"
+        app:layout_constraintTop_toTopOf="@id/plantMeasurement"
         app:layout_constraintStart_toEndOf="@id/textView"
         tools:ignore="LabelFor" />
 
@@ -43,7 +43,7 @@
         android:ems="10"
         android:inputType="numberDecimal"
         android:visibility="invisible"
-        app:layout_constraintTop_toTopOf="@id/measurement"
+        app:layout_constraintTop_toTopOf="@id/plantMeasurement"
         app:layout_constraintStart_toEndOf="@id/unitsSpinner"
         tools:ignore="LabelFor" />
 

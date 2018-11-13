@@ -3,7 +3,7 @@ package com.geobotanica.geobotanica.data.entity
 import androidx.room.*
 import org.threeten.bp.OffsetDateTime
 
-@Entity(tableName = "measurements",
+@Entity(tableName = "plantMeasurements",
     foreignKeys = [
         ForeignKey(
             entity = User::class,
@@ -21,7 +21,7 @@ import org.threeten.bp.OffsetDateTime
         Index(value = ["userId"])
     ]
 )
-data class Measurement(
+data class PlantMeasurement(
     val userId: Long,
     val plantId: Long,
     val type: Type,
@@ -46,14 +46,12 @@ data class Measurement(
             FRUIT -> "Fruit"
         }
     }
-
-    enum class Unit { CM, M, IN, FT }
 }
 
 object MeasurementTypeConverter {
     @TypeConverter @JvmStatic
-    fun toMeasurementType(ordinal: Int): Measurement.Type = Measurement.Type.values()[ordinal]
+    fun toMeasurementType(ordinal: Int): PlantMeasurement.Type = PlantMeasurement.Type.values()[ordinal]
 
     @TypeConverter @JvmStatic
-    fun fromMeasurementType(type: Measurement.Type): Int = type.ordinal
+    fun fromMeasurementType(type: PlantMeasurement.Type): Int = type.ordinal
 }

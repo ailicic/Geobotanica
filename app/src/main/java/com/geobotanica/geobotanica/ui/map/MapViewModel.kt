@@ -134,7 +134,7 @@ class MapViewModel @Inject constructor(
 
     private fun extractPlantMarkerData(plantComposite: PlantComposite): PlantMarkerData {
         val plant = plantComposite.plant
-        val photoPath = plantComposite.photos.first().fileName
+        val photoPath = plantComposite.plantPhotos.first().fileName
         val location = plantComposite.plantLocations.first().location
         val plantIcon = getPlantIconFromType(plant.type)
         return PlantMarkerData(

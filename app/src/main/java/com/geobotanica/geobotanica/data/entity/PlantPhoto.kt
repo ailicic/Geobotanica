@@ -3,7 +3,7 @@ package com.geobotanica.geobotanica.data.entity
 import androidx.room.*
 import org.threeten.bp.OffsetDateTime
 
-@Entity(tableName = "photos",
+@Entity(tableName = "plantPhotos",
     foreignKeys = [
         ForeignKey(
             entity = User::class,
@@ -21,7 +21,7 @@ import org.threeten.bp.OffsetDateTime
         Index(value = ["plantId"])
     ]
 )
-data class Photo(
+data class PlantPhoto(
     val userId: Long,
     val plantId: Long,
     val type: Type,
@@ -51,8 +51,8 @@ data class Photo(
 
 object PhotoTypeConverter {
     @TypeConverter @JvmStatic
-    fun toPhotoType(ordinal: Int): Photo.Type = Photo.Type.values()[ordinal]
+    fun toPhotoType(ordinal: Int): PlantPhoto.Type = PlantPhoto.Type.values()[ordinal]
 
     @TypeConverter @JvmStatic
-    fun fromPhotoType(type: Photo.Type): Int = type.ordinal
+    fun fromPhotoType(type: PlantPhoto.Type): Int = type.ordinal
 }

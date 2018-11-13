@@ -7,7 +7,7 @@ import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
 
-object Differ : Spek({
+object DiffingTests : Spek({
     describe("Diffing id lists") {
 
         data class IdDiffTest(val currentIds: List<Long>, val newIds: List<Long>, val diffs: Diffs)

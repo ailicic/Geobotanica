@@ -137,7 +137,7 @@ class NewPlantMeasurementFragment : BaseFragment() {
             return false
         }
         if (measurementsSwitch.isChecked && isMeasurementEmpty() ) {
-            Snackbar.make(view, "Provide plant measurements", Snackbar.LENGTH_LONG).setAction("Action", null).show()
+            Snackbar.make(view, "Provide plant plantMeasurements", Snackbar.LENGTH_LONG).setAction("Action", null).show()
             return false
         }
         return true
