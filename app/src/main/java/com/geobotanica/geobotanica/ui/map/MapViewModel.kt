@@ -39,8 +39,9 @@ class MapViewModel @Inject constructor(
 ): ViewModel() {
     var userId = 0L    // Field injected dynamic parameter
 
-    val plantMarkerData: LiveData< List<PlantMarkerData> > =
-            map(plantRepo.getAllPlantComposites()) { extractPlantMarkerDataList(it) }
+    val plantMarkerData: LiveData< List<PlantMarkerData> > by lazy {
+        map(plantRepo.getAllPlantComposites()) { extractPlantMarkerDataList(it) }
+    }
 
     val currentLocation: LiveData<Location>
         get() = _currentLocation

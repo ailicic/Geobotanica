@@ -19,11 +19,11 @@ import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.util.Differ
+import com.geobotanica.geobotanica.util.idDiffer.computeDiffs
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SharedPrefsExt.get
 import com.geobotanica.geobotanica.util.SharedPrefsExt.putSharedPrefs
-import com.geobotanica.geobotanica.util.unsubscribeThenObserve
+import com.geobotanica.geobotanica.util.observeAfterUnsubscribe
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_map.*
 import org.osmdroid.config.Configuration
@@ -207,15 +207,15 @@ class MapFragment : BaseFragment() {
 
     private fun bindViewModel() {
         with(viewModel) {
-            gpsFabIcon.unsubscribeThenObserve(this@MapFragment,
+            gpsFabIcon.observeAfterUnsubscribe(this@MapFragment,
                 Observer { @Suppress("DEPRECATION")
                     gpsFab.setImageDrawable(resources.getDrawable(it))
                 }
             )
-            showGpsRequiredSnackbar.unsubscribeThenObserve(this@MapFragment, onGpsRequiredSnackbar)
-            navigateToNewPlant.unsubscribeThenObserve(this@MapFragment, onNavigateToNewPlant)
-            plantMarkerData.unsubscribeThenObserve(this@MapFragment, onPlantMarkers)
-            currentLocation.unsubscribeThenObserve(this@MapFragment, onLocation)
+            showGpsRequiredSnackbar.observeAfterUnsubscribe(this@MapFragment, onGpsRequiredSnackbar)
+            navigateToNewPlant.observeAfterUnsubscribe(this@MapFragment, onNavigateToNewPlant)
+            plantMarkerData.observeAfterUnsubscribe(this@MapFragment, onPlantMarkers)
+            currentLocation.observeAfterUnsubscribe(this@MapFragment, onLocation)
         }
     }
 
@@ -234,9 +234,9 @@ class MapFragment : BaseFragment() {
 
     private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkersData ->
         val currentGbMarkers = map.overlays.filterIsInstance<GbMarker>()
-        val plantMarkerDiffs = Differ(
+        val plantMarkerDiffs = computeDiffs(
                 currentGbMarkers.map { it.plantId }, newPlantMarkersData.map { it.plantId }
-        ).getDiffs()
+        )
 
         map.overlays.removeAll( // Must be before add (for updated markers)
                 currentGbMarkers.filter { plantMarkerDiffs.removeIds.contains(it.plantId) } )
@@ -261,6 +261,7 @@ class MapFragment : BaseFragment() {
     }
 
     // TODO: See if logic here can be pushed to VM
+    @Suppress("DEPRECATION")
     private val onLocation = Observer<Location> {
         Lg.v("MapFragment: onLocation() = $it")
         if (it.latitude != null && it.longitude != null) { // OK in VM

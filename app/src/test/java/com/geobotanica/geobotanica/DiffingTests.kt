@@ -1,6 +1,6 @@
 package com.geobotanica.geobotanica
 
-import com.geobotanica.geobotanica.util.Differ
+import com.geobotanica.geobotanica.util.idDiffer.computeDiffs
 import com.geobotanica.geobotanica.util.Diffs
 import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
@@ -19,7 +19,7 @@ object DiffingTests : Spek({
             IdDiffTest(listOf(1L), listOf(2L), Diffs(removeIds = listOf(1L), insertIds = listOf(2L)))
         ).forEach {
             context("Given ${it.currentIds} and new ${it.newIds}") {
-                val diffs = Differ(currentIds = it.currentIds, newIds = it.newIds).getDiffs()
+                val diffs = computeDiffs(currentIds = it.currentIds, newIds = it.newIds)
 
                 it("Computes ${it.diffs}") {
                     diffs shouldEqual it.diffs
