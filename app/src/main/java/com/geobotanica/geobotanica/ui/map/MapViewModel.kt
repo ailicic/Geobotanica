@@ -73,6 +73,14 @@ class MapViewModel @Inject constructor(
         GPS_FIX(R.drawable.gps_fix)
     }
 
+    fun initGpsSubscribe() {
+        val isGpsEnabled = isGpsEnabled()
+        if (!isGpsEnabled)
+            showGpsRequiredSnackbar.call()
+        else if (wasGpsSubscribed)
+            subscribeGps()
+    }
+
     fun onClickGpsFab() {
         if (!isGpsEnabled()) {
             _gpsFabIcon.value = GPS_OFF.drawable
@@ -86,14 +94,6 @@ class MapViewModel @Inject constructor(
 
     fun onClickNewPlantFab() {
         navigateToNewPlant.call()
-    }
-
-    fun initGpsSubscribe() {
-        val isGpsEnabled = isGpsEnabled()
-        if (!isGpsEnabled)
-            showGpsRequiredSnackbar.call()
-        else if (wasGpsSubscribed)
-            subscribeGps()
     }
 
     fun isGpsSubscribed(): Boolean = locationService.isGpsSubscribed(this)
@@ -150,7 +150,7 @@ class MapViewModel @Inject constructor(
         )
     }
 
-    private fun getPlantIconFromType(plantType: Plant.Type): Int {
+    fun getPlantIconFromType(plantType: Plant.Type): Int {
         return when (plantType) {
             TREE -> R.drawable.marker_purple
             SHRUB -> R.drawable.marker_blue

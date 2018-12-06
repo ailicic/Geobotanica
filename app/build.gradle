@@ -45,7 +45,7 @@ dependencies {
     androidTestImplementation 'androidx.test:rules:1.1.0' // Non-default
 
     // MockK
-    testImplementation "io.mockk:mockk:1.7.1"
+    testImplementation "io.mockk:mockk:1.8.13"
 
     // Kluent
     testImplementation 'org.amshove.kluent:kluent-android:1.41'

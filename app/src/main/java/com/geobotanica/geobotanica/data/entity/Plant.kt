@@ -17,7 +17,7 @@ data class  Plant(
     val type: Type,
     val commonName: String? = null,
     val latinName: String? = null,
-    val timestamp: OffsetDateTime = OffsetDateTime.now() // TODO: Rename to dateCreated?
+    val timestamp: OffsetDateTime = OffsetDateTime.now()
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0
 

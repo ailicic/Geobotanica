@@ -18,6 +18,13 @@ object SpekLiveData {
             unsetLiveDataDelegate()
         }
     }
+    fun Suite.describeWithLiveData(text: String, block: Suite.() -> Unit) {
+        describe(text) {
+            setLiveDataDelegate()
+            block()
+            unsetLiveDataDelegate()
+        }
+    }
 
     private fun setLiveDataDelegate() {
         ArchTaskExecutor.getInstance().setDelegate(object : TaskExecutor() {
