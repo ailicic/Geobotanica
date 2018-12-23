@@ -119,7 +119,7 @@ class NewPlantMeasurementFragment : BaseFragment() {
         if (!isPlantValid(view))
             return
         loadViewModelWithPlantData()
-        viewModel.savePlant()
+        viewModel.savePlantComposite()
 
         Toast.makeText(activity, "Plant saved", Toast.LENGTH_SHORT).show() // TODO: Make snackbar
 

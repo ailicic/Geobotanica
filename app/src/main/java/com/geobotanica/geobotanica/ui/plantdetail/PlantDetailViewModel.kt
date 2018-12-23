@@ -5,20 +5,23 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations.map
 import androidx.lifecycle.Transformations.switchMap
 import androidx.lifecycle.ViewModel
+import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.data.repo.*
 import com.geobotanica.geobotanica.util.Lg
+import kotlinx.coroutines.*
 import java.io.File
 import javax.inject.Inject
 
 
 class PlantDetailViewModel @Inject constructor(
+        private val database: GbDatabase,
         private val userRepo: UserRepo,
         private val plantRepo: PlantRepo,
         private val plantLocationRepo: PlantLocationRepo,
         private val plantPhotoRepo: PlantPhotoRepo,
         private val plantMeasurementRepo: PlantMeasurementRepo
-): ViewModel() {
+) : ViewModel() {
     var plantId = 0L    // Field injection of dynamic parameter.
         set(value) {
             field = value
@@ -44,6 +47,8 @@ class PlantDetailViewModel @Inject constructor(
     lateinit var measuredByUser: LiveData<String>
     lateinit var locationText: LiveData<String>
     lateinit var createdDateText: LiveData<String>
+
+    private var job: Job? = null
 
     private fun init() {
         Lg.d("PlantDetailViewModel: init(plantId=$plantId)")
@@ -77,13 +82,23 @@ class PlantDetailViewModel @Inject constructor(
         }
     }
 
-    fun deletePlant() { // TODO: Verify photos + locations are deleted (cascade policy)
-        plantPhotos.value?.forEach {
-            Lg.d("Deleting photo: ${it.fileName}")
-            File(it.fileName).delete()
-        }
+    override fun onCleared() {
+        super.onCleared()
+        Lg.d("PlantDetailViewModel: OnCleared()")
+        runBlocking { job?.join() }
+    }
 
-        Lg.d("Deleting plant: ${plant.value!!}")
-        plantRepo.delete(plant.value!!)
+    fun deletePlant() { // TODO: Verify photos + locations are deleted (cascade policy)
+        job = GlobalScope.launch(Dispatchers.IO) {
+            database.runInTransaction {
+                plantPhotos.value?.forEach {
+                    Lg.d("Deleting photo: ${it.fileName}")
+                    File(it.fileName).delete()
+                }
+
+                Lg.d("Deleting plant: ${plant.value!!}")
+                plantRepo.delete(plant.value!!)
+            }
+        }
     }
 }

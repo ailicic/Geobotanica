@@ -8,7 +8,7 @@ object NavBundleExt {
     inline fun <reified T: Any?> BaseFragment.getNullableFromBundle(key: String): T? =
         this.arguments?.getValue<T>(key)
 
-    inline fun <reified T: Any> BaseFragment.getFromBundle(key: String, default: T = createDefault()): T =
+    inline fun <reified T: Any> BaseFragment.getFromBundle(key: String, default: T = getDefault()): T =
         this.arguments?.getValue<T>(key) ?: default
 
     inline fun <reified T: Any?> Bundle.getValue(key: String): T? {
@@ -23,7 +23,7 @@ object NavBundleExt {
         }
     }
 
-    inline fun <reified T: Any>createDefault(): T {
+    inline fun <reified T: Any>getDefault(): T {
         return when (T::class) {
             Boolean::class -> false as T
             Int::class -> 0 as T
@@ -41,5 +41,5 @@ object NavBundleExt {
 // https://medium.com/google-developers/viewmodels-persistence-onsaveinstancestate-restoring-ui-state-and-loaders-fc7cc4a6c090
 //    inline fun <reified T: Any> BaseFragment.getFromBundleOrPrefs(key: String, default: T? = null): T {
 //        return this.arguments?.getValue<T>(key)
-//                ?: getSharedPrefs(this.sharedPrefsKey).get(key, default ?: createDefault())
+//                ?: getSharedPrefs(this.sharedPrefsKey).get(key, default ?: getDefault())
 //    }

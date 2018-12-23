@@ -12,6 +12,9 @@ class PlantRepo @Inject constructor(
         private val plantDao: PlantDao,
         private val plantCompositeDao: PlantCompositeDao
 ) {
+
+    fun insert(plant: Plant): Long = plantDao.insert(plant)
+
     fun get(id: Long): LiveData<Plant> = plantDao.get(id)
 
 //    fun getAll(): LiveData<List<Plant>> = plantDao.getAll()
@@ -19,8 +22,6 @@ class PlantRepo @Inject constructor(
     fun getPlantComposite(plantId: Long): LiveData<PlantComposite> = plantCompositeDao.get(plantId)
 
     fun getAllPlantComposites(): LiveData<List<PlantComposite>> = plantCompositeDao.getAll()
-
-    fun insert(plant: Plant): Long = plantDao.insert(plant)
 
     fun delete(plant: Plant) = plantDao.delete(plant)
 }

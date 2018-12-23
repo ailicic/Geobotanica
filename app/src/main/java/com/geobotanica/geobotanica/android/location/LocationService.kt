@@ -105,10 +105,12 @@ class LocationService @Inject constructor (private val locationManager: Location
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, 0f, gpsLocationListener)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val isAdded = locationManager.registerGnssStatusCallback(gnssStatusCallback)
+            locationManager.registerGnssStatusCallback(gnssStatusCallback)
+//            val isAdded = locationManager.registerGnssStatusCallback(gnssStatusCallback)
 //            Lg.v("Registering GPS status (API >= 24), isAdded=$isAdded, callback=$gnssStatusCallback")
         } else {
-            val isAdded = locationManager.addGpsStatusListener(gpsStatusListener)
+            locationManager.addGpsStatusListener(gpsStatusListener)
+//            val isAdded = locationManager.addGpsStatusListener(gpsStatusListener)
 //            Lg.v("Registering GPS status (API < 24), isAdded=$isAdded, callback=$gpsStatusListener")
         }
     }

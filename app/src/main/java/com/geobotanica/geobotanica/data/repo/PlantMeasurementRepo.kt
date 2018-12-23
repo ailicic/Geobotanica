@@ -7,6 +7,9 @@ import javax.inject.Inject
 
 
 class PlantMeasurementRepo @Inject constructor(private val measurementDao: PlantMeasurementDao) {
+
+    fun insert(plantMeasurement: PlantMeasurement): Long = measurementDao.insert(plantMeasurement)
+
     fun get(id: Long): LiveData<PlantMeasurement> = measurementDao.get(id)
 
 //    fun getAllMeasurementsOfPlant(plantId: Long): LiveData<List<PlantMeasurement>> = measurementDao.getAllMeasurementsOfPlant(plantId)
@@ -19,6 +22,4 @@ class PlantMeasurementRepo @Inject constructor(private val measurementDao: Plant
 
     fun getTrunkDiameterOfPlant(plantId: Long): LiveData<PlantMeasurement> =
             measurementDao.getMeasurementOfPlant(plantId, PlantMeasurement.Type.TRUNK_DIAMETER.ordinal)
-
-    fun insert(plantMeasurement: PlantMeasurement): Long = measurementDao.insert(plantMeasurement)
 }

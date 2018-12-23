@@ -1,6 +1,6 @@
 package com.geobotanica.geobotanica
 
-import com.geobotanica.geobotanica.util.idDiffer.computeDiffs
+import com.geobotanica.geobotanica.util.IdDiffer.computeDiffs
 import com.geobotanica.geobotanica.util.Diffs
 import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek

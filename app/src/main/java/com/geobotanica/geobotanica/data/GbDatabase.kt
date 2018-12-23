@@ -17,7 +17,7 @@ import com.geobotanica.geobotanica.data.entity.*
             PlantMeasurement::class
         ],
         exportSchema = true,
-        version = 19
+        version = 20
 )
 @TypeConverters(
         PlantTypeConverter::class,
@@ -43,7 +43,6 @@ abstract class GbDatabase : RoomDatabase() {
                 Room.databaseBuilder(
                         context.applicationContext,
                         GbDatabase::class.java, "gb_db")
-                        .allowMainThreadQueries()   // TODO: Remove this, perform db ops on bg thread
                         .fallbackToDestructiveMigration() // TODO: Implement migrations after schema stagnates
                         .build()
     }

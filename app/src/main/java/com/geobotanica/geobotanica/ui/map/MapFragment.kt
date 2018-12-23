@@ -19,13 +19,16 @@ import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.util.idDiffer.computeDiffs
+import com.geobotanica.geobotanica.util.IdDiffer.computeDiffs
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SharedPrefsExt.get
 import com.geobotanica.geobotanica.util.SharedPrefsExt.putSharedPrefs
 import com.geobotanica.geobotanica.util.observeAfterUnsubscribe
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_map.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -72,7 +75,11 @@ class MapFragment : BaseFragment() {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
-        GbDatabase.getInstance(appContext).userDao().insert(User(1, "Guest")) // TODO: Move to Login Screen
+
+        GlobalScope.launch(Dispatchers.IO) {
+            GbDatabase.getInstance(appContext).clearAllTables()
+            GbDatabase.getInstance(appContext).userDao().insert(User(1, "Guest")) // TODO: Move to Login Screen
+        }
         viewModel = getViewModel(viewModelFactory) {
             userId = 1L // TODO: Retrieve userId from LoginFragment Navigation bundle (or shared prefs)
         }
@@ -221,7 +228,7 @@ class MapFragment : BaseFragment() {
 
     private val onGpsRequiredSnackbar = Observer<Unit> {
         Snackbar.make(coordinatorLayout, R.string.gps_must_be_enabled, Snackbar.LENGTH_LONG)
-            .setAction(R.string.enable) {_ ->
+            .setAction(R.string.enable) {
                 startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
             }.show()
     }
@@ -263,7 +270,7 @@ class MapFragment : BaseFragment() {
     // TODO: See if logic here can be pushed to VM
     @Suppress("DEPRECATION")
     private val onLocation = Observer<Location> {
-        Lg.v("MapFragment: onLocation() = $it")
+//        Lg.v("MapFragment: onLocation() = $it")
         if (it.latitude != null && it.longitude != null) { // OK in VM
             if (it.isRecent()) { // OK in VM
                 gpsFab.setImageDrawable(resources.getDrawable(R.drawable.gps_fix)) // Could be LiveData
