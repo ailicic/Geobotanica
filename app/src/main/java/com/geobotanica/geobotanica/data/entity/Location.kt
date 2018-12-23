@@ -3,6 +3,7 @@ package com.geobotanica.geobotanica.data.entity
 import androidx.room.*
 import org.threeten.bp.OffsetDateTime
 import java.io.Serializable
+import kotlin.math.max
 
 data class Location(
     val latitude: Double? = null,
@@ -14,6 +15,17 @@ data class Location(
     val timestamp: OffsetDateTime = OffsetDateTime.now()
 ): Serializable {
     fun isRecent(): Boolean = OffsetDateTime.now().minusSeconds(1).isBefore(this.timestamp)
+
+    fun mergeWith(location: Location): Location {
+        return Location(
+                latitude ?: location?.latitude,
+                longitude ?: location?.longitude,
+                altitude ?: location?.altitude,
+                precision ?: location?.precision,
+                satellitesInUse ?: location?.satellitesInUse,
+                satellitesVisible = max(satellitesVisible, location?.satellitesVisible ?: 0)
+        )
+    }
 }
 
 

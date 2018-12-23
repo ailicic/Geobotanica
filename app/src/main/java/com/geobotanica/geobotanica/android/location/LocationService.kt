@@ -60,7 +60,6 @@ class LocationService @Inject constructor (private val locationManager: Location
         Lg.v("LocationService: unsubscribe(): isRemoved=$isRemoved, observers=${observers.count()}, observer=$observer\"")
     }
 
-    // TODO: Push merge code into Location repo: location.mergeWith(location)
     private fun notify(location: Location) {
         observers.forEach { it.value(location) }
     }
@@ -82,16 +81,8 @@ class LocationService @Inject constructor (private val locationManager: Location
                     // Discard tempLocation, wait for next event
                     tempLocation = location
                     msSinceLastEvent = System.currentTimeMillis()
-                } else {
-                    // Events arrived within 100 ms of eachother. Merge them and notify()
-                    notify( Location(
-                            location.latitude ?: tempLocation?.latitude,
-                            location.longitude ?: tempLocation?.longitude,
-                            location.altitude ?: tempLocation?.altitude,
-                            location.precision ?: tempLocation?.precision,
-                            location.satellitesInUse ?: tempLocation?.satellitesInUse,
-                            satellitesVisible = max(location.satellitesVisible, tempLocation?.satellitesVisible ?: 0)
-                    ))
+                } else { // Events arrived within 100 ms of eachother. Merge them and notify()
+                    notify(location.mergeWith(tempLocation!!)) // Already handled null above
                     tempLocation = null
                 }
             }
