@@ -12,8 +12,6 @@ class PlantMeasurementRepo @Inject constructor(private val measurementDao: Plant
 
     fun get(id: Long): LiveData<PlantMeasurement> = measurementDao.get(id)
 
-//    fun getAllMeasurementsOfPlant(plantId: Long): LiveData<List<PlantMeasurement>> = measurementDao.getAllMeasurementsOfPlant(plantId)
-
     fun getHeightOfPlant(plantId: Long): LiveData<PlantMeasurement> =
             measurementDao.getMeasurementOfPlant(plantId, PlantMeasurement.Type.HEIGHT.ordinal)
 
@@ -22,4 +20,16 @@ class PlantMeasurementRepo @Inject constructor(private val measurementDao: Plant
 
     fun getTrunkDiameterOfPlant(plantId: Long): LiveData<PlantMeasurement> =
             measurementDao.getMeasurementOfPlant(plantId, PlantMeasurement.Type.TRUNK_DIAMETER.ordinal)
+
+    fun getHeightsOfPlant(plantId: Long): LiveData< List<PlantMeasurement> > =
+            measurementDao.getMeasurementsOfPlant(plantId, PlantMeasurement.Type.HEIGHT.ordinal)
+
+    fun getDiametersOfPlant(plantId: Long): LiveData< List<PlantMeasurement> >  =
+            measurementDao.getMeasurementsOfPlant(plantId, PlantMeasurement.Type.DIAMETER.ordinal)
+
+    fun getTrunkDiametersOfPlant(plantId: Long): LiveData< List<PlantMeasurement> >  =
+            measurementDao.getMeasurementsOfPlant(plantId, PlantMeasurement.Type.TRUNK_DIAMETER.ordinal)
+
+    fun getAllMeasurementsOfPlant(plantId: Long): LiveData<List<PlantMeasurement>> =
+            measurementDao.getAllMeasurementsOfPlant(plantId)
 }

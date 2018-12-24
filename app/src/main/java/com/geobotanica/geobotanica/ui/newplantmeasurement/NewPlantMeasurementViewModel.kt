@@ -78,7 +78,7 @@ class NewPlantMeasurementViewModel @Inject constructor (
             Lg.d("Saved: $diameterMeasurement (id=${diameterMeasurement.id})")
         }
         trunkDiameter?.let {
-            val trunkDiameterMeasurement = PlantMeasurement(userId, plant.id, PlantMeasurement.Type.DIAMETER, it)
+            val trunkDiameterMeasurement = PlantMeasurement(userId, plant.id, PlantMeasurement.Type.TRUNK_DIAMETER, it)
             trunkDiameterMeasurement.id = plantMeasurementRepo.insert(trunkDiameterMeasurement)
             Lg.d("Saved: $trunkDiameterMeasurement (id=${trunkDiameterMeasurement.id})")
         }

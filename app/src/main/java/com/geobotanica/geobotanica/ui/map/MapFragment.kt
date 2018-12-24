@@ -77,7 +77,7 @@ class MapFragment : BaseFragment() {
 
 
         GlobalScope.launch(Dispatchers.IO) {
-            GbDatabase.getInstance(appContext).clearAllTables()
+//            GbDatabase.getInstance(appContext).clearAllTables()
             GbDatabase.getInstance(appContext).userDao().insert(User(1, "Guest")) // TODO: Move to Login Screen
         }
         viewModel = getViewModel(viewModelFactory) {
