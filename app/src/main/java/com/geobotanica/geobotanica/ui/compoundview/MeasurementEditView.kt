@@ -29,11 +29,11 @@ class MeasurementEditView @JvmOverloads constructor(
             override fun onItemSelected(parentView: AdapterView<*>, selectedItemView: View?, position: Int, id: Long) {
 //                Lg.d("unitsSpinner.onItemSelected(): position=$position, id=$id")
                 if (id == Units.FT.ordinal.toLong()) {
-                    inchesEditText.visibility = View.VISIBLE
-                    inchesTextView.visibility = View.VISIBLE
+                    inchesEditText.isVisible = true
+                    inchesTextView.isVisible = true
                 } else {
-                    inchesEditText.visibility = View.INVISIBLE
-                    inchesTextView.visibility = View.INVISIBLE
+                    inchesEditText.isVisible = false
+                    inchesTextView.isVisible = false
                 }
             }
 

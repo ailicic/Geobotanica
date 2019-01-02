@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.RadioGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Location
@@ -64,7 +65,7 @@ class NewPlantMeasurementFragment : BaseFragment() {
         diameterMeasurementView.textView.text = resources.getString(R.string.diameter)
         trunkDiameterMeasurementView.textView.text = resources.getString(R.string.trunk_diameter)
         if (viewModel.plantType != Plant.Type.TREE)
-            trunkDiameterMeasurementView.visibility = View.GONE
+            trunkDiameterMeasurementView.isVisible = false
     }
 
     private fun bindClickListeners() {
@@ -79,16 +80,16 @@ class NewPlantMeasurementFragment : BaseFragment() {
         if (isChecked) {
             manualRadioButton.isEnabled = true
             assistedRadioButton.isEnabled = true
-            heightMeasurementView.visibility = View.VISIBLE
-            diameterMeasurementView.visibility = View.VISIBLE
+            heightMeasurementView.isVisible = true
+            diameterMeasurementView.isVisible = true
             if (viewModel.plantType == Plant.Type.TREE)
-                trunkDiameterMeasurementView.visibility = View.VISIBLE
+                trunkDiameterMeasurementView.isVisible = true
         } else {
             manualRadioButton.isEnabled = false
             assistedRadioButton.isEnabled = false
-            heightMeasurementView.visibility = View.GONE
-            diameterMeasurementView.visibility = View.GONE
-            trunkDiameterMeasurementView.visibility = View.GONE
+            heightMeasurementView.isVisible = false
+            diameterMeasurementView.isVisible = false
+            trunkDiameterMeasurementView.isVisible = false
         }
     }
 
@@ -97,17 +98,17 @@ class NewPlantMeasurementFragment : BaseFragment() {
         when (checkedId) {
             manualRadioButton.id -> {
                 Lg.d("onRadioButtonChecked(): Manual")
-                heightMeasurementView.visibility = View.VISIBLE
-                diameterMeasurementView.visibility = View.VISIBLE
+                heightMeasurementView.isVisible = true
+                diameterMeasurementView.isVisible = true
 
                 if (viewModel.plantType == Plant.Type.TREE)
-                    trunkDiameterMeasurementView.visibility = View.VISIBLE
+                    trunkDiameterMeasurementView.isVisible = true
             }
             assistedRadioButton.id -> {
                 Lg.d("onRadioButtonChecked(): Assisted")
-                heightMeasurementView.visibility = View.GONE
-                diameterMeasurementView.visibility = View.GONE
-                trunkDiameterMeasurementView.visibility = View.GONE
+                heightMeasurementView.isVisible = false
+                diameterMeasurementView.isVisible = false
+                trunkDiameterMeasurementView.isVisible = false
             }
         }
     }

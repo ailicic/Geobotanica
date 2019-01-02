@@ -40,7 +40,6 @@ import javax.inject.Inject
 // TODO: Disable map tile downloads (on emulator only) if no internet (consumes CPU)
 
 // TODO: Check that no hard-coded strings are used -> resources.getString(R.string.trunk_diameter)
-// TODO: Use isVisible everywhere
 // TODO: Use showSnackbar everywhere
 // TODO: Show PlantType icon in map bubble (and PlantDetail?)
 // TODO: Fix back button behaviour: location, names, measurements are lost, Delete temp photo
