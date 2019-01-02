@@ -57,8 +57,15 @@ abstract class BaseFragment : Fragment() {
         Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
     }
 
-    protected fun showSnackbar(message: String) {
-        Snackbar.make(this.view!!, message, Snackbar.LENGTH_LONG).setAction("Action", null).show()
+    protected fun showSnackbar(message: String, button: String = "", action: ((View) -> Unit)? = null) {
+        Snackbar.make(this.view!!, message, Snackbar.LENGTH_LONG).run {
+            action?.let { setAction(button, action) }
+            show()
+        }
+    }
+
+    protected fun showSnackbar(stringId: Int, button: String = "", action: ((View) -> Unit)? = null) {
+        showSnackbar(resources.getString(stringId), button, action)
     }
 
     override fun onAttach(context: Context) {

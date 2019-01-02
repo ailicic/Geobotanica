@@ -25,7 +25,6 @@ import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.get
 import com.geobotanica.geobotanica.util.observeAfterUnsubscribe
 import com.geobotanica.geobotanica.util.putSharedPrefs
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -40,9 +39,9 @@ import javax.inject.Inject
 // TODO: Disable map tile downloads (on emulator only) if no internet (consumes CPU)
 
 // TODO: Check that no hard-coded strings are used -> resources.getString(R.string.trunk_diameter)
-// TODO: Use showSnackbar everywhere
 // TODO: Show PlantType icon in map bubble (and PlantDetail?)
 // TODO: Fix back button behaviour: location, names, measurements are lost, Delete temp photo
+// TODO: Use androidx.appcompat.widget.AppCompatImageView in xml everywhere
 // TODO: Show snackbar after plant saved (pass as param in Navigate)
 // TODO: Show satellite stats too
 
@@ -232,10 +231,9 @@ class MapFragment : BaseFragment() {
     }
 
     private val onGpsRequiredSnackbar = Observer<Unit> {
-        Snackbar.make(coordinatorLayout, R.string.gps_must_be_enabled, Snackbar.LENGTH_LONG)
-            .setAction(R.string.enable) {
-                startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-            }.show()
+        showSnackbar(R.string.gps_must_be_enabled, "Enable") {
+            startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+        }
     }
 
     private val onNavigateToNewPlant = Observer<Unit> {

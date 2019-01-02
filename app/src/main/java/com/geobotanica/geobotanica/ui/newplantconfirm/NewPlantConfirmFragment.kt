@@ -25,10 +25,6 @@ import kotlinx.android.synthetic.main.measurement_compound_view.view.*
 import javax.inject.Inject
 
 
-// TODO: Handle back button better. Delete temp photo if needed, allow edit prev. activity, etc.
-// TODO: Use View.isVisible everywhere
-// TODO: Use androidx.appcompat.widget.AppCompatImageView in xml everywhere
-
 class NewPlantConfirmFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantConfirmViewModel>
     private lateinit var viewModel: NewPlantConfirmViewModel

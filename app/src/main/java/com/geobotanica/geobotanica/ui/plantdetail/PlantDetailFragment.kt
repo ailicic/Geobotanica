@@ -17,7 +17,6 @@ import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.ImageViewExt.setScaledBitmap
 import com.geobotanica.geobotanica.util.Lg
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_plant_detail.*
 import javax.inject.Inject
 
@@ -70,11 +69,7 @@ class PlantDetailFragment : BaseFragment() {
 
     private fun bindClickListeners() {
         deleteButton.setOnClickListener(::onDeleteButtonClicked)
-
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Add new photos/measurements", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-        }
+        fab.setOnClickListener { showSnackbar("Add new photos/measurements") }
     }
 
     @Suppress("UNUSED_PARAMETER")
