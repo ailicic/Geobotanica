@@ -17,6 +17,8 @@ import javax.inject.Inject
 
 // TODO: Forbid holding location if gps is fixed, held, then unheld (location is stale/absent and imprecise at this time)
 // TODO: Investigate when OnDetachedWindow() is called. Back button fires it but onStop of parent activity seems to not in NewPlant.
+// TODO: Prevent gps hold, gps disable, then gps unhold switch (gps must be enabled first)
+
 class GpsCompoundView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
@@ -73,8 +75,14 @@ class GpsCompoundView @JvmOverloads constructor(
     @Suppress("UNUSED_PARAMETER")
     private fun onToggleHoldPosition(buttonView: CompoundButton, isChecked: Boolean) {
         Lg.d("onToggleHoldPosition(): isChecked=$isChecked")
-        if (isChecked)
+        if (isChecked) {
+
+//            if (!isGpsEnabled()) {
+//                _gpsFabIcon.value = GPS_OFF.drawable
+//                showGpsRequiredSnackbar.call()
+//            }
             locationService.unsubscribe(this)
+        }
         else
             locationService.subscribe(this, ::onLocation)
     }

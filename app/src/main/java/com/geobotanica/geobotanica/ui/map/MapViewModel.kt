@@ -15,7 +15,7 @@ import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_NO_FIX
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_OFF
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
-import com.geobotanica.geobotanica.util.Timer.schedule
+import com.geobotanica.geobotanica.util.schedule
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton

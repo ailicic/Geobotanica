@@ -11,9 +11,10 @@ import com.geobotanica.geobotanica.util.Measurement
 import kotlinx.android.synthetic.main.measurement_compound_view.view.*
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
+import androidx.core.view.isVisible
 
 
-class MeasurementCompoundView @JvmOverloads constructor(
+class MeasurementEditView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0
@@ -25,7 +26,7 @@ class MeasurementCompoundView @JvmOverloads constructor(
 
         unitsSpinner.onItemSelectedListener = object : OnItemSelectedListener {
 
-            override fun onItemSelected(parentView: AdapterView<*>, selectedItemView: View, position: Int, id: Long) {
+            override fun onItemSelected(parentView: AdapterView<*>, selectedItemView: View?, position: Int, id: Long) {
 //                Lg.d("unitsSpinner.onItemSelected(): position=$position, id=$id")
                 if (id == Units.FT.ordinal.toLong()) {
                     inchesEditText.visibility = View.VISIBLE
@@ -42,9 +43,29 @@ class MeasurementCompoundView @JvmOverloads constructor(
         }
     }
 
-    fun getInCentimeters(): Float {
-        val value = editText.text.toString().toFloatOrNull() ?: 0F
-        val units = unitsSpinner.selectedItemId.toInt()
-        return Measurement(value, units).convert(Units.CM).value
+    fun isEmpty() = editText.text.isEmpty()
+
+    fun getValue(): Float {
+        val value = editText.text.toString().toFloat()
+        return if (inchesEditText.isVisible) {
+            val inches = if (inchesEditText.text.isEmpty()) 0F else inchesEditText.text.toString().toFloat() / 12
+            value + inches
+        } else value
+    }
+
+    fun getUnits() = Units.values()[unitsSpinner.selectedItemId.toInt()]
+
+    fun getMeasurement(): Measurement = Measurement(getValue(), getUnits())
+
+    fun setMeasurement(measurement: Measurement) {
+        if (measurement.units == Units.FT) {
+            val (feet, inches) = measurement.toFtIn()
+            editText.setText(feet.toString())
+            inchesEditText.setText(inches.toString())
+            unitsSpinner.setSelection(Units.FT.ordinal)
+        } else {
+            editText.setText(measurement.value.toString())
+            unitsSpinner.setSelection(measurement.units.ordinal)
+        }
     }
 }

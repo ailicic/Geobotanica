@@ -10,13 +10,15 @@ import androidx.core.view.doOnPreDraw
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Location
+import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.ImageViewExt.setScaledBitmap
 import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.NavBundleExt.getFromBundle
-import com.google.android.material.snackbar.Snackbar
+import com.geobotanica.geobotanica.util.getFromBundle
+import com.geobotanica.geobotanica.util.isEmpty
+import com.geobotanica.geobotanica.util.toTrimmedString
 import kotlinx.android.synthetic.main.fragment_new_plant_name.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import javax.inject.Inject
@@ -26,14 +28,13 @@ class NewPlantNameFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantNameViewModel>
     private lateinit var viewModel: NewPlantNameViewModel
 
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
-            plantType = getFromBundle(plantTypeKey)
+            plantType = PlantTypeConverter.toPlantType(getFromBundle(plantTypeKey))
             photoUri = getFromBundle(photoUriKey)
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, photoUri=$photoUri")
         }
@@ -57,30 +58,40 @@ class NewPlantNameFragment : BaseFragment() {
     private fun onFabPressed(view: View) {
         Lg.d("NewPlantFragment: onSaveButtonPressed()")
 
-        val commonName: String = commonNameEditText.editText!!.text.toString().trim()
-        val latinName: String = latinNameEditText.editText!!.text.toString().trim()
-
-        if (commonName.isEmpty() && latinName.isEmpty()) {
-            Snackbar.make(view, "Provide a plant className", Snackbar.LENGTH_LONG)
-                .setAction("Action", null)
-                .show()
+        if (!areNamesValid())
             return
-        }
+        loadViewModelWithPlantData()
 
-        val bundle = bundleOf(
-            userIdKey to viewModel.userId,
-            plantTypeKey to viewModel.plantType,
-            photoUriKey to viewModel.photoUri
+        val navController = activity.findNavController(R.id.fragment)
+        navController.navigate(R.id.newPlantMeasurementFragment, createBundleFromViewModel())
+    }
+
+    private fun areNamesValid(): Boolean {
+        if (commonNameEditText.isEmpty() && latinNameEditText.isEmpty()) {
+            showSnackbar("Provide a plant name")
+            return false
+        }
+        return true
+    }
+
+    private fun loadViewModelWithPlantData() {
+        commonNameEditText.toString()
+        val commonName = commonNameEditText.toTrimmedString()
+        val latinName = latinNameEditText.toTrimmedString()
+        viewModel.commonName = if (commonName.isNotEmpty()) commonName else null
+        viewModel.latinName = if (latinName.isNotEmpty()) latinName else null
+    }
+
+    private fun createBundleFromViewModel(): Bundle {
+        return bundleOf(
+                userIdKey to viewModel.userId,
+                plantTypeKey to viewModel.plantType.ordinal,
+                photoUriKey to viewModel.photoUri
         ).apply {
-            if (commonName.isNotEmpty())
-                putString(commonNameKey, commonName)
-            if (latinName.isNotEmpty())
-                putString(latinNameKey, latinName)
+            viewModel.commonName?.let { putString(commonNameKey, it) }
+            viewModel.latinName?.let { putString(latinNameKey, it) }
             if (gps.gpsSwitch.isChecked)
                 putSerializable(locationKey, gps.currentLocation)
         }
-
-        val navController = activity.findNavController(R.id.fragment)
-        navController.navigate(R.id.newPlantMeasurementFragment, bundle)
     }
 }

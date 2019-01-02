@@ -16,11 +16,12 @@ import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Location
+import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.NavBundleExt.getFromBundle
+import com.geobotanica.geobotanica.util.getFromBundle
 import kotlinx.android.synthetic.main.fragment_new_plant_type.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import java.io.File
@@ -42,7 +43,7 @@ class NewPlantPhotoFragment : BaseFragment() {
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
-            plantType = getFromBundle(plantTypeKey)
+            plantType = PlantTypeConverter.toPlantType(getFromBundle(plantTypeKey))
             oldPhotoUri = ""
             Lg.d("Fragment args: userId=$userId, plantType=$plantType")
         }
@@ -90,21 +91,29 @@ class NewPlantPhotoFragment : BaseFragment() {
                     }
                     viewModel.oldPhotoUri = viewModel.photoUri
 
-
-                    val bundle = bundleOf(
-                        userIdKey to viewModel.userId,
-                        plantTypeKey to viewModel.plantType,
-                        photoUriKey to viewModel.photoUri )
-                    if (gps.gpsSwitch.isChecked)
-                        bundle.putSerializable(locationKey, gps.currentLocation)
                     val navController = activity.findNavController(R.id.fragment)
-                    navController.navigate(R.id.newPlantNameFragment, bundle)
+                    navController.navigate(R.id.newPlantNameFragment, createBundle())
+                } else if (resultCode == Activity.RESULT_CANCELED) {
+                    Lg.d("onActivityResult: RESULT_CANCELED") // "X" in GUI or back button pressed
+
+                    val navController = activity.findNavController(R.id.fragment)
+                    navController.popBackStack(R.id.newPlantTypeFragment, false)
                 } else {
-                    Toast.makeText(activity, "Photo not captured", Toast.LENGTH_SHORT).show()
+                    Lg.d("onActivityResult: Unrecognized code")
                 }
             }
             else -> Toast.makeText(activity, "Unrecognized request code", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun createBundle(): Bundle {
+        val bundle = bundleOf(
+                userIdKey to viewModel.userId,
+                plantTypeKey to viewModel.plantType.ordinal,
+                photoUriKey to viewModel.photoUri)
+        if (gps.gpsSwitch.isChecked)
+            bundle.putSerializable(locationKey, gps.currentLocation)
+        return bundle
     }
 
     @Throws(IOException::class)

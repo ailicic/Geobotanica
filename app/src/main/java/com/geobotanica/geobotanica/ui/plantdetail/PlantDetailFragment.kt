@@ -21,6 +21,7 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_plant_detail.*
 import javax.inject.Inject
 
+// TODO: Double check how measurements are handled here. Integrate changes to Measurement and MeasurementEditView
 
 class PlantDetailFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<PlantDetailViewModel>

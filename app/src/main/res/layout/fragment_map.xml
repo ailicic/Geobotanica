@@ -9,6 +9,7 @@
     tools:context=".ui.map.MapFragment"
     tools:showIn="@layout/activity_main">
 
+    <!--suppress AndroidUnknownAttribute -->
     <org.osmdroid.views.MapView
         android:id="@+id/map"
         tilesource="Mapnik"
@@ -32,6 +33,6 @@
         android:layout_margin="@dimen/fab_margin"
         android:layout_gravity="bottom|end"
         app:tint="@color/colorWhite"
-        app:srcCompat="@drawable/plus" />
+        app:srcCompat="@drawable/ic_add_24px" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

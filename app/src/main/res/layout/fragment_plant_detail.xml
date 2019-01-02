@@ -18,19 +18,6 @@
         tools:context=".ui.plantdetail.PlantDetailFragment"
         tools:showIn="@layout/fragment_plant_detail">
 
-
-
-        <ImageView
-            android:id="@+id/plantPhoto"
-            android:layout_width="match_parent"
-            android:layout_height="192dp"
-            android:layout_marginTop="16dp"
-            android:scaleType="centerInside"
-            app:layout_constrainedWidth="true"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
         <TextView
             android:id="@+id/commonNameText"
             android:layout_width="wrap_content"
@@ -42,8 +29,7 @@
             android:textSize="18sp"
             android:text="@{ viewModel.plant.commonName }"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/plantPhoto" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/latinNameText"
@@ -55,11 +41,22 @@
             android:textSize="18sp"
             android:text="@{ viewModel.plant.latinName }"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/commonNameText" />
 
+        <ImageView
+            android:id="@+id/plantPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="192dp"
+            android:layout_marginTop="16dp"
+            android:scaleType="centerInside"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:ignore="ContentDescription" />
+
         <View
-            android:id="@+id/nameDivider"
+            android:id="@+id/photoDivider"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="8dp"
@@ -68,8 +65,7 @@
             android:background="@android:color/darker_gray"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/latinNameText" />
-
+            app:layout_constraintTop_toBottomOf="@+id/plantPhoto" />
 
         <TextView
             android:id="@+id/heightText"
@@ -79,9 +75,9 @@
             android:layout_marginStart="16dp"
             android:textColor="@color/colorBlack"
             android:visibility="@{ viewModel.height != null ? View.VISIBLE : View.GONE }"
-            android:text="@{ @string/plantMeasurement(viewModel.height.type, viewModel.height.measurement) }"
+            android:text="@{ @string/plant_measurement(viewModel.height.type, viewModel.height.measurement) }"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/nameDivider" />
+            app:layout_constraintTop_toBottomOf="@id/photoDivider" />
 
         <TextView
             android:id="@+id/heightDateText"
@@ -100,7 +96,7 @@
             android:layout_marginStart="16dp"
             android:visibility="@{ viewModel.diameter != null ? View.VISIBLE : View.GONE }"
             android:textColor="@color/colorBlack"
-            android:text="@{ @string/plantMeasurement(viewModel.diameter.type, viewModel.diameter.measurement) }"
+            android:text="@{ @string/plant_measurement(viewModel.diameter.type, viewModel.diameter.measurement) }"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/heightText" />
 
@@ -121,7 +117,7 @@
             android:layout_marginStart="16dp"
             android:visibility="@{ viewModel.trunkDiameter != null ? View.VISIBLE : View.GONE }"
             android:textColor="@color/colorBlack"
-            android:text="@{ @string/plantMeasurement(viewModel.trunkDiameter.type, viewModel.trunkDiameter.measurement) }"
+            android:text="@{ @string/plant_measurement(viewModel.trunkDiameter.type, viewModel.trunkDiameter.measurement) }"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/diameterText" />
 
@@ -198,7 +194,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:tint="@color/colorWhite"
-            app:srcCompat="@drawable/plus" />
+            app:srcCompat="@drawable/ic_add_24px" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

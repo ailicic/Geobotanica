@@ -94,6 +94,27 @@
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+    <fragment
+        android:id="@+id/newPlantConfirmFragment"
+        android:name="com.geobotanica.geobotanica.ui.newplantconfirm.NewPlantConfirmFragment"
+        android:label="Confirm New Plant">
+        <argument android:name="userId" />
+        <argument android:name="plantType" />
+        <argument android:name="photoFilePath" />
+        <argument android:name="plantLocation" />
+        <argument android:name="commonName" />
+        <argument android:name="latinName" />
+        <argument android:name="height" />
+        <argument android:name="diameter" />
+        <argument android:name="trunk_diameter" />
+        <action
+            android:id="@+id/action_newPlantConfirmFragment_to_mapFragment"
+            app:destination="@id/mapFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim"
             app:popUpTo="@+id/mapFragment"
             app:popUpToInclusive="false" />

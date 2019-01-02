@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View"/>
+        <variable
+            name="viewModel"
+            type="com.geobotanica.geobotanica.ui.newplantconfirm.NewPlantConfirmViewModel" />
+    </data>
+
+    <!--<ScrollView-->
+        <!--android:fillViewport="true"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent">-->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/constraintLayout"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:context=".ui.newplantconfirm.NewPlantConfirmFragment"
+        tools:showIn="@layout/fragment_new_plant_confirm">
+
+        <TextView
+            android:id="@+id/commonNameText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/colorBlack"
+            android:textSize="18sp"
+            android:text="@{ viewModel.commonName }"
+            android:visibility="@{ viewModel.commonName != null ? View.VISIBLE : View.GONE }"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/commonNameEditText"
+            android:layout_width="368dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@+id/commonNameText"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:text="@{ viewModel.commonName }"
+                android:hint="@string/common_name"  />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/latinNameText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:visibility="@{ viewModel.latinName != null ? View.VISIBLE : View.GONE}"
+            android:textColor="@color/colorBlack"
+            android:textSize="18sp"
+            android:text="@{ viewModel.latinName }"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/commonNameEditText" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/latinNameEditText"
+            android:layout_width="368dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/latinNameText">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:text="@{ viewModel.latinName }"
+                android:hint="@string/latin_name"  />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/editNamesButton"
+            android:layout_width="@dimen/image_button_size"
+            android:layout_height="@dimen/image_button_size"
+            android:layout_marginBottom="4dp"
+            android:layout_marginEnd="16dp"
+            android:scaleType="fitCenter"
+            android:tint="@color/colorPrimaryDark"
+            app:srcCompat="@drawable/ic_edit_black_24dp"
+            app:layout_constraintBottom_toTopOf="@id/nameDivider"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <View
+            android:id="@+id/nameDivider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintTop_toBottomOf="@+id/latinNameEditText"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+
+        <ImageView
+            android:id="@+id/plantPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="192dp"
+            android:layout_marginTop="8dp"
+            android:scaleType="centerInside"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintTop_toBottomOf="@+id/nameDivider"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:ignore="ContentDescription" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/addPhotoButton"
+            android:layout_width="@dimen/image_button_size"
+            android:layout_height="@dimen/image_button_size"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="16dp"
+            android:scaleType="fitXY"
+            android:tint="@color/colorPrimaryDark"
+            app:srcCompat="@drawable/ic_add_24px"
+            app:layout_constraintBottom_toTopOf="@id/photoDivider"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <View
+            android:id="@+id/photoDivider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintTop_toBottomOf="@+id/plantPhoto"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+
+        <TextView
+            android:id="@+id/heightText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="16dp"
+            android:visibility="@{ viewModel.heightMeasurement != null ? View.VISIBLE : View.GONE }"
+            android:textColor="@color/colorBlack"
+            android:text="@{ viewModel.heightMeasurement.toHeightString() }"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/photoDivider"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.geobotanica.geobotanica.ui.compoundview.MeasurementEditView
+            android:id="@+id/heightMeasurementView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/heightText"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/diameterText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:visibility="@{ viewModel.diameterMeasurement != null ? View.VISIBLE : View.GONE }"
+            android:textColor="@color/colorBlack"
+            android:text="@{ viewModel.diameterMeasurement.toDiameterString() }"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/heightMeasurementView" />
+
+        <com.geobotanica.geobotanica.ui.compoundview.MeasurementEditView
+            android:id="@+id/diameterMeasurementView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/diameterText"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/trunkDiameterText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:visibility="@{ viewModel.trunkDiameterMeasurement != null ? View.VISIBLE : View.GONE }"
+            android:textColor="@color/colorBlack"
+            android:text="@{ viewModel.trunkDiameterMeasurement.toTrunkDiameterString() }"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/diameterMeasurementView" />
+
+        <com.geobotanica.geobotanica.ui.compoundview.MeasurementEditView
+            android:id="@+id/trunkDiameterMeasurementView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/trunkDiameterText"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/editMeasurementsButton"
+            android:layout_width="@dimen/image_button_size"
+            android:layout_height="@dimen/image_button_size"
+            android:layout_marginBottom="4dp"
+            android:layout_marginEnd="16dp"
+            android:scaleType="fitCenter"
+            android:tint="@color/colorPrimaryDark"
+            android:visibility="@{ viewModel.heightMeasurement != null ? View.VISIBLE : View.GONE }"
+            app:srcCompat="@drawable/ic_edit_black_24dp"
+            app:layout_constraintBottom_toTopOf="@id/measurementsDivider"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <View
+            android:id="@+id/measurementsDivider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@android:color/darker_gray"
+            android:visibility="@{ viewModel.heightMeasurement != null ? View.VISIBLE : View.GONE }"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/trunkDiameterMeasurementView" />
+
+
+        <com.geobotanica.geobotanica.ui.compoundview.GpsCompoundView
+            android:id="@+id/gps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/fab_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:tint="@color/colorWhite"
+            app:srcCompat="@drawable/ic_done_black_24dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!--</ScrollView>-->
+</layout>

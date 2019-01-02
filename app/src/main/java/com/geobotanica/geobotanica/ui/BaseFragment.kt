@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker.PERMISSION_GRANTED
 import androidx.fragment.app.Fragment
 import com.geobotanica.geobotanica.util.Lg
+import com.google.android.material.snackbar.Snackbar
 import javax.inject.Inject
 
 abstract class BaseFragment : Fragment() {
@@ -33,6 +34,9 @@ abstract class BaseFragment : Fragment() {
     protected val latinNameKey = "plantLatinName"
     protected val photoUriKey = "plantPhoto"
     protected val locationKey = "location"
+    protected val heightMeasurementKey = "heightMeasurement"
+    protected val diameterMeasurementKey = "diameterMeasurement"
+    protected val trunkDiameterMeasurementKey = "trunkDiameterMeasurement"
 
     protected fun requestPermission(permission: String) {
         lazy { this }.run {
@@ -51,6 +55,10 @@ abstract class BaseFragment : Fragment() {
 
     protected fun showToast(message: String) {
         Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+    }
+
+    protected fun showSnackbar(message: String) {
+        Snackbar.make(this.view!!, message, Snackbar.LENGTH_LONG).setAction("Action", null).show()
     }
 
     override fun onAttach(context: Context) {

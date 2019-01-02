@@ -13,7 +13,7 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.NavBundleExt.getFromBundle
+import com.geobotanica.geobotanica.util.getFromBundle
 import kotlinx.android.synthetic.main.fragment_new_plant_type.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import javax.inject.Inject

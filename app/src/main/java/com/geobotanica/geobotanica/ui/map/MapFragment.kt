@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.geobotanica.geobotanica.R
@@ -21,9 +22,9 @@ import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.IdDiffer.computeDiffs
 import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.SharedPrefsExt.get
-import com.geobotanica.geobotanica.util.SharedPrefsExt.putSharedPrefs
+import com.geobotanica.geobotanica.util.get
 import com.geobotanica.geobotanica.util.observeAfterUnsubscribe
+import com.geobotanica.geobotanica.util.putSharedPrefs
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.Dispatchers
@@ -36,15 +37,21 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
+// TODO: Disable map tile downloads (on emulator only) if no internet (consumes CPU)
 
+// TODO: Check that no hard-coded strings are used -> resources.getString(R.string.trunk_diameter)
+// TODO: Use isVisible everywhere
+// TODO: Use showSnackbar everywhere
+// TODO: Show PlantType icon in map bubble (and PlantDetail?)
+// TODO: Fix back button behaviour: location, names, measurements are lost, Delete temp photo
 // TODO: Show snackbar after plant saved (pass as param in Navigate)
 // TODO: Show satellite stats too
-// TODO: Learn how to use only the keyboard
-// TODO: Use code reformatter:
-    // Check tabs on fn params / data class
-    // Subclass in class declaration: colon needs space on both sides
 
 // LONG TERM
+// TODO: Learn how to use only the keyboard
+// TODO: Use code reformatter:
+// Check tabs on fn params / data class
+// Subclass in class declaration: colon needs space on both sides
 // TODO: Use vector graphics for all icons where possible
 // TODO: Decide on Lg.v/d/i etc.
 // TODO: Double check proper placement of methods in lifecycle callbacks
@@ -74,7 +81,6 @@ class MapFragment : BaseFragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
-
 
         GlobalScope.launch(Dispatchers.IO) {
 //            GbDatabase.getInstance(appContext).clearAllTables()
@@ -164,7 +170,7 @@ class MapFragment : BaseFragment() {
                     initAfterPermissionsGranted()
                 } else {
                     Lg.i("permission.WRITE_EXTERNAL_STORAGE: PERMISSION_DENIED")
-                    showToast("External storage permission required")
+                    showToast("External storage permission required") // TODO: Find better UX approach (separate screen)
                     activity.finish()
                 }
             }
@@ -174,7 +180,7 @@ class MapFragment : BaseFragment() {
                     initAfterPermissionsGranted()
                 } else {
                     Lg.i("permission.ACCESS_FINE_LOCATION: PERMISSION_DENIED")
-                    showToast("GPS permission required")
+                    showToast("GPS permission required") // TODO: Find better UX approach (separate screen)
                     activity.finish()
                 }
             }
@@ -198,7 +204,7 @@ class MapFragment : BaseFragment() {
             setZoom(viewModel.mapZoomLevel)
             setCenter( GeoPoint(viewModel.mapLatitude, viewModel.mapLongitude) )
         }
-        coordinatorLayout.visibility = View.VISIBLE // TODO: Remove this after LoginScreen implemented
+        coordinatorLayout.isVisible = true // TODO: Remove this after LoginScreen implemented
         locationMarker = null
         createLocationPrecisionCircle() // Add to map now to ensure always on bottom
 
@@ -235,9 +241,36 @@ class MapFragment : BaseFragment() {
 
     private val onNavigateToNewPlant = Observer<Unit> {
         findNavController().navigate(
-            R.id.newPlantTypeFragment,
-            bundleOf("userId" to viewModel.userId) )
+                R.id.newPlantTypeFragment,
+                bundleOf("userId" to viewModel.userId) )
     }
+
+//    // TODO: REMOVE (Temp for NewPlantConfirmFragment)
+//    private val onNavigateToNewPlant = Observer<Unit> {
+//        findNavController().navigate(
+//                R.id.newPlantConfirmFragment, createBundle() )
+//    }
+//
+//
+//
+//    // TODO: REMOVE
+//    private fun createBundle(): Bundle {
+//        return bundleOf(
+//                userIdKey to viewModel.userId,
+//                plantTypeKey to 1L,
+//                photoUriKey to "",
+//                commonNameKey to "Common",
+//                latinNameKey to "Latin",
+//                heightMeasurementKey to Measurement(1.0f, Units.M),
+//                diameterMeasurementKey to Measurement(2.0f, Units.IN),
+//                trunkDiameterMeasurementKey to Measurement(3.5f, Units.FT)
+//        ).apply {
+//            putSerializable(locationKey, Location(
+//                49.477, -119.592, 1.0, 3.0f, 10, 20))
+//        }
+//    }
+
+
 
     private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkersData ->
         val currentGbMarkers = map.overlays.filterIsInstance<GbMarker>()
@@ -334,9 +367,3 @@ class MapFragment : BaseFragment() {
             location.let { map.controller.setCenter( GeoPoint(it.latitude!!, it.longitude!!) ) }
     }
 }
-
-
-// COROUTINES EXAMPLE (Switch to main thread)
-//            GlobalScope.launch(Dispatchers.Main) {
-//                setFabGpsIcon(GPS_NO_FIX)
-//            }

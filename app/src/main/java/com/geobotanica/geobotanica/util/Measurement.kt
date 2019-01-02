@@ -1,5 +1,7 @@
 package com.geobotanica.geobotanica.util
 
+import java.io.Serializable
+
 enum class Units {
     CM, M, IN, FT;
 
@@ -13,18 +15,25 @@ enum class Units {
     }
 }
 
-data class Measurement(val value: Float, val units: Units = Units.CM) {
+data class Measurement(val value: Float, val units: Units = Units.CM) : Serializable {
 
-    constructor(value: Float, units: Int) : this(value, Units.values()[units])
+//    constructor(value: Float, units: Int) : this(value, Units.values()[units])
 
-    override fun toString() = when (units) {
-        Units.FT -> {
-            val inches = value * 12 % 12
-            val feet = value - (inches / 12)
-            "%.0f ft %.1f in".format(feet, inches)
-        }
-        else -> "%.1f $units".format(value)
+    override fun toString(): String {
+        return if (units == Units.FT)
+            "%.0f ft %.1f in".format(getFeetWithoutInches(), getInchesWithoutFeet())
+//            "%.0f' %.1f\"".format(getFeetWithoutInches(), getInchesWithoutFeet())
+        else
+            "%.1f $units".format(value)
     }
+
+
+    private fun toPrefixedString(prefix: String) = "$prefix${toString()}"
+
+    // TODO: Use string resources here (need context)
+    fun toHeightString() = toPrefixedString("Height: ")
+    fun toDiameterString() = toPrefixedString("Diameter: ")
+    fun toTrunkDiameterString() = toPrefixedString("Trunk diameter: ")
 
     fun convert(toUnits: Units): Measurement {
         val cm = toCm()
@@ -36,7 +45,7 @@ data class Measurement(val value: Float, val units: Units = Units.CM) {
         }, toUnits)
     }
 
-    private fun toCm(): Float {
+    fun toCm(): Float {
         return when (units) {
             Units.CM -> value
             Units.M -> value * 100
@@ -44,4 +53,14 @@ data class Measurement(val value: Float, val units: Units = Units.CM) {
             Units.FT -> value * 12 * 2.54F
         }
     }
+
+    fun toFtIn(): Pair<Float, Float> {
+        if (units != Units.FT)
+            throw ArithmeticException()
+        return Pair( getFeetWithoutInches(), getInchesWithoutFeet() )
+    }
+
+    private fun getFeetWithoutInches() = value - (getInchesWithoutFeet() / 12)
+
+    private fun getInchesWithoutFeet() = value * 12 % 12
 }

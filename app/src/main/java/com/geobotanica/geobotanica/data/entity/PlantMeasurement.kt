@@ -16,7 +16,10 @@ import org.threeten.bp.OffsetDateTime
             childColumns = ["plantId"],
             onDelete = ForeignKey.CASCADE)
     ],
-    indices = [ Index(value = ["plantId"]) ]
+    indices = [
+        Index(value = ["userId"]),
+        Index(value = ["plantId"])
+    ]
 )
 data class PlantMeasurement(
     val userId: Long,
@@ -38,7 +41,7 @@ data class PlantMeasurement(
         override fun toString() = when (this) {
             HEIGHT -> "Height"
             DIAMETER -> "Diameter"
-            TRUNK_DIAMETER -> "Trunk diameter"
+            TRUNK_DIAMETER -> "Trunk diameterMeasurement"
             FLOWER -> "Flower"
             FRUIT -> "Fruit"
         }

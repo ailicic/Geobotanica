@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.RadioGroup
-import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Location
@@ -17,16 +17,13 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.NavBundleExt.getFromBundle
-import com.geobotanica.geobotanica.util.NavBundleExt.getNullableFromBundle
-import com.google.android.material.snackbar.Snackbar
+import com.geobotanica.geobotanica.util.getFromBundle
+import com.geobotanica.geobotanica.util.getNullableFromBundle
 import kotlinx.android.synthetic.main.fragment_new_plant_measurement.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import kotlinx.android.synthetic.main.measurement_compound_view.view.*
 import javax.inject.Inject
 
-
-// TODO: Handle back button better. Delete temp photo if needed, allow edit prev. activity, etc.
 
 class NewPlantMeasurementFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantMeasurementViewModel>
@@ -63,11 +60,11 @@ class NewPlantMeasurementFragment : BaseFragment() {
         arguments?.getSerializable(locationKey)?.let { gps.setLocation(it as Location) }
 
     private fun initMeasurementCompoundViews() {
-        heightMeasurement.textView.text = resources.getString(R.string.height)
-        diameterMeasurement.textView.text = resources.getString(R.string.diameter)
-        trunkDiameterMeasurement.textView.text = resources.getString(R.string.trunk_diameter)
+        heightMeasurementView.textView.text = resources.getString(R.string.height)
+        diameterMeasurementView.textView.text = resources.getString(R.string.diameter)
+        trunkDiameterMeasurementView.textView.text = resources.getString(R.string.trunk_diameter)
         if (viewModel.plantType != Plant.Type.TREE)
-            trunkDiameterMeasurement.visibility = View.GONE
+            trunkDiameterMeasurementView.visibility = View.GONE
     }
 
     private fun bindClickListeners() {
@@ -82,16 +79,16 @@ class NewPlantMeasurementFragment : BaseFragment() {
         if (isChecked) {
             manualRadioButton.isEnabled = true
             assistedRadioButton.isEnabled = true
-            heightMeasurement.visibility = View.VISIBLE
-            diameterMeasurement.visibility = View.VISIBLE
+            heightMeasurementView.visibility = View.VISIBLE
+            diameterMeasurementView.visibility = View.VISIBLE
             if (viewModel.plantType == Plant.Type.TREE)
-                trunkDiameterMeasurement.visibility = View.VISIBLE
+                trunkDiameterMeasurementView.visibility = View.VISIBLE
         } else {
             manualRadioButton.isEnabled = false
             assistedRadioButton.isEnabled = false
-            heightMeasurement.visibility = View.GONE
-            diameterMeasurement.visibility = View.GONE
-            trunkDiameterMeasurement.visibility = View.GONE
+            heightMeasurementView.visibility = View.GONE
+            diameterMeasurementView.visibility = View.GONE
+            trunkDiameterMeasurementView.visibility = View.GONE
         }
     }
 
@@ -100,63 +97,67 @@ class NewPlantMeasurementFragment : BaseFragment() {
         when (checkedId) {
             manualRadioButton.id -> {
                 Lg.d("onRadioButtonChecked(): Manual")
-                heightMeasurement.visibility = View.VISIBLE
-                diameterMeasurement.visibility = View.VISIBLE
+                heightMeasurementView.visibility = View.VISIBLE
+                diameterMeasurementView.visibility = View.VISIBLE
 
                 if (viewModel.plantType == Plant.Type.TREE)
-                    trunkDiameterMeasurement.visibility = View.VISIBLE
+                    trunkDiameterMeasurementView.visibility = View.VISIBLE
             }
             assistedRadioButton.id -> {
                 Lg.d("onRadioButtonChecked(): Assisted")
-                heightMeasurement.visibility = View.GONE
-                diameterMeasurement.visibility = View.GONE
-                trunkDiameterMeasurement.visibility = View.GONE
+                heightMeasurementView.visibility = View.GONE
+                diameterMeasurementView.visibility = View.GONE
+                trunkDiameterMeasurementView.visibility = View.GONE
             }
         }
     }
 
     private fun onFabPressed(view: View) {
-        if (!isPlantValid(view))
+        if (!isPlantValid())
             return
         loadViewModelWithPlantData()
-        viewModel.savePlantComposite()
-
-        Toast.makeText(activity, "Plant saved", Toast.LENGTH_SHORT).show() // TODO: Make snackbar
 
         val navController = activity.findNavController(R.id.fragment)
-        navController.popBackStack(R.id.mapFragment, false)
+        navController.navigate(R.id.newPlantConfirmFragment, createBundle())
     }
 
-    private fun isPlantValid(view: View): Boolean {
-        if (!gps.gpsSwitch.isEnabled) {
-            Snackbar.make(view, "Wait for GPS fix", Snackbar.LENGTH_LONG).setAction("Action", null).show()
-            return false
+    private fun loadViewModelWithPlantData() {
+        if (measurementsSwitch.isChecked) {
+            viewModel.heightMeasurement = heightMeasurementView.getMeasurement()
+            viewModel.diameterMeasurement = diameterMeasurementView.getMeasurement()
+            if (viewModel.plantType == Plant.Type.TREE)
+                viewModel.trunkDiameterMeasurement = trunkDiameterMeasurementView.getMeasurement()
         }
-        if (!gps.gpsSwitch.isChecked) {
-            Snackbar.make(view, "Plant position must be held", Snackbar.LENGTH_LONG).setAction("Action", null).show()
-            return false
-        }
+    }
+
+    private fun isPlantValid(): Boolean {
         if (measurementsSwitch.isChecked && isMeasurementEmpty() ) {
-            Snackbar.make(view, "Provide plant plantMeasurements", Snackbar.LENGTH_LONG).setAction("Action", null).show()
+            showSnackbar("Provide plant measurements")
             return false
         }
         return true
     }
 
     private fun isMeasurementEmpty(): Boolean {
-        return heightMeasurement.editText.text.isEmpty() ||
-                diameterMeasurement.editText.text.isEmpty() ||
-                ( viewModel.plantType == Plant.Type.TREE && trunkDiameterMeasurement.editText.text.isEmpty() )
+        return heightMeasurementView.isEmpty() ||
+                diameterMeasurementView.isEmpty() ||
+                ( viewModel.plantType == Plant.Type.TREE && trunkDiameterMeasurementView.isEmpty() )
     }
 
-    private fun loadViewModelWithPlantData() {
-        if (measurementsSwitch.isChecked) {
-            viewModel.height = heightMeasurement.getInCentimeters()
-            viewModel.diameter = diameterMeasurement.getInCentimeters()
-            if (viewModel.plantType == Plant.Type.TREE)
-                viewModel.trunkDiameter = trunkDiameterMeasurement.getInCentimeters()
+    private fun createBundle(): Bundle {
+        return bundleOf(
+                userIdKey to viewModel.userId,
+                plantTypeKey to viewModel.plantType.ordinal,
+                photoUriKey to viewModel.photoUri
+        ).apply {
+            viewModel.commonName?.let { putString(commonNameKey, it) }
+            viewModel.latinName?.let { putString(latinNameKey, it) }
+            viewModel.heightMeasurement?.let { putSerializable(heightMeasurementKey, it) }
+            viewModel.diameterMeasurement?.let { putSerializable(diameterMeasurementKey, it) }
+            viewModel.trunkDiameterMeasurement?.let { putSerializable(trunkDiameterMeasurementKey, it)
+            }
+            if (gps.gpsSwitch.isChecked)
+                putSerializable(locationKey, gps.currentLocation)
         }
-
-        gps.currentLocation?.let { viewModel.location = it }
     }
 }

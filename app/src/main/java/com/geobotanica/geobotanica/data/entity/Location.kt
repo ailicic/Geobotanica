@@ -18,12 +18,12 @@ data class Location(
 
     fun mergeWith(location: Location): Location {
         return Location(
-                latitude ?: location?.latitude,
-                longitude ?: location?.longitude,
-                altitude ?: location?.altitude,
-                precision ?: location?.precision,
-                satellitesInUse ?: location?.satellitesInUse,
-                satellitesVisible = max(satellitesVisible, location?.satellitesVisible ?: 0)
+                latitude ?: location.latitude,
+                longitude ?: location.longitude,
+                altitude ?: location.altitude,
+                precision ?: location.precision,
+                satellitesInUse ?: location.satellitesInUse,
+                satellitesVisible = max(satellitesVisible, location.satellitesVisible)
         )
     }
 }
