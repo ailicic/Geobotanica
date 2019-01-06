@@ -16,9 +16,9 @@
         <!--android:layout_height="match_parent">-->
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/constraintLayout"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:context=".ui.newplantconfirm.NewPlantConfirmFragment"
         tools:showIn="@layout/fragment_new_plant_confirm">
@@ -109,28 +109,27 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
 
-        <ImageView
-            android:id="@+id/plantPhoto"
-            android:layout_width="match_parent"
+        <com.geobotanica.geobotanica.ui.compoundview.PlantPhotoCompoundView
+            android:id="@+id/plantPhotoComplete"
+            android:layout_width="wrap_content"
             android:layout_height="192dp"
             android:layout_marginTop="8dp"
-            android:scaleType="centerInside"
-            app:layout_constrainedWidth="true"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             app:layout_constraintTop_toBottomOf="@+id/nameDivider"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:ignore="ContentDescription" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/addPhotoButton"
             android:layout_width="@dimen/image_button_size"
             android:layout_height="@dimen/image_button_size"
-            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:scaleType="fitXY"
             android:tint="@color/colorPrimaryDark"
             app:srcCompat="@drawable/ic_add_24px"
-            app:layout_constraintBottom_toTopOf="@id/photoDivider"
+            app:layout_constraintTop_toBottomOf="@id/plantPhotoComplete"
             app:layout_constraintEnd_toEndOf="parent" />
 
         <View
@@ -141,7 +140,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:background="@android:color/darker_gray"
-            app:layout_constraintTop_toBottomOf="@+id/plantPhoto"
+            app:layout_constraintTop_toBottomOf="@+id/addPhotoButton"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
 

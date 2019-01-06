@@ -3,16 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!--<data>-->
-        <!--<import type="android.view.View"/>-->
-        <!--<variable-->
-            <!--name="viewModel"-->
-            <!--type="com.geobotanica.geobotanica.ui.plantdetail.PlantDetailViewModel" />-->
-        <!--<variable-->
-            <!--name="location"-->
-            <!--type="com.geobotanica.geobotanica.data.entity.Location" /> &lt;!&ndash;Included to shorten characters for databinding&ndash;&gt;-->
-    <!--</data>-->
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -39,11 +29,12 @@
                 android:layout_height="@dimen/plant_type_icon_height"
                 android:scaleType="fitCenter"
                 android:gravity="center"
-                android:src="@drawable/plant_type_tree" />
+                android:src="@drawable/plant_type_tree"
+                tools:ignore="ContentDescription" />
 
             <TextView
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 android:lines="1"
                 android:gravity="center"
@@ -71,11 +62,12 @@
                 android:layout_height="@dimen/plant_type_icon_height"
                 android:scaleType="fitCenter"
                 android:gravity="center"
-                android:src="@drawable/plant_type_shrub" />
+                android:src="@drawable/plant_type_shrub"
+                tools:ignore="ContentDescription" />
 
             <TextView
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 android:lines="1"
                 android:gravity="center"
@@ -103,11 +95,12 @@
                 android:layout_height="@dimen/plant_type_icon_height"
                 android:scaleType="fitCenter"
                 android:gravity="center"
-                android:src="@drawable/plant_type_herb" />
+                android:src="@drawable/plant_type_herb"
+                tools:ignore="ContentDescription" />
 
             <TextView
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 android:lines="1"
                 android:gravity="center"
@@ -134,11 +127,12 @@
                 android:layout_height="@dimen/plant_type_icon_height"
                 android:scaleType="fitCenter"
                 android:gravity="center"
-                android:src="@drawable/plant_type_grass" />
+                android:src="@drawable/plant_type_grass"
+                tools:ignore="ContentDescription" />
 
             <TextView
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 android:lines="1"
                 android:gravity="center"
@@ -166,11 +160,12 @@
                 android:layout_height="@dimen/plant_type_icon_height"
                 android:scaleType="fitCenter"
                 android:gravity="center"
-                android:src="@drawable/plant_type_vine" />
+                android:src="@drawable/plant_type_vine"
+                tools:ignore="ContentDescription" />
 
             <TextView
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 android:lines="1"
                 android:gravity="center"

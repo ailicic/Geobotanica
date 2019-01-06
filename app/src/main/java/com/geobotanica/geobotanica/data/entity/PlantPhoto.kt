@@ -35,7 +35,7 @@ data class PlantPhoto(
         LEAF,
         FLOWER,
         FRUIT,
-        STEM,
+//        STEM,
         TRUNK;
 
         override fun toString() = when (this) {
@@ -43,7 +43,7 @@ data class PlantPhoto(
             LEAF -> "Leaf"
             FLOWER -> "Flower"
             FRUIT -> "Fruit"
-            STEM -> "Stem"
+//            STEM -> "Stem"
             TRUNK -> "Trunk"
         }
     }

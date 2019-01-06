@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- TODO: Use a generic photo icon instead of photo_type_flower-->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/plantPhoto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        app:srcCompat="@drawable/photo_type_flower"
+        />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/photoTypeIcon"
+        android:layout_width="@dimen/image_button_size"
+        android:layout_height="@dimen/image_button_size"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:scaleType="fitCenter"
+        app:layout_constraintTop_toTopOf="@id/plantPhoto"
+        app:layout_constraintEnd_toEndOf="@id/plantPhoto"
+        app:srcCompat="@drawable/photo_type_complete" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/photoEditButton"
+        android:layout_width="@dimen/image_button_size"
+        android:layout_height="@dimen/image_button_size"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:scaleType="fitCenter"
+        android:tint="@color/colorPrimaryDark"
+        app:srcCompat="@drawable/ic_edit_black_24dp"
+        app:layout_constraintBottom_toBottomOf="@id/plantPhoto"
+        app:layout_constraintEnd_toEndOf="@id/plantPhoto" />
+    <!--android:foreground="@drawable/ic_edit_black_24dp"-->
+    <!--android:background="@drawable/ic_edit_outline_24dp"-->
+
+
+</merge>

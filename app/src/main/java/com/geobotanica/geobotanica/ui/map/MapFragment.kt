@@ -20,11 +20,8 @@ import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
+import com.geobotanica.geobotanica.util.*
 import com.geobotanica.geobotanica.util.IdDiffer.computeDiffs
-import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.get
-import com.geobotanica.geobotanica.util.observeAfterUnsubscribe
-import com.geobotanica.geobotanica.util.putSharedPrefs
 import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -236,36 +233,36 @@ class MapFragment : BaseFragment() {
         }
     }
 
-    private val onNavigateToNewPlant = Observer<Unit> {
-        findNavController().navigate(
-                R.id.newPlantTypeFragment,
-                bundleOf("userId" to viewModel.userId) )
-    }
-
-//    // TODO: REMOVE (Temp for NewPlantConfirmFragment)
 //    private val onNavigateToNewPlant = Observer<Unit> {
 //        findNavController().navigate(
-//                R.id.newPlantConfirmFragment, createBundle() )
+//                R.id.newPlantTypeFragment,
+//                bundleOf("userId" to viewModel.userId) )
 //    }
-//
-//
-//
-//    // TODO: REMOVE
-//    private fun createBundle(): Bundle {
-//        return bundleOf(
-//                userIdKey to viewModel.userId,
-//                plantTypeKey to 1L,
+
+    // TODO: REMOVE (Temp for NewPlantConfirmFragment)
+    private val onNavigateToNewPlant = Observer<Unit> {
+        findNavController().navigate(
+                R.id.newPlantConfirmFragment, createBundle() )
+    }
+
+
+
+    // TODO: REMOVE
+    private fun createBundle(): Bundle {
+        return bundleOf(
+                userIdKey to viewModel.userId,
+                plantTypeKey to 1L,
 //                photoUriKey to "",
-//                commonNameKey to "Common",
-//                latinNameKey to "Latin",
-//                heightMeasurementKey to Measurement(1.0f, Units.M),
-//                diameterMeasurementKey to Measurement(2.0f, Units.IN),
-//                trunkDiameterMeasurementKey to Measurement(3.5f, Units.FT)
-//        ).apply {
-//            putSerializable(locationKey, Location(
-//                49.477, -119.592, 1.0, 3.0f, 10, 20))
-//        }
-//    }
+                commonNameKey to "Common",
+                latinNameKey to "Latin",
+                heightMeasurementKey to Measurement(1.0f, Units.M),
+                diameterMeasurementKey to Measurement(2.0f, Units.IN),
+                trunkDiameterMeasurementKey to Measurement(3.5f, Units.FT)
+        ).apply {
+            putSerializable(locationKey, Location(
+                49.477, -119.592, 1.0, 3.0f, 10, 20))
+        }
+    }
 
 
 

@@ -3,17 +3,26 @@ package com.geobotanica.geobotanica.ui
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.content.PermissionChecker.PERMISSION_GRANTED
 import androidx.fragment.app.Fragment
 import com.geobotanica.geobotanica.util.Lg
 import com.google.android.material.snackbar.Snackbar
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 abstract class BaseFragment : Fragment() {
@@ -37,6 +46,8 @@ abstract class BaseFragment : Fragment() {
     protected val heightMeasurementKey = "heightMeasurement"
     protected val diameterMeasurementKey = "diameterMeasurement"
     protected val trunkDiameterMeasurementKey = "trunkDiameterMeasurement"
+
+    protected val requestTakePhoto = 1
 
     protected fun requestPermission(permission: String) {
         lazy { this }.run {
@@ -67,6 +78,32 @@ abstract class BaseFragment : Fragment() {
     protected fun showSnackbar(stringId: Int, button: String = "", action: ((View) -> Unit)? = null) {
         showSnackbar(resources.getString(stringId), button, action)
     }
+
+    fun createPhotoFile(): File {
+        val fileName: String = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())
+        val storageDir: File? = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+//        /storage/emulated/0/Android/data/com.geobotanica/files/Pictures
+        return File.createTempFile(fileName, ".jpg", storageDir)
+    }
+
+    fun startPhotoIntent(photoFile: File) {
+        val capturePhotoIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        capturePhotoIntent.resolveActivity(activity.packageManager)
+
+        try {
+            val authorities = "${activity.packageName}.fileprovider"
+            Lg.v("authorities = $authorities")
+            val photoUri: Uri? = FileProvider.getUriForFile(activity, authorities, photoFile)
+            Lg.d("photoUri = ${photoUri?.path}")
+            capturePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+            startActivityForResult(capturePhotoIntent, requestTakePhoto)
+
+        } catch (e: IOException) {
+            showToast("Photo not captured")
+        }
+    }
+
+
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
