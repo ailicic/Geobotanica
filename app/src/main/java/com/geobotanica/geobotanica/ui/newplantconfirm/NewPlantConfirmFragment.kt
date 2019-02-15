@@ -164,6 +164,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         fab.setOnClickListener(::onFabClicked)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onNamesEditClicked(view: View) {
         if (!isPlantValid())
             return
@@ -210,6 +211,7 @@ class NewPlantConfirmFragment : BaseFragment() {
     // TODO: Create custom view for each image with icons
     // TODO: After add photo, need screen to select photo type, then camera screen to take photo
     // TODO: Use ConstraintLayout for everything
+    @Suppress("UNUSED_PARAMETER")
     private fun onAddPhotoClicked(view: View) {
         if (!isPlantValid())
             return
@@ -217,6 +219,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         showToast("Add photo Clicked")
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onMeasurementsEditClicked(view: View) {
         if (!isPlantValid())
             return
@@ -259,6 +262,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onFabClicked(view: View) {
         if (!isPlantValid() || !isLocationValid())
             return

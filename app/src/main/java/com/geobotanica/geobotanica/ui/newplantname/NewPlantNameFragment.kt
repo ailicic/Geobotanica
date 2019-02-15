@@ -55,6 +55,7 @@ class NewPlantNameFragment : BaseFragment() {
         arguments?.getSerializable(locationKey)?.let { gps.setLocation(it as Location) }
 
     // TODO: Push validation into the repo?
+    @Suppress("UNUSED_PARAMETER")
     private fun onFabPressed(view: View) {
         Lg.d("NewPlantFragment: onSaveButtonPressed()")
 

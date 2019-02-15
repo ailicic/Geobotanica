@@ -6,4 +6,8 @@
     <dimen name="plant_type_icon_padding">8dp</dimen>
     <dimen name="plant_type_icon_height">72dp</dimen>
     <dimen name="plant_type_icon_text_size">16sp</dimen>
+    <dimen name="photo_type_icon_padding">8dp</dimen>
+    <dimen name="photo_type_icon_margin">16dp</dimen>
+    <dimen name="photo_type_icon_dimen">32dp</dimen>
+    <dimen name="photo_type_icon_text_size">12sp</dimen>
 </resources>

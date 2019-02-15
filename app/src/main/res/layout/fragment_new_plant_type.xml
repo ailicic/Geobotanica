@@ -10,11 +10,13 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:context=".ui.fragment.NewPlantType">
 
+        <!--TODO: Use constraint layout everywhere here (after buttons redesigned)-->
         <LinearLayout
             android:id="@+id/buttonTree"
             android:layout_width="@dimen/plant_type_icon_layout_width"
             android:layout_height="wrap_content"
             android:padding="@dimen/plant_type_icon_padding"
+            android:layout_margin="8dp"
             android:orientation="vertical"
             android:background="@drawable/ripple_round_corners"
             android:clickable="true"

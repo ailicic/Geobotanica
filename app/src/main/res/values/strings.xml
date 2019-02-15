@@ -1,4 +1,7 @@
 <!--suppress CheckTagEmptyBody -->
+
+<!--TODO: Use string arrays where appropriate-->
+
 <resources>
     <string name="app_name">Geobotanica</string>
 
@@ -55,18 +58,26 @@
     <string name="plant_type_herb">Herb</string>
     <string name="plant_type_grass">Grass</string>
     <string name="plant_type_vine">Vine</string>
-    <string name="photo_type_complete">Complete</string>
-    <string name="photo_type_leaf">Leaf</string>
-    <string name="photo_type_buds">Buds</string>
-    <string name="photo_type_flower">Flower</string>
-    <string name="photo_type_fruit">Fruit</string>
-    <string name="photo_type_trunk">Trunk</string>
+    <!--<string name="photo_type_full">Full</string>-->
+    <!--<string name="photo_type_leaf">Leaf</string>-->
+    <!--<string name="photo_type_buds">Buds</string>-->
+    <!--<string name="photo_type_flower">Flower</string>-->
+    <!--<string name="photo_type_fruit">Fruit</string>-->
+    <!--<string name="photo_type_trunk">Trunk</string>-->
     <string name="inches">in</string>
     <string name="enable">Enable</string>
-    <string-array name="measurement_units">
+    <string-array name="measurement_unit">
         <item>cm</item>
         <item>m</item>
         <item>in</item>
         <item>ft</item>
+    </string-array>
+    <string-array name="photo_type">
+        <item>Full</item>
+        <item>Leaf</item>
+        <!--<item>Buds</item>-->
+        <item>Flower</item>
+        <item>Fruit</item>
+        <item>Trunk</item>
     </string-array>
 </resources>

@@ -65,7 +65,7 @@ dependencies {
     implementation 'org.osmdroid:osmdroid-android:6.0.2'
 
     // Room
-    def room_version = "2.1.0-alpha03"
+    def room_version = "2.1.0-alpha04"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
     testImplementation "androidx.room:room-testing:$room_version"
@@ -81,7 +81,7 @@ dependencies {
     implementation "androidx.core:core-ktx:1.0.1"
 
     // Navigation TODO: Use androidx after 1.0
-    def navigation_version = "1.0.0-alpha08" // WARNING: alpha09 causes crashes
+    def navigation_version = "1.0.0-beta02"
     implementation "android.arch.navigation:navigation-fragment-ktx:$navigation_version"
     implementation "android.arch.navigation:navigation-ui-ktx:$navigation_version"
 

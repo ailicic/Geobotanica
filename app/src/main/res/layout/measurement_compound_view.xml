@@ -32,7 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:entries="@array/measurement_units"
+        android:entries="@array/measurement_unit"
         app:layout_constraintStart_toEndOf="@+id/editText"
         app:layout_constraintBottom_toBottomOf="@+id/editText" />
 

@@ -2,15 +2,20 @@ package com.geobotanica.geobotanica.ui.map
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.geobotanica.geobotanica.R
@@ -22,6 +27,7 @@ import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.*
 import com.geobotanica.geobotanica.util.IdDiffer.computeDiffs
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -239,11 +245,33 @@ class MapFragment : BaseFragment() {
 //                bundleOf("userId" to viewModel.userId) )
 //    }
 
-    // TODO: REMOVE (Temp for NewPlantConfirmFragment)
-    private val onNavigateToNewPlant = Observer<Unit> {
-        findNavController().navigate(
-                R.id.newPlantConfirmFragment, createBundle() )
+    class PhotoTypeDialogFragment : DialogFragment() {
+
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            return activity?.let {
+                val builder = AlertDialog.Builder(it)
+                builder.setTitle("Select Photo Type")
+                        .setItems(R.array.photo_type,
+                                DialogInterface.OnClickListener { dialog, which ->
+                                    // The 'which' argument contains the index position of the selected item
+                                    Toast.makeText(activity,
+                                            resources.getStringArray(R.array.photo_type)[which],
+                                            Toast.LENGTH_SHORT).show()
+                                })
+                builder.create()
+            } ?: throw IllegalStateException("Activity cannot be null")
+        }
     }
+
+    private val onNavigateToNewPlant = Observer<Unit> {
+        PhotoTypeDialogFragment().show(fragmentManager,"tag")
+    }
+
+//    // TODO: REMOVE (Temp for NewPlantConfirmFragment)
+//    private val onNavigateToNewPlant = Observer<Unit> {
+//        findNavController().navigate(
+//                R.id.newPlantConfirmFragment, createBundle() )
+//    }
 
 
 
