@@ -2,22 +2,17 @@ package com.geobotanica.geobotanica.ui.map
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-import android.app.Dialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
-import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.Location
@@ -27,7 +22,6 @@ import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.*
 import com.geobotanica.geobotanica.util.IdDiffer.computeDiffs
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -39,13 +33,11 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
-// TODO: Disable map tile downloads (on emulator only) if no internet (consumes CPU)
+
 
 // TODO: Check that no hard-coded strings are used -> resources.getString(R.string.trunk_diameter)
-// TODO: Show PlantType icon in map bubble (and PlantDetail?)
 // TODO: Fix back button behaviour: location, names, measurements are lost, Delete temp photo
 // TODO: Use androidx.appcompat.widget.AppCompatImageView in xml everywhere
-// TODO: Show snackbar after plant saved (pass as param in Navigate)
 // TODO: Show satellite stats too
 
 // LONG TERM
@@ -65,6 +57,8 @@ import javax.inject.Inject
 // https://medium.com/google-developers/viewmodels-persistence-onsaveinstancestate-restoring-ui-state-and-loaders-fc7cc4a6c090
 // TODO: Check if resume state is handled correctly: start app using AS, press home, kill app using AS, open app
 
+// DEFERRED
+// TODO: Show PlantType icon in map bubble (and PlantDetail?)
 
 class MapFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<MapViewModel>
@@ -239,41 +233,16 @@ class MapFragment : BaseFragment() {
         }
     }
 
-//    private val onNavigateToNewPlant = Observer<Unit> {
-//        findNavController().navigate(
-//                R.id.newPlantTypeFragment,
-//                bundleOf("userId" to viewModel.userId) )
-//    }
-
-    class PhotoTypeDialogFragment : DialogFragment() {
-
-        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            return activity?.let {
-                val builder = AlertDialog.Builder(it)
-                builder.setTitle("Select Photo Type")
-                        .setItems(R.array.photo_type,
-                                DialogInterface.OnClickListener { dialog, which ->
-                                    // The 'which' argument contains the index position of the selected item
-                                    Toast.makeText(activity,
-                                            resources.getStringArray(R.array.photo_type)[which],
-                                            Toast.LENGTH_SHORT).show()
-                                })
-                builder.create()
-            } ?: throw IllegalStateException("Activity cannot be null")
-        }
-    }
-
     private val onNavigateToNewPlant = Observer<Unit> {
-        PhotoTypeDialogFragment().show(fragmentManager,"tag")
+        NavHostFragment.findNavController(this).navigate(
+                R.id.newPlantTypeFragment,
+                bundleOf("userId" to viewModel.userId) )
     }
 
-//    // TODO: REMOVE (Temp for NewPlantConfirmFragment)
+    // TODO: REMOVE (Temp for NewPlantConfirmFragment)
 //    private val onNavigateToNewPlant = Observer<Unit> {
-//        findNavController().navigate(
-//                R.id.newPlantConfirmFragment, createBundle() )
+//        NavHostFragment.findNavController(this).navigate(R.id.newPlantConfirmFragment, createBundle() )
 //    }
-
-
 
     // TODO: REMOVE
     private fun createBundle(): Bundle {
@@ -291,6 +260,9 @@ class MapFragment : BaseFragment() {
                 49.477, -119.592, 1.0, 3.0f, 10, 20))
         }
     }
+
+
+
 
 
 

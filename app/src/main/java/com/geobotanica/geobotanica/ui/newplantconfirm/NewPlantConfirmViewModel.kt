@@ -30,7 +30,8 @@ class NewPlantConfirmViewModel @Inject constructor (
     var diameterMeasurement: Measurement? = null
     var trunkDiameterMeasurement: Measurement? = null
     var location: Location? = null
-    var photoUris = mutableMapOf<PlantPhoto.Type, String>()
+    var photoUri: String = ""
+//    var photoUris = mutableMapOf<PlantPhoto.Type, String>()
     var newPhotoUri: String = ""
 
     private var job: Job? = null
@@ -49,19 +50,17 @@ class NewPlantConfirmViewModel @Inject constructor (
                 plant.id = plantRepo.insert(plant)
                 Lg.d("Saved: $plant (id=${plant.id})")
 
-                savePlantPhotos(plant)
+                savePlantPhoto(plant)
                 savePlantMeasurements(plant)
                 savePlantLocation(plant)
             }
         }
     }
 
-    private fun savePlantPhotos(plant: Plant) {
-        photoUris.forEach { (photoType, photoUri) ->
-            val photo = PlantPhoto(userId, plant.id, photoType, photoUri) // TODO: Store only relative path/filename
-            photo.id = plantPhotoRepo.insert(photo)
-            Lg.d("Saved: $photo (id=${photo.id})")
-        }
+    private fun savePlantPhoto(plant: Plant) {
+        val photo = PlantPhoto(userId, plant.id, PlantPhoto.Type.COMPLETE, photoUri) // TODO: Store only relative path/filename
+        photo.id = plantPhotoRepo.insert(photo)
+        Lg.d("Saved: $photo (id=${photo.id})")
     }
 
     private fun savePlantMeasurements(plant: Plant) {

@@ -113,6 +113,7 @@ class NewPlantMeasurementFragment : BaseFragment() {
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onFabPressed(view: View) {
         if (!isPlantValid())
             return

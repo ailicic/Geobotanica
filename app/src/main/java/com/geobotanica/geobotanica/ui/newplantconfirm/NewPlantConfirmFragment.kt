@@ -15,18 +15,15 @@ import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.data.entity.PlantPhoto
 import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
 import com.geobotanica.geobotanica.databinding.FragmentNewPlantConfirmBinding
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.ui.compoundview.PlantPhotoCompoundView
 import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_new_plant_confirm.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import kotlinx.android.synthetic.main.measurement_compound_view.view.*
-import kotlinx.android.synthetic.main.plant_photo_compound_view.*
 import java.io.File
 import javax.inject.Inject
 
@@ -36,8 +33,8 @@ class NewPlantConfirmFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantConfirmViewModel>
     private lateinit var viewModel: NewPlantConfirmViewModel
 
-    private lateinit var capturingPlantPhotoType: PlantPhoto.Type
-    private var plantPhotoCompoundViews = mutableMapOf<PlantPhoto.Type,PlantPhotoCompoundView>()
+//    private lateinit var capturingPlantPhotoType: PlantPhoto.Type
+//    private var plantPhotoCompoundViews = mutableMapOf<PlantPhoto.Type,PlantPhotoCompoundView>()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -46,14 +43,14 @@ class NewPlantConfirmFragment : BaseFragment() {
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
             plantType = PlantTypeConverter.toPlantType(getFromBundle(plantTypeKey))
-            photoUris[PlantPhoto.Type.COMPLETE] = getFromBundle(photoUriKey)
+            photoUri = getFromBundle(photoUriKey)
             commonName = getNullableFromBundle(commonNameKey)
             latinName = getNullableFromBundle(latinNameKey)
             heightMeasurement = arguments?.getSerializable(heightMeasurementKey) as Measurement?
             diameterMeasurement = arguments?.getSerializable(diameterMeasurementKey) as Measurement?
             trunkDiameterMeasurement = arguments?.getSerializable(trunkDiameterMeasurementKey) as Measurement?
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, commonName=$commonName, " +
-                    "latinName=$latinName, mainPhotoUri=${photoUris[PlantPhoto.Type.COMPLETE]}, " +
+                    "latinName=$latinName, photoUri=$photoUri, " +
                     "heightMeasurement=$heightMeasurement, " +
                     "diameterMeasurement=$diameterMeasurement, " +
                     "trunkDiameterMeasurement=$trunkDiameterMeasurement")
@@ -64,7 +61,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         val binding = DataBindingUtil.inflate<FragmentNewPlantConfirmBinding>(
                 layoutInflater, R.layout.fragment_new_plant_confirm, container, false).apply {
             viewModel = this@NewPlantConfirmFragment.viewModel
-            setLifecycleOwner(this@NewPlantConfirmFragment)
+            lifecycleOwner = this@NewPlantConfirmFragment
         }
         return binding.root
     }
@@ -80,7 +77,6 @@ class NewPlantConfirmFragment : BaseFragment() {
     private fun setMainPlantPhoto() {
         plantPhotoComplete.doOnPreDraw {
 //            viewModel.photoUris[PlantPhoto.Type.COMPLETE]?.let {uri -> plantPhotoComplete.setPhoto(uri)}
-            plantPhotoCompoundViews[PlantPhoto.Type.COMPLETE] = plantPhotoComplete
         }
     }
 
@@ -108,9 +104,9 @@ class NewPlantConfirmFragment : BaseFragment() {
 //        }
 //    }
 
-    private val onEditPhoto = Observer<PlantPhoto.Type> { plantPhotoType ->
-//        showToast("onEditPhoto")
-        capturingPlantPhotoType = plantPhotoType
+//    private val onEditPhoto = Observer<PlantPhoto.Type> {
+    private val onEditPhoto = Observer<Int?> {
+//        capturingPlantPhotoType = plantPhotoType
 
         with (viewModel) {
             val photoFile = createPhotoFile()
@@ -120,26 +116,25 @@ class NewPlantConfirmFragment : BaseFragment() {
     }
 
 
+//    private val onEditPhotoType = Observer<PlantPhoto.Type> { plantPhotoType ->
+//        val dialog = PhotoTypeDialogFragment()
+//        dialog.photoTypeSelected.observe(this,Observer<PlantPhoto.Type> {
+//
+//        })
+//        dialog.show(fragmentManager, "tag")
+//    }
+
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             requestTakePhoto -> {
                 when (resultCode) {
                     Activity.RESULT_OK -> {
-                        Lg.d("New ${capturingPlantPhotoType} photo received")
-                        if (viewModel.photoUris.containsKey(capturingPlantPhotoType)) {
-                            val oldPhotoUri = viewModel.photoUris[capturingPlantPhotoType]
-                            Lg.d("Deleting old photo: $oldPhotoUri")
-                            Lg.d("Delete photo result = ${File(oldPhotoUri).delete()}")
-                        }
+                        Lg.d("New photo received")
+                        Lg.d("Deleting old photo: ${viewModel.photoUri}")
+                        Lg.d("Delete photo result = ${File(viewModel.photoUri).delete()}")
 
-                        when (capturingPlantPhotoType) {
-                            PlantPhoto.Type.COMPLETE -> plantPhotoComplete.setPhoto(viewModel.newPhotoUri)
-                            PlantPhoto.Type.LEAF -> plantPhotoComplete.setPhoto(viewModel.newPhotoUri)
-                            PlantPhoto.Type.FLOWER -> plantPhotoComplete.setPhoto(viewModel.newPhotoUri)
-                            PlantPhoto.Type.FRUIT -> plantPhotoComplete.setPhoto(viewModel.newPhotoUri)
-                            PlantPhoto.Type.TRUNK -> plantPhotoComplete.setPhoto(viewModel.newPhotoUri)
-                        }
-                        viewModel.photoUris[capturingPlantPhotoType] = viewModel.newPhotoUri
+                        viewModel.photoUri = viewModel.newPhotoUri
                     }
                     Activity.RESULT_CANCELED -> {
                         Lg.d("onActivityResult: RESULT_CANCELED") // "X" in GUI or back button pressed
@@ -155,11 +150,12 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     private fun bindViewModel() {
         plantPhotoComplete.editPhoto.observeAfterUnsubscribe(this, onEditPhoto)
+//        plantPhotoComplete.editPhotoType.observeAfterUnsubscribe(this, onEditPhotoType)
     }
 
     private fun bindClickListeners() {
         editNamesButton.setOnClickListener(::onNamesEditClicked)
-        addPhotoButton.setOnClickListener(::onAddPhotoClicked)
+//        addPhotoButton.setOnClickListener(::onAddPhotoClicked)
         editMeasurementsButton.setOnClickListener(::onMeasurementsEditClicked)
         fab.setOnClickListener(::onFabClicked)
     }
