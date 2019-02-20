@@ -34,8 +34,8 @@
         android:scaleType="fitCenter"
         android:tint="@color/colorPrimaryDark"
         app:srcCompat="@drawable/ic_edit_black_24dp"
-        app:layout_constraintBottom_toBottomOf="@id/plantPhoto"
-        app:layout_constraintEnd_toEndOf="@id/plantPhoto" />
+        app:layout_constraintBottom_toBottomOf="@id/plantPhotoFull"
+        app:layout_constraintEnd_toEndOf="@id/plantPhotoFull" />
     <!--android:foreground="@drawable/ic_edit_black_24dp"-->
     <!--android:background="@drawable/ic_edit_outline_24dp"-->
 

@@ -15,8 +15,8 @@ import com.geobotanica.geobotanica.databinding.FragmentPlantDetailBinding
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.util.ImageViewExt.setScaledBitmap
 import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.setScaledBitmap
 import kotlinx.android.synthetic.main.fragment_plant_detail.*
 import javax.inject.Inject
 
@@ -58,10 +58,10 @@ class PlantDetailFragment : BaseFragment() {
     }
 
     private fun setPlantPhoto() {
-        plantPhoto.doOnPreDraw {
+        plantPhotoFull.doOnPreDraw {
             viewModel.mainPhoto.observe(this, Observer {mainPhoto ->
                 mainPhoto?.let { photo ->
-                    plantPhoto.setScaledBitmap(photo.fileName)
+                    plantPhotoFull.setScaledBitmap(photo.fileName)
                 }
             })
         }

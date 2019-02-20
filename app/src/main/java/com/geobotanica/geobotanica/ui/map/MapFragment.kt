@@ -34,13 +34,11 @@ import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
 
-
-// TODO: Check that no hard-coded strings are used -> resources.getString(R.string.trunk_diameter)
-// TODO: Fix back button behaviour: location, names, measurements are lost, Delete temp photo
 // TODO: Use androidx.appcompat.widget.AppCompatImageView in xml everywhere
 // TODO: Show satellite stats too
 
 // LONG TERM
+// TODO: Check that no hard-coded strings are used -> resources.getString(R.string.trunk_diameter)
 // TODO: Learn how to use only the keyboard
 // TODO: Use code reformatter:
 // Check tabs on fn params / data class
@@ -244,22 +242,22 @@ class MapFragment : BaseFragment() {
 //        NavHostFragment.findNavController(this).navigate(R.id.newPlantConfirmFragment, createBundle() )
 //    }
 
-    // TODO: REMOVE
-    private fun createBundle(): Bundle {
-        return bundleOf(
-                userIdKey to viewModel.userId,
-                plantTypeKey to 1L,
-//                photoUriKey to "",
-                commonNameKey to "Common",
-                latinNameKey to "Latin",
-                heightMeasurementKey to Measurement(1.0f, Units.M),
-                diameterMeasurementKey to Measurement(2.0f, Units.IN),
-                trunkDiameterMeasurementKey to Measurement(3.5f, Units.FT)
-        ).apply {
-            putSerializable(locationKey, Location(
-                49.477, -119.592, 1.0, 3.0f, 10, 20))
-        }
-    }
+//    // TODO: REMOVE
+//    private fun createBundle(): Bundle {
+//        return bundleOf(
+//                userIdKey to viewModel.userId,
+//                plantTypeKey to 1L,
+////                photoUriKey to "",
+//                commonNameKey to "Common",
+//                latinNameKey to "Latin",
+//                heightMeasurementKey to Measurement(1.0f, Units.M),
+//                diameterMeasurementKey to Measurement(2.0f, Units.IN),
+//                trunkDiameterMeasurementKey to Measurement(3.5f, Units.FT)
+//        ).apply {
+//            putSerializable(locationKey, Location(
+//                49.477, -119.592, 1.0, 3.0f, 10, 20))
+//        }
+//    }
 
 
 

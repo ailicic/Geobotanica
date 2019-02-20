@@ -88,16 +88,21 @@ class PlantDetailViewModel @Inject constructor(
         runBlocking { job?.join() }
     }
 
-    fun deletePlant() { // TODO: Verify photos + locations are deleted (cascade policy)
+    fun deletePlant() {
+        deletePlantPhotoFiles()
         job = GlobalScope.launch(Dispatchers.IO) {
             database.runInTransaction {
-                plantPhotos.value?.forEach {
-                    Lg.d("Deleting photo: ${it.fileName}")
-                    File(it.fileName).delete()
-                }
-
                 Lg.d("Deleting plant: ${plant.value!!}")
                 plantRepo.delete(plant.value!!)
+            }
+        }
+    }
+
+    private fun deletePlantPhotoFiles() {
+        plantPhotos.observeForever {
+            it.forEach { plantPhoto ->
+                val fileName = plantPhoto.fileName
+                Lg.d("Deleting photo: $fileName (Result=${File(fileName).delete()})")
             }
         }
     }

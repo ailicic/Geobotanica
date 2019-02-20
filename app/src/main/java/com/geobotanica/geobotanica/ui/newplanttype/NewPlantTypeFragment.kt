@@ -15,7 +15,6 @@ import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.getFromBundle
 import kotlinx.android.synthetic.main.fragment_new_plant_type.*
-import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import javax.inject.Inject
 
 
@@ -42,6 +41,11 @@ class NewPlantTypeFragment : BaseFragment() {
         bindClickListeners()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        activity.currentLocation = null // Delete since exiting New Plant flow
+    }
+
     private fun bindClickListeners() {
         buttonTree.setOnClickListener(::onClickListener)
         buttonShrub.setOnClickListener(::onClickListener)
@@ -51,23 +55,23 @@ class NewPlantTypeFragment : BaseFragment() {
     }
 
     private fun onClickListener(view: View) {
-        var plantType = Plant.Type.TREE
-        when(view) {
-            buttonTree -> plantType = Plant.Type.TREE
-            buttonShrub -> plantType = Plant.Type.SHRUB
-            buttonHerb -> plantType = Plant.Type.HERB
-            buttonGrass -> plantType = Plant.Type.GRASS
-            buttonVine -> plantType = Plant.Type.VINE
-        }
-        Lg.d("onClickListener(): Clicked $plantType")
+        val navController = activity.findNavController(R.id.fragment)
+        navController.navigate(R.id.newPlantPhotoFragment, createBundle(getClickedPlantType(view)))
+    }
 
-        val bundle = bundleOf(
+    private fun getClickedPlantType(view: View): Plant.Type =
+        when (view) {
+            buttonTree -> Plant.Type.TREE
+            buttonShrub -> Plant.Type.SHRUB
+            buttonHerb -> Plant.Type.HERB
+            buttonGrass -> Plant.Type.GRASS
+            buttonVine -> Plant.Type.VINE
+            else -> Plant.Type.TREE
+        }
+
+    private fun createBundle(plantType: Plant.Type): Bundle =
+        bundleOf(
             userIdKey to viewModel.userId,
             plantTypeKey to plantType.ordinal)
-        if (gps.gpsSwitch.isChecked)
-            bundle.putSerializable(locationKey, gps.currentLocation)
-        val navController = activity.findNavController(R.id.fragment)
-        navController.navigate(R.id.newPlantPhotoFragment, bundle)
-    }
 
 }

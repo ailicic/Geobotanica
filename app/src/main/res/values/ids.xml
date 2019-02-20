@@ -4,5 +4,15 @@
     <item name="locationText" type="id" />
     <item name="createdByText" type="id" />
     <item name="modifiedByText" type="id" />
-    <item name="measurementsDivider" type="id" />
+
+    <item name="heightValue" type="id" />
+    <item name="heightUnits" type="id" />
+    <item name="heightInchesValue" type="id" />
+    <item name="diameterValue" type="id" />
+    <item name="diameterUnits" type="id" />
+    <item name="diameterInchesValue" type="id" />
+    <item name="trunkDiamValue" type="id" />
+    <item name="trunkDiamUnits" type="id" />
+    <item name="trunkDiamInchesValue" type="id" />
+
 </resources>

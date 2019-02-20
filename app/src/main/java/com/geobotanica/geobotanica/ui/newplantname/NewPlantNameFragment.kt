@@ -9,18 +9,12 @@ import androidx.core.os.bundleOf
 import androidx.core.view.doOnPreDraw
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.util.ImageViewExt.setScaledBitmap
-import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.getFromBundle
-import com.geobotanica.geobotanica.util.isEmpty
-import com.geobotanica.geobotanica.util.toTrimmedString
+import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_new_plant_name.*
-import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import javax.inject.Inject
 
 
@@ -46,13 +40,9 @@ class NewPlantNameFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setGpsLocationFromBundle()
-        plantPhoto.doOnPreDraw { plantPhoto.setScaledBitmap(viewModel.photoUri) }
+        plantPhotoFull.doOnPreDraw { plantPhotoFull.setScaledBitmap(viewModel.photoUri) }
         fab.setOnClickListener(::onFabPressed)
     }
-
-    private fun setGpsLocationFromBundle() =
-        arguments?.getSerializable(locationKey)?.let { gps.setLocation(it as Location) }
 
     // TODO: Push validation into the repo?
     @Suppress("UNUSED_PARAMETER")
@@ -61,29 +51,29 @@ class NewPlantNameFragment : BaseFragment() {
 
         if (!areNamesValid())
             return
-        loadViewModelWithPlantData()
+        saveViewModelState()
 
         val navController = activity.findNavController(R.id.fragment)
-        navController.navigate(R.id.newPlantMeasurementFragment, createBundleFromViewModel())
+        navController.navigate(R.id.newPlantMeasurementFragment, createBundle())
     }
 
     private fun areNamesValid(): Boolean {
-        if (commonNameEditText.isEmpty() && latinNameEditText.isEmpty()) {
+        if (commonNameTextInput.isEmpty() && latinNameTextInput.isEmpty()) {
             showSnackbar("Provide a plant name")
             return false
         }
         return true
     }
 
-    private fun loadViewModelWithPlantData() {
-        commonNameEditText.toString()
-        val commonName = commonNameEditText.toTrimmedString()
-        val latinName = latinNameEditText.toTrimmedString()
+    private fun saveViewModelState() {
+        commonNameTextInput.toString()
+        val commonName = commonNameTextInput.toTrimmedString()
+        val latinName = latinNameTextInput.toTrimmedString()
         viewModel.commonName = if (commonName.isNotEmpty()) commonName else null
         viewModel.latinName = if (latinName.isNotEmpty()) latinName else null
     }
 
-    private fun createBundleFromViewModel(): Bundle {
+    private fun createBundle(): Bundle {
         return bundleOf(
                 userIdKey to viewModel.userId,
                 plantTypeKey to viewModel.plantType.ordinal,
@@ -91,8 +81,6 @@ class NewPlantNameFragment : BaseFragment() {
         ).apply {
             viewModel.commonName?.let { putString(commonNameKey, it) }
             viewModel.latinName?.let { putString(latinNameKey, it) }
-            if (gps.gpsSwitch.isChecked)
-                putSerializable(locationKey, gps.currentLocation)
         }
     }
 }

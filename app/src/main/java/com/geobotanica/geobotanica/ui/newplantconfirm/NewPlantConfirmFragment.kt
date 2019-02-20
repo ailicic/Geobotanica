@@ -13,7 +13,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
 import com.geobotanica.geobotanica.databinding.FragmentNewPlantConfirmBinding
@@ -23,7 +22,6 @@ import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_new_plant_confirm.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
-import kotlinx.android.synthetic.main.measurement_compound_view.view.*
 import java.io.File
 import javax.inject.Inject
 
@@ -46,9 +44,9 @@ class NewPlantConfirmFragment : BaseFragment() {
             photoUri = getFromBundle(photoUriKey)
             commonName = getNullableFromBundle(commonNameKey)
             latinName = getNullableFromBundle(latinNameKey)
-            heightMeasurement = arguments?.getSerializable(heightMeasurementKey) as Measurement?
-            diameterMeasurement = arguments?.getSerializable(diameterMeasurementKey) as Measurement?
-            trunkDiameterMeasurement = arguments?.getSerializable(trunkDiameterMeasurementKey) as Measurement?
+            heightMeasurement = getNullableFromBundle(heightMeasurementKey)
+            diameterMeasurement = getNullableFromBundle(diameterMeasurementKey)
+            trunkDiameterMeasurement = getNullableFromBundle(trunkDiameterMeasurementKey)
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, commonName=$commonName, " +
                     "latinName=$latinName, photoUri=$photoUri, " +
                     "heightMeasurement=$heightMeasurement, " +
@@ -69,32 +67,24 @@ class NewPlantConfirmFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         setMainPlantPhoto()
         initMeasurementEditViews()
-        setGpsLocationFromBundle()
         bindViewModel()
         bindClickListeners()
     }
 
     private fun setMainPlantPhoto() {
-        plantPhotoComplete.doOnPreDraw {
-//            viewModel.photoUris[PlantPhoto.Type.COMPLETE]?.let {uri -> plantPhotoComplete.setPhoto(uri)}
-        }
+        plantPhotoFull.doOnPreDraw { plantPhotoFull.setPhoto(viewModel.photoUri) }
     }
 
     private fun initMeasurementEditViews() {
-        heightMeasurementView.textView.text = resources.getString(R.string.height)
         viewModel.heightMeasurement?.let {heightMeasurementView.setMeasurement(it) }
-
-        diameterMeasurementView.textView.text = resources.getString(R.string.diameter)
         viewModel.diameterMeasurement?.let{ diameterMeasurementView.setMeasurement(it) }
 
         if (viewModel.plantType == Plant.Type.TREE) {
-            trunkDiameterMeasurementView.textView.text = resources.getString(R.string.trunk_diameter)
             viewModel.trunkDiameterMeasurement?.let { trunkDiameterMeasurementView.setMeasurement(it) }
         }
     }
 
 //    private val onAddPhoto = Observer<PlantPhoto.Type> { plantPhotoType ->
-//        showToast("onAddPhoto")
 //        capturingPlantPhotoType = plantPhotoType
 //
 //        with (viewModel) {
@@ -104,7 +94,6 @@ class NewPlantConfirmFragment : BaseFragment() {
 //        }
 //    }
 
-//    private val onEditPhoto = Observer<PlantPhoto.Type> {
     private val onEditPhoto = Observer<Int?> {
 //        capturingPlantPhotoType = plantPhotoType
 
@@ -124,7 +113,6 @@ class NewPlantConfirmFragment : BaseFragment() {
 //        dialog.show(fragmentManager, "tag")
 //    }
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             requestTakePhoto -> {
@@ -133,23 +121,22 @@ class NewPlantConfirmFragment : BaseFragment() {
                         Lg.d("New photo received")
                         Lg.d("Deleting old photo: ${viewModel.photoUri}")
                         Lg.d("Delete photo result = ${File(viewModel.photoUri).delete()}")
-
                         viewModel.photoUri = viewModel.newPhotoUri
                     }
-                    Activity.RESULT_CANCELED -> {
-                        Lg.d("onActivityResult: RESULT_CANCELED") // "X" in GUI or back button pressed
+                    Activity.RESULT_CANCELED -> { // "X" in GUI or back button pressed
+                        Lg.d("onActivityResult: RESULT_CANCELED")
+                        Lg.d("Deleting unused photo file: ${viewModel.newPhotoUri}")
+                        Lg.d("Delete photo result = ${File(viewModel.newPhotoUri).delete()}")
                     }
                     else -> Lg.d("onActivityResult: Unrecognized code")
                 }
             }
+            else -> showToast("Unrecognized request code")
         }
     }
 
-    private fun setGpsLocationFromBundle() =
-            arguments?.getSerializable(locationKey)?.let { gps.setLocation(it as Location) }
-
     private fun bindViewModel() {
-        plantPhotoComplete.editPhoto.observeAfterUnsubscribe(this, onEditPhoto)
+        plantPhotoFull.editPhoto.observeAfterUnsubscribe(this, onEditPhoto)
 //        plantPhotoComplete.editPhotoType.observeAfterUnsubscribe(this, onEditPhotoType)
     }
 
@@ -169,7 +156,7 @@ class NewPlantConfirmFragment : BaseFragment() {
     }
 
     private fun disableTextEdits() {
-        if (commonNameEditText.isVisible || latinNameEditText.isVisible)
+        if (commonNameTextInput.isVisible || latinNameTextInput.isVisible)
             setNamesEditable(false)
         if (heightMeasurementView.isVisible)
             setMeasurementsEditable(false)
@@ -178,23 +165,23 @@ class NewPlantConfirmFragment : BaseFragment() {
     private fun setNamesEditable(enableEdits: Boolean) {
         if (enableEdits) {
             commonNameText.isVisible = false
-            commonNameEditText.isVisible =true
+            commonNameTextInput.isVisible =true
 
             latinNameText.isVisible = false
-            latinNameEditText.isVisible = true
+            latinNameTextInput.isVisible = true
 
             editNamesButton.isVisible = false
             nameDivider.isVisible = false
         } else {
-            commonNameEditText.isVisible = false
-            if (commonNameEditText.isNotEmpty()) {
-                viewModel.commonName = commonNameEditText.editText?.text.toString()
+            commonNameTextInput.isVisible = false
+            if (commonNameTextInput.isNotEmpty()) {
+                viewModel.commonName = commonNameTextInput.editText?.text.toString()
                 commonNameText.text = viewModel.commonName
                 commonNameText.isVisible = true
             }
-            latinNameEditText.isVisible = false
-            if (latinNameEditText.isNotEmpty()) {
-                viewModel.latinName = latinNameEditText.editText?.text.toString()
+            latinNameTextInput.isVisible = false
+            if (latinNameTextInput.isNotEmpty()) {
+                viewModel.latinName = latinNameTextInput.editText?.text.toString()
                 latinNameText.text = viewModel.latinName
                 latinNameText.isVisible = true
             }
@@ -207,13 +194,13 @@ class NewPlantConfirmFragment : BaseFragment() {
     // TODO: Create custom view for each image with icons
     // TODO: After add photo, need screen to select photo type, then camera screen to take photo
     // TODO: Use ConstraintLayout for everything
-    @Suppress("UNUSED_PARAMETER")
-    private fun onAddPhotoClicked(view: View) {
-        if (!isPlantValid())
-            return
-        disableTextEdits()
-        showToast("Add photo Clicked")
-    }
+//    @Suppress("UNUSED_PARAMETER")
+//    private fun onAddPhotoClicked(view: View) {
+//        if (!isPlantValid())
+//            return
+//        disableTextEdits()
+//        showToast("Add photo Clicked")
+//    }
 
     @Suppress("UNUSED_PARAMETER")
     private fun onMeasurementsEditClicked(view: View) {
@@ -265,14 +252,15 @@ class NewPlantConfirmFragment : BaseFragment() {
         gps.currentLocation?.let { viewModel.location = it }
 
         viewModel.savePlantComposite()
-        showToast("Plant saved") // TODO: Make snackbar
+        showToast("Plant saved") // TODO: Make snackbar (maybe?)
 
         val navController = activity.findNavController(R.id.fragment)
         navController.popBackStack(R.id.mapFragment, false)
+        activity.currentLocation = null
     }
 
     private fun isPlantValid(): Boolean {
-        if (commonNameEditText.isEmpty() && latinNameEditText.isEmpty()) {
+        if (commonNameTextInput.isEmpty() && latinNameTextInput.isEmpty()) {
             showSnackbar("Provide a plant name")
             return false
         }

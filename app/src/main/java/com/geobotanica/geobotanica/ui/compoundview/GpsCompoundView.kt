@@ -15,8 +15,7 @@ import javax.inject.Inject
 
 // https://medium.com/@Sserra90/android-writing-a-compound-view-1eacbf1957fc
 
-// TODO: Forbid holding location if gps is fixed, held, then unheld (location is stale/absent and imprecise at this time)
-// TODO: Investigate when OnDetachedWindow() is called. Back button fires it but onStop of parent activity seems to not in NewPlant.
+// TODO: Investigate when onDetachedFromWindow() is called. Back button fires it but onStop of parent activity seems to not in NewPlant.
 // TODO: Prevent gps hold, gps disable, then gps unhold switch (gps must be enabled first)
 
 class GpsCompoundView @JvmOverloads constructor(
@@ -28,41 +27,45 @@ class GpsCompoundView @JvmOverloads constructor(
     @Inject lateinit var locationService: LocationService
 
     var currentLocation: Location? = null
+    val activity: MainActivity = context as MainActivity
 
     init {
-        (context as MainActivity).applicationComponent.inject(this)
+//        Lg.d("GpsCompoundView: init{}")
+        activity.applicationComponent.inject(this)
         inflate(getContext(), R.layout.gps_compound_view,this)
     }
 
-    fun setLocation(location: Location) { // Only called if Location object found in Navigation arguments
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+//        Lg.d("GpsCompoundView: onAttachedToWindow()")
+
+        if (activity.currentLocation != null)
+            importLocationData(activity.currentLocation!!)
+        else
+            locationService.subscribe(this, ::onLocation)
+        gpsSwitch.setOnCheckedChangeListener(::onToggleHoldPosition)
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+//        Lg.d("GpsCompoundView: onDetachedFromWindow()")
+        gpsSwitch.setOnCheckedChangeListener(null)
+        locationService.unsubscribe(this)
+    }
+
+    private fun importLocationData(location: Location) {
         currentLocation = location
         gpsSwitch.isChecked = true
         precisionText.text = context.resources.getString(R.string.precision, location.precision)
         setSatellitesText(location.satellitesInUse ?: 0, location.satellitesVisible)
         holdText.visibility = View.VISIBLE
         gpsSwitch.visibility = View.VISIBLE
-//        locationService.unsubscribe(this) // Not required since always called before onAttachedToWindow()
-    }
-
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-//        Lg.d("GpsCompoundView: onAttachedToWindow()")
-        gpsSwitch.setOnCheckedChangeListener(::onToggleHoldPosition)
-        if (!gpsSwitch.isChecked)
-            locationService.subscribe(this, ::onLocation)
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-//        Lg.d("GpsCompoundView: onDetachedFromWindow()")
-        gpsSwitch.setOnClickListener(null)
-        locationService.unsubscribe(this)
     }
 
     private fun onLocation(location: Location) {
-        currentLocation = location.apply {
+        currentLocation = location
+        location.run {
 //            Lg.v("onLocation(): $this")
-
             precision?.let {
                 precisionText.text = context.resources.getString(R.string.precision, precision)
                 holdText.visibility = View.VISIBLE
@@ -76,15 +79,18 @@ class GpsCompoundView @JvmOverloads constructor(
     private fun onToggleHoldPosition(buttonView: CompoundButton, isChecked: Boolean) {
         Lg.d("onToggleHoldPosition(): isChecked=$isChecked")
         if (isChecked) {
+            locationService.unsubscribe(this)
+            activity.currentLocation = currentLocation
 
 //            if (!isGpsEnabled()) {
 //                _gpsFabIcon.value = GPS_OFF.drawable
 //                showGpsRequiredSnackbar.call()
 //            }
-            locationService.unsubscribe(this)
         }
-        else
+        else {
+            activity.currentLocation = null
             locationService.subscribe(this, ::onLocation)
+        }
     }
 
     private fun setSatellitesText(satellitesInUse: Int, satellitesVisible: Int) {

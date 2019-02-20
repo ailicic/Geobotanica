@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.util.ImageViewExt.setScaledBitmap
+import com.geobotanica.geobotanica.util.setScaledBitmap
 import com.geobotanica.geobotanica.util.SingleLiveEvent
 import kotlinx.android.synthetic.main.plant_photo_compound_view.view.*
 

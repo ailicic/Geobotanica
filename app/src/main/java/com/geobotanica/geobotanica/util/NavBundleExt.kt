@@ -30,6 +30,7 @@ inline fun <reified T: Any?> Bundle.getValue(key: String): T? {
             return if (value == 0.0) null else value // Ensure null is returned if absent
         }
         String::class -> { this.getString(key) as T? }
+        Measurement::class -> { this.getSerializable(key) as T? }
         else -> throw IllegalArgumentException("$key is of unknown type")
     }
 }

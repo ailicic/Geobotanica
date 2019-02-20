@@ -14,10 +14,10 @@
         android:layout_marginBottom="8dp"
         android:textColor="@color/colorBlack"
         app:layout_constraintStart_toStartOf="@id/plantMeasurement"
-        app:layout_constraintBottom_toBottomOf="@+id/editText" />
+        app:layout_constraintBottom_toBottomOf="@+id/editText1" />
 
     <EditText
-        android:id="@+id/editText"
+        android:id="@+id/editText1"
         android:layout_width="48dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -28,23 +28,23 @@
         tools:ignore="LabelFor" />
 
     <Spinner
-        android:id="@+id/unitsSpinner"
+        android:id="@+id/spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:entries="@array/measurement_unit"
-        app:layout_constraintStart_toEndOf="@+id/editText"
-        app:layout_constraintBottom_toBottomOf="@+id/editText" />
+        app:layout_constraintStart_toEndOf="@+id/editText1"
+        app:layout_constraintBottom_toBottomOf="@+id/editText1" />
 
     <EditText
-        android:id="@+id/inchesEditText"
+        android:id="@+id/editText2"
         android:layout_width="48dp"
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="numberDecimal"
         android:visibility="invisible"
         app:layout_constraintTop_toTopOf="@id/plantMeasurement"
-        app:layout_constraintStart_toEndOf="@id/unitsSpinner"
+        app:layout_constraintStart_toEndOf="@id/spinner"
         tools:ignore="LabelFor" />
 
     <TextView
@@ -57,7 +57,7 @@
         android:textSize="16sp"
         android:textColor="@color/colorBlack"
         android:visibility="invisible"
-        app:layout_constraintStart_toEndOf="@id/inchesEditText"
-        app:layout_constraintBottom_toBottomOf="@+id/editText" />
+        app:layout_constraintStart_toEndOf="@id/editText2"
+        app:layout_constraintBottom_toBottomOf="@+id/editText1" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -30,6 +30,7 @@
 
     <TextView
         android:id="@+id/precisionText"
+        android:saveEnabled="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -39,6 +40,7 @@
 
     <TextView
         android:id="@+id/satellitesText"
+        android:saveEnabled="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -60,6 +62,7 @@
 
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/gpsSwitch"
+        android:saveEnabled="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="invisible"

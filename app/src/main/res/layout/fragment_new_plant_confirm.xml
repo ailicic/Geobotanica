@@ -32,7 +32,7 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/commonNameEditText"
+            android:id="@+id/commonNameTextInput"
             android:layout_width="368dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -61,10 +61,10 @@
             android:textSize="18sp"
             android:text="@{ viewModel.latinName }"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/commonNameEditText" />
+            app:layout_constraintTop_toBottomOf="@id/commonNameTextInput" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/latinNameEditText"
+            android:id="@+id/latinNameTextInput"
             android:layout_width="368dp"
             android:layout_height="wrap_content"
             android:visibility="gone"
@@ -100,12 +100,12 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:background="@android:color/darker_gray"
-            app:layout_constraintTop_toBottomOf="@+id/latinNameEditText"
+            app:layout_constraintTop_toBottomOf="@+id/latinNameTextInput"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
 
         <com.geobotanica.geobotanica.ui.compoundview.PlantPhotoCompoundView
-            android:id="@+id/plantPhotoComplete"
+            android:id="@+id/plantPhotoFull"
             android:layout_width="wrap_content"
             android:layout_height="192dp"
             android:layout_marginTop="8dp"
@@ -135,7 +135,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:background="@android:color/darker_gray"
-            app:layout_constraintTop_toBottomOf="@+id/plantPhotoComplete"
+            app:layout_constraintTop_toBottomOf="@+id/plantPhotoFull"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
 

@@ -11,7 +11,6 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
 import com.geobotanica.geobotanica.ui.BaseFragment
@@ -21,8 +20,6 @@ import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.getFromBundle
 import com.geobotanica.geobotanica.util.getNullableFromBundle
 import kotlinx.android.synthetic.main.fragment_new_plant_measurement.*
-import kotlinx.android.synthetic.main.gps_compound_view.view.*
-import kotlinx.android.synthetic.main.measurement_compound_view.view.*
 import javax.inject.Inject
 
 
@@ -52,18 +49,11 @@ class NewPlantMeasurementFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setGpsLocationFromBundle()
         initMeasurementCompoundViews()
         bindClickListeners()
     }
 
-    private fun setGpsLocationFromBundle() =
-        arguments?.getSerializable(locationKey)?.let { gps.setLocation(it as Location) }
-
     private fun initMeasurementCompoundViews() {
-        heightMeasurementView.textView.text = resources.getString(R.string.height)
-        diameterMeasurementView.textView.text = resources.getString(R.string.diameter)
-        trunkDiameterMeasurementView.textView.text = resources.getString(R.string.trunk_diameter)
         if (viewModel.plantType != Plant.Type.TREE)
             trunkDiameterMeasurementView.isVisible = false
     }
@@ -117,13 +107,13 @@ class NewPlantMeasurementFragment : BaseFragment() {
     private fun onFabPressed(view: View) {
         if (!isPlantValid())
             return
-        loadViewModelWithPlantData()
+        saveViewModelState()
 
         val navController = activity.findNavController(R.id.fragment)
         navController.navigate(R.id.newPlantConfirmFragment, createBundle())
     }
 
-    private fun loadViewModelWithPlantData() {
+    private fun saveViewModelState() {
         if (measurementsSwitch.isChecked) {
             viewModel.heightMeasurement = heightMeasurementView.getMeasurement()
             viewModel.diameterMeasurement = diameterMeasurementView.getMeasurement()
@@ -156,10 +146,7 @@ class NewPlantMeasurementFragment : BaseFragment() {
             viewModel.latinName?.let { putString(latinNameKey, it) }
             viewModel.heightMeasurement?.let { putSerializable(heightMeasurementKey, it) }
             viewModel.diameterMeasurement?.let { putSerializable(diameterMeasurementKey, it) }
-            viewModel.trunkDiameterMeasurement?.let { putSerializable(trunkDiameterMeasurementKey, it)
-            }
-            if (gps.gpsSwitch.isChecked)
-                putSerializable(locationKey, gps.currentLocation)
+            viewModel.trunkDiameterMeasurement?.let { putSerializable(trunkDiameterMeasurementKey, it) }
         }
     }
 }

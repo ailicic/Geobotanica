@@ -81,6 +81,7 @@ abstract class BaseFragment : Fragment() {
 
     fun createPhotoFile(): File {
         val fileName: String = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())
+//        Lg.d("createPhotoFile(): fileName=$fileName")
         val storageDir: File? = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
 //        /storage/emulated/0/Android/data/com.geobotanica/files/Pictures
         return File.createTempFile(fileName, ".jpg", storageDir)
@@ -92,8 +93,8 @@ abstract class BaseFragment : Fragment() {
 
         try {
             val authorities = "${activity.packageName}.fileprovider"
-            Lg.v("authorities = $authorities")
-            val photoUri: Uri? = FileProvider.getUriForFile(activity, authorities, photoFile)
+//            Lg.v("authorities = $authorities")
+            val photoUri: Uri? = FileProvider.getUriForFile(activity, authorities, photoFile) // Adds 12 digits to filename
             Lg.d("photoUri = ${photoUri?.path}")
             capturePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
             startActivityForResult(capturePhotoIntent, requestTakePhoto)

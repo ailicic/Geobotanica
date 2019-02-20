@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI.setupActionBarWithNavController
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.di.components.ApplicationComponent
 import com.geobotanica.geobotanica.di.components.DaggerApplicationComponent
 import com.geobotanica.geobotanica.di.modules.ApplicationModule
@@ -17,6 +18,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var applicationComponent: ApplicationComponent
 
     private val className = "MainActivity"
+    var currentLocation: Location? = null // Easy solution to hold location between fragments during new plant flow
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

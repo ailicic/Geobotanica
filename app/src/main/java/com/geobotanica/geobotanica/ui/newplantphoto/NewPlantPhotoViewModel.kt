@@ -10,5 +10,4 @@ class NewPlantPhotoViewModel @Inject constructor (): ViewModel() {
     var userId = 0L
     var plantType = Plant.Type.TREE
     var photoUri: String = ""
-    var oldPhotoUri: String = ""
 }
