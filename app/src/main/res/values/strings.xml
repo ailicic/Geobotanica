@@ -66,6 +66,7 @@
     <!--<string name="photo_type_trunk">Trunk</string>-->
     <string name="inches">in</string>
     <string name="enable">Enable</string>
+    <string name="name_search_hint">Common or Latin name</string>
     <string-array name="measurement_unit">
         <item>cm</item>
         <item>m</item>

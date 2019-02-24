@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
-import androidx.core.view.doOnPreDraw
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
@@ -15,6 +14,7 @@ import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_new_plant_name.*
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 
@@ -40,8 +40,30 @@ class NewPlantNameFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        plantPhotoFull.doOnPreDraw { plantPhotoFull.setScaledBitmap(viewModel.photoUri) }
         fab.setOnClickListener(::onFabPressed)
+
+        // TODO: Need to "debounce" by ~300 ms
+        // TODO: Show spinner while searching (maybe)
+        searchEditText.onTextChanged {string ->
+            if (string.length > 1) {
+                GlobalScope.launch(Dispatchers.Main) {
+                    resultsText.text = viewModel.searchPlantName(string)
+                }
+            }
+        }
+
+//        GlobalScope.launch(Dispatchers.IO) {
+//            Lg.d("Count vern: ${vernacularDao.getCount()}")
+//            Lg.d("Count taxa: ${taxonRepo.getCount()}")
+//
+//            val vernOrderedTime =measureTimeMillis {
+//                val vernOrdered = vernacularRepo.getAllOrdered()
+//                Lg.d("vernOrdered: $vernOrdered")
+//            }
+//            Lg.d("vernOrderedTime = $vernOrderedTime")
+//        }
+
+//        plantDatabaseRo.close()
     }
 
     // TODO: Push validation into the repo?

@@ -10,28 +10,37 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:context=".ui.fragment.NewPlantType">
 
-        <!--TODO: Make button view: show large image when clicked-->
-        <ImageView
-            android:id="@+id/plantPhotoFull"
+        <EditText
+            android:id="@+id/searchEditText"
             android:layout_width="match_parent"
-            android:layout_height="192dp"
-            android:layout_marginTop="16dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/plant_type_tree"
-            app:layout_constrainedWidth="true"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:ignore="ContentDescription" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:hint="@string/name_search_hint" />
+
+        <TextView
+            android:id="@+id/resultsText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="results text"
+            app:layout_constraintTop_toBottomOf="@id/searchEditText"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/commonNameTextInput"
             android:layout_width="368dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/plantPhotoFull">
+            app:layout_constraintBottom_toTopOf="@+id/latinNameTextInput">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/commonNameEditText"
@@ -47,9 +56,10 @@
             android:id="@+id/latinNameTextInput"
             android:layout_width="368dp"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/commonNameTextInput">
+            app:layout_constraintBottom_toTopOf="@+id/gps">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/latinNameEditText"
@@ -59,7 +69,6 @@
                 android:layout_marginStart="16dp"
                 android:hint="@string/latin_name" />
         </com.google.android.material.textfield.TextInputLayout>
-
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"

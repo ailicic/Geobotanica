@@ -33,7 +33,7 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
-
+// TODO: Verify that app does not crash on first run due to permissions
 // TODO: Use androidx.appcompat.widget.AppCompatImageView in xml everywhere
 // TODO: Show satellite stats too
 
@@ -182,6 +182,13 @@ class MapFragment : BaseFragment() {
     }
 
     private fun init() {
+
+        // TODO: Remove
+        NavHostFragment.findNavController(this).navigate(
+                R.id.newPlantNameFragment, createBundle() )
+
+
+
         initMap()
         viewModel.initGpsSubscribe()
         setClickListeners()
@@ -242,22 +249,22 @@ class MapFragment : BaseFragment() {
 //        NavHostFragment.findNavController(this).navigate(R.id.newPlantConfirmFragment, createBundle() )
 //    }
 
-//    // TODO: REMOVE
-//    private fun createBundle(): Bundle {
-//        return bundleOf(
-//                userIdKey to viewModel.userId,
-//                plantTypeKey to 1L,
-////                photoUriKey to "",
-//                commonNameKey to "Common",
-//                latinNameKey to "Latin",
-//                heightMeasurementKey to Measurement(1.0f, Units.M),
-//                diameterMeasurementKey to Measurement(2.0f, Units.IN),
-//                trunkDiameterMeasurementKey to Measurement(3.5f, Units.FT)
-//        ).apply {
-//            putSerializable(locationKey, Location(
-//                49.477, -119.592, 1.0, 3.0f, 10, 20))
-//        }
-//    }
+    // TODO: REMOVE
+    private fun createBundle(): Bundle {
+        return bundleOf(
+                userIdKey to viewModel.userId,
+                plantTypeKey to 1L,
+//                photoUriKey to "",
+                commonNameKey to "Common",
+                latinNameKey to "Latin",
+                heightMeasurementKey to Measurement(1.0f, Units.M),
+                diameterMeasurementKey to Measurement(2.0f, Units.IN),
+                trunkDiameterMeasurementKey to Measurement(3.5f, Units.FT)
+        ).apply {
+            putSerializable(locationKey, Location(
+                49.477, -119.592, 1.0, 3.0f, 10, 20))
+        }
+    }
 
 
 

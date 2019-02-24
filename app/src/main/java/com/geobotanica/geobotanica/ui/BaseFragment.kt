@@ -35,7 +35,7 @@ abstract class BaseFragment : Fragment() {
         activity.getSharedPreferences(className, Context.MODE_PRIVATE)
     }
 
-    // NavBundle/SharedPrefs keys
+    // NavBundle keys
     protected val userIdKey = "userId"
     protected val plantIdKey = "plantId"
     protected val plantTypeKey = "plantType"

@@ -17,7 +17,7 @@ import com.geobotanica.geobotanica.data.entity.*
             PlantMeasurement::class
         ],
         exportSchema = true,
-        version = 22
+        version = 1
 )
 @TypeConverters(
         PlantTypeConverter::class,
@@ -39,9 +39,9 @@ abstract class GbDatabase : RoomDatabase() {
                 gbDatabase ?: buildDatabase(context).also{ gbDatabase = it }
             }
 
-        private fun buildDatabase(context: Context) =
+        private fun buildDatabase(appContext: Context) =
                 Room.databaseBuilder(
-                        context.applicationContext,
+                        appContext,
                         GbDatabase::class.java, "gb_db")
                         .fallbackToDestructiveMigration() // TODO: Implement migrations after schema stagnates
                         .build()
