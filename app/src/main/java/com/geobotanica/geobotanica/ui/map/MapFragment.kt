@@ -17,7 +17,7 @@ import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.User
-import com.geobotanica.geobotanica.data_ro.PlantDatabaseRo
+import com.geobotanica.geobotanica.data_taxa.TaxaDatabase
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -185,7 +185,7 @@ class MapFragment : BaseFragment() {
 
     private fun init() {
 //        // TODO: Remove
-        PlantDatabaseRo.getInstance(appContext).close()
+        TaxaDatabase.getInstance(appContext).close()
         NavHostFragment.findNavController(this).navigate(
                 R.id.newPlantNameFragment, createBundle() )
 

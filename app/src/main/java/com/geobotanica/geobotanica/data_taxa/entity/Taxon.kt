@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.data_ro.entity
+package com.geobotanica.geobotanica.data_taxa.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

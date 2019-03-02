@@ -2,9 +2,9 @@ package com.geobotanica.geobotanica.ui.newplantname
 
 import androidx.lifecycle.ViewModel
 import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.data_ro.DEFAULT_RESULT_LIMIT
-import com.geobotanica.geobotanica.data_ro.repo.TaxonRepo
-import com.geobotanica.geobotanica.data_ro.repo.VernacularRepo
+import com.geobotanica.geobotanica.data_taxa.DEFAULT_RESULT_LIMIT
+import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
+import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -146,8 +146,8 @@ class PlantNameSearchService @Inject constructor (
 
     private fun mapIdToSearchResult(resultType: PlantNameType, result: Long): SearchResult {
         return SearchResult(resultType, result, when(resultType) {
-            PlantNameType.VERNACULAR -> vernacularRepo.get(result)!!.vernacular!!
-            PlantNameType.SCIENTIFIC -> taxonRepo.get(result)!!.latinName
+            PlantNameType.VERNACULAR -> vernacularRepo.get(result)!!.vernacular!!.capitalize()
+            PlantNameType.SCIENTIFIC -> taxonRepo.get(result)!!.latinName.capitalize()
         })
     }
 }

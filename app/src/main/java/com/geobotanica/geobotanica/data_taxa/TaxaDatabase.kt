@@ -1,14 +1,13 @@
-package com.geobotanica.geobotanica.data_ro
+package com.geobotanica.geobotanica.data_taxa
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.geobotanica.geobotanica.data_ro.dao.TaxonCompositeDao
-import com.geobotanica.geobotanica.data_ro.dao.TaxonDao
-import com.geobotanica.geobotanica.data_ro.dao.VernacularDao
-import com.geobotanica.geobotanica.data_ro.entity.Taxon
-import com.geobotanica.geobotanica.data_ro.entity.Vernacular
+import com.geobotanica.geobotanica.data_taxa.dao.TaxonDao
+import com.geobotanica.geobotanica.data_taxa.dao.VernacularDao
+import com.geobotanica.geobotanica.data_taxa.entity.Taxon
+import com.geobotanica.geobotanica.data_taxa.entity.Vernacular
 
 const val DEFAULT_RESULT_LIMIT = 50
 
@@ -17,16 +16,15 @@ const val DEFAULT_RESULT_LIMIT = 50
             Taxon::class,
             Vernacular::class
         ],
-        version = 2
+        version = 1
 )
-abstract class PlantDatabaseRo : RoomDatabase() {
+abstract class TaxaDatabase : RoomDatabase() {
     abstract fun taxonDao(): TaxonDao
-    abstract fun taxonCompositeDao(): TaxonCompositeDao
     abstract fun vernacularDao(): VernacularDao
 
     companion object {
-        @Volatile private var plantDatabaseRo: PlantDatabaseRo? = null
-        fun getInstance(appContext: Context): PlantDatabaseRo =
+        @Volatile private var plantDatabaseRo: TaxaDatabase? = null
+        fun getInstance(appContext: Context): TaxaDatabase =
                 plantDatabaseRo ?: synchronized(this) {
                     plantDatabaseRo ?: buildDatabase(appContext).also{ plantDatabaseRo = it }
             }
@@ -34,7 +32,7 @@ abstract class PlantDatabaseRo : RoomDatabase() {
         private fun buildDatabase(appContext: Context) =
             Room.databaseBuilder(
                 appContext,
-                PlantDatabaseRo::class.java, "CoL.sqlite"
+                TaxaDatabase::class.java, "taxa.db"
             ).build()
     }
 }

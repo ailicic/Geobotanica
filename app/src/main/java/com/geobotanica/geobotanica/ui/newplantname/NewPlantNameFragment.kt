@@ -12,7 +12,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
-import com.geobotanica.geobotanica.data_ro.PlantDatabaseRo
+import com.geobotanica.geobotanica.data_taxa.TaxaDatabase
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -38,6 +38,8 @@ class NewPlantNameFragment : BaseFragment() {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
+
+
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
             plantType = PlantTypeConverter.toPlantType(getFromBundle(plantTypeKey))
@@ -62,7 +64,7 @@ class NewPlantNameFragment : BaseFragment() {
             Lg.d("Count vern: ${viewModel.vernacularRepo.getCount()}")
             Lg.d("Count taxa: ${viewModel.taxonRepo.getCount()}")
         }
-        PlantDatabaseRo.getInstance(appContext).close()
+        TaxaDatabase.getInstance(appContext).close()
         searchEditText.requestFocus()
     }
 

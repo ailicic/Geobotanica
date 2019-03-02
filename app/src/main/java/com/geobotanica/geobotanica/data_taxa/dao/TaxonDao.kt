@@ -1,10 +1,9 @@
-package com.geobotanica.geobotanica.data_ro.dao
+package com.geobotanica.geobotanica.data_taxa.dao
 
 import androidx.room.Dao
 import androidx.room.Query
 import com.geobotanica.geobotanica.data.dao.BaseDao
-import com.geobotanica.geobotanica.data_ro.DEFAULT_RESULT_LIMIT
-import com.geobotanica.geobotanica.data_ro.entity.Taxon
+import com.geobotanica.geobotanica.data_taxa.entity.Taxon
 
 @Dao
 interface TaxonDao : BaseDao<Taxon> {
@@ -12,10 +11,10 @@ interface TaxonDao : BaseDao<Taxon> {
     @Query("SELECT * FROM taxa WHERE id = :id")
     fun get(id: Long): Taxon?
 
-    @Query("SELECT DISTINCT(id) FROM taxa WHERE generic LIKE :string || '%' LIMIT :limit")
+    @Query("SELECT id FROM taxa WHERE generic LIKE :string || '%' LIMIT :limit")
     fun genericStartsWith(string: String, limit: Int): List<Long>?
 
-    @Query("SELECT DISTINCT(id) FROM taxa WHERE epithet LIKE :string || '%' LIMIT :limit")
+    @Query("SELECT id FROM taxa WHERE epithet LIKE :string || '%' LIMIT :limit")
     fun epithetStartsWith(string: String, limit: Int): List<Long>?
 
     @Query("""SELECT id FROM

@@ -1,10 +1,9 @@
-package com.geobotanica.geobotanica.data_ro.dao
+package com.geobotanica.geobotanica.data_taxa.dao
 
 import androidx.room.Dao
 import androidx.room.Query
 import com.geobotanica.geobotanica.data.dao.BaseDao
-import com.geobotanica.geobotanica.data_ro.DEFAULT_RESULT_LIMIT
-import com.geobotanica.geobotanica.data_ro.entity.Vernacular
+import com.geobotanica.geobotanica.data_taxa.entity.Vernacular
 
 @Dao
 interface VernacularDao : BaseDao<Vernacular> {

@@ -1,8 +1,8 @@
-package com.geobotanica.geobotanica.data_ro.repo
+package com.geobotanica.geobotanica.data_taxa.repo
 
-import com.geobotanica.geobotanica.data_ro.DEFAULT_RESULT_LIMIT
-import com.geobotanica.geobotanica.data_ro.dao.VernacularDao
-import com.geobotanica.geobotanica.data_ro.entity.Vernacular
+import com.geobotanica.geobotanica.data_taxa.DEFAULT_RESULT_LIMIT
+import com.geobotanica.geobotanica.data_taxa.dao.VernacularDao
+import com.geobotanica.geobotanica.data_taxa.entity.Vernacular
 import javax.inject.Inject
 
 
