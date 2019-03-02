@@ -87,4 +87,7 @@ dependencies {
 
     // OffsetDateTime
     implementation 'org.threeten:threetenbp:1.3.6'
+
+    // RecyclerView
+    implementation "androidx.recyclerview:recyclerview:1.0.0"
 }

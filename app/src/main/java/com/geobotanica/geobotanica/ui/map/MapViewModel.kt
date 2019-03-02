@@ -93,7 +93,11 @@ class MapViewModel @Inject constructor(
     }
 
     fun onClickNewPlantFab() {
-        navigateToNewPlant.call()
+        if (!isGpsEnabled()) {
+            _gpsFabIcon.value = GPS_OFF.drawable
+            showGpsRequiredSnackbar.call()
+        } else
+            navigateToNewPlant.call()
     }
 
     fun isGpsSubscribed(): Boolean = locationService.isGpsSubscribed(this)

@@ -17,6 +17,7 @@ import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.User
+import com.geobotanica.geobotanica.data_ro.PlantDatabaseRo
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -33,16 +34,17 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
+// TODO: Remove TaxonComposite (no longer needed, reduces db size, indexes preloaded)
 // TODO: Verify that app does not crash on first run due to permissions
 // TODO: Use androidx.appcompat.widget.AppCompatImageView in xml everywhere
 // TODO: Show satellite stats too
+// TODO: Use code reformatter:
+// Check tabs on fn params / data class
+// Subclass in class declaration: colon needs space on both sides
 
 // LONG TERM
 // TODO: Check that no hard-coded strings are used -> resources.getString(R.string.trunk_diameter)
 // TODO: Learn how to use only the keyboard
-// TODO: Use code reformatter:
-// Check tabs on fn params / data class
-// Subclass in class declaration: colon needs space on both sides
 // TODO: Use vector graphics for all icons where possible
 // TODO: Decide on Lg.v/d/i etc.
 // TODO: Double check proper placement of methods in lifecycle callbacks
@@ -182,8 +184,8 @@ class MapFragment : BaseFragment() {
     }
 
     private fun init() {
-
-        // TODO: Remove
+//        // TODO: Remove
+        PlantDatabaseRo.getInstance(appContext).close()
         NavHostFragment.findNavController(this).navigate(
                 R.id.newPlantNameFragment, createBundle() )
 
@@ -239,9 +241,12 @@ class MapFragment : BaseFragment() {
     }
 
     private val onNavigateToNewPlant = Observer<Unit> {
+                // TODO: Remove
         NavHostFragment.findNavController(this).navigate(
-                R.id.newPlantTypeFragment,
-                bundleOf("userId" to viewModel.userId) )
+                R.id.newPlantNameFragment, createBundle() )
+//        NavHostFragment.findNavController(this).navigate(
+//                R.id.newPlantTypeFragment,
+//                bundleOf("userId" to viewModel.userId) )
     }
 
     // TODO: REMOVE (Temp for NewPlantConfirmFragment)

@@ -65,7 +65,7 @@
     <fragment
         android:id="@+id/newPlantNameFragment"
         android:name="com.geobotanica.geobotanica.ui.newplantname.NewPlantNameFragment"
-        android:label="Plant Name" >
+        android:label="Search Plant Name" >
         <argument android:name="userId" />
         <argument android:name="plantType" />
         <argument android:name="photoFilePath" />

@@ -40,10 +40,10 @@ abstract class GbDatabase : RoomDatabase() {
             }
 
         private fun buildDatabase(appContext: Context) =
-                Room.databaseBuilder(
-                        appContext,
-                        GbDatabase::class.java, "gb_db")
-                        .fallbackToDestructiveMigration() // TODO: Implement migrations after schema stagnates
-                        .build()
+            Room.databaseBuilder(
+                appContext,
+                GbDatabase::class.java, "gb.db"
+            ).fallbackToDestructiveMigration() // TODO: Implement migrations after schema stagnates
+            .build()
     }
 }

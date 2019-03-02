@@ -6,21 +6,30 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.navigation.findNavController
+import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
+import com.geobotanica.geobotanica.data_ro.PlantDatabaseRo
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_new_plant_name.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.consumeEach
 import javax.inject.Inject
 
-
+// TODO: Show "No results" if list is empty
+// TODO: Add filter for vern/sci name (action bar / menu button)
+// TODO: Prioritize previously selected names in list (need history table)
+// TODO: Add favourites button on each result and prioritize favourites
 class NewPlantNameFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantNameViewModel>
     private lateinit var viewModel: NewPlantNameViewModel
+
+    private lateinit var plantNamesRecyclerViewAdapter: PlantNamesRecyclerViewAdapter
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -38,32 +47,66 @@ class NewPlantNameFragment : BaseFragment() {
         return inflater.inflate(R.layout.fragment_new_plant_name, container, false)
     }
 
+    @ExperimentalCoroutinesApi
+    @ObsoleteCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        initRecyclerView()
+        bindViewListeners()
+
+        GlobalScope.launch(Dispatchers.IO) {
+            Lg.d("Count vern: ${viewModel.vernacularRepo.getCount()}")
+            Lg.d("Count taxa: ${viewModel.taxonRepo.getCount()}")
+        }
+        PlantDatabaseRo.getInstance(appContext).close()
+        searchEditText.requestFocus()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        searchJob?.cancel()
+    }
+
+    private fun initRecyclerView() {
+        recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+
+        plantNamesRecyclerViewAdapter = PlantNamesRecyclerViewAdapter(emptyList(), onClickItem)
+        recyclerView.adapter = plantNamesRecyclerViewAdapter
+    }
+
+    private var searchJob: Job? = null
+    private var searchString = ""
+
+    @ExperimentalCoroutinesApi
+    @ObsoleteCoroutinesApi
+    private fun bindViewListeners() {
         fab.setOnClickListener(::onFabPressed)
 
-        // TODO: Need to "debounce" by ~300 ms
-        // TODO: Show spinner while searching (maybe)
-        searchEditText.onTextChanged {string ->
-            if (string.length > 1) {
-                GlobalScope.launch(Dispatchers.Main) {
-                    resultsText.text = viewModel.searchPlantName(string)
+        searchEditText.onTextChanged { editText ->
+//            Lg.d("New editText: $editText")
+            if (searchString == editText)
+                return@onTextChanged
+            searchJob?.cancel()
+            searchString = editText
+
+            searchJob = GlobalScope.launch(Dispatchers.Main) {
+                delay(300)
+                if (searchString == editText) {
+                    progressBar.isVisible = true
+                    viewModel.searchPlantName(searchString).consumeEach {
+                        plantNamesRecyclerViewAdapter.items = it
+//                        Lg.d("Update: ${plantNamesRecyclerViewAdapter.items.size} hits for \"$searchString\"")
+                        plantNamesRecyclerViewAdapter.notifyDataSetChanged()
+                    }
                 }
+                progressBar.isVisible = false
             }
         }
+    }
 
-//        GlobalScope.launch(Dispatchers.IO) {
-//            Lg.d("Count vern: ${vernacularDao.getCount()}")
-//            Lg.d("Count taxa: ${taxonRepo.getCount()}")
-//
-//            val vernOrderedTime =measureTimeMillis {
-//                val vernOrdered = vernacularRepo.getAllOrdered()
-//                Lg.d("vernOrdered: $vernOrdered")
-//            }
-//            Lg.d("vernOrderedTime = $vernOrderedTime")
-//        }
-
-//        plantDatabaseRo.close()
+    private val onClickItem = { item: PlantNameSearchService.SearchResult ->
+        showToast(item.name)
     }
 
     // TODO: Push validation into the repo?
