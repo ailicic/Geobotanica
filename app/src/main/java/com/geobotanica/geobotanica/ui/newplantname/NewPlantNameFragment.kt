@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.isEmpty
 import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -15,16 +16,18 @@ import com.geobotanica.geobotanica.data_ro.PlantDatabaseRo
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.util.*
+import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.getFromBundle
+import com.geobotanica.geobotanica.util.onTextChanged
+import com.geobotanica.geobotanica.util.toTrimmedString
 import kotlinx.android.synthetic.main.fragment_new_plant_name.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
 import javax.inject.Inject
 
-// TODO: Show "No results" if list is empty
-// TODO: Add filter for vern/sci name (action bar / menu button)
 // TODO: Prioritize previously selected names in list (need history table)
 // TODO: Add favourites button on each result and prioritize favourites
+// TODO: MAYBE Add filter for vern/sci name (action bar / menu button)
 class NewPlantNameFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantNameViewModel>
     private lateinit var viewModel: NewPlantNameViewModel
@@ -78,10 +81,12 @@ class NewPlantNameFragment : BaseFragment() {
     private var searchJob: Job? = null
     private var searchString = ""
 
+    @UseExperimental(InternalCoroutinesApi::class)
     @ExperimentalCoroutinesApi
     @ObsoleteCoroutinesApi
     private fun bindViewListeners() {
         fab.setOnClickListener(::onFabPressed)
+        clearButton.setOnClickListener { searchEditText.text.clear() }
 
         searchEditText.onTextChanged { editText ->
 //            Lg.d("New editText: $editText")
@@ -94,13 +99,18 @@ class NewPlantNameFragment : BaseFragment() {
                 delay(300)
                 if (searchString == editText) {
                     progressBar.isVisible = true
+                    noResultsText.isVisible = false
                     viewModel.searchPlantName(searchString).consumeEach {
                         plantNamesRecyclerViewAdapter.items = it
 //                        Lg.d("Update: ${plantNamesRecyclerViewAdapter.items.size} hits for \"$searchString\"")
                         plantNamesRecyclerViewAdapter.notifyDataSetChanged()
                     }
                 }
+            }
+            searchJob?.invokeOnCompletion {
                 progressBar.isVisible = false
+                if (recyclerView.adapter?.itemCount == 0)
+                    noResultsText.isVisible = true
             }
         }
     }

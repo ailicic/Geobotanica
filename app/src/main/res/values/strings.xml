@@ -42,6 +42,7 @@
     <string name="shrub">Shrub</string>
     <string name="herb">Herb</string>
     <string name="vine">Vine</string>
+    <string name="no_results">No Results</string>
     <string name="assisted">Assisted</string>
     <string name="manual">Manual</string>
     <!--https://docs.oracle.com/javase/1.5.0/docs/api/java/util/Formatter.html-->
