@@ -5,7 +5,9 @@ import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.dao.*
 import com.geobotanica.geobotanica.data_taxa.TaxaDatabase
 import com.geobotanica.geobotanica.data_taxa.dao.TaxonDao
+import com.geobotanica.geobotanica.data_taxa.dao.TaxonStarDao
 import com.geobotanica.geobotanica.data_taxa.dao.VernacularDao
+import com.geobotanica.geobotanica.data_taxa.dao.VernacularStarDao
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -21,6 +23,8 @@ class RepoModule {
     @Provides @Singleton fun provideMeasurementDao(gbDatabase: GbDatabase): PlantMeasurementDao = gbDatabase.measurementDao()
 
     @Provides @Singleton fun provideTaxaDatabase(context: Context): TaxaDatabase = TaxaDatabase.getInstance(context)
-    @Provides @Singleton fun provideTaxonDao(plantDatabaseRo: TaxaDatabase): TaxonDao = plantDatabaseRo.taxonDao()
-    @Provides @Singleton fun provideVernacularDao(plantDatabaseRo: TaxaDatabase): VernacularDao = plantDatabaseRo.vernacularDao()
+    @Provides @Singleton fun provideTaxonDao(taxaDatabase: TaxaDatabase): TaxonDao = taxaDatabase.taxonDao()
+    @Provides @Singleton fun provideTaxonStarDao(taxaDatabase: TaxaDatabase): TaxonStarDao = taxaDatabase.taxonStarDao()
+    @Provides @Singleton fun provideVernacularDao(taxaDatabase: TaxaDatabase): VernacularDao = taxaDatabase.vernacularDao()
+    @Provides @Singleton fun provideVernacularStarDao(taxaDatabase: TaxaDatabase): VernacularStarDao = taxaDatabase.vernacularStarDao()
 }

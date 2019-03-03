@@ -5,22 +5,30 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.geobotanica.geobotanica.data_taxa.dao.TaxonDao
+import com.geobotanica.geobotanica.data_taxa.dao.TaxonStarDao
 import com.geobotanica.geobotanica.data_taxa.dao.VernacularDao
+import com.geobotanica.geobotanica.data_taxa.dao.VernacularStarDao
 import com.geobotanica.geobotanica.data_taxa.entity.Taxon
+import com.geobotanica.geobotanica.data_taxa.entity.TaxonStar
 import com.geobotanica.geobotanica.data_taxa.entity.Vernacular
+import com.geobotanica.geobotanica.data_taxa.entity.VernacularStar
 
 const val DEFAULT_RESULT_LIMIT = 50
 
 @Database(
         entities = [
             Taxon::class,
-            Vernacular::class
+            TaxonStar::class,
+            Vernacular::class,
+            VernacularStar::class
         ],
         version = 1
 )
 abstract class TaxaDatabase : RoomDatabase() {
     abstract fun taxonDao(): TaxonDao
+    abstract fun taxonStarDao(): TaxonStarDao
     abstract fun vernacularDao(): VernacularDao
+    abstract fun vernacularStarDao(): VernacularStarDao
 
     companion object {
         @Volatile private var plantDatabaseRo: TaxaDatabase? = null

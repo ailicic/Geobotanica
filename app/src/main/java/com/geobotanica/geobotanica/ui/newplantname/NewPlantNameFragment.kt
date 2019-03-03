@@ -16,6 +16,7 @@ import com.geobotanica.geobotanica.data_taxa.TaxaDatabase
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
+import com.geobotanica.geobotanica.ui.newplantname.PlantNameSearchService.SearchResult
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.getFromBundle
 import com.geobotanica.geobotanica.util.onTextChanged
@@ -26,19 +27,18 @@ import kotlinx.coroutines.channels.consumeEach
 import javax.inject.Inject
 
 // TODO: Prioritize previously selected names in list (need history table)
-// TODO: Add favourites button on each result and prioritize favourites
 // TODO: MAYBE Add filter for vern/sci name (action bar / menu button)
 class NewPlantNameFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantNameViewModel>
     private lateinit var viewModel: NewPlantNameViewModel
 
-    private lateinit var plantNamesRecyclerViewAdapter: PlantNamesRecyclerViewAdapter
+    private val mainScope = CoroutineScope(Dispatchers.Main)
+
+    private lateinit var plantNamesAdapter: PlantNamesAdapter
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
-
-
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
@@ -73,52 +73,60 @@ class NewPlantNameFragment : BaseFragment() {
         searchJob?.cancel()
     }
 
-    private fun initRecyclerView() {
+    private fun initRecyclerView() = mainScope.launch {
         recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-
-        plantNamesRecyclerViewAdapter = PlantNamesRecyclerViewAdapter(emptyList(), onClickItem)
-        recyclerView.adapter = plantNamesRecyclerViewAdapter
+        plantNamesAdapter = PlantNamesAdapter(viewModel.getAllStarredPlantNames(), onClickItem, onClickStar)
+        recyclerView.adapter = plantNamesAdapter
     }
 
     private var searchJob: Job? = null
     private var searchString = ""
 
-    @UseExperimental(InternalCoroutinesApi::class)
-    @ExperimentalCoroutinesApi
     @ObsoleteCoroutinesApi
+    @ExperimentalCoroutinesApi
     private fun bindViewListeners() {
         fab.setOnClickListener(::onFabPressed)
         clearButton.setOnClickListener { searchEditText.text.clear() }
+        searchEditText.onTextChanged(::onSearchEditTextChanged)
+    }
 
-        searchEditText.onTextChanged { editText ->
-//            Lg.d("New editText: $editText")
-            if (searchString == editText)
-                return@onTextChanged
-            searchJob?.cancel()
-            searchString = editText
+    private val onClickItem = { item: SearchResult ->
+        showToast(item.name)
+    }
 
-            searchJob = GlobalScope.launch(Dispatchers.Main) {
-                delay(300)
-                if (searchString == editText) {
-                    progressBar.isVisible = true
-                    noResultsText.isVisible = false
-                    viewModel.searchPlantName(searchString).consumeEach {
-                        plantNamesRecyclerViewAdapter.items = it
-//                        Lg.d("Update: ${plantNamesRecyclerViewAdapter.items.size} hits for \"$searchString\"")
-                        plantNamesRecyclerViewAdapter.notifyDataSetChanged()
-                    }
+    private val onClickStar = { result: SearchResult ->
+        viewModel.setStarred(result.plantNameType, result.id, result.isStarred)
+    }
+
+    @ExperimentalCoroutinesApi
+    @ObsoleteCoroutinesApi
+    private fun onSearchEditTextChanged(editText: String) {
+        if (searchString == editText)
+            return@onSearchEditTextChanged
+        searchJob?.cancel()
+        searchString = editText
+
+        progressBar.isVisible = true
+        searchJob = mainScope.launch {
+            delay(300)
+            noResultsText.isVisible = false
+            if (searchString.isEmpty()) {
+                plantNamesAdapter.items = viewModel.getAllStarredPlantNames()
+                plantNamesAdapter.notifyDataSetChanged()
+            } else if (searchString == editText) {
+                viewModel.searchPlantName(searchString).consumeEach {
+                    plantNamesAdapter.items = it
+                    plantNamesAdapter.notifyDataSetChanged()
                 }
             }
-            searchJob?.invokeOnCompletion {
+        }
+        searchJob?.invokeOnCompletion { completionError ->
+            if (completionError == null) { // Coroutine completed normally
                 progressBar.isVisible = false
                 if (recyclerView.adapter?.itemCount == 0)
                     noResultsText.isVisible = true
             }
         }
-    }
-
-    private val onClickItem = { item: PlantNameSearchService.SearchResult ->
-        showToast(item.name)
     }
 
     // TODO: Push validation into the repo?

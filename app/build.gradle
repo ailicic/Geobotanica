@@ -65,6 +65,7 @@ dependencies {
     implementation 'org.osmdroid:osmdroid-android:6.0.2'
 
     // Room
+    // TODO: Use this after 2.1 release: implementation "androidx.room:room-coroutines:${room_version}"
     def room_version = "2.1.0-alpha04"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
