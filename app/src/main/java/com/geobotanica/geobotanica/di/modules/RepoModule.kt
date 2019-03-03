@@ -8,6 +8,9 @@ import com.geobotanica.geobotanica.data_taxa.dao.TaxonDao
 import com.geobotanica.geobotanica.data_taxa.dao.TaxonStarDao
 import com.geobotanica.geobotanica.data_taxa.dao.VernacularDao
 import com.geobotanica.geobotanica.data_taxa.dao.VernacularStarDao
+import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
+import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -27,4 +30,9 @@ class RepoModule {
     @Provides @Singleton fun provideTaxonStarDao(taxaDatabase: TaxaDatabase): TaxonStarDao = taxaDatabase.taxonStarDao()
     @Provides @Singleton fun provideVernacularDao(taxaDatabase: TaxaDatabase): VernacularDao = taxaDatabase.vernacularDao()
     @Provides @Singleton fun provideVernacularStarDao(taxaDatabase: TaxaDatabase): VernacularStarDao = taxaDatabase.vernacularStarDao()
+
+    @Provides @Singleton fun providePlantNameSearchService(
+            taxonRepo: TaxonRepo,
+            vernacularRepo: VernacularRepo
+    ): PlantNameSearchService = PlantNameSearchService(taxonRepo, vernacularRepo)
 }

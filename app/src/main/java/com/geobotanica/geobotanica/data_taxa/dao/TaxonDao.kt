@@ -17,9 +17,9 @@ interface TaxonDao : BaseDao<Taxon> {
     @Query("SELECT id FROM taxa WHERE epithet LIKE :string || '%' LIMIT :limit")
     fun epithetStartsWith(string: String, limit: Int): List<Long>?
 
-    @Query("""SELECT id FROM
-            (SELECT id, generic, epithet FROM taxa WHERE generic LIKE :first || '%' OR epithet LIKE :first || '%')
-        WHERE generic LIKE :second || '%' OR epithet LIKE :second || '%' LIMIT :limit""")
+    @Query("""SELECT id FROM taxa
+        WHERE (generic LIKE :first || '%' OR epithet LIKE :first || '%')
+        AND (generic LIKE :second || '%' OR epithet LIKE :second || '%') LIMIT :limit""")
     fun genericOrEpithetStartsWith(first: String, second: String, limit: Int): List<Long>?
 
     @Query("SELECT COUNT(*) FROM taxa")

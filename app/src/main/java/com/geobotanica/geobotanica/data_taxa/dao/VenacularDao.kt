@@ -21,9 +21,9 @@ interface VernacularDao : BaseDao<Vernacular> {
     @Query("SELECT id FROM vernaculars WHERE vernacular LIKE :string || '%' LIMIT :limit")
     fun firstWordStartsWith(string: String, limit: Int): List<Long>?
 
-    @Query("""SELECT id FROM
-            (SELECT * FROM vernaculars WHERE vernacular LIKE :first || '%' OR vernacular LIKE "% " || :first || '%')
-        WHERE vernacular LIKE :second || '%' OR vernacular LIKE "% " || :second || '%' LIMIT :limit""")
+    @Query("""SELECT id FROM vernaculars
+        WHERE (vernacular LIKE :first || '%' OR vernacular LIKE "% " || :first || '%')
+        AND (vernacular LIKE :second || '%' OR vernacular LIKE "% " || :second || '%') LIMIT :limit""")
     fun anyWordStartsWith(first: String, second: String, limit: Int): List<Long>?
 
 //    @Query("SELECT taxonId FROM vernaculars WHERE vernacular LIKE '%'||:string||'%' LIMIT :limit")

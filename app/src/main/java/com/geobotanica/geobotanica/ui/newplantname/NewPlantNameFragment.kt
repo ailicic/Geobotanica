@@ -13,10 +13,10 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
 import com.geobotanica.geobotanica.data_taxa.TaxaDatabase
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.ui.newplantname.PlantNameSearchService.SearchResult
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.getFromBundle
 import com.geobotanica.geobotanica.util.onTextChanged
@@ -59,11 +59,6 @@ class NewPlantNameFragment : BaseFragment() {
 
         initRecyclerView()
         bindViewListeners()
-
-        GlobalScope.launch(Dispatchers.IO) {
-            Lg.d("Count vern: ${viewModel.vernacularRepo.getCount()}")
-            Lg.d("Count taxa: ${viewModel.taxonRepo.getCount()}")
-        }
         TaxaDatabase.getInstance(appContext).close()
         searchEditText.requestFocus()
     }

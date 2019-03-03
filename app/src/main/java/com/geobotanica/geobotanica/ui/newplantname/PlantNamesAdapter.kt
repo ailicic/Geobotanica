@@ -7,8 +7,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.ui.newplantname.PlantNameSearchService.PlantNameType.SCIENTIFIC
-import com.geobotanica.geobotanica.ui.newplantname.PlantNameSearchService.PlantNameType.VERNACULAR
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameType.*
 import kotlinx.android.synthetic.main.plant_name_list_item.view.*
 
 
