@@ -30,9 +30,9 @@
     <string name="add_measurements">Add Measurements</string>
     <string name="plant_location">Plant Location</string>
     <string name="hold">Hold</string>
-    <string name="common_name">Common Name</string>
+    <string name="common_names">Common Names</string>
+    <string name="scientific_names">Scientific names</string>
     <string name="hint_common_name">e.g. Hardy kiwi</string>
-    <string name="latin_name">Latin Name</string>
     <string name="hint_latin_name">e.g. Actinidia arguta</string>
     <string name="height">Height</string>
     <string name="diameter">Diameter</string>
@@ -42,6 +42,8 @@
     <string name="shrub">Shrub</string>
     <string name="herb">Herb</string>
     <string name="vine">Vine</string>
+    <string name="starred">Starred</string>
+    <string name="history">History</string>
     <string name="no_results">No Results</string>
     <string name="assisted">Assisted</string>
     <string name="manual">Manual</string>
@@ -68,6 +70,9 @@
     <string name="inches">in</string>
     <string name="enable">Enable</string>
     <string name="name_search_hint">Common or Latin name</string>
+    <string name="filter">Filter</string>
+    <string name="apply">Apply</string>
+    <string name="cancel">Cancel</string>
     <string-array name="measurement_unit">
         <item>cm</item>
         <item>m</item>

@@ -34,8 +34,9 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
-// TODO: Remove TaxonComposite (no longer needed, reduces db size, indexes preloaded)
+// TODO: Change "Latin name" to "Scientific name" everywhere
 // TODO: Verify that app does not crash on first run due to permissions
+// TODO: Ensure gps remains active during plant name search
 // TODO: Use androidx.appcompat.widget.AppCompatImageView in xml everywhere
 // TODO: Show satellite stats too
 // TODO: Use code reformatter:
@@ -141,7 +142,7 @@ class MapFragment : BaseFragment() {
     }
 
     private fun saveSharedPrefsFromViewModel() {
-        putSharedPrefs(
+        sharedPrefs.put(
             sharedPrefsIsFirstRun to false,
             sharedPrefsMapLatitude to viewModel.mapLatitude,
             sharedPrefsMapLongitude to viewModel.mapLongitude,

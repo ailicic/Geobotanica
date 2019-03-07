@@ -12,4 +12,7 @@
     <dimen name="photo_type_icon_text_size">12sp</dimen>
     <dimen name="list_item_common_text_size">16sp</dimen>
     <dimen name="list_item_latin_text_size">16sp</dimen>
+    <dimen name="list_item_filter_vertical_margin">4dp</dimen>
+    <dimen name="list_item_filter_start_margin">16dp</dimen>
+    <dimen name="list_item_filter_text_size">16sp</dimen>
 </resources>

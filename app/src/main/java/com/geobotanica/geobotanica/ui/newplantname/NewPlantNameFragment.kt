@@ -2,9 +2,7 @@ package com.geobotanica.geobotanica.ui.newplantname
 
 import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.core.os.bundleOf
 import androidx.core.view.isEmpty
 import androidx.core.view.isVisible
@@ -13,28 +11,31 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
 import com.geobotanica.geobotanica.data_taxa.TaxaDatabase
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameFilterOptions
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
+import com.geobotanica.geobotanica.data_taxa.util.defaultPlantNameFilterFlags
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.getFromBundle
-import com.geobotanica.geobotanica.util.onTextChanged
-import com.geobotanica.geobotanica.util.toTrimmedString
+import com.geobotanica.geobotanica.ui.plantNameFilterOptionsKey
+import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_new_plant_name.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
 import javax.inject.Inject
 
 // TODO: Prioritize previously selected names in list (need history table)
-// TODO: MAYBE Add filter for vern/sci name (action bar / menu button)
+
 class NewPlantNameFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantNameViewModel>
     private lateinit var viewModel: NewPlantNameViewModel
 
+    private lateinit var plantNamesAdapter: PlantNamesAdapter
+
+    private var searchJob: Job? = null
     private val mainScope = CoroutineScope(Dispatchers.Main)
 
-    private lateinit var plantNamesAdapter: PlantNamesAdapter
+    private val sharedPrefsFilterFlags = "filterFlags"
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -45,10 +46,15 @@ class NewPlantNameFragment : BaseFragment() {
             plantType = PlantTypeConverter.toPlantType(getFromBundle(plantTypeKey))
             photoUri = getFromBundle(photoUriKey)
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, photoUri=$photoUri")
+
+            plantNameFilterOptions = PlantNameFilterOptions(
+                    sharedPrefs.get(sharedPrefsFilterFlags, defaultPlantNameFilterFlags)
+            )
         }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        setHasOptionsMenu(true)
         return inflater.inflate(R.layout.fragment_new_plant_name, container, false)
     }
 
@@ -58,9 +64,33 @@ class NewPlantNameFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         initRecyclerView()
-        bindViewListeners()
+        bindListeners()
         TaxaDatabase.getInstance(appContext).close()
         searchEditText.requestFocus()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater?.inflate(com.geobotanica.geobotanica.R.menu.new_plant_name, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    @ObsoleteCoroutinesApi
+    @ExperimentalCoroutinesApi
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.action_filter -> {
+            PlantNameFilterOptionsDialog().run {
+                arguments = bundleOf(
+                        plantNameFilterOptionsKey to viewModel.plantNameFilterFlags)
+                onApplyOptions = { filterFlags: Int ->
+                    sharedPrefs.put(sharedPrefsFilterFlags to filterFlags)
+                    viewModel.plantNameFilterOptions = PlantNameFilterOptions(filterFlags)
+                    updateSearchResults()
+                }
+                show(this@NewPlantNameFragment.fragmentManager,"tag")
+            }
+            true
+        }
+        else -> super.onOptionsItemSelected(item)
     }
 
     override fun onStop() {
@@ -74,12 +104,9 @@ class NewPlantNameFragment : BaseFragment() {
         recyclerView.adapter = plantNamesAdapter
     }
 
-    private var searchJob: Job? = null
-    private var searchString = ""
-
     @ObsoleteCoroutinesApi
     @ExperimentalCoroutinesApi
-    private fun bindViewListeners() {
+    private fun bindListeners() {
         fab.setOnClickListener(::onFabPressed)
         clearButton.setOnClickListener { searchEditText.text.clear() }
         searchEditText.onTextChanged(::onSearchEditTextChanged)
@@ -93,27 +120,26 @@ class NewPlantNameFragment : BaseFragment() {
         viewModel.setStarred(result.plantNameType, result.id, result.isStarred)
     }
 
+    @ObsoleteCoroutinesApi
+    @ExperimentalCoroutinesApi
+    private fun onSearchEditTextChanged(editText: String) {
+        if (viewModel.searchText == editText)
+            return
+        searchJob?.cancel()
+        viewModel.searchText = editText
+        updateSearchResults()
+    }
+
     @ExperimentalCoroutinesApi
     @ObsoleteCoroutinesApi
-    private fun onSearchEditTextChanged(editText: String) {
-        if (searchString == editText)
-            return@onSearchEditTextChanged
-        searchJob?.cancel()
-        searchString = editText
-
-        progressBar.isVisible = true
+    private fun updateSearchResults() {
+        noResultsText.isVisible = false
         searchJob = mainScope.launch {
             delay(300)
-            noResultsText.isVisible = false
-            if (searchString.isEmpty()) {
-                plantNamesAdapter.items = viewModel.getAllStarredPlantNames()
-                plantNamesAdapter.notifyDataSetChanged()
-            } else if (searchString == editText) {
-                viewModel.searchPlantName(searchString).consumeEach {
-                    plantNamesAdapter.items = it
-                    plantNamesAdapter.notifyDataSetChanged()
-                }
-            }
+            if (viewModel.searchText.isBlank())
+                showDefaultResults()
+            else
+                searchPlantName(viewModel.searchText)
         }
         searchJob?.invokeOnCompletion { completionError ->
             if (completionError == null) { // Coroutine completed normally
@@ -121,6 +147,21 @@ class NewPlantNameFragment : BaseFragment() {
                 if (recyclerView.adapter?.itemCount == 0)
                     noResultsText.isVisible = true
             }
+        }
+    }
+
+    private suspend fun showDefaultResults() {
+        plantNamesAdapter.items = viewModel.getAllStarredPlantNames()
+        plantNamesAdapter.notifyDataSetChanged()
+    }
+
+    @ExperimentalCoroutinesApi
+    @ObsoleteCoroutinesApi
+    private suspend fun searchPlantName(string: String) {
+        progressBar.isVisible = true
+        viewModel.searchPlantName(string).consumeEach {
+            plantNamesAdapter.items = it
+            plantNamesAdapter.notifyDataSetChanged()
         }
     }
 

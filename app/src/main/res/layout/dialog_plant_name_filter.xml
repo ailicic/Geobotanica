@@ -1,0 +1,46 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.appcompat.widget.AppCompatCheckBox
+        android:id="@+id/checkboxCommon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/list_item_filter_start_margin"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="@dimen/list_item_filter_vertical_margin"
+        android:text="@string/common_names"
+        android:textSize="@dimen/list_item_filter_text_size" />
+
+    <androidx.appcompat.widget.AppCompatCheckBox
+        android:id="@+id/checkboxScientific"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/list_item_filter_start_margin"
+        android:layout_marginTop="@dimen/list_item_filter_vertical_margin"
+        android:layout_marginBottom="@dimen/list_item_filter_vertical_margin"
+        android:textSize="@dimen/list_item_filter_text_size"
+        android:text="@string/scientific_names"/>
+
+    <androidx.appcompat.widget.AppCompatCheckBox
+        android:id="@+id/checkboxStarred"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/list_item_filter_start_margin"
+        android:layout_marginTop="@dimen/list_item_filter_vertical_margin"
+        android:layout_marginBottom="@dimen/list_item_filter_vertical_margin"
+        android:text="@string/starred"
+        android:textSize="@dimen/list_item_filter_text_size"/>
+
+    <androidx.appcompat.widget.AppCompatCheckBox
+        android:id="@+id/checkboxHistory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/list_item_filter_start_margin"
+        android:layout_marginTop="@dimen/list_item_filter_vertical_margin"
+        android:layout_marginBottom="@dimen/list_item_filter_vertical_margin"
+        android:text="@string/history"
+        android:textSize="@dimen/list_item_filter_text_size" />
+
+</LinearLayout>

@@ -5,6 +5,7 @@ import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
 import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameFilterOptions
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameType.*
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.coroutines.*
@@ -24,6 +25,11 @@ class NewPlantNameViewModel @Inject constructor (
     var commonName: String? = null
     var latinName: String? = null
 
+    var searchText = ""
+    lateinit var plantNameFilterOptions: PlantNameFilterOptions
+    val plantNameFilterFlags: Int
+        get() = plantNameFilterOptions.filterFlags
+
     // TODO: Remove this init block (for testing)
     init {
         GlobalScope.launch(Dispatchers.IO) {
@@ -34,10 +40,10 @@ class NewPlantNameViewModel @Inject constructor (
 
     @ExperimentalCoroutinesApi
     fun searchPlantName(string: String): ReceiveChannel<List<PlantNameSearchService.SearchResult>> =
-        plantNameSearchService.search(string)
+        plantNameSearchService.search(string, plantNameFilterOptions)
 
     suspend fun getAllStarredPlantNames(): List<PlantNameSearchService.SearchResult> = withContext(Dispatchers.IO) {
-        plantNameSearchService.getAllStarred()
+        plantNameSearchService.getAllStarred(plantNameFilterOptions)
     }
 
     fun setStarred(plantNameType: PlantNameSearchService.PlantNameType, id: Long, isStarred: Boolean) {

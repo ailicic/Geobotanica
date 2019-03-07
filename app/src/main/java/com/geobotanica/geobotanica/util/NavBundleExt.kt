@@ -8,7 +8,7 @@ inline fun <reified T: Any?> BaseFragment.getNullableFromBundle(key: String): T?
     this.arguments?.getValue<T>(key)
 
 inline fun <reified T: Any> BaseFragment.getFromBundle(key: String, default: T = getDefault()): T =
-    this.arguments?.getValue<T>(key) ?: default
+        getNullableFromBundle(key) ?: default
 
 inline fun <reified T: Any?> Bundle.getValue(key: String): T? {
     return when (T::class) {

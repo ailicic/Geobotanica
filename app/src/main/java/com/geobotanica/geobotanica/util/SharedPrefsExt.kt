@@ -16,8 +16,8 @@ inline fun <reified T: Any> SharedPreferences.get(key: String, defaultValue: T):
     }
 }
 
-fun BaseFragment.putSharedPrefs(vararg pairs: Pair<String, Any>) {
-    sharedPrefs.edit().run {
+fun SharedPreferences.put(vararg pairs: Pair<String, Any>) {
+    edit().run {
         for ((key, value) in pairs) {
             when (value) {
                 is Boolean -> { putBoolean(key, value) }

@@ -25,13 +25,16 @@ import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 
+// NavBundle keys
+const val plantNameFilterOptionsKey = "plantNameFilterOptions" // Used by PlantNameFilterDialog : DialogFragment()
+
 abstract class BaseFragment : Fragment() {
     @Inject lateinit var appContext: Context
     @Inject lateinit var activity: MainActivity
     @Inject lateinit var defaultSharedPrefs: SharedPreferences
 
-    val className: String by lazy { this.toString().substringBefore('{') }
-    val sharedPrefs: SharedPreferences by lazy {
+    private val className: String by lazy { this.toString().substringBefore('{') }
+    val sharedPrefs: SharedPreferences by lazy { // Each fragment has private sharedPrefs
         activity.getSharedPreferences(className, Context.MODE_PRIVATE)
     }
 
