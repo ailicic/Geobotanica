@@ -23,7 +23,7 @@ class NewPlantNameViewModel @Inject constructor (
     var plantType = Plant.Type.TREE
     var photoUri: String = ""
     var commonName: String? = null
-    var latinName: String? = null
+    var scientificName: String? = null
 
     var searchText = ""
     lateinit var plantNameFilterOptions: PlantNameFilterOptions

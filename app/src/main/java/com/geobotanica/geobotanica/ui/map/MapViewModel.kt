@@ -23,7 +23,7 @@ import javax.inject.Singleton
 data class PlantMarkerData(
         val plantId: Long,
         val commonName: String? = null,
-        val latinName: String? = null,
+        val scientificName: String? = null,
         val latitude: Double? = null,
         val longitude: Double? = null,
         val photoPath: String? = null,
@@ -145,7 +145,7 @@ class MapViewModel @Inject constructor(
         return PlantMarkerData(
             plant.id,
             plant.commonName,
-            plant.latinName,
+            plant.scientificName,
             location.latitude,
             location.longitude,
             photoPath,

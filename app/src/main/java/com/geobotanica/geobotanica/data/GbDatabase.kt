@@ -17,7 +17,7 @@ import com.geobotanica.geobotanica.data.entity.*
             PlantMeasurement::class
         ],
         exportSchema = true,
-        version = 1
+        version = 2
 )
 @TypeConverters(
         PlantTypeConverter::class,

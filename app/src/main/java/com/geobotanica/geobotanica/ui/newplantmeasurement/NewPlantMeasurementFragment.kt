@@ -37,9 +37,9 @@ class NewPlantMeasurementFragment : BaseFragment() {
             plantType = PlantTypeConverter.toPlantType(getFromBundle(plantTypeKey))
             photoUri = getFromBundle(photoUriKey)
             commonName = getNullableFromBundle(commonNameKey)
-            latinName = getNullableFromBundle(latinNameKey)
+            scientificName = getNullableFromBundle(scientificNameKey)
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, commonName=$commonName, " +
-                    "latinName=$latinName, photoUri=$photoUri")
+                    "scientificName=$scientificName, photoUri=$photoUri")
         }
     }
 
@@ -143,7 +143,7 @@ class NewPlantMeasurementFragment : BaseFragment() {
                 photoUriKey to viewModel.photoUri
         ).apply {
             viewModel.commonName?.let { putString(commonNameKey, it) }
-            viewModel.latinName?.let { putString(latinNameKey, it) }
+            viewModel.scientificName?.let { putString(scientificNameKey, it) }
             viewModel.heightMeasurement?.let { putSerializable(heightMeasurementKey, it) }
             viewModel.diameterMeasurement?.let { putSerializable(diameterMeasurementKey, it) }
             viewModel.trunkDiameterMeasurement?.let { putSerializable(trunkDiameterMeasurementKey, it) }

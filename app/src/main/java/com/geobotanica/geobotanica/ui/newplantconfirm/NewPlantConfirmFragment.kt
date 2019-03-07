@@ -43,12 +43,12 @@ class NewPlantConfirmFragment : BaseFragment() {
             plantType = PlantTypeConverter.toPlantType(getFromBundle(plantTypeKey))
             photoUri = getFromBundle(photoUriKey)
             commonName = getNullableFromBundle(commonNameKey)
-            latinName = getNullableFromBundle(latinNameKey)
+            scientificName = getNullableFromBundle(scientificNameKey)
             heightMeasurement = getNullableFromBundle(heightMeasurementKey)
             diameterMeasurement = getNullableFromBundle(diameterMeasurementKey)
             trunkDiameterMeasurement = getNullableFromBundle(trunkDiameterMeasurementKey)
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, commonName=$commonName, " +
-                    "latinName=$latinName, photoUri=$photoUri, " +
+                    "scientificName=$scientificName, photoUri=$photoUri, " +
                     "heightMeasurement=$heightMeasurement, " +
                     "diameterMeasurement=$diameterMeasurement, " +
                     "trunkDiameterMeasurement=$trunkDiameterMeasurement")
@@ -156,7 +156,7 @@ class NewPlantConfirmFragment : BaseFragment() {
     }
 
     private fun disableTextEdits() {
-        if (commonNameTextInput.isVisible || latinNameTextInput.isVisible)
+        if (commonNameTextInput.isVisible || scientificNameTextInput.isVisible)
             setNamesEditable(false)
         if (heightMeasurementView.isVisible)
             setMeasurementsEditable(false)
@@ -167,8 +167,8 @@ class NewPlantConfirmFragment : BaseFragment() {
             commonNameText.isVisible = false
             commonNameTextInput.isVisible =true
 
-            latinNameText.isVisible = false
-            latinNameTextInput.isVisible = true
+            scientificNameText.isVisible = false
+            scientificNameTextInput.isVisible = true
 
             editNamesButton.isVisible = false
             nameDivider.isVisible = false
@@ -179,11 +179,11 @@ class NewPlantConfirmFragment : BaseFragment() {
                 commonNameText.text = viewModel.commonName
                 commonNameText.isVisible = true
             }
-            latinNameTextInput.isVisible = false
-            if (latinNameTextInput.isNotEmpty()) {
-                viewModel.latinName = latinNameTextInput.editText?.text.toString()
-                latinNameText.text = viewModel.latinName
-                latinNameText.isVisible = true
+            scientificNameTextInput.isVisible = false
+            if (scientificNameTextInput.isNotEmpty()) {
+                viewModel.scientificName = scientificNameTextInput.editText?.text.toString()
+                scientificNameText.text = viewModel.scientificName
+                scientificNameText.isVisible = true
             }
             editNamesButton.isVisible = true
             nameDivider.isVisible = true
@@ -260,7 +260,7 @@ class NewPlantConfirmFragment : BaseFragment() {
     }
 
     private fun isPlantValid(): Boolean {
-        if (commonNameTextInput.isEmpty() && latinNameTextInput.isEmpty()) {
+        if (commonNameTextInput.isEmpty() && scientificNameTextInput.isEmpty()) {
             showSnackbar("Provide a plant name")
             return false
         }

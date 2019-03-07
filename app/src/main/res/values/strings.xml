@@ -11,7 +11,7 @@
     <string name="extra_plant_type">com.geobotanica.plant_type</string>
     <string name="extra_plant_photo_path">com.geobotanica.plant_photo_path</string>
     <string name="extra_plant_common_name">com.geobotanica.plant_common_name</string>
-    <string name="extra_plant_latin_name">com.geobotanica.plant_latin_name</string>
+    <string name="extra_plant_scientific_name">com.geobotanica.plant_scientific_name</string>
     <string name="extra_location">com.geobotanica.location</string>
     <string name="activity_map">MapActivity</string>
     <string name="activity_plant_details">Plant Details</string>
@@ -33,7 +33,7 @@
     <string name="common_names">Common Names</string>
     <string name="scientific_names">Scientific names</string>
     <string name="hint_common_name">e.g. Hardy kiwi</string>
-    <string name="hint_latin_name">e.g. Actinidia arguta</string>
+    <string name="hint_scientific_name">e.g. Actinidia arguta</string>
     <string name="height">Height</string>
     <string name="diameter">Diameter</string>
     <string name="trunk_diameter">Trunk diameter</string>
@@ -69,7 +69,7 @@
     <!--<string name="photo_type_trunk">Trunk</string>-->
     <string name="inches">in</string>
     <string name="enable">Enable</string>
-    <string name="name_search_hint">Common or Latin name</string>
+    <string name="name_search_hint">Common or Scientific name</string>
     <string name="filter">Filter</string>
     <string name="apply">Apply</string>
     <string name="cancel">Cancel</string>

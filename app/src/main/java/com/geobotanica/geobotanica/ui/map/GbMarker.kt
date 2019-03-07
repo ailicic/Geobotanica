@@ -17,7 +17,7 @@ class GbMarker(plantMarkerData: PlantMarkerData, val activity: AppCompatActivity
     init {
         plantMarkerData.let {
             title = it.commonName
-            snippet = it.latinName
+            snippet = it.scientificName
             subDescription = it.dateCreated
             @Suppress("DEPRECATION")
             icon = activity.resources.getDrawable(it.icon!!)

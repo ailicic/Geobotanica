@@ -20,6 +20,6 @@ data class Taxon(
         val epithet: String? = null, // Latin 2 (specificEpithet)
         val infraspecificEpithet: String? = null
 ) {
-    val latinName: String
+    val scientific: String
         get() = "$generic $epithet"
 }

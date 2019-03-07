@@ -32,14 +32,14 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/latinNameText"
+            android:id="@+id/scientificNameText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:visibility="@{ viewModel.plant.latinName != null ? View.VISIBLE : View.GONE}"
+            android:visibility="@{ viewModel.plant.scientificName != null ? View.VISIBLE : View.GONE}"
             android:textColor="@color/colorBlack"
             android:textSize="18sp"
-            android:text="@{ viewModel.plant.latinName }"
+            android:text="@{ viewModel.plant.scientificName }"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/commonNameText" />
 

@@ -12,7 +12,7 @@ class NewPlantMeasurementViewModel @Inject constructor() : ViewModel() {
     lateinit var plantType: Plant.Type
     lateinit var photoUri: String
     var commonName: String? = null
-    var latinName: String? = null
+    var scientificName: String? = null
     var heightMeasurement: Measurement? = null
     var diameterMeasurement: Measurement? = null
     var trunkDiameterMeasurement: Measurement? = null

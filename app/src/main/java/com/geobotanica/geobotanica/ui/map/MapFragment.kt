@@ -34,7 +34,6 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
-// TODO: Change "Latin name" to "Scientific name" everywhere
 // TODO: Verify that app does not crash on first run due to permissions
 // TODO: Ensure gps remains active during plant name search
 // TODO: Use androidx.appcompat.widget.AppCompatImageView in xml everywhere
@@ -262,7 +261,7 @@ class MapFragment : BaseFragment() {
                 plantTypeKey to 1L,
 //                photoUriKey to "",
                 commonNameKey to "Common",
-                latinNameKey to "Latin",
+                scientificNameKey to "Latin",
                 heightMeasurementKey to Measurement(1.0f, Units.M),
                 diameterMeasurementKey to Measurement(2.0f, Units.IN),
                 trunkDiameterMeasurementKey to Measurement(3.5f, Units.FT)

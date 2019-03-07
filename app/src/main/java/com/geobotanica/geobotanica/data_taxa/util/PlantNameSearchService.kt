@@ -116,7 +116,7 @@ class PlantNameSearchService @Inject constructor (
     private fun mapIdToSearchResult(id: Long, plantNameType: PlantNameType, isStarred: Boolean): SearchResult {
         return SearchResult(id, plantNameType, isStarred, when(plantNameType) {
             VERNACULAR -> vernacularRepo.get(id)!!.vernacular!!.capitalize()
-            SCIENTIFIC -> taxonRepo.get(id)!!.latinName.capitalize()
+            SCIENTIFIC -> taxonRepo.get(id)!!.scientific.capitalize()
         })
     }
 

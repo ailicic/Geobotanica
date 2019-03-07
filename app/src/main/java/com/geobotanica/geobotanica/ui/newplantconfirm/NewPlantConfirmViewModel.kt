@@ -25,7 +25,7 @@ class NewPlantConfirmViewModel @Inject constructor (
     var userId = 0L
     lateinit var plantType: Plant.Type
     var commonName: String? = null
-    var latinName: String? = null
+    var scientificName: String? = null
     var heightMeasurement: Measurement? = null
     var diameterMeasurement: Measurement? = null
     var trunkDiameterMeasurement: Measurement? = null
@@ -46,7 +46,7 @@ class NewPlantConfirmViewModel @Inject constructor (
         job = GlobalScope.launch(Dispatchers.IO) {
             database.runInTransaction {
                 Lg.d("Saving PlantComposite to database now...")
-                val plant = Plant(userId, plantType, commonName, latinName)
+                val plant = Plant(userId, plantType, commonName, scientificName)
                 plant.id = plantRepo.insert(plant)
                 Lg.d("Saved: $plant (id=${plant.id})")
 

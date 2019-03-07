@@ -20,6 +20,6 @@ interface PlantDao : BaseDao<Plant> {
     @Query("SELECT * FROM plants WHERE commonName = :commonName")
     fun getPlantsByCommonName(commonName: String): LiveData<List<Plant>>
 
-    @Query("SELECT * FROM plants WHERE latinName = :latinName")
-    fun getPlantsByLatinName(latinName: String): LiveData<List<Plant>>
+    @Query("SELECT * FROM plants WHERE scientificName = :scientificName")
+    fun getPlantsByScientificName(scientificName: String): LiveData<List<Plant>>
 }

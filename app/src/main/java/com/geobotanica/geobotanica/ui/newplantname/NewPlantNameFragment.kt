@@ -179,7 +179,7 @@ class NewPlantNameFragment : BaseFragment() {
     }
 
     private fun areNamesValid(): Boolean {
-        if (commonNameTextInput.isEmpty() && latinNameTextInput.isEmpty()) {
+        if (commonNameTextInput.isEmpty() && scientificNameTextInput.isEmpty()) {
             showSnackbar("Provide a plant name")
             return false
         }
@@ -189,9 +189,9 @@ class NewPlantNameFragment : BaseFragment() {
     private fun saveViewModelState() {
         commonNameTextInput.toString()
         val commonName = commonNameTextInput.toTrimmedString()
-        val latinName = latinNameTextInput.toTrimmedString()
+        val scientificName = scientificNameTextInput.toTrimmedString()
         viewModel.commonName = if (commonName.isNotEmpty()) commonName else null
-        viewModel.latinName = if (latinName.isNotEmpty()) latinName else null
+        viewModel.scientificName = if (scientificName.isNotEmpty()) scientificName else null
     }
 
     private fun createBundle(): Bundle {
@@ -201,7 +201,7 @@ class NewPlantNameFragment : BaseFragment() {
                 photoUriKey to viewModel.photoUri
         ).apply {
             viewModel.commonName?.let { putString(commonNameKey, it) }
-            viewModel.latinName?.let { putString(latinNameKey, it) }
+            viewModel.scientificName?.let { putString(scientificNameKey, it) }
         }
     }
 }

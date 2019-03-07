@@ -51,32 +51,32 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
-            android:id="@+id/latinNameText"
+            android:id="@+id/scientificNameText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginStart="16dp"
-            android:visibility="@{ viewModel.latinName != null ? View.VISIBLE : View.GONE}"
+            android:visibility="@{ viewModel.scientificName != null ? View.VISIBLE : View.GONE}"
             android:textColor="@color/colorBlack"
             android:textSize="18sp"
-            android:text="@{ viewModel.latinName }"
+            android:text="@{ viewModel.scientificName }"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/commonNameTextInput" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/latinNameTextInput"
+            android:id="@+id/scientificNameTextInput"
             android:layout_width="368dp"
             android:layout_height="wrap_content"
             android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/latinNameText">
+            app:layout_constraintTop_toBottomOf="@+id/scientificNameText">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
-                android:text="@{ viewModel.latinName }"
+                android:text="@{ viewModel.scientificName }"
                 android:hint="@string/scientific_names"  />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -100,7 +100,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:background="@android:color/darker_gray"
-            app:layout_constraintTop_toBottomOf="@+id/latinNameTextInput"
+            app:layout_constraintTop_toBottomOf="@+id/scientificNameTextInput"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
 
