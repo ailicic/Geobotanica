@@ -9,6 +9,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.*
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchFilterOptions
 import com.geobotanica.geobotanica.data_taxa.util.defaultPlantNameFilterFlags
 import com.geobotanica.geobotanica.ui.plantNameFilterOptionsKey
 import com.geobotanica.geobotanica.util.getValue
@@ -17,7 +19,7 @@ import kotlinx.android.synthetic.main.dialog_plant_name_filter.*
 class PlantNameFilterOptionsDialog : DialogFragment() {
 
     private lateinit var customView: View // Required for kotlinx synthetic bindings
-    lateinit var onApplyOptions: (filterFlags: Int) -> Unit
+    lateinit var onApplyFilters: (filterOptions: SearchFilterOptions) -> Unit
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
@@ -27,13 +29,13 @@ class PlantNameFilterOptionsDialog : DialogFragment() {
                 setTitle(getString(R.string.filter))
                 setView(customView)
                 setPositiveButton(getString(R.string.apply)) { _, _ ->
-                    val filterFlags = PlantNameSearchService.PlantNameFilterOptions(
-                            !checkboxCommon.isChecked,
-                            !checkboxScientific.isChecked,
-                            !checkboxStarred.isChecked,
-                            !checkboxHistory.isChecked
-                    ).filterFlags
-                    onApplyOptions(filterFlags)
+                    val filterOptions = SearchFilterOptions.fromBooleans(
+                            ! checkboxCommon.isChecked,
+                            ! checkboxScientific.isChecked,
+                            ! checkboxStarred.isChecked,
+                            ! checkboxHistory.isChecked
+                    )
+                    onApplyFilters(filterOptions)
                 }
                 setNegativeButton(getString(R.string.cancel)) { _, _ -> }
                 create()
@@ -47,13 +49,14 @@ class PlantNameFilterOptionsDialog : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val filterOptions = PlantNameSearchService.PlantNameFilterOptions(
-            arguments!!.getValue<Int>(plantNameFilterOptionsKey) ?: defaultPlantNameFilterFlags
-        ) // TODO: Prevent zero (default) from being passed as null above
-        checkboxCommon.isChecked = ! filterOptions.isVernacularFiltered
-        checkboxScientific.isChecked = ! filterOptions.isScientificFiltered
-        checkboxStarred.isChecked = ! filterOptions.isStarredFiltered
-        checkboxHistory.isChecked = ! filterOptions.isHistoryFiltered
+        // TODO: Prevent zero (default) from being passed as null below
+        val filterOptions = SearchFilterOptions(
+                arguments!!.getValue<Int>(plantNameFilterOptionsKey)
+                ?: defaultPlantNameFilterFlags)
+        checkboxCommon.isChecked = ! filterOptions.hasFilter(COMMON)
+        checkboxScientific.isChecked = ! filterOptions.hasFilter(SCIENTIFIC)
+        checkboxStarred.isChecked = ! filterOptions.hasFilter(STARRED)
+        checkboxHistory.isChecked = ! filterOptions.hasFilter(USED)
 
         checkboxScientific.setOnCheckedChangeListener { _, isChecked ->
             if (!isChecked)

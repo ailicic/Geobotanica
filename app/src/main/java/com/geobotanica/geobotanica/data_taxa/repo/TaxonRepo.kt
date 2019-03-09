@@ -2,14 +2,16 @@ package com.geobotanica.geobotanica.data_taxa.repo
 
 import com.geobotanica.geobotanica.data_taxa.DEFAULT_RESULT_LIMIT
 import com.geobotanica.geobotanica.data_taxa.dao.TaxonDao
-import com.geobotanica.geobotanica.data_taxa.dao.TaxonStarDao
+import com.geobotanica.geobotanica.data_taxa.dao.StarredTaxonDao
+import com.geobotanica.geobotanica.data_taxa.dao.UsedTaxonDao
 import com.geobotanica.geobotanica.data_taxa.entity.Taxon
 import javax.inject.Inject
 
 
 class TaxonRepo @Inject constructor(
         private val taxonDao: TaxonDao,
-        private val taxonStarDao: TaxonStarDao
+        private val starredTaxonDao: StarredTaxonDao,
+        private val usedTaxonDao: UsedTaxonDao
 ) {
 
     fun get(id: Long): Taxon? = taxonDao.get(id)
@@ -25,16 +27,29 @@ class TaxonRepo @Inject constructor(
 
     fun getCount(): Int = taxonDao.getCount()
 
-    // TaxonStarDao
+    // StarredTaxonDao
 
-    fun getAllStarred(): List<Long> = taxonStarDao.getAll() ?: emptyList()
+    fun getAllStarred(): List<Long> = starredTaxonDao.getAll() ?: emptyList()
 
     fun setStarred(id: Long, isStarred: Boolean) =
-        if (isStarred) taxonStarDao.setStarred(id) else taxonStarDao.unsetStarred(id)
+        if (isStarred) starredTaxonDao.setStarred(id) else starredTaxonDao.unsetStarred(id)
 
     fun starredStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
-        taxonStarDao.starredStartsWith(string, limit)
+        starredTaxonDao.starredStartsWith(string, limit)
 
     fun starredStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
-        taxonStarDao.starredStartsWith(first, second, limit)
+        starredTaxonDao.starredStartsWith(first, second, limit)
+
+    // UsedTaxonDao
+
+    fun getAllUsed(): List<Long> = usedTaxonDao.getAll() ?: emptyList()
+
+    fun setUsed(id: Long, isUsed: Boolean) =
+            if (isUsed) usedTaxonDao.setUsed(id) else usedTaxonDao.unsetUsed(id)
+
+    fun usedStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+            usedTaxonDao.usedStartsWith(string, limit)
+
+    fun usedStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+            usedTaxonDao.usedStartsWith(first, second, limit)
 }

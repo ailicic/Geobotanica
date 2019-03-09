@@ -11,8 +11,9 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
 import com.geobotanica.geobotanica.data_taxa.TaxaDatabase
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameFilterOptions
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchFilterOptions
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.USED
 import com.geobotanica.geobotanica.data_taxa.util.defaultPlantNameFilterFlags
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
@@ -23,8 +24,6 @@ import kotlinx.android.synthetic.main.fragment_new_plant_name.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
 import javax.inject.Inject
-
-// TODO: Prioritize previously selected names in list (need history table)
 
 class NewPlantNameFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantNameViewModel>
@@ -47,7 +46,7 @@ class NewPlantNameFragment : BaseFragment() {
             photoUri = getFromBundle(photoUriKey)
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, photoUri=$photoUri")
 
-            plantNameFilterOptions = PlantNameFilterOptions(
+            searchFilterOptions = SearchFilterOptions(
                     sharedPrefs.get(sharedPrefsFilterFlags, defaultPlantNameFilterFlags)
             )
         }
@@ -80,10 +79,10 @@ class NewPlantNameFragment : BaseFragment() {
         R.id.action_filter -> {
             PlantNameFilterOptionsDialog().run {
                 arguments = bundleOf(
-                        plantNameFilterOptionsKey to viewModel.plantNameFilterFlags)
-                onApplyOptions = { filterFlags: Int ->
-                    sharedPrefs.put(sharedPrefsFilterFlags to filterFlags)
-                    viewModel.plantNameFilterOptions = PlantNameFilterOptions(filterFlags)
+                        plantNameFilterOptionsKey to viewModel.searchFilterOptions.filterFlags)
+                onApplyFilters = { filterOptions: SearchFilterOptions ->
+                    sharedPrefs.put(sharedPrefsFilterFlags to filterOptions.filterFlags)
+                    viewModel.searchFilterOptions = filterOptions
                     updateSearchResults()
                 }
                 show(this@NewPlantNameFragment.fragmentManager,"tag")
@@ -100,7 +99,7 @@ class NewPlantNameFragment : BaseFragment() {
 
     private fun initRecyclerView() = mainScope.launch {
         recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-        plantNamesAdapter = PlantNamesAdapter(viewModel.getAllStarredPlantNames(), onClickItem, onClickStar)
+        plantNamesAdapter = PlantNamesAdapter(viewModel.getDefaultPlantNames(), onClickItem, onClickStar)
         recyclerView.adapter = plantNamesAdapter
     }
 
@@ -112,12 +111,14 @@ class NewPlantNameFragment : BaseFragment() {
         searchEditText.onTextChanged(::onSearchEditTextChanged)
     }
 
-    private val onClickItem = { item: SearchResult ->
-        showToast(item.name)
+    private val onClickItem = { result: SearchResult ->
+        showToast(result.plantName)
+        result.toggleTag(USED)
+        viewModel.updateIsUsed(result)
     }
 
     private val onClickStar = { result: SearchResult ->
-        viewModel.setStarred(result.plantNameType, result.id, result.isStarred)
+        viewModel.updateIsStarred(result)
     }
 
     @ObsoleteCoroutinesApi
@@ -151,7 +152,7 @@ class NewPlantNameFragment : BaseFragment() {
     }
 
     private suspend fun showDefaultResults() {
-        plantNamesAdapter.items = viewModel.getAllStarredPlantNames()
+        plantNamesAdapter.items = viewModel.getDefaultPlantNames()
         plantNamesAdapter.notifyDataSetChanged()
     }
 

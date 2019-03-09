@@ -4,10 +4,7 @@ import android.content.Context
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.dao.*
 import com.geobotanica.geobotanica.data_taxa.TaxaDatabase
-import com.geobotanica.geobotanica.data_taxa.dao.TaxonDao
-import com.geobotanica.geobotanica.data_taxa.dao.TaxonStarDao
-import com.geobotanica.geobotanica.data_taxa.dao.VernacularDao
-import com.geobotanica.geobotanica.data_taxa.dao.VernacularStarDao
+import com.geobotanica.geobotanica.data_taxa.dao.*
 import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
 import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
@@ -27,9 +24,12 @@ class RepoModule {
 
     @Provides @Singleton fun provideTaxaDatabase(context: Context): TaxaDatabase = TaxaDatabase.getInstance(context)
     @Provides @Singleton fun provideTaxonDao(taxaDatabase: TaxaDatabase): TaxonDao = taxaDatabase.taxonDao()
-    @Provides @Singleton fun provideTaxonStarDao(taxaDatabase: TaxaDatabase): TaxonStarDao = taxaDatabase.taxonStarDao()
+    @Provides @Singleton fun provideStarredTaxonDao(taxaDatabase: TaxaDatabase): StarredTaxonDao = taxaDatabase.starredTaxonDao()
+    @Provides @Singleton fun provideUsedTaxonDao(taxaDatabase: TaxaDatabase): UsedTaxonDao = taxaDatabase.usedTaxonDao()
     @Provides @Singleton fun provideVernacularDao(taxaDatabase: TaxaDatabase): VernacularDao = taxaDatabase.vernacularDao()
-    @Provides @Singleton fun provideVernacularStarDao(taxaDatabase: TaxaDatabase): VernacularStarDao = taxaDatabase.vernacularStarDao()
+    @Provides @Singleton fun provideStarredVernacularDao(taxaDatabase: TaxaDatabase): StarredVernacularDao = taxaDatabase.starredVernacularDao()
+    @Provides @Singleton fun provideUsedVernacularDao(taxaDatabase: TaxaDatabase): UsedVernacularDao = taxaDatabase.usedVernacularDao()
+
 
     @Provides @Singleton fun providePlantNameSearchService(
             taxonRepo: TaxonRepo,

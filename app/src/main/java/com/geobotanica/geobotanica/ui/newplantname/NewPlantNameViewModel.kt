@@ -5,8 +5,9 @@ import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
 import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameFilterOptions
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameType.*
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchFilterOptions
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.*
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -26,9 +27,7 @@ class NewPlantNameViewModel @Inject constructor (
     var scientificName: String? = null
 
     var searchText = ""
-    lateinit var plantNameFilterOptions: PlantNameFilterOptions
-    val plantNameFilterFlags: Int
-        get() = plantNameFilterOptions.filterFlags
+    lateinit var searchFilterOptions: SearchFilterOptions
 
     // TODO: Remove this init block (for testing)
     init {
@@ -39,18 +38,28 @@ class NewPlantNameViewModel @Inject constructor (
     }
 
     @ExperimentalCoroutinesApi
-    fun searchPlantName(string: String): ReceiveChannel<List<PlantNameSearchService.SearchResult>> =
-        plantNameSearchService.search(string, plantNameFilterOptions)
+    fun searchPlantName(string: String): ReceiveChannel<List<SearchResult>> =
+        plantNameSearchService.search(string, searchFilterOptions)
 
-    suspend fun getAllStarredPlantNames(): List<PlantNameSearchService.SearchResult> = withContext(Dispatchers.IO) {
-        plantNameSearchService.getAllStarred(plantNameFilterOptions)
+    fun updateIsUsed(result: SearchResult) {
+        GlobalScope.launch(Dispatchers.IO) {
+            when {
+                result.hasTag(COMMON) -> vernacularRepo.setUsed(result.id, result.hasTag(USED))
+                result.hasTag(SCIENTIFIC) -> taxonRepo.setUsed(result.id, result.hasTag(USED))
+                else -> { }
+            }
+        }
     }
 
-    fun setStarred(plantNameType: PlantNameSearchService.PlantNameType, id: Long, isStarred: Boolean) {
+    suspend fun getDefaultPlantNames(): List<SearchResult> = withContext(Dispatchers.IO) {
+        plantNameSearchService.getDefault(searchFilterOptions)
+    }
+
+    fun updateIsStarred(result: SearchResult) {
         GlobalScope.launch(Dispatchers.IO) {
-            when (plantNameType) {
-                SCIENTIFIC -> taxonRepo.setStarred(id, isStarred)
-                VERNACULAR -> vernacularRepo.setStarred(id, isStarred)
+            when {
+                result.hasTag(COMMON) -> vernacularRepo.setStarred(result.id, result.hasTag(STARRED))
+                result.hasTag(SCIENTIFIC) -> taxonRepo.setStarred(result.id, result.hasTag(STARRED))
             }
         }
     }

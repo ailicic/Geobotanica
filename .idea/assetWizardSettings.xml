@@ -29,7 +29,7 @@
                         <option name="values">
                           <map>
                             <entry key="color" value="ffffff" />
-                            <entry key="outputName" value="ic_history" />
+                            <entry key="outputName" value="ic_time" />
                             <entry key="sourceFile" value="$PROJECT_DIR$/../../../baseline-add-24px.svg" />
                           </map>
                         </option>

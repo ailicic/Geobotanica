@@ -5,10 +5,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameType.*
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.*
 import kotlinx.android.synthetic.main.plant_name_list_item.view.*
 
 
@@ -29,24 +30,27 @@ class PlantNamesAdapter(
         val item = items[position]
 
         val resources = holder.view.context.resources
+        holder.plantName.text = item.plantName
+
+        val plantTypeIcon = when {
+            item.hasTag(COMMON) -> R.drawable.hat
+            item.hasTag(SCIENTIFIC) -> R.drawable.grad_cap
+            else -> throw IllegalArgumentException("Must specify either COMMON or SCIENTIFIC tag") // TODO: Handle this differently
+        }
+        holder.plantTypeIcon.setImageDrawable(resources.getDrawable(plantTypeIcon))
+
+        holder.usedIcon.isVisible = item.hasTag(USED)
+
         val star = resources.getDrawable(R.drawable.ic_star)
         val starBorder = resources.getDrawable(R.drawable.ic_star_border)
-        val starDrawable = if (item.isStarred) star else starBorder
-
-        val plantTypeIcon = when (item.plantNameType) {
-            VERNACULAR -> R.drawable.hat
-            SCIENTIFIC -> R.drawable.grad_cap
-        }
-
-        holder.plantTypeIcon.setImageDrawable(resources.getDrawable(plantTypeIcon))
-        holder.name.text = item.name
-        holder.star.setImageDrawable(starDrawable)
+        val starIcon = if (item.hasTag(STARRED)) star else starBorder
+        holder.starredIcon.setImageDrawable(starIcon)
 
         holder.view.setOnClickListener { onClick(item) }
-        holder.star.setOnClickListener {
-            item.isStarred = !item.isStarred
-            val drawable = if (item.isStarred) star else starBorder
-            holder.star.setImageDrawable(drawable)
+        holder.starredIcon.setOnClickListener {
+            item.toggleTag(STARRED)
+            val drawable = if (item.hasTag(STARRED)) star else starBorder
+            holder.starredIcon.setImageDrawable(drawable)
             onClickStar(item)
         }
     }
@@ -55,7 +59,8 @@ class PlantNamesAdapter(
 
     inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val plantTypeIcon: ImageView = view.plantTypeIcon
-        val name: TextView = view.name
-        val star: ImageView= view.star
+        val plantName: TextView = view.plantName
+        val usedIcon: ImageView= view.usedIcon
+        val starredIcon: ImageView= view.starIcon
     }
 }

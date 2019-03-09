@@ -2,14 +2,16 @@ package com.geobotanica.geobotanica.data_taxa.repo
 
 import com.geobotanica.geobotanica.data_taxa.DEFAULT_RESULT_LIMIT
 import com.geobotanica.geobotanica.data_taxa.dao.VernacularDao
-import com.geobotanica.geobotanica.data_taxa.dao.VernacularStarDao
+import com.geobotanica.geobotanica.data_taxa.dao.StarredVernacularDao
+import com.geobotanica.geobotanica.data_taxa.dao.UsedVernacularDao
 import com.geobotanica.geobotanica.data_taxa.entity.Vernacular
 import javax.inject.Inject
 
 
 class VernacularRepo @Inject constructor(
         private val vernacularDao: VernacularDao,
-        private val vernacularStarDao: VernacularStarDao
+        private val starredVernacularDao: StarredVernacularDao,
+        private val usedVernacularDao: UsedVernacularDao
 ) {
 
     fun get(id: Long): Vernacular? = vernacularDao.get(id)
@@ -27,16 +29,29 @@ class VernacularRepo @Inject constructor(
 
     fun getCount(): Int = vernacularDao.getCount()
 
-    // VernacularStarDao
+    // StarredVernacularDao
 
-    fun getAllStarred(): List<Long> = vernacularStarDao.getAll() ?: emptyList()
+    fun getAllStarred(): List<Long> = starredVernacularDao.getAll() ?: emptyList()
 
     fun setStarred(id: Long, isStarred: Boolean) =
-            if (isStarred) vernacularStarDao.setStarred(id) else vernacularStarDao.unsetStarred(id)
+            if (isStarred) starredVernacularDao.setStarred(id) else starredVernacularDao.unsetStarred(id)
 
     fun starredStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
-            vernacularStarDao.starredStartsWith(string, limit)
+            starredVernacularDao.starredStartsWith(string, limit)
 
     fun starredStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
-            vernacularStarDao.starredStartsWith(first, second, limit)
+            starredVernacularDao.starredStartsWith(first, second, limit)
+
+    // UsedVernacularDao
+
+    fun getAllUsed(): List<Long> = usedVernacularDao.getAll() ?: emptyList()
+
+    fun setUsed(id: Long, isUsed: Boolean) =
+            if (isUsed) usedVernacularDao.setUsed(id) else usedVernacularDao.unsetUsed(id)
+
+    fun usedStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+            usedVernacularDao.usedStartsWith(string, limit)
+
+    fun usedStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+            usedVernacularDao.usedStartsWith(first, second, limit)
 }
