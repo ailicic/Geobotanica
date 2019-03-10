@@ -8,10 +8,9 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.*
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchFilterOptions
-import com.geobotanica.geobotanica.data_taxa.util.defaultPlantNameFilterFlags
+import com.geobotanica.geobotanica.data_taxa.util.defaultFilterFlags
 import com.geobotanica.geobotanica.ui.plantNameFilterOptionsKey
 import com.geobotanica.geobotanica.util.getValue
 import kotlinx.android.synthetic.main.dialog_plant_name_filter.*
@@ -52,7 +51,7 @@ class PlantNameFilterOptionsDialog : DialogFragment() {
         // TODO: Prevent zero (default) from being passed as null below
         val filterOptions = SearchFilterOptions(
                 arguments!!.getValue<Int>(plantNameFilterOptionsKey)
-                ?: defaultPlantNameFilterFlags)
+                ?: defaultFilterFlags)
         checkboxCommon.isChecked = ! filterOptions.hasFilter(COMMON)
         checkboxScientific.isChecked = ! filterOptions.hasFilter(SCIENTIFIC)
         checkboxStarred.isChecked = ! filterOptions.hasFilter(STARRED)

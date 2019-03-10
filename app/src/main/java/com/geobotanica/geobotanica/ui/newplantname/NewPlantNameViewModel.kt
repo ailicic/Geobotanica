@@ -44,22 +44,18 @@ class NewPlantNameViewModel @Inject constructor (
     fun updateIsUsed(result: SearchResult) {
         GlobalScope.launch(Dispatchers.IO) {
             when {
-                result.hasTag(COMMON) -> vernacularRepo.setUsed(result.id, result.hasTag(USED))
-                result.hasTag(SCIENTIFIC) -> taxonRepo.setUsed(result.id, result.hasTag(USED))
+                result.hasTag(COMMON) -> vernacularRepo.setTagged(result.id, USED, result.hasTag(USED))
+                result.hasTag(SCIENTIFIC) -> taxonRepo.setTagged(result.id, USED, result.hasTag(USED))
                 else -> { }
             }
         }
     }
 
-    suspend fun getDefaultPlantNames(): List<SearchResult> = withContext(Dispatchers.IO) {
-        plantNameSearchService.getDefault(searchFilterOptions)
-    }
-
     fun updateIsStarred(result: SearchResult) {
         GlobalScope.launch(Dispatchers.IO) {
             when {
-                result.hasTag(COMMON) -> vernacularRepo.setStarred(result.id, result.hasTag(STARRED))
-                result.hasTag(SCIENTIFIC) -> taxonRepo.setStarred(result.id, result.hasTag(STARRED))
+                result.hasTag(COMMON) -> vernacularRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
+                result.hasTag(SCIENTIFIC) -> taxonRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
             }
         }
     }

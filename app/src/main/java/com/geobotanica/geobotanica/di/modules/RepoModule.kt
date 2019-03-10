@@ -24,12 +24,8 @@ class RepoModule {
 
     @Provides @Singleton fun provideTaxaDatabase(context: Context): TaxaDatabase = TaxaDatabase.getInstance(context)
     @Provides @Singleton fun provideTaxonDao(taxaDatabase: TaxaDatabase): TaxonDao = taxaDatabase.taxonDao()
-    @Provides @Singleton fun provideStarredTaxonDao(taxaDatabase: TaxaDatabase): StarredTaxonDao = taxaDatabase.starredTaxonDao()
-    @Provides @Singleton fun provideUsedTaxonDao(taxaDatabase: TaxaDatabase): UsedTaxonDao = taxaDatabase.usedTaxonDao()
     @Provides @Singleton fun provideVernacularDao(taxaDatabase: TaxaDatabase): VernacularDao = taxaDatabase.vernacularDao()
-    @Provides @Singleton fun provideStarredVernacularDao(taxaDatabase: TaxaDatabase): StarredVernacularDao = taxaDatabase.starredVernacularDao()
-    @Provides @Singleton fun provideUsedVernacularDao(taxaDatabase: TaxaDatabase): UsedVernacularDao = taxaDatabase.usedVernacularDao()
-
+    @Provides @Singleton fun provideTagDao(taxaDatabase: TaxaDatabase): TagDao = taxaDatabase.tagDao()
 
     @Provides @Singleton fun providePlantNameSearchService(
             taxonRepo: TaxonRepo,

@@ -1,17 +1,18 @@
 package com.geobotanica.geobotanica.data_taxa.repo
 
 import com.geobotanica.geobotanica.data_taxa.DEFAULT_RESULT_LIMIT
+import com.geobotanica.geobotanica.data_taxa.dao.TagDao
 import com.geobotanica.geobotanica.data_taxa.dao.VernacularDao
-import com.geobotanica.geobotanica.data_taxa.dao.StarredVernacularDao
-import com.geobotanica.geobotanica.data_taxa.dao.UsedVernacularDao
+import com.geobotanica.geobotanica.data_taxa.entity.Tag
 import com.geobotanica.geobotanica.data_taxa.entity.Vernacular
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.*
 import javax.inject.Inject
 
 
 class VernacularRepo @Inject constructor(
         private val vernacularDao: VernacularDao,
-        private val starredVernacularDao: StarredVernacularDao,
-        private val usedVernacularDao: UsedVernacularDao
+        private val tagDao: TagDao
 ) {
 
     fun get(id: Long): Vernacular? = vernacularDao.get(id)
@@ -29,29 +30,31 @@ class VernacularRepo @Inject constructor(
 
     fun getCount(): Int = vernacularDao.getCount()
 
-    // StarredVernacularDao
 
-    fun getAllStarred(): List<Long> = starredVernacularDao.getAll() ?: emptyList()
+    // Tagged Vernaculars
 
-    fun setStarred(id: Long, isStarred: Boolean) =
-            if (isStarred) starredVernacularDao.setStarred(id) else starredVernacularDao.unsetStarred(id)
+    fun getAllStarred(limit: Int = DEFAULT_RESULT_LIMIT): List<Long> =
+            tagDao.getAllVernacularsWithTag(STARRED.ordinal, limit) ?: emptyList()
+
+    fun getAllUsed(limit: Int = DEFAULT_RESULT_LIMIT): List<Long> =
+            tagDao.getAllVernacularsWithTag(USED.ordinal, limit) ?: emptyList()
+
+    fun setTagged(id: Long, tag: PlantNameTag, isTagged: Boolean) {
+        if (isTagged)
+            tagDao.insert(Tag(tag.ordinal, vernacularId = id))
+        else
+            tagDao.unsetVernacularTag(id, tag.ordinal)
+    }
 
     fun starredStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
-            starredVernacularDao.starredStartsWith(string, limit)
+            tagDao.taggedVernacularStartsWith(string, STARRED.ordinal, limit)
 
     fun starredStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
-            starredVernacularDao.starredStartsWith(first, second, limit)
-
-    // UsedVernacularDao
-
-    fun getAllUsed(): List<Long> = usedVernacularDao.getAll() ?: emptyList()
-
-    fun setUsed(id: Long, isUsed: Boolean) =
-            if (isUsed) usedVernacularDao.setUsed(id) else usedVernacularDao.unsetUsed(id)
+            tagDao.taggedVernacularStartsWith(first, second, STARRED.ordinal, limit)
 
     fun usedStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
-            usedVernacularDao.usedStartsWith(string, limit)
+            tagDao.taggedVernacularStartsWith(string, USED.ordinal, limit)
 
     fun usedStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
-            usedVernacularDao.usedStartsWith(first, second, limit)
+            tagDao.taggedVernacularStartsWith(first, second, USED.ordinal, limit)
 }

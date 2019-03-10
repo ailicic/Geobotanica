@@ -14,10 +14,11 @@ import kotlinx.android.synthetic.main.plant_name_list_item.view.*
 
 
 class PlantNamesAdapter(
-        var items: List<PlantNameSearchService.SearchResult>,
         private val onClick: (PlantNameSearchService.SearchResult) -> Unit,
         private val onClickStar: (PlantNameSearchService.SearchResult) -> Unit
 ) : RecyclerView.Adapter<PlantNamesAdapter.ViewHolder>() {
+
+    var items: List<PlantNameSearchService.SearchResult> = emptyList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)

@@ -1,17 +1,19 @@
 package com.geobotanica.geobotanica.data_taxa.repo
 
 import com.geobotanica.geobotanica.data_taxa.DEFAULT_RESULT_LIMIT
+import com.geobotanica.geobotanica.data_taxa.dao.TagDao
 import com.geobotanica.geobotanica.data_taxa.dao.TaxonDao
-import com.geobotanica.geobotanica.data_taxa.dao.StarredTaxonDao
-import com.geobotanica.geobotanica.data_taxa.dao.UsedTaxonDao
+import com.geobotanica.geobotanica.data_taxa.entity.Tag
 import com.geobotanica.geobotanica.data_taxa.entity.Taxon
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.STARRED
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.USED
 import javax.inject.Inject
 
 
 class TaxonRepo @Inject constructor(
         private val taxonDao: TaxonDao,
-        private val starredTaxonDao: StarredTaxonDao,
-        private val usedTaxonDao: UsedTaxonDao
+        private val tagDao: TagDao
 ) {
 
     fun get(id: Long): Taxon? = taxonDao.get(id)
@@ -27,29 +29,31 @@ class TaxonRepo @Inject constructor(
 
     fun getCount(): Int = taxonDao.getCount()
 
-    // StarredTaxonDao
 
-    fun getAllStarred(): List<Long> = starredTaxonDao.getAll() ?: emptyList()
+    // Tagged Taxa
 
-    fun setStarred(id: Long, isStarred: Boolean) =
-        if (isStarred) starredTaxonDao.setStarred(id) else starredTaxonDao.unsetStarred(id)
+    fun getAllStarred(limit: Int = DEFAULT_RESULT_LIMIT): List<Long> =
+            tagDao.getAllTaxaWithTag(STARRED.ordinal, limit) ?: emptyList()
+
+    fun getAllUsed(limit: Int = DEFAULT_RESULT_LIMIT): List<Long> =
+            tagDao.getAllTaxaWithTag(USED.ordinal, limit) ?: emptyList()
+
+    fun setTagged(id: Long, tag: PlantNameTag, isTagged: Boolean) {
+        if (isTagged)
+            tagDao.insert(Tag(tag.ordinal, taxonId = id))
+        else
+            tagDao.unsetTaxonTag(id, tag.ordinal)
+    }
 
     fun starredStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
-        starredTaxonDao.starredStartsWith(string, limit)
+            tagDao.taggedTaxonStartsWith(string, STARRED.ordinal, limit)
 
     fun starredStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
-        starredTaxonDao.starredStartsWith(first, second, limit)
-
-    // UsedTaxonDao
-
-    fun getAllUsed(): List<Long> = usedTaxonDao.getAll() ?: emptyList()
-
-    fun setUsed(id: Long, isUsed: Boolean) =
-            if (isUsed) usedTaxonDao.setUsed(id) else usedTaxonDao.unsetUsed(id)
+            tagDao.taggedTaxonStartsWith(first, second, STARRED.ordinal, limit)
 
     fun usedStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
-            usedTaxonDao.usedStartsWith(string, limit)
+            tagDao.taggedTaxonStartsWith(string, USED.ordinal, limit)
 
     fun usedStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
-            usedTaxonDao.usedStartsWith(first, second, limit)
+            tagDao.taggedTaxonStartsWith(first, second, USED.ordinal, limit)
 }

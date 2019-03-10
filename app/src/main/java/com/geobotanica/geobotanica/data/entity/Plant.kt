@@ -19,7 +19,7 @@ data class  Plant(
         val scientificName: String? = null,
         val timestamp: OffsetDateTime = OffsetDateTime.now()
 ) {
-    @PrimaryKey(autoGenerate = true) var id: Long = 0
+    @PrimaryKey(autoGenerate = true) var id: Long = 0L
 
     enum class Type {
         TREE,

@@ -14,7 +14,7 @@ import com.geobotanica.geobotanica.data_taxa.TaxaDatabase
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchFilterOptions
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.USED
-import com.geobotanica.geobotanica.data_taxa.util.defaultPlantNameFilterFlags
+import com.geobotanica.geobotanica.data_taxa.util.defaultFilterFlags
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -47,7 +47,7 @@ class NewPlantNameFragment : BaseFragment() {
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, photoUri=$photoUri")
 
             searchFilterOptions = SearchFilterOptions(
-                    sharedPrefs.get(sharedPrefsFilterFlags, defaultPlantNameFilterFlags)
+                    sharedPrefs.get(sharedPrefsFilterFlags, defaultFilterFlags)
             )
         }
     }
@@ -99,8 +99,9 @@ class NewPlantNameFragment : BaseFragment() {
 
     private fun initRecyclerView() = mainScope.launch {
         recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-        plantNamesAdapter = PlantNamesAdapter(viewModel.getDefaultPlantNames(), onClickItem, onClickStar)
+        plantNamesAdapter = PlantNamesAdapter(onClickItem, onClickStar)
         recyclerView.adapter = plantNamesAdapter
+        updateSearchResults()
     }
 
     @ObsoleteCoroutinesApi
@@ -137,10 +138,11 @@ class NewPlantNameFragment : BaseFragment() {
         noResultsText.isVisible = false
         searchJob = mainScope.launch {
             delay(300)
-            if (viewModel.searchText.isBlank())
-                showDefaultResults()
-            else
-                searchPlantName(viewModel.searchText)
+            progressBar.isVisible = true
+            viewModel.searchPlantName(viewModel.searchText).consumeEach {
+                plantNamesAdapter.items = it
+                plantNamesAdapter.notifyDataSetChanged()
+            }
         }
         searchJob?.invokeOnCompletion { completionError ->
             if (completionError == null) { // Coroutine completed normally
@@ -148,21 +150,6 @@ class NewPlantNameFragment : BaseFragment() {
                 if (recyclerView.adapter?.itemCount == 0)
                     noResultsText.isVisible = true
             }
-        }
-    }
-
-    private suspend fun showDefaultResults() {
-        plantNamesAdapter.items = viewModel.getDefaultPlantNames()
-        plantNamesAdapter.notifyDataSetChanged()
-    }
-
-    @ExperimentalCoroutinesApi
-    @ObsoleteCoroutinesApi
-    private suspend fun searchPlantName(string: String) {
-        progressBar.isVisible = true
-        viewModel.searchPlantName(string).consumeEach {
-            plantNamesAdapter.items = it
-            plantNamesAdapter.notifyDataSetChanged()
         }
     }
 
