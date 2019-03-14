@@ -26,18 +26,20 @@ class VernacularRepo @Inject constructor(
     fun anyWordStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             vernacularDao.anyWordStartsWith(first, second, limit)
 
-//    fun contains(string: String): List<Long>? = vernacularDao.contains(string)
+    fun fromTaxonId(taxonId: Int): List<Long>? = vernacularDao.fromTaxonId(taxonId.toLong())
 
     fun getCount(): Int = vernacularDao.getCount()
+
+//    fun contains(string: String): List<Long>? = vernacularDao.contains(string)
 
 
     // Tagged Vernaculars
 
-    fun getAllStarred(limit: Int = DEFAULT_RESULT_LIMIT): List<Long> =
-            tagDao.getAllVernacularsWithTag(STARRED.ordinal, limit) ?: emptyList()
+    fun getAllStarred(limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+            tagDao.getAllVernacularsWithTag(STARRED.ordinal, limit)
 
-    fun getAllUsed(limit: Int = DEFAULT_RESULT_LIMIT): List<Long> =
-            tagDao.getAllVernacularsWithTag(USED.ordinal, limit) ?: emptyList()
+    fun getAllUsed(limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+            tagDao.getAllVernacularsWithTag(USED.ordinal, limit)
 
     fun setTagged(id: Long, tag: PlantNameTag, isTagged: Boolean) {
         if (isTagged)
@@ -57,4 +59,10 @@ class VernacularRepo @Inject constructor(
 
     fun usedStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             tagDao.taggedVernacularStartsWith(first, second, USED.ordinal, limit)
+
+    fun starredFromTaxonId(taxonId: Int): List<Long>? =
+            tagDao.taggedVernacularFromTaxonId(taxonId.toLong(), STARRED.ordinal)
+
+    fun usedFromTaxonId(taxonId: Int): List<Long>? =
+            tagDao.taggedVernacularFromTaxonId(taxonId.toLong(), USED.ordinal)
 }

@@ -65,7 +65,7 @@ class NewPlantPhotoFragment : BaseFragment() {
     //                    plantPhoto.setImageBitmap(getScaledBitmap())
 
                         val navController = activity.findNavController(R.id.fragment)
-                        navController.navigate(R.id.newPlantNameFragment, createBundle())
+                        navController.navigate(R.id.searchPlantNameFragment, createBundle())
                     }
                     Activity.RESULT_CANCELED -> { // "X" in GUI or back button pressed
                         Lg.d("onActivityResult: RESULT_CANCELED")

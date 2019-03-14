@@ -1,24 +1,27 @@
-package com.geobotanica.geobotanica.ui.newplantname
+package com.geobotanica.geobotanica.ui.searchplantname
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.*
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
 import kotlinx.android.synthetic.main.plant_name_list_item.view.*
 
 
 class PlantNamesAdapter(
-        private val onClick: (PlantNameSearchService.SearchResult) -> Unit,
-        private val onClickStar: (PlantNameSearchService.SearchResult) -> Unit
+        private val onClick: (Int, SearchResult) -> Unit,
+        private val onClickStar: (SearchResult) -> Unit,
+        var isSelectable: Boolean = false
 ) : RecyclerView.Adapter<PlantNamesAdapter.ViewHolder>() {
 
-    var items: List<PlantNameSearchService.SearchResult> = emptyList()
+    var items: List<SearchResult> = emptyList()
+    var selectedIndex:Int = RecyclerView.NO_POSITION
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -47,7 +50,20 @@ class PlantNamesAdapter(
         val starIcon = if (item.hasTag(STARRED)) star else starBorder
         holder.starredIcon.setImageDrawable(starIcon)
 
-        holder.view.setOnClickListener { onClick(item) }
+        if (isSelectable && position == selectedIndex)
+            holder.constraintLayout.setBackgroundColor(resources.getColor(R.color.colorLightGrey))
+        else
+            holder.constraintLayout.setBackgroundColor(resources.getColor(R.color.colorWhite))
+
+        holder.view.setOnClickListener {
+            if (isSelectable) {
+                notifyItemChanged(selectedIndex)
+                selectedIndex = position
+                notifyItemChanged(selectedIndex)
+            }
+            onClick(position, item)
+        }
+
         holder.starredIcon.setOnClickListener {
             item.toggleTag(STARRED)
             val drawable = if (item.hasTag(STARRED)) star else starBorder
@@ -59,6 +75,7 @@ class PlantNamesAdapter(
     override fun getItemCount(): Int = items.size
 
     inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+        val constraintLayout: ConstraintLayout = view.constraintLayout
         val plantTypeIcon: ImageView = view.plantTypeIcon
         val plantName: TextView = view.plantName
         val usedIcon: ImageView= view.usedIcon

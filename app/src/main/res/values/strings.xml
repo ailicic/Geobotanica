@@ -25,12 +25,15 @@
     <string name="enable_gps">Enable GPS</string>
     <string name="got_it">Got it!</string>
     <string name="delete">Delete</string>
+    <string name="skip">Skip</string>
     <string name="action_settings">Settings</string>
     <string name="photo_type">Photo Type</string>
     <string name="add_measurements">Add Measurements</string>
     <string name="plant_location">Plant Location</string>
     <string name="hold">Hold</string>
-    <string name="common_names">Common Names</string>
+    <string name="common_name">Common Name</string>
+    <string name="common_names">Common names</string>
+    <string name="scientific_name">Scientific name</string>
     <string name="scientific_names">Scientific names</string>
     <string name="hint_common_name">e.g. Hardy kiwi</string>
     <string name="hint_scientific_name">e.g. Actinidia arguta</string>
@@ -44,6 +47,8 @@
     <string name="vine">Vine</string>
     <string name="starred">Starred</string>
     <string name="history">History</string>
+    <string name="suggested_common">Suggested common names:</string>
+    <string name="suggested_scientific">Suggested scientific names:</string>
     <string name="no_results">No Results</string>
     <string name="assisted">Assisted</string>
     <string name="manual">Manual</string>
@@ -69,10 +74,16 @@
     <!--<string name="photo_type_trunk">Trunk</string>-->
     <string name="inches">in</string>
     <string name="enable">Enable</string>
-    <string name="name_search_hint">Common or Scientific name</string>
+    <string name="name_search_hint">Common or scientific name</string>
     <string name="filter">Filter</string>
     <string name="apply">Apply</string>
     <string name="cancel">Cancel</string>
+    <string name="geobotanica">Geobotanica</string>
+    <string name="plant_details">Plant Details</string>
+    <string name="plant_photo">Plant Photo</string>
+    <string name="search_plant_name">Search Plant Name</string>
+    <string name="plant_name">Plant Name</string>
+    <string name="confirm_new_plant">Confirm New Plant</string>
     <string-array name="measurement_unit">
         <item>cm</item>
         <item>m</item>

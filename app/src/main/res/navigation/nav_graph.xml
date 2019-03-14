@@ -3,120 +3,185 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/mapFragment">
+    app:startDestination="@id/mapFragment"
+    >
 
-    // TODO: Use R.strings for labels
+    <!-- TODO: Clean this up-->
+        <!-- Animation data ignored?-->
+        <!-- Arguments useless? (Just for type safety? Need SafeArgs import for that)-->
+        <!-- Destinations useless? (Why specify here? Just for back-stack generation on deep links?)-->
+        <!-- Could Define just fragments for basic nav and ignore the rest -> Seems ok-->
+    <!-- TODO: Update after 1.0 (make a decision on how to use Nav)-->
+
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.geobotanica.geobotanica.ui.map.MapFragment"
-        android:label="Geobotanica"
+        android:label="@string/geobotanica"
         tools:layout="@layout/fragment_map" >
-        <action
-            android:id="@+id/action_mapFragment_to_plantDetailFragment"
-            app:destination="@id/plantDetailFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-        <action
-            android:id="@+id/action_mapFragment_to_newPlantTypeFragment"
-            app:destination="@id/newPlantTypeFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
-
     <fragment
         android:id="@+id/plantDetailFragment"
         android:name="com.geobotanica.geobotanica.ui.plantdetail.PlantDetailFragment"
-        android:label="Plant Details" >
-        <argument android:name="plantId" />
+        android:label="@string/plant_details" >
     </fragment>
-
     <fragment
         android:id="@+id/newPlantTypeFragment"
         android:name="com.geobotanica.geobotanica.ui.newplanttype.NewPlantTypeFragment"
-        android:label="Plant Type" >
-        <argument android:name="userId" />
-        <action
-            android:id="@+id/action_newPlantTypeFragment_to_newPlantPhotoFragment"
-            app:destination="@id/newPlantPhotoFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        android:label="@string/plant_type" >
     </fragment>
     <fragment
         android:id="@+id/newPlantPhotoFragment"
         android:name="com.geobotanica.geobotanica.ui.newplantphoto.NewPlantPhotoFragment"
-        android:label="Plant Photo" >
-        <argument android:name="userId" />
-        <argument android:name="plantType" />
-        <argument android:name="location" />
-        <action
-            android:id="@+id/action_newPlantPhotoFragment_to_newPlantNameFragment"
-            app:destination="@id/newPlantNameFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        android:label="@string/plant_photo" >
+    </fragment>
+    <fragment
+        android:id="@+id/searchPlantNameFragment"
+        android:name="com.geobotanica.geobotanica.ui.searchplantname.SearchPlantNameFragment"
+        android:label="@string/search_plant_name" >
     </fragment>
     <fragment
         android:id="@+id/newPlantNameFragment"
         android:name="com.geobotanica.geobotanica.ui.newplantname.NewPlantNameFragment"
-        android:label="Search Plant Name" >
-        <argument android:name="userId" />
-        <argument android:name="plantType" />
-        <argument android:name="photoFilePath" />
-        <argument android:name="plantLocation" />
-        <action
-            android:id="@+id/action_newPlantNameFragment_to_newPlantMeasurementFragment"
-            app:destination="@id/newPlantMeasurementFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        android:label="@string/plant_name" >
     </fragment>
     <fragment
         android:id="@+id/newPlantMeasurementFragment"
         android:name="com.geobotanica.geobotanica.ui.newplantmeasurement.NewPlantMeasurementFragment"
-        android:label="Plant Measurement">
-        <argument android:name="userId" />
-        <argument android:name="plantType" />
-        <argument android:name="photoFilePath" />
-        <argument android:name="plantLocation" />
-        <argument android:name="commonName" />
-        <argument android:name="latinName" />
-        <action
-            android:id="@+id/action_newPlantMeasurementFragment_to_mapFragment"
-            app:destination="@id/mapFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        android:label="@string/plant_measurement">
     </fragment>
     <fragment
         android:id="@+id/newPlantConfirmFragment"
         android:name="com.geobotanica.geobotanica.ui.newplantconfirm.NewPlantConfirmFragment"
-        android:label="Confirm New Plant">
-        <argument android:name="userId" />
-        <argument android:name="plantType" />
-        <argument android:name="photoFilePath" />
-        <argument android:name="plantLocation" />
-        <argument android:name="commonName" />
-        <argument android:name="latinName" />
-        <argument android:name="height" />
-        <argument android:name="diameter" />
-        <argument android:name="trunk_diameter" />
-        <action
-            android:id="@+id/action_newPlantConfirmFragment_to_mapFragment"
-            app:destination="@id/mapFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim"
-            app:popUpTo="@+id/mapFragment"
-            app:popUpToInclusive="false" />
+        android:label="@string/confirm_new_plant">
     </fragment>
+
+    <!--<fragment-->
+        <!--android:id="@+id/mapFragment"-->
+        <!--android:name="com.geobotanica.geobotanica.ui.map.MapFragment"-->
+        <!--android:label="Geobotanica"-->
+        <!--tools:layout="@layout/fragment_map" >-->
+        <!--<action-->
+            <!--android:id="@+id/action_mapFragment_to_plantDetailFragment"-->
+            <!--app:destination="@id/plantDetailFragment"-->
+            <!--app:enterAnim="@anim/nav_default_enter_anim"-->
+            <!--app:exitAnim="@anim/nav_default_exit_anim"-->
+            <!--app:popEnterAnim="@anim/nav_default_pop_enter_anim"-->
+            <!--app:popExitAnim="@anim/nav_default_pop_exit_anim" />-->
+        <!--<action-->
+            <!--android:id="@+id/action_mapFragment_to_newPlantTypeFragment"-->
+            <!--app:destination="@id/newPlantTypeFragment"-->
+            <!--app:enterAnim="@anim/nav_default_enter_anim"-->
+            <!--app:exitAnim="@anim/nav_default_exit_anim"-->
+            <!--app:popEnterAnim="@anim/nav_default_pop_enter_anim"-->
+            <!--app:popExitAnim="@anim/nav_default_pop_exit_anim" />-->
+    <!--</fragment>-->
+
+    <!--<fragment-->
+        <!--android:id="@+id/plantDetailFragment"-->
+        <!--android:name="com.geobotanica.geobotanica.ui.plantdetail.PlantDetailFragment"-->
+        <!--android:label="Plant Details" >-->
+        <!--<argument android:name="plantId" />-->
+    <!--</fragment>-->
+
+    <!--<fragment-->
+        <!--android:id="@+id/newPlantTypeFragment"-->
+        <!--android:name="com.geobotanica.geobotanica.ui.newplanttype.NewPlantTypeFragment"-->
+        <!--android:label="Plant Type" >-->
+        <!--<argument android:name="userId" />-->
+        <!--<action-->
+            <!--android:id="@+id/action_newPlantTypeFragment_to_newPlantPhotoFragment"-->
+            <!--app:destination="@id/newPlantPhotoFragment"-->
+            <!--app:enterAnim="@anim/nav_default_enter_anim"-->
+            <!--app:exitAnim="@anim/nav_default_exit_anim"-->
+            <!--app:popEnterAnim="@anim/nav_default_pop_enter_anim"-->
+            <!--app:popExitAnim="@anim/nav_default_pop_exit_anim" />-->
+    <!--</fragment>-->
+    <!--<fragment-->
+        <!--android:id="@+id/newPlantPhotoFragment"-->
+        <!--android:name="com.geobotanica.geobotanica.ui.newplantphoto.NewPlantPhotoFragment"-->
+        <!--android:label="Plant Photo" >-->
+        <!--<argument android:name="userId" />-->
+        <!--<argument android:name="plantType" />-->
+        <!--<argument android:name="location" />-->
+        <!--<action-->
+            <!--android:id="@+id/action_newPlantPhotoFragment_to_newPlantNameFragment"-->
+            <!--app:destination="@id/searchPlantNameFragment"-->
+            <!--app:enterAnim="@anim/nav_default_enter_anim"-->
+            <!--app:exitAnim="@anim/nav_default_exit_anim"-->
+            <!--app:popEnterAnim="@anim/nav_default_pop_enter_anim"-->
+            <!--app:popExitAnim="@anim/nav_default_pop_exit_anim" />-->
+    <!--</fragment>-->
+    <!--<fragment-->
+        <!--android:id="@+id/searchPlantNameFragment"-->
+        <!--android:name="com.geobotanica.geobotanica.ui.searchplantname.SearchPlantNameFragment"-->
+        <!--android:label="Search Plant Name" >-->
+        <!--<argument android:name="userId" />-->
+        <!--<argument android:name="plantType" />-->
+        <!--<argument android:name="photoFilePath" />-->
+        <!--<argument android:name="plantLocation" />-->
+        <!--<action-->
+            <!--android:id="@+id/action_newPlantNameFragment_to_newPlantMeasurementFragment"-->
+            <!--app:destination="@id/newPlantNameFragment"-->
+            <!--app:enterAnim="@anim/nav_default_enter_anim"-->
+            <!--app:exitAnim="@anim/nav_default_exit_anim"-->
+            <!--app:popEnterAnim="@anim/nav_default_pop_enter_anim"-->
+            <!--app:popExitAnim="@anim/nav_default_pop_exit_anim" />-->
+    <!--</fragment>-->
+    <!--<fragment-->
+        <!--android:id="@+id/newPlantNameFragment"-->
+        <!--android:name="com.geobotanica.geobotanica.ui.searchplantname.SearchPlantNameFragment"-->
+        <!--android:label="Search Plant Name" >-->
+        <!--<argument android:name="userId" />-->
+        <!--<argument android:name="plantType" />-->
+        <!--<argument android:name="photoFilePath" />-->
+        <!--<argument android:name="plantLocation" />-->
+        <!--<action-->
+            <!--android:id="@+id/action_newPlantNameFragment_to_newPlantMeasurementFragment"-->
+            <!--app:destination="@id/newPlantMeasurementFragment"-->
+            <!--app:enterAnim="@anim/nav_default_enter_anim"-->
+            <!--app:exitAnim="@anim/nav_default_exit_anim"-->
+            <!--app:popEnterAnim="@anim/nav_default_pop_enter_anim"-->
+            <!--app:popExitAnim="@anim/nav_default_pop_exit_anim" />-->
+    <!--</fragment>-->
+    <!--<fragment-->
+        <!--android:id="@+id/newPlantMeasurementFragment"-->
+        <!--android:name="com.geobotanica.geobotanica.ui.newplantmeasurement.NewPlantMeasurementFragment"-->
+        <!--android:label="Plant Measurement">-->
+        <!--<argument android:name="userId" />-->
+        <!--<argument android:name="plantType" />-->
+        <!--<argument android:name="photoFilePath" />-->
+        <!--<argument android:name="plantLocation" />-->
+        <!--<argument android:name="commonName" />-->
+        <!--<argument android:name="latinName" />-->
+        <!--<action-->
+            <!--android:id="@+id/action_newPlantMeasurementFragment_to_mapFragment"-->
+            <!--app:destination="@id/newPlantConfirmFragment"-->
+            <!--app:enterAnim="@anim/nav_default_enter_anim"-->
+            <!--app:exitAnim="@anim/nav_default_exit_anim"-->
+            <!--app:popEnterAnim="@anim/nav_default_pop_enter_anim"-->
+            <!--app:popExitAnim="@anim/nav_default_pop_exit_anim" />-->
+    <!--</fragment>-->
+    <!--<fragment-->
+        <!--android:id="@+id/newPlantConfirmFragment"-->
+        <!--android:name="com.geobotanica.geobotanica.ui.newplantconfirm.NewPlantConfirmFragment"-->
+        <!--android:label="Confirm New Plant">-->
+        <!--<argument android:name="userId" />-->
+        <!--<argument android:name="plantType" />-->
+        <!--<argument android:name="photoFilePath" />-->
+        <!--<argument android:name="plantLocation" />-->
+        <!--<argument android:name="commonName" />-->
+        <!--<argument android:name="latinName" />-->
+        <!--<argument android:name="height" />-->
+        <!--<argument android:name="diameter" />-->
+        <!--<argument android:name="trunk_diameter" />-->
+        <!--<action-->
+            <!--android:id="@+id/action_newPlantConfirmFragment_to_mapFragment"-->
+            <!--app:destination="@id/mapFragment"-->
+            <!--app:enterAnim="@anim/nav_default_enter_anim"-->
+            <!--app:exitAnim="@anim/nav_default_exit_anim"-->
+            <!--app:popEnterAnim="@anim/nav_default_pop_enter_anim"-->
+            <!--app:popExitAnim="@anim/nav_default_pop_exit_anim"-->
+            <!--app:popUpTo="@+id/mapFragment"-->
+            <!--app:popUpToInclusive="false" />-->
+    <!--</fragment>-->
 </navigation>

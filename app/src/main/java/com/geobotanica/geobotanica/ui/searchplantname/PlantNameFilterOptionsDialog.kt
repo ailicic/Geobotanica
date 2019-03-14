@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui.newplantname
+package com.geobotanica.geobotanica.ui.searchplantname
 
 import android.app.Dialog
 import android.os.Bundle

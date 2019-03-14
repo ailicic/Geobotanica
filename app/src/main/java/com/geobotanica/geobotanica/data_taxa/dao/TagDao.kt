@@ -27,6 +27,11 @@ interface TagDao : BaseDao<Tag> {
 		AND (vernacular LIKE :second || '%' OR vernacular LIKE "% " || :second || '%') LIMIT :limit""")
     fun taggedVernacularStartsWith(first: String, second: String, tag: Int, limit: Int): List<Long>?
 
+    @Query("""SELECT id FROM vernaculars
+        WHERE taxonId = :taxonId
+        AND id IN (SELECT vernacularId FROM tags WHERE tag = :tag AND vernacularId NOT NULL)""")
+    fun taggedVernacularFromTaxonId(taxonId: Long, tag: Int): List<Long>?
+
 
     // Taxa
 
@@ -46,4 +51,9 @@ interface TagDao : BaseDao<Tag> {
 		AND (generic LIKE :first || '%' OR epithet LIKE :first || '%')
 		AND (generic LIKE :second || '%' OR epithet LIKE :second || '%') LIMIT :limit """)
     fun taggedTaxonStartsWith(first: String, second: String, tag: Int, limit: Int): List<Long>?
+
+    @Query("""SELECT taxonId FROM vernaculars
+        WHERE vernacular = (SELECT vernacular FROM vernaculars WHERE id=:vernacularId)
+        AND taxonId IN (SELECT taxonId FROM tags WHERE tag = :tag AND taxonId NOT NULL)""")
+    fun taggedTaxonFromVernacularId(vernacularId: Long, tag: Int): List<Long>?
 }

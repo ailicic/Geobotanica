@@ -16,6 +16,13 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.system.measureTimeMillis
 
 
+/*
+    NOTES
+    - The current search strategy produces results as fast as possible at the expense of complexity (good for dynamic searching)
+    - The search implementation would be simpler (but produce results slower) if the full search was performed first,
+         then tags were applied after (via tagged id search, then intersect with results)
+ */
+
 const val defaultFilterFlags = 0b0
 
 class PlantNameSearchService @Inject constructor (
@@ -52,22 +59,37 @@ class PlantNameSearchService @Inject constructor (
         PlantNameSearch(fun2 = taxonRepo::genericOrEpithetStartsWith, tagList = listOf(SCIENTIFIC))
     )
 
+    private val suggestedNameSearchSequence = listOf(
+        PlantNameSearch(fun0 = vernacularRepo::starredFromTaxonId, tagList = listOf(COMMON, STARRED)),
+        PlantNameSearch(fun0 = vernacularRepo::usedFromTaxonId, tagList = listOf(COMMON, USED)),
+        PlantNameSearch(fun0 = vernacularRepo::fromTaxonId, tagList = listOf(COMMON)),
+
+        PlantNameSearch(fun0 = taxonRepo::starredFromVernacularId, tagList = listOf(SCIENTIFIC, STARRED)),
+        PlantNameSearch(fun0 = taxonRepo::usedFromVernacularId, tagList = listOf(SCIENTIFIC, USED)),
+        PlantNameSearch(fun0 = taxonRepo::fromVernacularId, tagList = listOf(SCIENTIFIC))
+    )
+
     @ExperimentalCoroutinesApi
-    fun search(searchText: String, filterOptions: SearchFilterOptions): ReceiveChannel<List<SearchResult>> = produce {
+    fun search(
+        searchText: String,
+        filterOptions: SearchFilterOptions = SearchFilterOptions(),
+        isSuggestionsSearch: Boolean = false // If true, Taxon/Vernacular id is passed in searchText
+    ): ReceiveChannel<List<SearchResult>> = produce {
         val words = searchText.split(' ').filter { it.isNotBlank() }
         val wordCount = words.size
         Lg.d("Search words: $words")
 
         val aggregateResultIds = mutableListOf<Long>()
         val aggregateResults = mutableListOf<SearchResult>()
-        val searchSequence = getSearchSequence(wordCount)
+        val searchSequence = getSearchSequence(wordCount, isSuggestionsSearch)
 
         searchSequence.filter { filterOptions.shouldNotFilter(it) }.forEach forEachSearch@ { search ->
             if (aggregateResults.size >= DEFAULT_RESULT_LIMIT)
                 return@forEachSearch
 
             val time = measureTimeMillis {
-                val results = getSearchResults(words, search, getLimit(aggregateResults)) ?: return@forEachSearch
+                val results = getSearchResults(words, search, getLimit(aggregateResults), isSuggestionsSearch)
+                        ?: return@forEachSearch
                 val uniqueIds = results subtract aggregateResultIds
                 val mergeTagsOnIds = results intersect aggregateResultIds
 
@@ -91,24 +113,41 @@ class PlantNameSearchService @Inject constructor (
         close()
     }
 
-    private fun getSearchSequence(wordCount: Int): List<PlantNameSearch> {
-        return when (wordCount) {
+    @ExperimentalCoroutinesApi
+    fun searchSuggestedCommonNames(taxonId: Long): ReceiveChannel<List<SearchResult>> =
+        search(taxonId.toString(), SearchFilterOptions(SCIENTIFIC.flag), true)
+
+
+    @ExperimentalCoroutinesApi
+    fun searchSuggestedScientificNames(vernacularId: Long): ReceiveChannel<List<SearchResult>> =
+        search(vernacularId.toString(), SearchFilterOptions(COMMON.flag), true)
+
+    private fun getLimit(filteredResults: List<SearchResult>) =
+            DEFAULT_RESULT_LIMIT - filteredResults.size
+
+    private fun getSearchSequence(wordCount: Int, isSuggestionsSearch: Boolean): List<PlantNameSearch> {
+        return if (isSuggestionsSearch)
+            suggestedNameSearchSequence
+        else when (wordCount) {
             0 -> defaultSearchSequence
             1 -> singleWordSearchSequence
             else -> doubleWordSearchSequence
         }
     }
 
-    private fun getSearchResults(words: List<String>, search: PlantNameSearch, limit: Int): List<Long>? {
-        return when (words.size) {
+    private fun getSearchResults(
+            words: List<String>,
+            search: PlantNameSearch,
+            limit: Int,
+            isSuggestionsSearch: Boolean): List<Long>? {
+        return if (isSuggestionsSearch)
+            search.fun0!!(words[0].toInt())
+        else when (words.size) {
             0 -> search.fun0!!(limit)
             1 -> search.fun1!!(words[0], limit)
             else -> search.fun2!!(words[0], words[1], limit)
         }
     }
-
-    private fun getLimit(filteredResults: List<SearchResult>) =
-            DEFAULT_RESULT_LIMIT - filteredResults.size
 
     private fun mapIdToSearchResult(id: Long, search: PlantNameSearch): SearchResult {
         return SearchResult(id, search.tags, when {
@@ -128,9 +167,9 @@ class PlantNameSearchService @Inject constructor (
 
         val functionName: String
             get() {
-                return (fun1 ?: fun2).toString()
-                        .removePrefix("function ")
-                        .removeSuffix(" (Kotlin reflection is not available)")
+                return (fun0 ?: fun1 ?: fun2).toString()
+                    .removePrefix("function ")
+                    .removeSuffix(" (Kotlin reflection is not available)")
             }
 
         fun hasTag(tag: PlantNameTag) = tags and tag.flag != 0
@@ -156,7 +195,7 @@ class PlantNameSearchService @Inject constructor (
         }
     }
 
-    data class SearchFilterOptions(val filterFlags: Int) {
+    data class SearchFilterOptions(val filterFlags: Int = defaultFilterFlags) {
         fun hasFilter(filterOption: PlantNameTag) = filterOption.flag and filterFlags != 0
         fun shouldNotFilter(search: PlantNameSearch) = (search.tags and (COMMON.flag or SCIENTIFIC.flag)) and filterFlags == 0
         fun shouldNotFilter(searchResult: SearchResult) = searchResult.tags and filterFlags == 0

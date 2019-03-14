@@ -46,7 +46,8 @@
                 android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
                 android:text="@{ viewModel.commonName }"
-                android:hint="@string/common_names"  />
+                android:inputType="textNoSuggestions"
+                android:hint="@string/common_name"  />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -77,7 +78,8 @@
                 android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
                 android:text="@{ viewModel.scientificName }"
-                android:hint="@string/scientific_names"  />
+                android:inputType="textNoSuggestions"
+                android:hint="@string/scientific_name"  />
         </com.google.android.material.textfield.TextInputLayout>
 
         <androidx.appcompat.widget.AppCompatImageView

@@ -27,16 +27,18 @@ class TaxonRepo @Inject constructor(
     fun genericOrEpithetStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             taxonDao.genericOrEpithetStartsWith(first, second, limit)
 
+    fun fromVernacularId(vernacularId: Int): List<Long>? = taxonDao.fromVernacularId(vernacularId.toLong())
+
     fun getCount(): Int = taxonDao.getCount()
 
 
     // Tagged Taxa
 
-    fun getAllStarred(limit: Int = DEFAULT_RESULT_LIMIT): List<Long> =
-            tagDao.getAllTaxaWithTag(STARRED.ordinal, limit) ?: emptyList()
+    fun getAllStarred(limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+            tagDao.getAllTaxaWithTag(STARRED.ordinal, limit)
 
-    fun getAllUsed(limit: Int = DEFAULT_RESULT_LIMIT): List<Long> =
-            tagDao.getAllTaxaWithTag(USED.ordinal, limit) ?: emptyList()
+    fun getAllUsed(limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+            tagDao.getAllTaxaWithTag(USED.ordinal, limit)
 
     fun setTagged(id: Long, tag: PlantNameTag, isTagged: Boolean) {
         if (isTagged)
@@ -56,4 +58,10 @@ class TaxonRepo @Inject constructor(
 
     fun usedStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             tagDao.taggedTaxonStartsWith(first, second, USED.ordinal, limit)
+
+    fun starredFromVernacularId(vernacularId: Int): List<Long>? =
+            tagDao.taggedTaxonFromVernacularId(vernacularId.toLong(), STARRED.ordinal)
+
+    fun usedFromVernacularId(vernacularId: Int): List<Long>? =
+            tagDao.taggedTaxonFromVernacularId(vernacularId.toLong(), USED.ordinal)
 }

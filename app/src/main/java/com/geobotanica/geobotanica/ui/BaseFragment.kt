@@ -42,6 +42,8 @@ abstract class BaseFragment : Fragment() {
     protected val userIdKey = "userId"
     protected val plantIdKey = "plantId"
     protected val plantTypeKey = "plantType"
+    protected val taxonIdKey = "taxonId"
+    protected val vernacularIdKey = "vernacularId"
     protected val commonNameKey = "commonName"
     protected val scientificNameKey = "plantScientificName"
     protected val photoUriKey = "plantPhoto"

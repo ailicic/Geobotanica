@@ -38,8 +38,10 @@ class NewPlantMeasurementFragment : BaseFragment() {
             photoUri = getFromBundle(photoUriKey)
             commonName = getNullableFromBundle(commonNameKey)
             scientificName = getNullableFromBundle(scientificNameKey)
+            vernacularId = getNullableFromBundle(vernacularIdKey)
+            taxonId = getNullableFromBundle(taxonIdKey)
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, commonName=$commonName, " +
-                    "scientificName=$scientificName, photoUri=$photoUri")
+                    "scientificName=$scientificName, photoUri=$photoUri, vernacularId=$vernacularId, taxonId=$taxonId")
         }
     }
 

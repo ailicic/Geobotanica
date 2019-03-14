@@ -22,6 +22,10 @@ interface TaxonDao : BaseDao<Taxon> {
         AND (generic LIKE :second || '%' OR epithet LIKE :second || '%') LIMIT :limit""")
     fun genericOrEpithetStartsWith(first: String, second: String, limit: Int): List<Long>?
 
+    @Query("""SELECT taxonId FROM vernaculars
+        WHERE vernacular = (SELECT vernacular FROM vernaculars WHERE id=:vernacularId)""")
+    fun fromVernacularId(vernacularId: Long): List<Long>?
+
     @Query("SELECT COUNT(*) FROM taxa")
     fun getCount(): Int
 }
