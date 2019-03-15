@@ -41,7 +41,7 @@ data class PlantMeasurement(
         override fun toString() = when (this) {
             HEIGHT -> "Height"
             DIAMETER -> "Diameter"
-            TRUNK_DIAMETER -> "Trunk diameterMeasurement"
+            TRUNK_DIAMETER -> "Trunk diameter"
             FLOWER -> "Flower"
             FRUIT -> "Fruit"
         }

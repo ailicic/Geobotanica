@@ -41,12 +41,16 @@ class VernacularRepo @Inject constructor(
     fun getAllUsed(limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             tagDao.getAllVernacularsWithTag(USED.ordinal, limit)
 
-    fun setTagged(id: Long, tag: PlantNameTag, isTagged: Boolean) {
-        if (isTagged)
-            tagDao.insert(Tag(tag.ordinal, vernacularId = id))
-        else
+    fun setTagged(id: Long, tag: PlantNameTag, isTagged: Boolean = true) {
+        if (isTagged) {
+            tagDao.getVernacularWithTag(id, tag.ordinal)?.let {
+                updateTagTimestamp(it.vernacularId!!, tag)
+            } ?: tagDao.insert(Tag(tag.ordinal, vernacularId = id))
+        } else
             tagDao.unsetVernacularTag(id, tag.ordinal)
     }
+
+    fun updateTagTimestamp(id: Long, tag: PlantNameTag) = tagDao.updateVernacularTimestamp(id, tag.ordinal)
 
     fun starredStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             tagDao.taggedVernacularStartsWith(string, STARRED.ordinal, limit)

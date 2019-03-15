@@ -15,7 +15,6 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.measureTimeMillis
 
-
 /*
     NOTES
     - The current search strategy produces results as fast as possible at the expense of complexity (good for dynamic searching)

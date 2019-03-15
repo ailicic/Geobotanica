@@ -46,7 +46,7 @@ class PlantDetailFragment : BaseFragment() {
         val binding = DataBindingUtil.inflate<FragmentPlantDetailBinding>(
                 layoutInflater, R.layout.fragment_plant_detail, container, false).apply {
             viewModel = this@PlantDetailFragment.viewModel
-            setLifecycleOwner(this@PlantDetailFragment)
+            lifecycleOwner = this@PlantDetailFragment
         }
         return binding.root
     }

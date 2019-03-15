@@ -34,9 +34,10 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
-// TODO: Add timestamp to used tags (prob need replace on conflict)
+// TODO: Investigate why app start time is so long
 // TODO: MAYBE INSTEAD OF BELOW: Avoid snackbars, disable fab until conditions are met. Use onTextEditChanged listeners
     // TODO: Use coordinator layout where fab exists (can use constraint inside coordinator?)
+// TODO: Decide on PlantConfrimFragment: keep or not. If keep, need to handle changes to plant names -> null taxonId/vernId
 // TODO: Ensure gps remains active during plant name search (and that GPS deactivates if location is held)
 // TODO: Use androidx.appcompat.widget.AppCompatImageView in xml everywhere
 // TODO: Show satellite stats too
@@ -187,9 +188,9 @@ class MapFragment : BaseFragment() {
 
     private fun init() {
 //        // TODO: Remove
-        TaxaDatabase.getInstance(appContext).close()
-        NavHostFragment.findNavController(this).navigate(
-                R.id.searchPlantNameFragment, createBundle() )
+//        TaxaDatabase.getInstance(appContext).close()
+//        NavHostFragment.findNavController(this).navigate(
+//                R.id.searchPlantNameFragment, createBundle() )
 
 
 
@@ -243,12 +244,9 @@ class MapFragment : BaseFragment() {
     }
 
     private val onNavigateToNewPlant = Observer<Unit> {
-                // TODO: Remove
         NavHostFragment.findNavController(this).navigate(
-                R.id.searchPlantNameFragment, createBundle() )
-//        NavHostFragment.findNavController(this).navigate(
-//                R.id.newPlantTypeFragment,
-//                bundleOf("userId" to viewModel.userId) )
+                R.id.newPlantTypeFragment,
+                bundleOf("userId" to viewModel.userId) )
     }
 
     // TODO: REMOVE (Temp for NewPlantConfirmFragment)

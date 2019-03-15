@@ -19,6 +19,7 @@ import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.getFromBundle
 import com.geobotanica.geobotanica.util.getNullableFromBundle
+import com.geobotanica.geobotanica.util.putValue
 import kotlinx.android.synthetic.main.fragment_new_plant_measurement.*
 import javax.inject.Inject
 
@@ -41,7 +42,7 @@ class NewPlantMeasurementFragment : BaseFragment() {
             vernacularId = getNullableFromBundle(vernacularIdKey)
             taxonId = getNullableFromBundle(taxonIdKey)
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, commonName=$commonName, " +
-                    "scientificName=$scientificName, photoUri=$photoUri, vernacularId=$vernacularId, taxonId=$taxonId")
+                    "scientificName=$scientificName, vernId=$vernacularId, taxonId=$taxonId, photoUri=$photoUri")
         }
     }
 
@@ -144,8 +145,10 @@ class NewPlantMeasurementFragment : BaseFragment() {
                 plantTypeKey to viewModel.plantType.ordinal,
                 photoUriKey to viewModel.photoUri
         ).apply {
-            viewModel.commonName?.let { putString(commonNameKey, it) }
-            viewModel.scientificName?.let { putString(scientificNameKey, it) }
+            viewModel.commonName?.let { putValue(commonNameKey, it) }
+            viewModel.scientificName?.let { putValue(scientificNameKey, it) }
+            viewModel.vernacularId?.let { putValue(vernacularIdKey, it) }
+            viewModel.taxonId?.let { putValue(taxonIdKey, it) }
             viewModel.heightMeasurement?.let { putSerializable(heightMeasurementKey, it) }
             viewModel.diameterMeasurement?.let { putSerializable(diameterMeasurementKey, it) }
             viewModel.trunkDiameterMeasurement?.let { putSerializable(trunkDiameterMeasurementKey, it) }

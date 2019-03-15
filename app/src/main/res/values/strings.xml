@@ -4,23 +4,6 @@
 
 <resources>
     <string name="app_name">Geobotanica</string>
-
-
-    <string name="extra_user_id">com.geobotanica.user_id</string>
-    <string name="extra_plant_id">com.geobotanica.plant_id</string>
-    <string name="extra_plant_type">com.geobotanica.plant_type</string>
-    <string name="extra_plant_photo_path">com.geobotanica.plant_photo_path</string>
-    <string name="extra_plant_common_name">com.geobotanica.plant_common_name</string>
-    <string name="extra_plant_scientific_name">com.geobotanica.plant_scientific_name</string>
-    <string name="extra_location">com.geobotanica.location</string>
-    <string name="activity_map">MapActivity</string>
-    <string name="activity_plant_details">Plant Details</string>
-    <string name="activity_new_plant_type">Select Plant Type</string>
-    <string name="activity_new_plant_photo">Capture Photo</string>
-    <string name="activity_new_plant_name">Plant Name</string>
-    <string name="activity_plant_measurements">Plant Measurements</string>
-
-
     <string name="gps_must_be_enabled">GPS must be enabled</string>
     <string name="enable_gps">Enable GPS</string>
     <string name="got_it">Got it!</string>
@@ -55,7 +38,8 @@
     <!--https://docs.oracle.com/javase/1.5.0/docs/api/java/util/Formatter.html-->
     <string name="precision">± %1$.1f m</string>
     <string name="satellites">%1$d/%2$d</string>
-    <string name="plant_measurement">%1$s: %2$.1f cm</string> <!--TODO: Remove this-->
+    <string name="plant_measurement">%1$s: %2$.1f cm</string>
+    <string name="plant_measurements">Plant Measurements</string>
     <string name="location">Location precision: ± %1$.1f m (%2$d/%3$d satellites)</string>
     <string name="measured_by">Measured by %1$s</string>
     <string name="created_by">Created by %1$s on %2$s</string>

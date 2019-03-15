@@ -41,21 +41,20 @@ class SearchPlantNameViewModel @Inject constructor (
     fun searchPlantName(string: String): ReceiveChannel<List<SearchResult>> =
         plantNameSearchService.search(string, searchFilterOptions)
 
-//    fun updateIsUsed(result: SearchResult) {
-//        GlobalScope.launch(Dispatchers.IO) {
-//            when {
-//                result.hasTag(COMMON) -> vernacularRepo.setTagged(result.id, USED, result.hasTag(USED))
-//                result.hasTag(SCIENTIFIC) -> taxonRepo.setTagged(result.id, USED, result.hasTag(USED))
-//                else -> { }
-//            }
-//        }
-//    }
-
     fun updateIsStarred(result: SearchResult) {
         GlobalScope.launch(Dispatchers.IO) {
             when {
                 result.hasTag(COMMON) -> vernacularRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
                 result.hasTag(SCIENTIFIC) -> taxonRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
+            }
+        }
+    }
+
+    fun updateStarredTimestamp(result: SearchResult) {
+        GlobalScope.launch(Dispatchers.IO) {
+            when {
+                result.hasTag(COMMON) -> vernacularRepo.updateTagTimestamp(result.id, STARRED)
+                result.hasTag(SCIENTIFIC) -> taxonRepo.updateTagTimestamp(result.id, STARRED)
             }
         }
     }

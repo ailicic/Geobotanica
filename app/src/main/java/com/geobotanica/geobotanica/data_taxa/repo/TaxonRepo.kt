@@ -40,12 +40,17 @@ class TaxonRepo @Inject constructor(
     fun getAllUsed(limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             tagDao.getAllTaxaWithTag(USED.ordinal, limit)
 
-    fun setTagged(id: Long, tag: PlantNameTag, isTagged: Boolean) {
-        if (isTagged)
-            tagDao.insert(Tag(tag.ordinal, taxonId = id))
-        else
+    fun setTagged(id: Long, tag: PlantNameTag, isTagged: Boolean = true) {
+        if (isTagged) {
+            tagDao.getTaxonWithTag(id, tag.ordinal)?.let {
+                updateTagTimestamp(it.taxonId!!, tag)
+            } ?: tagDao.insert(Tag(tag.ordinal, taxonId = id))
+        } else
             tagDao.unsetTaxonTag(id, tag.ordinal)
     }
+
+    fun updateTagTimestamp(id: Long, tag: PlantNameTag) = tagDao.updateTaxonTimestamp(id, tag.ordinal)
+
 
     fun starredStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             tagDao.taggedTaxonStartsWith(string, STARRED.ordinal, limit)

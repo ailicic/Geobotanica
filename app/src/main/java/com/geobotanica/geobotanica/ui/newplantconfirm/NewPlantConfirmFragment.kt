@@ -44,14 +44,15 @@ class NewPlantConfirmFragment : BaseFragment() {
             photoUri = getFromBundle(photoUriKey)
             commonName = getNullableFromBundle(commonNameKey)
             scientificName = getNullableFromBundle(scientificNameKey)
+            vernacularId = getNullableFromBundle(vernacularIdKey)
+            taxonId = getNullableFromBundle(taxonIdKey)
             heightMeasurement = getNullableFromBundle(heightMeasurementKey)
             diameterMeasurement = getNullableFromBundle(diameterMeasurementKey)
             trunkDiameterMeasurement = getNullableFromBundle(trunkDiameterMeasurementKey)
-            Lg.d("Fragment args: userId=$userId, plantType=$plantType, commonName=$commonName, " +
-                    "scientificName=$scientificName, photoUri=$photoUri, " +
-                    "heightMeasurement=$heightMeasurement, " +
-                    "diameterMeasurement=$diameterMeasurement, " +
-                    "trunkDiameterMeasurement=$trunkDiameterMeasurement")
+            Lg.d("Fragment args: userId=$userId, plantType=$plantType, " +
+                    "commonName=$commonName, scientificName=$scientificName, " +
+                    "vernId=$vernacularId, taxonId=$taxonId, photoUri=$photoUri, " +
+                    "height=$heightMeasurement, diameter=$diameterMeasurement, trunkDiameter=$trunkDiameterMeasurement")
         }
     }
 

@@ -47,7 +47,7 @@
     <fragment
         android:id="@+id/newPlantMeasurementFragment"
         android:name="com.geobotanica.geobotanica.ui.newplantmeasurement.NewPlantMeasurementFragment"
-        android:label="@string/plant_measurement">
+        android:label="@string/plant_measurements">
     </fragment>
     <fragment
         android:id="@+id/newPlantConfirmFragment"

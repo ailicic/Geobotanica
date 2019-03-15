@@ -50,8 +50,6 @@
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
             android:scrollbars="vertical"
             android:background="?android:attr/selectableItemBackground"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"

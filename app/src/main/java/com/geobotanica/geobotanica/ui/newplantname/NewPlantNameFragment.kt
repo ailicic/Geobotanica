@@ -49,13 +49,14 @@ class NewPlantNameFragment : BaseFragment() {
             userId = getFromBundle(userIdKey)
             plantType = PlantTypeConverter.toPlantType(getFromBundle(plantTypeKey))
             photoUri = getFromBundle(photoUriKey)
-            taxonId = getNullableFromBundle(taxonIdKey)
             vernacularId = getNullableFromBundle(vernacularIdKey)
+            taxonId = getNullableFromBundle(taxonIdKey)
             lastSelectedIndex = null
             lastSelectedId = null
             lastSelectedName = ""
 
-            Lg.d("Fragment args: userId=$userId, plantType=$plantType, photoUri=$photoUri, taxonId=$taxonId, vernId=$vernacularId")
+            Lg.d("Fragment args: userId=$userId, plantType=$plantType, " +
+                    "vernId=$vernacularId, taxonId=$taxonId, photoUri=$photoUri")
         }
     }
 
@@ -219,6 +220,9 @@ class NewPlantNameFragment : BaseFragment() {
                     taxonId = lastSelectedId
                 else if (vernacularId == null)
                     vernacularId = lastSelectedId
+            } else {
+                lastSelectedIndex = null
+                lastSelectedId = null
             }
         }
     }

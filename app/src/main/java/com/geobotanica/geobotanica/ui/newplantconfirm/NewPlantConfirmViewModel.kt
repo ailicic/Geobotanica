@@ -7,6 +7,9 @@ import com.geobotanica.geobotanica.data.repo.PlantLocationRepo
 import com.geobotanica.geobotanica.data.repo.PlantMeasurementRepo
 import com.geobotanica.geobotanica.data.repo.PlantPhotoRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
+import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
+import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.USED
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.Measurement
 import kotlinx.coroutines.*
@@ -19,13 +22,17 @@ class NewPlantConfirmViewModel @Inject constructor (
         private val plantRepo: PlantRepo,
         private val plantLocationRepo: PlantLocationRepo,
         private val plantPhotoRepo: PlantPhotoRepo,
-        private val plantMeasurementRepo: PlantMeasurementRepo
+        private val plantMeasurementRepo: PlantMeasurementRepo,
+        private val taxonRepo: TaxonRepo,
+        private val vernacularRepo: VernacularRepo
 ) : ViewModel() {
 
     var userId = 0L
     lateinit var plantType: Plant.Type
     var commonName: String? = null
     var scientificName: String? = null
+    var taxonId: Long? = null
+    var vernacularId: Long? = null
     var heightMeasurement: Measurement? = null
     var diameterMeasurement: Measurement? = null
     var trunkDiameterMeasurement: Measurement? = null
@@ -46,7 +53,7 @@ class NewPlantConfirmViewModel @Inject constructor (
         job = GlobalScope.launch(Dispatchers.IO) {
             database.runInTransaction {
                 Lg.d("Saving PlantComposite to database now...")
-                val plant = Plant(userId, plantType, commonName, scientificName)
+                val plant = Plant(userId, plantType, commonName, scientificName, vernacularId, taxonId)
                 plant.id = plantRepo.insert(plant)
                 Lg.d("Saved: $plant (id=${plant.id})")
 
@@ -54,6 +61,8 @@ class NewPlantConfirmViewModel @Inject constructor (
                 savePlantMeasurements(plant)
                 savePlantLocation(plant)
             }
+            vernacularId?.let {vernacularRepo.setTagged(it, USED) }
+            taxonId?.let {taxonRepo.setTagged(it, USED) }
         }
     }
 

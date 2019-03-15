@@ -1,7 +1,6 @@
 package com.geobotanica.geobotanica.data.dao
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import androidx.room.Dao
 import androidx.room.Query
 import com.geobotanica.geobotanica.data.entity.Plant

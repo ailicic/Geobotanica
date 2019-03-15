@@ -17,6 +17,8 @@ data class  Plant(
         val type: Type,
         val commonName: String? = null,
         val scientificName: String? = null,
+        val vernacularId: Long? = null,
+        val taxonId: Long? = null,
         val timestamp: OffsetDateTime = OffsetDateTime.now()
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0L

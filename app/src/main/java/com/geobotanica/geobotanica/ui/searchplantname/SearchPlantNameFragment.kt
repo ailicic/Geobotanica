@@ -9,8 +9,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.COMMON
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.SCIENTIFIC
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.*
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchFilterOptions
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
 import com.geobotanica.geobotanica.data_taxa.util.defaultFilterFlags
@@ -109,6 +108,8 @@ class SearchPlantNameFragment : BaseFragment() {
             viewModel.vernacularId = result.id
         else if (result.hasTag(SCIENTIFIC))
             viewModel.taxonId = result.id
+        if (result.hasTag(STARRED))
+            viewModel.updateStarredTimestamp(result)
         navigateToNext()
     }
 
@@ -170,8 +171,8 @@ class SearchPlantNameFragment : BaseFragment() {
                 plantTypeKey to viewModel.plantType.ordinal,
                 photoUriKey to viewModel.photoUri
         ).apply {
-            viewModel.taxonId?.let { putValue(taxonIdKey, it) }
             viewModel.vernacularId?.let { putValue(vernacularIdKey, it) }
+            viewModel.taxonId?.let { putValue(taxonIdKey, it) }
         }
     }
 }
