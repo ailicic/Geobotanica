@@ -18,7 +18,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/media/Data/Backup/Android/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/device/ic_access_time_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/media/Data/Backup/Android/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/av/ic_replay_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -29,7 +29,7 @@
                         <option name="values">
                           <map>
                             <entry key="color" value="ffffff" />
-                            <entry key="outputName" value="ic_time" />
+                            <entry key="outputName" value="ic_reset_black_24dp" />
                             <entry key="sourceFile" value="$PROJECT_DIR$/../../../baseline-add-24px.svg" />
                           </map>
                         </option>

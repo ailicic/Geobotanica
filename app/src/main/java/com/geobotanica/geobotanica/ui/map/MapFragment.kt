@@ -33,7 +33,6 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
-// TODO: Decide on PlantConfrimFragment: keep or not. If keep, need to handle changes to plant names -> null taxonId/vernId
 // TODO: Investigate why app start time is so long
 // TODO: Use androidx.appcompat.widget.AppCompatImageView in xml everywhere
 // TODO: Show satellite stats too
@@ -44,8 +43,8 @@ import javax.inject.Inject
 // TODO: Make custom camera screen so Espresso can be used for UI testing
 
 // LONG TERM NIT PICK
-// TODO: Check that no hard-coded strings are used -> resources.getString(R.string.trunk_diameter)
 // TODO: Learn how to use only the keyboard
+// TODO: Check that no hard-coded strings are used -> resources.getString(R.string.trunk_diameter)
 // TODO: Use code reformatter:
 // Check tabs on fn params / data class
 // Subclass in class declaration: colon needs space on both sides
@@ -256,7 +255,7 @@ class MapFragment : BaseFragment() {
     private fun createBundle(): Bundle {
         return bundleOf(
                 userIdKey to viewModel.userId,
-                plantTypeKey to 1L,
+                plantTypeKey to 2L,
 //                photoUriKey to "",
                 commonNameKey to "Common",
                 scientificNameKey to "Latin",

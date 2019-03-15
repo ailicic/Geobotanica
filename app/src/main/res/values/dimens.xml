@@ -15,4 +15,5 @@
     <dimen name="list_item_filter_vertical_margin">4dp</dimen>
     <dimen name="list_item_filter_start_margin">16dp</dimen>
     <dimen name="list_item_filter_text_size">16sp</dimen>
+    <dimen name="measurement_text_size">14sp</dimen>
 </resources>

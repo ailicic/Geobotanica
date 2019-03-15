@@ -32,7 +32,7 @@ class NewPlantNameFragment : BaseFragment() {
     private lateinit var plantNamesAdapter: PlantNamesAdapter
 
     private var loadNamesJob: Job? = null
-    private var animateTextJob: Job = Job()
+    private var animateTextJob: Job = Job().apply { cancel() } // Ensure job is not active (needed non-null for simplicity)
     private val mainScope = CoroutineScope(Dispatchers.Main)
 
     private var activeEditText: EditText? = null
@@ -199,7 +199,6 @@ class NewPlantNameFragment : BaseFragment() {
     }
 
     private fun navigateToNext() {
-        saveViewModelState()
         val navController = activity.findNavController(R.id.fragment)
         navController.navigate(R.id.newPlantMeasurementFragment, createBundle())
     }
@@ -213,11 +212,12 @@ class NewPlantNameFragment : BaseFragment() {
     }
 
     private fun saveViewModelState() {
-        val commonNameInputText = commonNameTextInput.toTrimmedString()
-        val scientificNameInputText = scientificNameTextInput.toTrimmedString()
+        val commonNameText = commonNameTextInput.toTrimmedString()
+        val scientificNameText = scientificNameTextInput.toTrimmedString()
+        Lg.d("commonNameText=$commonNameText, scientificNameText=$scientificNameText")
         with (viewModel) {
-            commonName = if (commonNameInputText.isNotEmpty()) commonNameInputText else null
-            scientificName = if (scientificNameInputText.isNotEmpty()) scientificNameInputText else null
+            commonName = if (commonNameText.isEmpty()) null else commonNameText
+            scientificName = if (scientificNameText.isEmpty()) null else scientificNameText
 
             if (activeEditText?.text.toString() == lastSelectedName) {
                 if (taxonId == null)

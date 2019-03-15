@@ -34,7 +34,7 @@ class NewPlantNameViewModel @Inject constructor (
     suspend fun loadNamesFromIds() = withContext(Dispatchers.IO) {
         commonName = null
         scientificName = null
-        vernacularId?.let { commonName = vernacularRepo.get(it)?.vernacular?.capitalize() }
+        vernacularId?.let { commonName = vernacularRepo.get(it)?.vernacular?.capitalize() } ?:
         taxonId?.let { scientificName = taxonRepo.get(it)?.scientific?.capitalize() }
     }
 

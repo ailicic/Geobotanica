@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
         <import type="android.view.View"/>
@@ -26,7 +27,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:textColor="@color/colorBlack"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:text="@{ viewModel.commonName }"
                 android:visibility="@{ viewModel.commonName != null ? View.VISIBLE : View.GONE }"
                 app:layout_constraintTop_toTopOf="parent"
@@ -42,6 +43,7 @@
                 app:layout_constraintStart_toStartOf="parent">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/commonNameEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="16dp"
@@ -52,6 +54,20 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <ImageView
+                android:id="@+id/resetCommonButton"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_reset"
+                android:tint="@color/colorPrimaryDark"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="@id/commonNameTextInput"
+                app:layout_constraintBottom_toBottomOf="@id/commonNameTextInput"
+                app:layout_constraintEnd_toEndOf="@id/commonNameTextInput"
+                tools:ignore="ContentDescription" />
+
             <TextView
                 android:id="@+id/scientificNameText"
                 android:layout_width="wrap_content"
@@ -60,7 +76,8 @@
                 android:layout_marginStart="16dp"
                 android:visibility="@{ viewModel.scientificName != null ? View.VISIBLE : View.GONE}"
                 android:textColor="@color/colorBlack"
-                android:textSize="18sp"
+                android:textSize="16sp"
+                android:textStyle="italic"
                 android:text="@{ viewModel.scientificName }"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/commonNameTextInput" />
@@ -74,14 +91,30 @@
                 app:layout_constraintTop_toBottomOf="@+id/scientificNameText">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/scientificNameEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="16dp"
                     android:layout_marginStart="16dp"
                     android:text="@{ viewModel.scientificName }"
+                    android:textStyle="italic"
                     android:inputType="textNoSuggestions"
                     android:hint="@string/scientific_name"  />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <ImageView
+                android:id="@+id/resetScientificButton"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_reset"
+                android:tint="@color/colorPrimaryDark"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="@id/scientificNameTextInput"
+                app:layout_constraintBottom_toBottomOf="@id/scientificNameTextInput"
+                app:layout_constraintEnd_toEndOf="@id/scientificNameTextInput"
+                tools:ignore="ContentDescription" />
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/editNamesButton"
@@ -151,18 +184,18 @@
                 android:visibility="@{ viewModel.heightMeasurement != null ? View.VISIBLE : View.GONE }"
                 android:textColor="@color/colorBlack"
                 android:text="@{ viewModel.heightMeasurement.toHeightString() }"
-                android:textSize="16sp"
+                android:textSize="@dimen/measurement_text_size"
                 app:layout_constraintTop_toBottomOf="@id/photoDivider"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <com.geobotanica.geobotanica.ui.compoundview.MeasurementEditView
-                android:id="@+id/heightMeasurementView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@id/heightText"
-                app:layout_constraintStart_toStartOf="parent" />
+            <!--<com.geobotanica.geobotanica.ui.compoundview.MeasurementEditView-->
+                <!--android:id="@+id/heightMeasurementView"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginStart="16dp"-->
+                <!--android:visibility="gone"-->
+                <!--app:layout_constraintTop_toBottomOf="@id/heightText"-->
+                <!--app:layout_constraintStart_toStartOf="parent" />-->
 
             <TextView
                 android:id="@+id/diameterText"
@@ -173,18 +206,18 @@
                 android:visibility="@{ viewModel.diameterMeasurement != null ? View.VISIBLE : View.GONE }"
                 android:textColor="@color/colorBlack"
                 android:text="@{ viewModel.diameterMeasurement.toDiameterString() }"
-                android:textSize="16sp"
+                android:textSize="@dimen/measurement_text_size"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/heightMeasurementView" />
+                app:layout_constraintTop_toBottomOf="@id/heightText" />
 
-            <com.geobotanica.geobotanica.ui.compoundview.MeasurementEditView
-                android:id="@+id/diameterMeasurementView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@id/diameterText"
-                app:layout_constraintStart_toStartOf="parent" />
+            <!--<com.geobotanica.geobotanica.ui.compoundview.MeasurementEditView-->
+                <!--android:id="@+id/diameterMeasurementView"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginStart="16dp"-->
+                <!--android:visibility="gone"-->
+                <!--app:layout_constraintTop_toBottomOf="@id/diameterText"-->
+                <!--app:layout_constraintStart_toStartOf="parent" />-->
 
             <TextView
                 android:id="@+id/trunkDiameterText"
@@ -195,31 +228,31 @@
                 android:visibility="@{ viewModel.trunkDiameterMeasurement != null ? View.VISIBLE : View.GONE }"
                 android:textColor="@color/colorBlack"
                 android:text="@{ viewModel.trunkDiameterMeasurement.toTrunkDiameterString() }"
-                android:textSize="16sp"
+                android:textSize="@dimen/measurement_text_size"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/diameterMeasurementView" />
+                app:layout_constraintTop_toBottomOf="@id/diameterText" />
 
-            <com.geobotanica.geobotanica.ui.compoundview.MeasurementEditView
-                android:id="@+id/trunkDiameterMeasurementView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@id/trunkDiameterText"
-                app:layout_constraintStart_toStartOf="parent" />
+            <!--<com.geobotanica.geobotanica.ui.compoundview.MeasurementEditView-->
+                <!--android:id="@+id/trunkDiameterMeasurementView"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginStart="16dp"-->
+                <!--android:visibility="gone"-->
+                <!--app:layout_constraintTop_toBottomOf="@id/trunkDiameterText"-->
+                <!--app:layout_constraintStart_toStartOf="parent" />-->
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/editMeasurementsButton"
-                android:layout_width="@dimen/image_button_size"
-                android:layout_height="@dimen/image_button_size"
-                android:layout_marginBottom="4dp"
-                android:layout_marginEnd="16dp"
-                android:scaleType="fitCenter"
-                android:tint="@color/colorPrimaryDark"
-                android:visibility="@{ viewModel.heightMeasurement != null ? View.VISIBLE : View.GONE }"
-                app:srcCompat="@drawable/ic_edit_black_24dp"
-                app:layout_constraintBottom_toTopOf="@id/measurementsDivider"
-                app:layout_constraintEnd_toEndOf="parent" />
+            <!--<androidx.appcompat.widget.AppCompatImageView-->
+                <!--android:id="@+id/editMeasurementsButton"-->
+                <!--android:layout_width="@dimen/image_button_size"-->
+                <!--android:layout_height="@dimen/image_button_size"-->
+                <!--android:layout_marginBottom="4dp"-->
+                <!--android:layout_marginEnd="16dp"-->
+                <!--android:scaleType="fitCenter"-->
+                <!--android:tint="@color/colorPrimaryDark"-->
+                <!--android:visibility="@{ viewModel.heightMeasurement != null ? View.VISIBLE : View.GONE }"-->
+                <!--app:srcCompat="@drawable/ic_edit_black_24dp"-->
+                <!--app:layout_constraintBottom_toTopOf="@id/measurementsDivider"-->
+                <!--app:layout_constraintEnd_toEndOf="parent" />-->
 
             <View
                 android:id="@+id/measurementsDivider"
@@ -232,7 +265,7 @@
                 android:visibility="@{ viewModel.heightMeasurement != null ? View.VISIBLE : View.GONE }"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/trunkDiameterMeasurementView" />
+                app:layout_constraintTop_toBottomOf="@+id/trunkDiameterText" />
 
 
             <com.geobotanica.geobotanica.ui.compoundview.GpsCompoundView
