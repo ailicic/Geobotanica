@@ -44,7 +44,7 @@ class GivenMap_WhenFabClicked_ThenPlantTypeButtonsVisible {
         Thread.sleep(700)
 
         val floatingActionButton = onView(
-                allOf(withId(R.id.newPlantFab),
+                allOf(withId(R.id.fab),
                         childAtPosition(
                                 allOf(withId(R.id.coordinatorLayout),
                                         childAtPosition(

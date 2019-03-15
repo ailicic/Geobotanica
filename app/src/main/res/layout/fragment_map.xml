@@ -2,14 +2,9 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/coordinatorLayout"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:visibility="invisible"
-    tools:context=".ui.map.MapFragment"
-    tools:showIn="@layout/activity_main">
+    android:layout_height="match_parent">
 
-    <!--suppress AndroidUnknownAttribute -->
     <org.osmdroid.views.MapView
         android:id="@+id/map"
         tilesource="Mapnik"
@@ -27,7 +22,7 @@
         app:srcCompat="@drawable/gps_off" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/newPlantFab"
+        android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"

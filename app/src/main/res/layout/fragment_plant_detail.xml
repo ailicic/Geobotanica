@@ -13,10 +13,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/constraintLayout"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context=".ui.plantdetail.PlantDetailFragment"
-        tools:showIn="@layout/fragment_plant_detail">
+        android:id="@+id/constraintLayout">
 
         <TextView
             android:id="@+id/commonNameText"
@@ -198,6 +195,4 @@
             app:srcCompat="@drawable/ic_add_24px" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 </layout>

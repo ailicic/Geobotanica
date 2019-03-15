@@ -17,7 +17,6 @@ import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.User
-import com.geobotanica.geobotanica.data_taxa.TaxaDatabase
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -34,31 +33,30 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
-// TODO: Investigate why app start time is so long
-// TODO: MAYBE INSTEAD OF BELOW: Avoid snackbars, disable fab until conditions are met. Use onTextEditChanged listeners
-    // TODO: Use coordinator layout where fab exists (can use constraint inside coordinator?)
 // TODO: Decide on PlantConfrimFragment: keep or not. If keep, need to handle changes to plant names -> null taxonId/vernId
-// TODO: Ensure gps remains active during plant name search (and that GPS deactivates if location is held)
+// TODO: Investigate why app start time is so long
 // TODO: Use androidx.appcompat.widget.AppCompatImageView in xml everywhere
 // TODO: Show satellite stats too
+
+// LONG TERM
+// TODO: Group nearby markers into clusters
+// TODO: Create download map/db activity and utilize offline map tiles
+// TODO: Make custom camera screen so Espresso can be used for UI testing
+
+// LONG TERM NIT PICK
+// TODO: Check that no hard-coded strings are used -> resources.getString(R.string.trunk_diameter)
+// TODO: Learn how to use only the keyboard
 // TODO: Use code reformatter:
 // Check tabs on fn params / data class
 // Subclass in class declaration: colon needs space on both sides
-
-// LONG TERM
-// TODO: Check that no hard-coded strings are used -> resources.getString(R.string.trunk_diameter)
-// TODO: Learn how to use only the keyboard
 // TODO: Use vector graphics for all icons where possible
 // TODO: Decide on Lg.v/d/i etc.
 // TODO: Double check proper placement of methods in lifecycle callbacks
     // https://developer.android.com/guide/components/activities/activity-lifecycle
-// TODO: Group nearby markers into clusters
-// TODO: Create download map activity and utilize offline map tiles
 // https://github.com/osmdroid/osmdroid/wiki/Offline-Map-Tiles
 // TODO: Fix screen rotation crashes and consider landscape layouts
-// TODO: Figure out how to resume app state after onStop, then process death (e.g. home or switch app)
+// TODO: Figure out how to resume app state after onStop, then process death (e.g. home or switch app, then kill app)
 // https://medium.com/google-developers/viewmodels-persistence-onsaveinstancestate-restoring-ui-state-and-loaders-fc7cc4a6c090
-// TODO: Check if resume state is handled correctly: start app using AS, press home, kill app using AS, open app
 
 // DEFERRED
 // TODO: Show PlantType icon in map bubble (and PlantDetail?)
@@ -189,8 +187,8 @@ class MapFragment : BaseFragment() {
     private fun init() {
 //        // TODO: Remove
 //        TaxaDatabase.getInstance(appContext).close()
-//        NavHostFragment.findNavController(this).navigate(
-//                R.id.searchPlantNameFragment, createBundle() )
+        NavHostFragment.findNavController(this).navigate(
+                R.id.searchPlantNameFragment, createBundle() )
 
 
 
@@ -220,7 +218,7 @@ class MapFragment : BaseFragment() {
     @Suppress("DEPRECATION")
     private fun setClickListeners() {
         gpsFab.setOnClickListener { viewModel.onClickGpsFab() }
-        newPlantFab.setOnClickListener { viewModel.onClickNewPlantFab() }
+        fab.setOnClickListener { viewModel.onClickNewPlantFab() }
     }
 
     private fun bindViewModel() {

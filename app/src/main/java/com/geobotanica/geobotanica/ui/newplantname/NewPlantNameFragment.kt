@@ -70,6 +70,8 @@ class NewPlantNameFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        if (viewModel.taxonId == null && viewModel.vernacularId == null)
+            gps.isVisible = true
 
         initRecyclerView()
         loadPlantNames()
@@ -98,9 +100,11 @@ class NewPlantNameFragment : BaseFragment() {
                 loadNamesFromIds()
 
                 val suggestedNamesChannel: ReceiveChannel<List<SearchResult>>? =
-                        if (vernacularId != null) searchSuggestedScientificNames(vernacularId!!)
-                        else if (taxonId != null) searchSuggestedCommonNames(taxonId!!)
-                        else null
+                        when {
+                            vernacularId != null -> searchSuggestedScientificNames(vernacularId!!)
+                            taxonId != null -> searchSuggestedCommonNames(taxonId!!)
+                            else -> null
+                        }
 
                 suggestedNamesChannel?.consumeEach {results ->
                     plantNamesAdapter.items = results
