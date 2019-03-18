@@ -11,6 +11,9 @@ interface TaxonDao : BaseDao<Taxon> {
     @Query("SELECT * FROM taxa WHERE id = :id")
     fun get(id: Long): Taxon?
 
+//    @Query("SELECT id FROM taxa")
+//    fun getAllIds(): Cursor
+
     @Query("SELECT id FROM taxa WHERE generic LIKE :string || '%' LIMIT :limit")
     fun genericStartsWith(string: String, limit: Int): List<Long>?
 

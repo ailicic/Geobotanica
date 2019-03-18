@@ -27,7 +27,9 @@
     <string name="tree">Tree</string>
     <string name="shrub">Shrub</string>
     <string name="herb">Herb</string>
+    <string name="grass">Grass</string>
     <string name="vine">Vine</string>
+    <string name="fungus">Fungus</string>
     <string name="starred">Starred</string>
     <string name="history">History</string>
     <string name="suggested_common">Suggested common names:</string>

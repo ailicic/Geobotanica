@@ -13,13 +13,13 @@ import org.threeten.bp.OffsetDateTime
     indices = [ Index(value = ["userId"]) ]
 )
 data class  Plant(
-        val userId: Long = 0L,
-        val type: Type,
-        val commonName: String? = null,
-        val scientificName: String? = null,
-        val vernacularId: Long? = null,
-        val taxonId: Long? = null,
-        val timestamp: OffsetDateTime = OffsetDateTime.now()
+    val userId: Long = 0L,
+    val type: Type,
+    val commonName: String? = null,
+    val scientificName: String? = null,
+    val vernacularId: Long? = null,
+    val taxonId: Long? = null,
+    val timestamp: OffsetDateTime = OffsetDateTime.now()
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0L
 

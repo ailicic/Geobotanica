@@ -2,6 +2,7 @@ package com.geobotanica.geobotanica.data_taxa.repo
 
 import com.geobotanica.geobotanica.data_taxa.DEFAULT_RESULT_LIMIT
 import com.geobotanica.geobotanica.data_taxa.dao.TagDao
+import com.geobotanica.geobotanica.data_taxa.dao.TypeDao
 import com.geobotanica.geobotanica.data_taxa.dao.VernacularDao
 import com.geobotanica.geobotanica.data_taxa.entity.Tag
 import com.geobotanica.geobotanica.data_taxa.entity.Vernacular
@@ -12,7 +13,8 @@ import javax.inject.Inject
 
 class VernacularRepo @Inject constructor(
         private val vernacularDao: VernacularDao,
-        private val tagDao: TagDao
+        private val tagDao: TagDao,
+        private val typeDao: TypeDao
 ) {
 
     fun get(id: Long): Vernacular? = vernacularDao.get(id)
@@ -69,4 +71,11 @@ class VernacularRepo @Inject constructor(
 
     fun usedFromTaxonId(taxonId: Int): List<Long>? =
             tagDao.taggedVernacularFromTaxonId(taxonId.toLong(), USED.ordinal)
+
+
+    // Plant Types
+
+    fun getType(id: Long): Int = typeDao.getVernacularType(id).fold(0) { acc, it -> acc or it }
+
+    fun getTypeCount(): Int = typeDao.getVernacularCount()
 }

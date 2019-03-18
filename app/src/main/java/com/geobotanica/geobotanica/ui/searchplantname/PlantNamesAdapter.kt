@@ -36,12 +36,30 @@ class PlantNamesAdapter(
         val resources = holder.view.context.resources
         holder.plantName.text = item.plantName
 
-        val plantTypeIcon = when {
+        val plantNameIcon = when {
             item.hasTag(COMMON) -> R.drawable.hat
             item.hasTag(SCIENTIFIC) -> R.drawable.grad_cap
             else -> throw IllegalArgumentException("Must specify either COMMON or SCIENTIFIC tag") // TODO: Handle this differently
         }
-        holder.plantTypeIcon.setImageDrawable(resources.getDrawable(plantTypeIcon))
+        holder.plantNameIcon.setImageDrawable(resources.getDrawable(plantNameIcon))
+
+        val plantTypes = item.getPlantTypeList()
+        val plantTypeCount = plantTypes.size
+        if (plantTypeCount == 1 || plantTypeCount == 2) {
+            val drawableArray = resources.obtainTypedArray(R.array.plantTypes)
+            holder.plantTypeIcon.run {
+                setImageResource(drawableArray.getResourceId(plantTypes[0].ordinal, -1))
+                isVisible = true
+            }
+
+            if (plantTypeCount == 2) {
+                holder.altPlantTypeIcon.run {
+                    setImageResource(drawableArray.getResourceId(plantTypes[1].ordinal, -1))
+                    isVisible = true
+                }
+            }
+            drawableArray.recycle()
+        }
 
         holder.usedIcon.isVisible = item.hasTag(USED)
 
@@ -76,8 +94,10 @@ class PlantNamesAdapter(
 
     inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val constraintLayout: ConstraintLayout = view.constraintLayout
-        val plantTypeIcon: ImageView = view.plantTypeIcon
+        val plantNameIcon: ImageView = view.plantNameIcon
         val plantName: TextView = view.plantName
+        val plantTypeIcon: ImageView= view.plantTypeIcon
+        val altPlantTypeIcon: ImageView= view.altPlantTypeIcon
         val usedIcon: ImageView= view.usedIcon
         val starredIcon: ImageView= view.starIcon
     }

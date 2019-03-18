@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
     indices = [ // Room crashes if uncommented since index already exists in imported db file
         Index(value = ["taxonId"]) // Required for Taxon foreign key constraint (c.f. PlantNameComposite)
     ]*/)
-data class  Vernacular(
+data class Vernacular(
     @PrimaryKey val id: Long = 0L,
     val taxonId: Long = 0L,
     val vernacular: String? = null

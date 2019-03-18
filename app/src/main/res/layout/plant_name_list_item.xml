@@ -11,10 +11,10 @@
     android:background="?android:attr/selectableItemBackground">
 
     <ImageView
-        android:id="@+id/plantTypeIcon"
+        android:id="@+id/plantNameIcon"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:src="@drawable/gps_fix"
         android:tint="@color/colorDarkGrey"
         app:layout_constraintStart_toStartOf="parent"
@@ -30,9 +30,31 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:textSize="@dimen/list_item_common_text_size"
-        app:layout_constraintStart_toEndOf="@id/plantTypeIcon"
+        app:layout_constraintStart_toEndOf="@id/plantNameIcon"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <ImageView
+        android:id="@+id/plantTypeIcon"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="8dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/plantName"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/altPlantTypeIcon"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="8dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/plantTypeIcon"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:ignore="ContentDescription" />
 
     <ImageView
         android:id="@+id/usedIcon"
@@ -50,7 +72,7 @@
         android:id="@+id/starIcon"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginEnd="16dp"
         android:src="@drawable/ic_star_border"
         android:tint="@color/colorYellow"
         app:layout_constraintEnd_toEndOf="parent"

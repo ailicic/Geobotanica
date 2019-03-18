@@ -9,16 +9,16 @@ import androidx.room.PrimaryKey
             Index(value = ["epithet"])
         ]*/)
 data class Taxon(
-        @PrimaryKey val id: Long = 0L,
-        val kingdom: String? = null,
-        val phylum: String? = null,
-        val class_: String? = null,
-        val order: String? = null,
-        val family: String? = null,
-        val generic: String? = null, // Latin 1 (genericName)
-        val genus: String? = null,
-        val epithet: String? = null, // Latin 2 (specificEpithet)
-        val infraspecificEpithet: String? = null
+    @PrimaryKey val id: Long = 0L,
+    val kingdom: String? = null,
+    val phylum: String? = null,
+    val class_: String? = null,
+    val order: String? = null,
+    val family: String? = null,
+    val generic: String? = null, // Latin 1 (genericName)
+    val genus: String? = null,
+    val epithet: String? = null, // Latin 2 (specificEpithet)
+    val infraspecificEpithet: String? = null
 ) {
     val scientific: String
         get() = "$generic $epithet"

@@ -3,8 +3,10 @@ package com.geobotanica.geobotanica.data_taxa.repo
 import com.geobotanica.geobotanica.data_taxa.DEFAULT_RESULT_LIMIT
 import com.geobotanica.geobotanica.data_taxa.dao.TagDao
 import com.geobotanica.geobotanica.data_taxa.dao.TaxonDao
+import com.geobotanica.geobotanica.data_taxa.dao.TypeDao
 import com.geobotanica.geobotanica.data_taxa.entity.Tag
 import com.geobotanica.geobotanica.data_taxa.entity.Taxon
+import com.geobotanica.geobotanica.data_taxa.entity.TaxonType
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.STARRED
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.USED
@@ -13,10 +15,13 @@ import javax.inject.Inject
 
 class TaxonRepo @Inject constructor(
         private val taxonDao: TaxonDao,
-        private val tagDao: TagDao
+        private val tagDao: TagDao,
+        private val typeDao: TypeDao
 ) {
 
     fun get(id: Long): Taxon? = taxonDao.get(id)
+
+//    fun getAllIds(): Cursor = taxonDao.getAllIds()
 
     fun genericStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             taxonDao.genericStartsWith(string, limit)
@@ -69,4 +74,31 @@ class TaxonRepo @Inject constructor(
 
     fun usedFromVernacularId(vernacularId: Int): List<Long>? =
             tagDao.taggedTaxonFromVernacularId(vernacularId.toLong(), USED.ordinal)
+
+
+    // Plant Types
+
+    fun insertType(obj: TaxonType): Long = typeDao.insert(obj)
+
+    fun getType(id: Long): Int {
+        typeDao.getTaxonType(id)?.let { return it }
+
+        var typeFlags = typeDao.getTaxonTypeByGeneric(id).fold(0) { acc, it -> acc or it }
+        if (typeFlags != 0)
+            return typeFlags
+
+        typeFlags = typeDao.getTaxonTypeByFamily(id).fold(0) { acc, it -> acc or it }
+        if (typeFlags != 0)
+            return typeFlags
+
+        return typeDao.getTaxonTypeByOrder(id).fold(0) { acc, it -> acc or it }
+    }
+
+    fun getTypeByGeneric(id: Long): List<Int> = typeDao.getTaxonTypeByGeneric(id)
+
+    fun getTypeByFamily(id: Long): List<Int> = typeDao.getTaxonTypeByFamily(id)
+
+    fun getTypeByOrder(id: Long): List<Int> = typeDao.getTaxonTypeByOrder(id)
+
+    fun getTypeCount(): Int = typeDao.getTaxonCount()
 }

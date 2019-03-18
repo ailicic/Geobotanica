@@ -149,11 +149,17 @@ class PlantNameSearchService @Inject constructor (
     }
 
     private fun mapIdToSearchResult(id: Long, search: PlantNameSearch): SearchResult {
-        return SearchResult(id, search.tags, when {
+        val plantName: String = when {
             search.hasTag(COMMON) -> vernacularRepo.get(id)!!.vernacular!!.capitalize()
             search.hasTag(SCIENTIFIC) -> taxonRepo.get(id)!!.scientific.capitalize()
             else -> throw IllegalArgumentException("Must specify either COMMON or SCIENTIFIC tag")
-        })
+        }
+        val plantTypes: Int = when {
+            search.hasTag(COMMON) -> vernacularRepo.getType(id)
+            search.hasTag(SCIENTIFIC) -> taxonRepo.getType(id)
+            else -> throw IllegalArgumentException("Must specify either COMMON or SCIENTIFIC tag")
+        }
+        return SearchResult(id, search.tags, plantTypes, plantName)
     }
 
     class PlantNameSearch(
@@ -177,6 +183,7 @@ class PlantNameSearchService @Inject constructor (
     data class SearchResult(
         val id: Long, // Either vernacularId (COMMMON) or taxonId (SCIENTIFIC), depending on tag present
         var tags: Int, // Bitflags
+        val plantTypes: Int, // Bitflags
         val plantName: String
     ) {
         fun hasTag(tag: PlantNameTag): Boolean = tags and tag.flag != 0
@@ -191,6 +198,15 @@ class PlantNameSearchService @Inject constructor (
                 temp = temp shr 1
             }
             return count
+        }
+
+        fun getPlantTypeList(): List<PlantType> {
+            val plantTypeList = mutableListOf<PlantType>()
+            PlantType.values().forEach {
+                if (plantTypes and it.flag == it.flag)
+                    plantTypeList.add(it)
+            }
+            return plantTypeList
         }
     }
 
@@ -225,6 +241,15 @@ class PlantNameSearchService @Inject constructor (
         SCIENTIFIC( 0b0000_0010),
         STARRED(    0b0000_0100),
         USED(       0b0000_1000);
+    }
+
+    enum class PlantType(val flag: Int) {
+        TREE(   0b0000_0001),
+        SHRUB(  0b0000_0010),
+        HERB(   0b0000_0100),
+        GRASS(  0b0000_1000),
+        VINE(   0b0001_0000),
+        FUNGUS( 0b0010_0000);
     }
 
 }

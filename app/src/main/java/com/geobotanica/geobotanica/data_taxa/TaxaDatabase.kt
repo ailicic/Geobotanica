@@ -8,10 +8,9 @@ import androidx.room.TypeConverters
 import com.geobotanica.geobotanica.data.entity.OffsetDateTimeConverter
 import com.geobotanica.geobotanica.data_taxa.dao.TagDao
 import com.geobotanica.geobotanica.data_taxa.dao.TaxonDao
+import com.geobotanica.geobotanica.data_taxa.dao.TypeDao
 import com.geobotanica.geobotanica.data_taxa.dao.VernacularDao
-import com.geobotanica.geobotanica.data_taxa.entity.Tag
-import com.geobotanica.geobotanica.data_taxa.entity.Taxon
-import com.geobotanica.geobotanica.data_taxa.entity.Vernacular
+import com.geobotanica.geobotanica.data_taxa.entity.*
 
 const val DEFAULT_RESULT_LIMIT = 50
 
@@ -19,7 +18,9 @@ const val DEFAULT_RESULT_LIMIT = 50
         entities = [
             Taxon::class,
             Vernacular::class,
-            Tag::class
+            Tag::class,
+            TaxonType::class,
+            VernacularType::class
         ],
         version = 1
 )
@@ -28,6 +29,7 @@ abstract class TaxaDatabase : RoomDatabase() {
     abstract fun taxonDao(): TaxonDao
     abstract fun vernacularDao(): VernacularDao
     abstract fun tagDao(): TagDao
+    abstract fun typeDao(): TypeDao
 
     companion object {
         @Volatile private var plantDatabaseRo: TaxaDatabase? = null

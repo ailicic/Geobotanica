@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer-array name="plantTypes">
+        <item>@drawable/plant_type_tree</item>
+        <item>@drawable/plant_type_shrub</item>
+        <item>@drawable/plant_type_herb</item>
+        <item>@drawable/plant_type_grass</item>
+        <item>@drawable/plant_type_vine</item>
+        <!--<item>@drawable/plant_type_fungus</item>-->
+    </integer-array>
+</resources>

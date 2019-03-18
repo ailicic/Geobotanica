@@ -17,6 +17,7 @@ import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.User
+import com.geobotanica.geobotanica.data_taxa.TaxaDatabase
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -33,11 +34,19 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
+
+// TODO: Use autogenerate for primary keys in taxa entities. So if entities are added primary key will autogen.
+    // NOTE: Inserts by room create ids by incrementing the largest id present, regardless of gaps in the ids. Could use this to detect user-entered data.
+// TODO: Use non-null lists for return types in DAOs. Room uses empty lists if no result.
+// TODO: Tweak filter UI and show icons (check boxes on far right, icons left of name)
+
+// TODO: Redesign PlantTypeFragment (can use VASCAN to infer?) ->
 // TODO: Investigate why app start time is so long
 // TODO: Use androidx.appcompat.widget.AppCompatImageView in xml everywhere
 // TODO: Show satellite stats too
 
 // LONG TERM
+// TODO: Use inline on functions that accept lambda parameters
 // TODO: Group nearby markers into clusters
 // TODO: Create download map/db activity and utilize offline map tiles
 // TODO: Make custom camera screen so Espresso can be used for UI testing
