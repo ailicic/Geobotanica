@@ -24,12 +24,6 @@
     <string name="diameter">Diameter</string>
     <string name="trunk_diameter">Trunk diameter</string>
     <string name="plant_type">Plant Type</string>
-    <string name="tree">Tree</string>
-    <string name="shrub">Shrub</string>
-    <string name="herb">Herb</string>
-    <string name="grass">Grass</string>
-    <string name="vine">Vine</string>
-    <string name="fungus">Fungus</string>
     <string name="starred">Starred</string>
     <string name="history">History</string>
     <string name="suggested_common">Suggested common names:</string>
@@ -47,11 +41,6 @@
     <string name="created_by">Created by %1$s on %2$s</string>
     <string name="modified_by">Modified by %1$s on %2$s</string>
     <string name="button_gps">Hold position</string>
-    <string name="plant_type_tree">Tree</string>
-    <string name="plant_type_shrub">Shrub</string>
-    <string name="plant_type_herb">Herb</string>
-    <string name="plant_type_grass">Grass</string>
-    <string name="plant_type_vine">Vine</string>
     <!--<string name="photo_type_full">Full</string>-->
     <!--<string name="photo_type_leaf">Leaf</string>-->
     <!--<string name="photo_type_buds">Buds</string>-->
@@ -70,6 +59,14 @@
     <string name="search_plant_name">Search Plant Name</string>
     <string name="plant_name">Plant Name</string>
     <string name="confirm_new_plant">Confirm New Plant</string>
+    <string-array name="plant_type_array">
+        <item>Tree</item>
+        <item>Shrub</item>
+        <item>Herb</item>
+        <item>Grass</item>
+        <item>Vine</item>
+        <item>Fungus</item>
+    </string-array>
     <string-array name="measurement_unit">
         <item>cm</item>
         <item>m</item>

@@ -16,7 +16,7 @@ import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchR
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.ui.searchplantname.PlantNamesAdapter
+import com.geobotanica.geobotanica.ui.searchplantname.PlantNameAdapter
 import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_new_plant_name.*
 import kotlinx.coroutines.*
@@ -29,7 +29,7 @@ class NewPlantNameFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantNameViewModel>
     private lateinit var viewModel: NewPlantNameViewModel
 
-    private lateinit var plantNamesAdapter: PlantNamesAdapter
+    private lateinit var plantNamesAdapter: PlantNameAdapter
 
     private var loadNamesJob: Job? = null
     private var animateTextJob: Job = Job().apply { cancel() } // Ensure job is not active (needed non-null for simplicity)
@@ -87,7 +87,7 @@ class NewPlantNameFragment : BaseFragment() {
 
     private fun initRecyclerView() = mainScope.launch {
         recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-        plantNamesAdapter = PlantNamesAdapter(::onClickItem, ::onClickStar, true)
+        plantNamesAdapter = PlantNameAdapter(::onClickItem, ::onClickStar, true)
         viewModel.lastSelectedIndex?. let { plantNamesAdapter.selectedIndex = it }
         recyclerView.adapter = plantNamesAdapter
     }

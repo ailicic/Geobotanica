@@ -2,176 +2,19 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/constraintLayout">
 
-    <LinearLayout
-        android:id="@+id/buttonTree"
-        android:layout_width="@dimen/plant_type_icon_layout_width"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/plant_type_icon_padding"
-        android:layout_margin="8dp"
-        android:orientation="vertical"
-        android:background="@drawable/ripple_round_corners"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/buttonHerb"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/buttonShrub">
+        android:scrollbars="vertical"
+        android:background="?android:attr/selectableItemBackground"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:layout_width="fill_parent"
-            android:layout_height="@dimen/plant_type_icon_height"
-            android:scaleType="fitCenter"
-            android:gravity="center"
-            android:src="@drawable/plant_type_tree"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:lines="1"
-            android:gravity="center"
-            android:text="@string/plant_type_tree"
-            android:textStyle="bold"
-            android:textSize="@dimen/plant_type_icon_text_size"
-            android:textColor="@color/colorGreen"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/buttonShrub"
-        android:layout_width="@dimen/plant_type_icon_layout_width"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/plant_type_icon_padding"
-        android:orientation="vertical"
-        android:background="@drawable/ripple_round_corners"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintTop_toTopOf="@id/buttonTree"
-        app:layout_constraintStart_toEndOf="@id/buttonTree"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <ImageView
-            android:layout_width="fill_parent"
-            android:layout_height="@dimen/plant_type_icon_height"
-            android:scaleType="fitCenter"
-            android:gravity="center"
-            android:src="@drawable/plant_type_shrub"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:lines="1"
-            android:gravity="center"
-            android:text="@string/plant_type_shrub"
-            android:textStyle="bold"
-            android:textSize="@dimen/plant_type_icon_text_size"
-            android:textColor="@color/colorGreen"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/buttonHerb"
-        android:layout_width="@dimen/plant_type_icon_layout_width"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/plant_type_icon_padding"
-        android:orientation="vertical"
-        android:background="@drawable/ripple_round_corners"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintTop_toBottomOf="@id/buttonTree"
-        app:layout_constraintBottom_toTopOf="@id/buttonVine"
-        app:layout_constraintStart_toStartOf="@id/buttonTree">
-
-        <ImageView
-            android:layout_width="fill_parent"
-            android:layout_height="@dimen/plant_type_icon_height"
-            android:scaleType="fitCenter"
-            android:gravity="center"
-            android:src="@drawable/plant_type_herb"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:lines="1"
-            android:gravity="center"
-            android:text="@string/plant_type_herb"
-            android:textStyle="bold"
-            android:textSize="@dimen/plant_type_icon_text_size"
-            android:textColor="@color/colorGreen"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/buttonGrass"
-        android:layout_width="@dimen/plant_type_icon_layout_width"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/plant_type_icon_padding"
-        android:orientation="vertical"
-        android:background="@drawable/ripple_round_corners"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintTop_toTopOf="@id/buttonHerb"
-        app:layout_constraintStart_toStartOf="@id/buttonShrub">
-
-        <ImageView
-            android:layout_width="fill_parent"
-            android:layout_height="@dimen/plant_type_icon_height"
-            android:scaleType="fitCenter"
-            android:gravity="center"
-            android:src="@drawable/plant_type_grass"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:lines="1"
-            android:gravity="center"
-            android:text="@string/plant_type_grass"
-            android:textStyle="bold"
-            android:textSize="@dimen/plant_type_icon_text_size"
-            android:textColor="@color/colorGreen"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/buttonVine"
-        android:layout_width="@dimen/plant_type_icon_layout_width"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/plant_type_icon_padding"
-        android:orientation="vertical"
-        android:background="@drawable/ripple_round_corners"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintTop_toBottomOf="@id/buttonHerb"
-        app:layout_constraintStart_toStartOf="@id/buttonHerb"
-        app:layout_constraintBottom_toTopOf="@id/gps">
-
-        <ImageView
-            android:layout_width="fill_parent"
-            android:layout_height="@dimen/plant_type_icon_height"
-            android:scaleType="fitCenter"
-            android:gravity="center"
-            android:src="@drawable/plant_type_vine"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:lines="1"
-            android:gravity="center"
-            android:text="@string/plant_type_vine"
-            android:textStyle="bold"
-            android:textSize="@dimen/plant_type_icon_text_size"
-            android:textColor="@color/colorGreen"/>
-    </LinearLayout>
 
     <com.geobotanica.geobotanica.ui.compoundview.GpsCompoundView
         android:id="@+id/gps"

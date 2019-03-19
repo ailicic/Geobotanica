@@ -27,7 +27,7 @@ class SearchPlantNameFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<SearchPlantNameViewModel>
     private lateinit var viewModel: SearchPlantNameViewModel
 
-    private lateinit var plantNamesAdapter: PlantNamesAdapter
+    private lateinit var plantNameAdapter: PlantNameAdapter
 
     private var searchJob: Job? = null
     private val mainScope = CoroutineScope(Dispatchers.Main)
@@ -98,8 +98,8 @@ class SearchPlantNameFragment : BaseFragment() {
     @ExperimentalCoroutinesApi
     private fun initRecyclerView() = mainScope.launch {
         recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-        plantNamesAdapter = PlantNamesAdapter(::onClickItem, ::onClickStar, true)
-        recyclerView.adapter = plantNamesAdapter
+        plantNameAdapter = PlantNameAdapter(::onClickItem, ::onClickStar, true)
+        recyclerView.adapter = plantNameAdapter
         updateSearchResults()
     }
 
@@ -147,8 +147,8 @@ class SearchPlantNameFragment : BaseFragment() {
             delay(300)
             progressBar.isVisible = true
             viewModel.searchPlantName(viewModel.searchText).consumeEach {
-                plantNamesAdapter.items = it
-                plantNamesAdapter.notifyDataSetChanged()
+                plantNameAdapter.items = it
+                plantNameAdapter.notifyDataSetChanged()
             }
         }
         searchJob?.invokeOnCompletion { completionError ->

@@ -94,11 +94,5 @@ class TaxonRepo @Inject constructor(
         return typeDao.getTaxonTypeByOrder(id).fold(0) { acc, it -> acc or it }
     }
 
-    fun getTypeByGeneric(id: Long): List<Int> = typeDao.getTaxonTypeByGeneric(id)
-
-    fun getTypeByFamily(id: Long): List<Int> = typeDao.getTaxonTypeByFamily(id)
-
-    fun getTypeByOrder(id: Long): List<Int> = typeDao.getTaxonTypeByOrder(id)
-
     fun getTypeCount(): Int = typeDao.getTaxonCount()
 }

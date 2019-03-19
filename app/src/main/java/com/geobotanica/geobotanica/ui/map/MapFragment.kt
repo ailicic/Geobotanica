@@ -195,8 +195,8 @@ class MapFragment : BaseFragment() {
     private fun init() {
 //        // TODO: Remove
 //        TaxaDatabase.getInstance(appContext).close()
-        NavHostFragment.findNavController(this).navigate(
-                R.id.searchPlantNameFragment, createBundle() )
+//        NavHostFragment.findNavController(this).navigate(
+//                R.id.searchPlantNameFragment, createBundle() )
 
 
 

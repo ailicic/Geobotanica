@@ -14,11 +14,11 @@ import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchR
 import kotlinx.android.synthetic.main.plant_name_list_item.view.*
 
 
-class PlantNamesAdapter(
+class PlantNameAdapter(
         private val onClick: (Int, SearchResult) -> Unit,
         private val onClickStar: (SearchResult) -> Unit,
         var isSelectable: Boolean = false
-) : RecyclerView.Adapter<PlantNamesAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<PlantNameAdapter.ViewHolder>() {
 
     var items: List<SearchResult> = emptyList()
     var selectedIndex:Int = RecyclerView.NO_POSITION
@@ -46,19 +46,19 @@ class PlantNamesAdapter(
         val plantTypes = item.getPlantTypeList()
         val plantTypeCount = plantTypes.size
         if (plantTypeCount == 1 || plantTypeCount == 2) {
-            val drawableArray = resources.obtainTypedArray(R.array.plantTypes)
+            val plantTypeDrawables = resources.obtainTypedArray(R.array.plantTypes)
             holder.plantTypeIcon.run {
-                setImageResource(drawableArray.getResourceId(plantTypes[0].ordinal, -1))
+                setImageResource(plantTypeDrawables.getResourceId(plantTypes[0].ordinal, -1))
                 isVisible = true
             }
 
             if (plantTypeCount == 2) {
                 holder.altPlantTypeIcon.run {
-                    setImageResource(drawableArray.getResourceId(plantTypes[1].ordinal, -1))
+                    setImageResource(plantTypeDrawables.getResourceId(plantTypes[1].ordinal, -1))
                     isVisible = true
                 }
             }
-            drawableArray.recycle()
+            plantTypeDrawables.recycle()
         }
 
         holder.usedIcon.isVisible = item.hasTag(USED)

@@ -5,10 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
-import androidx.navigation.findNavController
+import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data.entity.Plant
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantType
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -21,6 +20,8 @@ import javax.inject.Inject
 class NewPlantTypeFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantTypeViewModel>
     private lateinit var viewModel: NewPlantTypeViewModel
+
+    private lateinit var plantTypeAdapter: PlantTypeAdapter
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -38,7 +39,7 @@ class NewPlantTypeFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        bindClickListeners()
+        initRecyclerView()
     }
 
     override fun onDestroy() {
@@ -46,32 +47,20 @@ class NewPlantTypeFragment : BaseFragment() {
         activity.currentLocation = null // Delete since exiting New Plant flow
     }
 
-    private fun bindClickListeners() {
-        buttonTree.setOnClickListener(::onClickListener)
-        buttonShrub.setOnClickListener(::onClickListener)
-        buttonHerb.setOnClickListener(::onClickListener)
-        buttonGrass.setOnClickListener(::onClickListener)
-        buttonVine.setOnClickListener(::onClickListener)
+    private fun initRecyclerView() {
+        recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+        plantTypeAdapter = PlantTypeAdapter(PlantType.values().toList(), ::onClickItem)
+        recyclerView.adapter = plantTypeAdapter
     }
 
-    private fun onClickListener(view: View) {
-        val navController = activity.findNavController(R.id.fragment)
-        navController.navigate(R.id.newPlantPhotoFragment, createBundle(getClickedPlantType(view)))
+    private fun onClickItem(plantType: PlantType) {
+        showToast("${plantType.ordinal}")
+//        navigateToNext()
     }
 
-    private fun getClickedPlantType(view: View): Plant.Type =
-        when (view) {
-            buttonTree -> Plant.Type.TREE
-            buttonShrub -> Plant.Type.SHRUB
-            buttonHerb -> Plant.Type.HERB
-            buttonGrass -> Plant.Type.GRASS
-            buttonVine -> Plant.Type.VINE
-            else -> Plant.Type.TREE
-        }
-
-    private fun createBundle(plantType: Plant.Type): Bundle =
-        bundleOf(
-            userIdKey to viewModel.userId,
-            plantTypeKey to plantType.ordinal)
+//    private fun createBundle(plantType: Plant.Type): Bundle =
+//        bundleOf(
+//            userIdKey to viewModel.userId,
+//            plantTypeKey to plantType.ordinal)
 
 }

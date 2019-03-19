@@ -6,6 +6,6 @@
         <item>@drawable/plant_type_herb</item>
         <item>@drawable/plant_type_grass</item>
         <item>@drawable/plant_type_vine</item>
-        <!--<item>@drawable/plant_type_fungus</item>-->
+        <item>@drawable/plant_type_fungus</item>
     </integer-array>
 </resources>
