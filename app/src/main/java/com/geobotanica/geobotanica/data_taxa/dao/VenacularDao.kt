@@ -13,18 +13,18 @@ interface VernacularDao : BaseDao<Vernacular> {
 
     @Query("""SELECT id FROM vernaculars
         WHERE vernacular LIKE "% " || :string || '%' LIMIT :limit""")
-    fun nonFirstWordStartsWith(string: String, limit: Int): List<Long>?
+    fun nonFirstWordStartsWith(string: String, limit: Int): List<Long>
 
     @Query("SELECT id FROM vernaculars WHERE vernacular LIKE :string || '%' LIMIT :limit")
-    fun firstWordStartsWith(string: String, limit: Int): List<Long>?
+    fun firstWordStartsWith(string: String, limit: Int): List<Long>
 
     @Query("""SELECT id FROM vernaculars
         WHERE (vernacular LIKE :first || '%' OR vernacular LIKE "% " || :first || '%')
         AND (vernacular LIKE :second || '%' OR vernacular LIKE "% " || :second || '%') LIMIT :limit""")
-    fun anyWordStartsWith(first: String, second: String, limit: Int): List<Long>?
+    fun anyWordStartsWith(first: String, second: String, limit: Int): List<Long>
 
     @Query("SELECT id FROM vernaculars WHERE taxonId = :taxonId")
-    fun fromTaxonId(taxonId: Long): List<Long>?
+    fun fromTaxonId(taxonId: Long): List<Long>
 
 //    @Query("SELECT taxonId FROM vernaculars WHERE vernacular LIKE '%'||:string||'%' LIMIT :limit")
 //    fun contains(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>?

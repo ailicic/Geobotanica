@@ -35,9 +35,7 @@ import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
 
-// TODO: Use autogenerate for primary keys in taxa entities. So if entities are added primary key will autogen.
-    // NOTE: Inserts by room create ids by incrementing the largest id present, regardless of gaps in the ids. Could use this to detect user-entered data.
-// TODO: Use non-null lists for return types in DAOs. Room uses empty lists if no result.
+// TODO: Use existing bundles when navigating. Don't extract/pack bundles on each navigation
 // TODO: Tweak filter UI and show icons (check boxes on far right, icons left of name)
 
 // TODO: Account for Fungi types in PlantType search
@@ -69,6 +67,7 @@ import javax.inject.Inject
 
 // DEFERRED
 // TODO: Show PlantType icon in map bubble (and PlantDetail?)
+
 
 class MapFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<MapViewModel>
@@ -195,9 +194,9 @@ class MapFragment : BaseFragment() {
 
     private fun init() {
 //        // TODO: Remove
-//        TaxaDatabase.getInstance(appContext).close()
-        NavHostFragment.findNavController(this).navigate(
-                R.id.searchPlantNameFragment, createBundle() )
+        TaxaDatabase.getInstance(appContext).close()
+//        NavHostFragment.findNavController(this).navigate(
+//                R.id.searchPlantNameFragment, createBundle() )
 
 
         initMap()

@@ -3,13 +3,14 @@ package com.geobotanica.geobotanica.data_taxa.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+// NOTE: Inserts by room create ids by incrementing the largest id present, regardless of gaps in the ids. Could use this to detect user-entered data.
+
 @Entity(tableName = "taxa"/*,
         indices = [ // Room crashes if uncommented since index already exists in imported db file
             Index(value = ["generic"]),
             Index(value = ["epithet"])
         ]*/)
 data class Taxon(
-    @PrimaryKey val id: Long = 0L,
     val kingdom: String? = null,
     val phylum: String? = null,
     val class_: String? = null,
@@ -20,6 +21,8 @@ data class Taxon(
     val epithet: String? = null, // Latin 2 (specificEpithet)
     val infraspecificEpithet: String? = null
 ) {
+    @PrimaryKey(autoGenerate = true) var id: Long = 0L
+
     val scientific: String
         get() = "$generic $epithet"
 }

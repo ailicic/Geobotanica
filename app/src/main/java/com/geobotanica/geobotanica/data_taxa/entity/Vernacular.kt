@@ -8,7 +8,8 @@ import androidx.room.PrimaryKey
         Index(value = ["taxonId"]) // Required for Taxon foreign key constraint (c.f. PlantNameComposite)
     ]*/)
 data class Vernacular(
-    @PrimaryKey val id: Long = 0L,
     val taxonId: Long = 0L,
     val vernacular: String? = null
-)
+) {
+    @PrimaryKey(autoGenerate = true) var id: Long = 0L
+}

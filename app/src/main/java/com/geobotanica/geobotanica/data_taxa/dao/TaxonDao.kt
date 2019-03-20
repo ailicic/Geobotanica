@@ -15,19 +15,19 @@ interface TaxonDao : BaseDao<Taxon> {
 //    fun getAllIds(): Cursor
 
     @Query("SELECT id FROM taxa WHERE generic LIKE :string || '%' LIMIT :limit")
-    fun genericStartsWith(string: String, limit: Int): List<Long>?
+    fun genericStartsWith(string: String, limit: Int): List<Long>
 
     @Query("SELECT id FROM taxa WHERE epithet LIKE :string || '%' LIMIT :limit")
-    fun epithetStartsWith(string: String, limit: Int): List<Long>?
+    fun epithetStartsWith(string: String, limit: Int): List<Long>
 
     @Query("""SELECT id FROM taxa
         WHERE (generic LIKE :first || '%' OR epithet LIKE :first || '%')
         AND (generic LIKE :second || '%' OR epithet LIKE :second || '%') LIMIT :limit""")
-    fun genericOrEpithetStartsWith(first: String, second: String, limit: Int): List<Long>?
+    fun genericOrEpithetStartsWith(first: String, second: String, limit: Int): List<Long>
 
     @Query("""SELECT taxonId FROM vernaculars
         WHERE vernacular = (SELECT vernacular FROM vernaculars WHERE id=:vernacularId)""")
-    fun fromVernacularId(vernacularId: Long): List<Long>?
+    fun fromVernacularId(vernacularId: Long): List<Long>
 
     @Query("SELECT COUNT(*) FROM taxa")
     fun getCount(): Int
