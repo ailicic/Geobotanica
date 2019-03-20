@@ -8,13 +8,13 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantType
+import com.geobotanica.geobotanica.data.entity.Plant
 import kotlinx.android.synthetic.main.plant_type_list_item.view.*
 
 
 class PlantTypeAdapter(
-        private val items: List<PlantType>,
-        private val onClick: (PlantType) -> Unit
+        private val items: List<Plant.Type>,
+        private val onClick: (Plant.Type) -> Unit
 ) : RecyclerView.Adapter<PlantTypeAdapter.ViewHolder>() {
 
 

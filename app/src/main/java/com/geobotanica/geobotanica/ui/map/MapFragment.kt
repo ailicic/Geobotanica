@@ -40,7 +40,8 @@ import javax.inject.Inject
 // TODO: Use non-null lists for return types in DAOs. Room uses empty lists if no result.
 // TODO: Tweak filter UI and show icons (check boxes on far right, icons left of name)
 
-// TODO: Redesign PlantTypeFragment (can use VASCAN to infer?) ->
+// TODO: Account for Fungi types in PlantType search
+// TODO: Show PlantType icon in confirm plant and allow edit (since might be auto-selected from db)
 // TODO: Investigate why app start time is so long
 // TODO: Use androidx.appcompat.widget.AppCompatImageView in xml everywhere
 // TODO: Show satellite stats too
@@ -195,9 +196,8 @@ class MapFragment : BaseFragment() {
     private fun init() {
 //        // TODO: Remove
 //        TaxaDatabase.getInstance(appContext).close()
-//        NavHostFragment.findNavController(this).navigate(
-//                R.id.searchPlantNameFragment, createBundle() )
-
+        NavHostFragment.findNavController(this).navigate(
+                R.id.searchPlantNameFragment, createBundle() )
 
 
         initMap()
@@ -251,7 +251,7 @@ class MapFragment : BaseFragment() {
 
     private val onNavigateToNewPlant = Observer<Unit> {
         NavHostFragment.findNavController(this).navigate(
-                R.id.newPlantTypeFragment,
+                R.id.newPlantPhotoFragment,
                 bundleOf("userId" to viewModel.userId) )
     }
 

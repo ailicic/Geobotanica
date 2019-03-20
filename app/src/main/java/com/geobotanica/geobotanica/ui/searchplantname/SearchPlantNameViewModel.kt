@@ -1,7 +1,6 @@
 package com.geobotanica.geobotanica.ui.searchplantname
 
 import androidx.lifecycle.ViewModel
-import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
 import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
@@ -24,7 +23,6 @@ class SearchPlantNameViewModel @Inject constructor (
     private val plantNameSearchService: PlantNameSearchService
 ): ViewModel() {
     var userId = 0L
-    var plantType = Plant.Type.TREE
     var photoUri: String = ""
     var taxonId: Long? = null
     var vernacularId: Long? = null
@@ -54,7 +52,7 @@ class SearchPlantNameViewModel @Inject constructor (
 //                ++i
 //                if (i % 10_000 == 0)
 //                    Lg.d("${i / 10_000}%")
-//                val type = taxonRepo.getType(cursor.getLong(0))
+//                val type = taxonRepo.getTypes(cursor.getLong(0))
 ////                Lg.d("Cursor at ${cursor.getLong(0)}")
 //                when (type.size) {
 //                    0 -> ++ countZero

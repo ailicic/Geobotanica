@@ -155,8 +155,8 @@ class PlantNameSearchService @Inject constructor (
             else -> throw IllegalArgumentException("Must specify either COMMON or SCIENTIFIC tag")
         }
         val plantTypes: Int = when {
-            search.hasTag(COMMON) -> vernacularRepo.getType(id)
-            search.hasTag(SCIENTIFIC) -> taxonRepo.getType(id)
+            search.hasTag(COMMON) -> vernacularRepo.getTypes(id)
+            search.hasTag(SCIENTIFIC) -> taxonRepo.getTypes(id)
             else -> throw IllegalArgumentException("Must specify either COMMON or SCIENTIFIC tag")
         }
         return SearchResult(id, search.tags, plantTypes, plantName)
@@ -199,15 +199,6 @@ class PlantNameSearchService @Inject constructor (
             }
             return count
         }
-
-        fun getPlantTypeList(): List<PlantType> {
-            val plantTypeList = mutableListOf<PlantType>()
-            PlantType.values().forEach {
-                if (plantTypes and it.flag == it.flag)
-                    plantTypeList.add(it)
-            }
-            return plantTypeList
-        }
     }
 
     data class SearchFilterOptions(val filterFlags: Int = defaultFilterFlags) {
@@ -242,14 +233,4 @@ class PlantNameSearchService @Inject constructor (
         STARRED(    0b0000_0100),
         USED(       0b0000_1000);
     }
-
-    enum class PlantType(val flag: Int) {
-        TREE(   0b0000_0001),
-        SHRUB(  0b0000_0010),
-        HERB(   0b0000_0100),
-        GRASS(  0b0000_1000),
-        VINE(   0b0001_0000),
-        FUNGUS( 0b0010_0000);
-    }
-
 }

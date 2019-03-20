@@ -80,7 +80,7 @@ class TaxonRepo @Inject constructor(
 
     fun insertType(obj: TaxonType): Long = typeDao.insert(obj)
 
-    fun getType(id: Long): Int {
+    fun getTypes(id: Long): Int {
         typeDao.getTaxonType(id)?.let { return it }
 
         var typeFlags = typeDao.getTaxonTypeByGeneric(id).fold(0) { acc, it -> acc or it }

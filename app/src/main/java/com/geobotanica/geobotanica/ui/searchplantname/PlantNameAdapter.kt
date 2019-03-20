@@ -9,6 +9,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.*
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
 import kotlinx.android.synthetic.main.plant_name_list_item.view.*
@@ -43,7 +44,7 @@ class PlantNameAdapter(
         }
         holder.plantNameIcon.setImageDrawable(resources.getDrawable(plantNameIcon))
 
-        val plantTypes = item.getPlantTypeList()
+        val plantTypes = Plant.Type.flagsToList(item.plantTypes)
         val plantTypeCount = plantTypes.size
         if (plantTypeCount == 1 || plantTypeCount == 2) {
             val plantTypeDrawables = resources.obtainTypedArray(R.array.plantTypes)

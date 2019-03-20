@@ -161,6 +161,7 @@ class MapViewModel @Inject constructor(
             HERB -> R.drawable.marker_green
             GRASS -> R.drawable.marker_light_green
             VINE -> R.drawable.marker_yellow
+            FUNGUS -> R.drawable.marker_yellow // TODO: Use different color
         }
     }
 }

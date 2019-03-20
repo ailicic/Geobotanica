@@ -35,12 +35,12 @@ class NewPlantMeasurementFragment : BaseFragment() {
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
-            plantType = PlantTypeConverter.toPlantType(getFromBundle(plantTypeKey))
             photoUri = getFromBundle(photoUriKey)
             commonName = getNullableFromBundle(commonNameKey)
             scientificName = getNullableFromBundle(scientificNameKey)
             vernacularId = getNullableFromBundle(vernacularIdKey)
             taxonId = getNullableFromBundle(taxonIdKey)
+            plantType = Plant.Type.fromFlag(getFromBundle(plantTypeKey))
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, commonName=$commonName, " +
                     "scientificName=$scientificName, vernId=$vernacularId, taxonId=$taxonId, photoUri=$photoUri")
         }
@@ -142,8 +142,8 @@ class NewPlantMeasurementFragment : BaseFragment() {
     private fun createBundle(): Bundle {
         return bundleOf(
                 userIdKey to viewModel.userId,
-                plantTypeKey to viewModel.plantType.ordinal,
-                photoUriKey to viewModel.photoUri
+                photoUriKey to viewModel.photoUri,
+                plantTypeKey to viewModel.plantType.flag
         ).apply {
             viewModel.commonName?.let { putValue(commonNameKey, it) }
             viewModel.scientificName?.let { putValue(scientificNameKey, it) }

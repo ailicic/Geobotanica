@@ -8,7 +8,6 @@ import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.*
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchFilterOptions
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
@@ -40,11 +39,10 @@ class SearchPlantNameFragment : BaseFragment() {
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
-            plantType = PlantTypeConverter.toPlantType(getFromBundle(plantTypeKey))
             photoUri = getFromBundle(photoUriKey)
 
             searchFilterOptions = SearchFilterOptions(sharedPrefs.get(sharedPrefsFilterFlags, defaultFilterFlags))
-            Lg.d("Fragment args: userId=$userId, plantType=$plantType, photoUri=$photoUri")
+            Lg.d("Fragment args: userId=$userId, photoUri=$photoUri")
         }
     }
 
@@ -103,6 +101,7 @@ class SearchPlantNameFragment : BaseFragment() {
         updateSearchResults()
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onClickItem(index: Int, result: SearchResult) {
         if (result.hasTag(COMMON))
             viewModel.vernacularId = result.id
@@ -168,7 +167,6 @@ class SearchPlantNameFragment : BaseFragment() {
     private fun createBundle(): Bundle {
         return bundleOf(
                 userIdKey to viewModel.userId,
-                plantTypeKey to viewModel.plantType.ordinal,
                 photoUriKey to viewModel.photoUri
         ).apply {
             viewModel.vernacularId?.let { putValue(vernacularIdKey, it) }

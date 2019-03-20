@@ -7,7 +7,8 @@ import com.geobotanica.geobotanica.data_taxa.dao.VernacularDao
 import com.geobotanica.geobotanica.data_taxa.entity.Tag
 import com.geobotanica.geobotanica.data_taxa.entity.Vernacular
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.*
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.STARRED
+import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.USED
 import javax.inject.Inject
 
 
@@ -75,7 +76,7 @@ class VernacularRepo @Inject constructor(
 
     // Plant Types
 
-    fun getType(id: Long): Int = typeDao.getVernacularType(id).fold(0) { acc, it -> acc or it }
+    fun getTypes(id: Long): Int = typeDao.getVernacularType(id).fold(0) { acc, it -> acc or it }
 
     fun getTypeCount(): Int = typeDao.getVernacularCount()
 }

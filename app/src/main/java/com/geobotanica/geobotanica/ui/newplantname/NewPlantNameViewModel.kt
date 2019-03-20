@@ -19,13 +19,13 @@ class NewPlantNameViewModel @Inject constructor (
     private val plantNameSearchService: PlantNameSearchService
 ): ViewModel() {
     var userId = 0L
-    var plantType = Plant.Type.TREE
     var photoUri: String = ""
     var commonName: String? = null
     var scientificName: String? = null
 
     var taxonId: Long? = null
     var vernacularId: Long? = null
+    var plantTypes: Int? = null
 
     var lastSelectedIndex: Int? = null
     var lastSelectedId: Long? = null
@@ -53,5 +53,22 @@ class NewPlantNameViewModel @Inject constructor (
                 result.hasTag(SCIENTIFIC) -> taxonRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
             }
         }
+    }
+
+    fun getPlantTypes() = runBlocking {
+        plantTypes = null
+        GlobalScope.launch(Dispatchers.IO) {
+            taxonId?.let {
+                plantTypes = taxonRepo.getTypes(it)
+            } ?: vernacularId?.let {
+                plantTypes = vernacularRepo.getTypes(it)
+            }
+        }.join()
+    }
+
+    fun isPlantTypeKnown(): Boolean {
+        return plantTypes?.let {
+            Plant.Type.flagsToList(it).size == 1
+        } ?: false
     }
 }

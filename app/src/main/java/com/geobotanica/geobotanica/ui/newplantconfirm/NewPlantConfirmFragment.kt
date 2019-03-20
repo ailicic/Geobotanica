@@ -12,6 +12,7 @@ import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
 import com.geobotanica.geobotanica.databinding.FragmentNewPlantConfirmBinding
 import com.geobotanica.geobotanica.ui.BaseFragment
@@ -38,7 +39,7 @@ class NewPlantConfirmFragment : BaseFragment() {
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
-            plantType = PlantTypeConverter.toPlantType(getFromBundle(plantTypeKey))
+            plantType = Plant.Type.fromFlag(getFromBundle(plantTypeKey))
             photoUri = getFromBundle(photoUriKey)
             commonName = getNullableFromBundle(commonNameKey)
             scientificName = getNullableFromBundle(scientificNameKey)

@@ -30,8 +30,7 @@ class NewPlantPhotoFragment : BaseFragment() {
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
-            plantType = PlantTypeConverter.toPlantType(getFromBundle(plantTypeKey))
-            Lg.d("Fragment args: userId=$userId, plantType=$plantType")
+            Lg.d("Fragment args: userId=$userId")
         }
     }
 
@@ -46,6 +45,11 @@ class NewPlantPhotoFragment : BaseFragment() {
         val photoFile = createPhotoFile()
         viewModel.photoUri = photoFile.absolutePath
         startPhotoIntent(photoFile)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        activity.currentLocation = null // Delete since exiting New Plant flow
     }
 
     private fun deletePhotoIfExists() {
@@ -83,6 +87,5 @@ class NewPlantPhotoFragment : BaseFragment() {
     private fun createBundle(): Bundle =
         bundleOf(
             userIdKey to viewModel.userId,
-            plantTypeKey to viewModel.plantType.ordinal,
             photoUriKey to viewModel.photoUri)
 }

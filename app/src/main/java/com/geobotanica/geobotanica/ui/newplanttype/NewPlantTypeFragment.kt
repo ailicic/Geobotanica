@@ -5,14 +5,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantType
+import com.geobotanica.geobotanica.data.entity.Plant
+import com.geobotanica.geobotanica.data.entity.Plant.Type.Companion.allPlantTypeFlags
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.getFromBundle
+import com.geobotanica.geobotanica.util.getNullableFromBundle
+import com.geobotanica.geobotanica.util.putValue
 import kotlinx.android.synthetic.main.fragment_new_plant_type.*
 import javax.inject.Inject
 
@@ -29,8 +34,15 @@ class NewPlantTypeFragment : BaseFragment() {
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
+            photoUri = getFromBundle(photoUriKey)
+            commonName = getNullableFromBundle(commonNameKey)
+            scientificName = getNullableFromBundle(scientificNameKey)
+            vernacularId = getNullableFromBundle(vernacularIdKey)
+            taxonId = getNullableFromBundle(taxonIdKey)
+            plantTypeOptions = Plant.Type.flagsToList(getFromBundle(plantTypeKey, allPlantTypeFlags))
+            Lg.d("Fragment args: plantTypeOptions=$plantTypeOptions, userId=$userId, commonName=$commonName, " +
+                    "scientificName=$scientificName, vernId=$vernacularId, taxonId=$taxonId, photoUri=$photoUri")
         }
-        Lg.d("Fragment args: userId=${viewModel.userId}")
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -42,25 +54,31 @@ class NewPlantTypeFragment : BaseFragment() {
         initRecyclerView()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        activity.currentLocation = null // Delete since exiting New Plant flow
-    }
-
     private fun initRecyclerView() {
         recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-        plantTypeAdapter = PlantTypeAdapter(PlantType.values().toList(), ::onClickItem)
+        plantTypeAdapter = PlantTypeAdapter(viewModel.plantTypeOptions, ::onClickItem)
         recyclerView.adapter = plantTypeAdapter
     }
 
-    private fun onClickItem(plantType: PlantType) {
-        showToast("${plantType.ordinal}")
-//        navigateToNext()
+    private fun onClickItem(plantType: Plant.Type) {
+        viewModel.plantType = plantType
+        navigateToNext()
     }
 
-//    private fun createBundle(plantType: Plant.Type): Bundle =
-//        bundleOf(
-//            userIdKey to viewModel.userId,
-//            plantTypeKey to plantType.ordinal)
+    private fun navigateToNext() {
+        val navController = activity.findNavController(R.id.fragment)
+        navController.navigate(R.id.newPlantMeasurementFragment, createBundle())
+    }
 
+    private fun createBundle(): Bundle =
+        bundleOf(
+            userIdKey to viewModel.userId,
+            photoUriKey to viewModel.photoUri,
+            plantTypeKey to viewModel.plantType.flag
+        ).apply {
+            viewModel.commonName?.let { putValue(commonNameKey, it) }
+            viewModel.scientificName?.let { putValue(scientificNameKey, it) }
+            viewModel.vernacularId?.let { putValue(vernacularIdKey, it) }
+            viewModel.taxonId?.let { putValue(taxonIdKey, it) }
+        }
 }

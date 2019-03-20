@@ -11,7 +11,6 @@ import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
@@ -47,7 +46,6 @@ class NewPlantNameFragment : BaseFragment() {
     private fun initViewModel() {
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
-            plantType = PlantTypeConverter.toPlantType(getFromBundle(plantTypeKey))
             photoUri = getFromBundle(photoUriKey)
             vernacularId = getNullableFromBundle(vernacularIdKey)
             taxonId = getNullableFromBundle(taxonIdKey)
@@ -55,8 +53,7 @@ class NewPlantNameFragment : BaseFragment() {
             lastSelectedId = null
             lastSelectedName = ""
 
-            Lg.d("Fragment args: userId=$userId, plantType=$plantType, " +
-                    "vernId=$vernacularId, taxonId=$taxonId, photoUri=$photoUri")
+            Lg.d("Fragment args: userId=$userId, vernId=$vernacularId, taxonId=$taxonId, photoUri=$photoUri")
         }
     }
 
@@ -200,7 +197,11 @@ class NewPlantNameFragment : BaseFragment() {
 
     private fun navigateToNext() {
         val navController = activity.findNavController(R.id.fragment)
-        navController.navigate(R.id.newPlantMeasurementFragment, createBundle())
+
+        if (viewModel.isPlantTypeKnown())
+            navController.navigate(R.id.newPlantMeasurementFragment, createBundle())
+        else
+            navController.navigate(R.id.newPlantTypeFragment, createBundle())
     }
 
     private fun areNamesValid(): Boolean {
@@ -228,6 +229,7 @@ class NewPlantNameFragment : BaseFragment() {
                 lastSelectedIndex = null
                 lastSelectedId = null
             }
+            getPlantTypes()
         }
     }
 
@@ -235,13 +237,13 @@ class NewPlantNameFragment : BaseFragment() {
         with (viewModel) {
             return bundleOf(
                     userIdKey to userId,
-                    plantTypeKey to plantType.ordinal,
                     photoUriKey to photoUri
             ).apply {
                 commonName?.let { putValue(commonNameKey, it) }
                 scientificName?.let { putValue(scientificNameKey, it) }
                 taxonId?.let { putValue(taxonIdKey, it) }
                 vernacularId?.let { putValue(vernacularIdKey, it) }
+                plantTypes?.let { putValue(plantTypeKey, it) }
             }
         }
     }
