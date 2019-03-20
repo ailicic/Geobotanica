@@ -25,14 +25,14 @@ class PlantNameFilterOptionsDialog : DialogFragment() {
         customView = LayoutInflater.from(context).inflate(R.layout.dialog_plant_name_filter, null)
         return activity?.let {
             AlertDialog.Builder(it).run {
-                setTitle(getString(R.string.filter))
+                setTitle(getString(R.string.include))
                 setView(customView)
                 setPositiveButton(getString(R.string.apply)) { _, _ ->
                     val filterOptions = SearchFilterOptions.fromBooleans(
-                            ! checkboxCommon.isChecked,
-                            ! checkboxScientific.isChecked,
-                            ! checkboxStarred.isChecked,
-                            ! checkboxHistory.isChecked
+                            ! commonCheckbox.isChecked,
+                            ! scientificCheckbox.isChecked,
+                            ! starredCheckbox.isChecked,
+                            ! historyCheckbox.isChecked
                     )
                     onApplyFilters(filterOptions)
                 }
@@ -52,18 +52,18 @@ class PlantNameFilterOptionsDialog : DialogFragment() {
         val filterOptions = SearchFilterOptions(
                 arguments!!.getValue<Int>(plantNameFilterOptionsKey)
                 ?: defaultFilterFlags)
-        checkboxCommon.isChecked = ! filterOptions.hasFilter(COMMON)
-        checkboxScientific.isChecked = ! filterOptions.hasFilter(SCIENTIFIC)
-        checkboxStarred.isChecked = ! filterOptions.hasFilter(STARRED)
-        checkboxHistory.isChecked = ! filterOptions.hasFilter(USED)
+        commonCheckbox.isChecked = ! filterOptions.hasFilter(COMMON)
+        scientificCheckbox.isChecked = ! filterOptions.hasFilter(SCIENTIFIC)
+        starredCheckbox.isChecked = ! filterOptions.hasFilter(STARRED)
+        historyCheckbox.isChecked = ! filterOptions.hasFilter(USED)
 
-        checkboxScientific.setOnCheckedChangeListener { _, isChecked ->
+        scientificCheckbox.setOnCheckedChangeListener { _, isChecked ->
             if (!isChecked)
-                dialog.checkboxCommon.isChecked = true
+                dialog.commonCheckbox.isChecked = true
         }
-        checkboxCommon.setOnCheckedChangeListener { _, isChecked ->
+        commonCheckbox.setOnCheckedChangeListener { _, isChecked ->
             if (!isChecked)
-                dialog.checkboxScientific.isChecked = true
+                dialog.scientificCheckbox.isChecked = true
         }
     }
 }

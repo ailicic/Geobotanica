@@ -38,11 +38,13 @@ class PlantNameAdapter(
         holder.plantName.text = item.plantName
 
         val plantNameIcon = when {
-            item.hasTag(COMMON) -> R.drawable.hat
-            item.hasTag(SCIENTIFIC) -> R.drawable.grad_cap
+            item.hasTag(COMMON) -> R.drawable.common_name
+            item.hasTag(SCIENTIFIC) -> R.drawable.scientific_name
             else -> throw IllegalArgumentException("Must specify either COMMON or SCIENTIFIC tag") // TODO: Handle this differently
         }
         holder.plantNameIcon.setImageDrawable(resources.getDrawable(plantNameIcon))
+        if (plantNameIcon == R.drawable.common_name)
+            holder.plantNameIcon.setColorFilter(resources.getColor(R.color.colorBrown))
 
         val plantTypes = Plant.Type.flagsToList(item.plantTypes)
         val plantTypeCount = plantTypes.size
@@ -62,7 +64,7 @@ class PlantNameAdapter(
             plantTypeDrawables.recycle()
         }
 
-        holder.usedIcon.isVisible = item.hasTag(USED)
+        holder.historyIcon.isVisible = item.hasTag(USED)
 
         val star = resources.getDrawable(R.drawable.ic_star)
         val starBorder = resources.getDrawable(R.drawable.ic_star_border)
@@ -99,7 +101,7 @@ class PlantNameAdapter(
         val plantName: TextView = view.plantName
         val plantTypeIcon: ImageView= view.plantTypeIcon
         val altPlantTypeIcon: ImageView= view.altPlantTypeIcon
-        val usedIcon: ImageView= view.usedIcon
+        val historyIcon: ImageView= view.historyIcon
         val starredIcon: ImageView= view.starIcon
     }
 }

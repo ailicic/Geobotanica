@@ -50,7 +50,7 @@
     <string name="inches">in</string>
     <string name="enable">Enable</string>
     <string name="name_search_hint">Common or scientific name</string>
-    <string name="filter">Filter</string>
+    <string name="include">Include</string>
     <string name="apply">Apply</string>
     <string name="cancel">Cancel</string>
     <string name="geobotanica">Geobotanica</string>

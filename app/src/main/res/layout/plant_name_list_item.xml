@@ -10,10 +10,10 @@
     android:focusable="true"
     android:background="?android:attr/selectableItemBackground">
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/plantNameIcon"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="@dimen/list_item_name_icon_size"
+        android:layout_height="@dimen/list_item_name_icon_size"
         android:layout_marginStart="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -32,10 +32,10 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/plantTypeIcon"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="@dimen/list_item_name_icon_size"
+        android:layout_height="@dimen/list_item_name_icon_size"
         android:layout_marginStart="8dp"
         android:visibility="gone"
         app:layout_constraintStart_toEndOf="@id/plantName"
@@ -43,10 +43,10 @@
         app:layout_constraintBottom_toBottomOf="parent"
         tools:ignore="ContentDescription" />
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/altPlantTypeIcon"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="@dimen/list_item_name_icon_size"
+        android:layout_height="@dimen/list_item_name_icon_size"
         android:layout_marginStart="8dp"
         android:visibility="gone"
         app:layout_constraintStart_toEndOf="@id/plantTypeIcon"
@@ -54,8 +54,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         tools:ignore="ContentDescription" />
 
-    <ImageView
-        android:id="@+id/usedIcon"
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/historyIcon"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:src="@drawable/ic_time"
@@ -66,7 +66,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         tools:ignore="ContentDescription" />
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/starIcon"
         android:layout_width="36dp"
         android:layout_height="36dp"

@@ -13,7 +13,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.data.entity.PlantTypeConverter
 import com.geobotanica.geobotanica.databinding.FragmentNewPlantConfirmBinding
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
@@ -39,12 +38,12 @@ class NewPlantConfirmFragment : BaseFragment() {
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
-            plantType = Plant.Type.fromFlag(getFromBundle(plantTypeKey))
             photoUri = getFromBundle(photoUriKey)
             commonName = getNullableFromBundle(commonNameKey)
             scientificName = getNullableFromBundle(scientificNameKey)
             vernacularId = getNullableFromBundle(vernacularIdKey)
             taxonId = getNullableFromBundle(taxonIdKey)
+            plantType = Plant.Type.fromFlag(getFromBundle(plantTypeKey))
             heightMeasurement = getNullableFromBundle(heightMeasurementKey)
             diameterMeasurement = getNullableFromBundle(diameterMeasurementKey)
             trunkDiameterMeasurement = getNullableFromBundle(trunkDiameterMeasurementKey)
@@ -156,6 +155,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         resetCommonButton.isVisible = editText != viewModel.commonName
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onClickResetCommon(view: View) {
         commonNameEditText.setText(viewModel.commonName)
         commonNameEditText.setSelection(viewModel.commonName!!.length)
@@ -165,6 +165,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         resetScientificButton.isVisible = editText != viewModel.scientificName
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onResetScientificName(view: View) {
         scientificNameEditText.setText(viewModel.scientificName)
         scientificNameEditText.setSelection(viewModel.scientificName!!.length)
