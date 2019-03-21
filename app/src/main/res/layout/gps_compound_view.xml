@@ -16,7 +16,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/GpsCrossHairImage"  />
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/GpsCrossHairImage"
         android:layout_width="48dp"
         android:layout_height="48dp"

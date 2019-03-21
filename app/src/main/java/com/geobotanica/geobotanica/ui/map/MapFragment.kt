@@ -35,17 +35,16 @@ import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
 
-// TODO: Account for Fungi types in PlantType search
-// TODO: Show PlantType icon in confirm plant and allow edit (since might be auto-selected from db)
+// TODO: Show PlantType icon in confirm plant and allow edit (since might be auto-selected from db) -> create dialog
 // TODO: Investigate why app start time is so long
-// TODO: Use androidx.appcompat.widget.AppCompatImageView in xml everywhere
 // TODO: Show satellite stats too
 
 // LONG TERM
-// TODO: Maybe use existing bundle when navigating (it works, but need to be careful about updating old values).
-// TODO: Use inline on functions that accept lambda parameters
-// TODO: Group nearby markers into clusters
 // TODO: Create download map/db activity and utilize offline map tiles
+// TODO: Use inline on functions that accept lambda parameters
+// TODO: Maybe use existing bundle when navigating (it works, but need to be careful about updating old values).
+// TODO: Group nearby markers into clusters
+// TODO: Limit max height to recyclerview in SearchPlantName (extends below screen)
 // TODO: Make custom camera screen so Espresso can be used for UI testing
 
 // LONG TERM NIT PICK
@@ -193,8 +192,8 @@ class MapFragment : BaseFragment() {
     private fun init() {
 //        // TODO: Remove
 //        TaxaDatabase.getInstance(appContext).close()
-        NavHostFragment.findNavController(this).navigate(
-                R.id.searchPlantNameFragment, createBundle() )
+//        NavHostFragment.findNavController(this).navigate(
+//                R.id.searchPlantNameFragment, createBundle() )
 
 
         initMap()

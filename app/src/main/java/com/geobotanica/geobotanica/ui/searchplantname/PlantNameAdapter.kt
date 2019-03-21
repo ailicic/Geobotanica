@@ -33,7 +33,7 @@ class PlantNameAdapter(
     @Suppress("DEPRECATION")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
-
+        
         val resources = holder.view.context.resources
         holder.plantName.text = item.plantName
 
@@ -46,6 +46,8 @@ class PlantNameAdapter(
         if (plantNameIcon == R.drawable.common_name)
             holder.plantNameIcon.setColorFilter(resources.getColor(R.color.colorBrown))
 
+        holder.plantTypeIcon.isVisible = false
+        holder.altPlantTypeIcon.isVisible = false
         val plantTypes = Plant.Type.flagsToList(item.plantTypes)
         val plantTypeCount = plantTypes.size
         if (plantTypeCount == 1 || plantTypeCount == 2) {

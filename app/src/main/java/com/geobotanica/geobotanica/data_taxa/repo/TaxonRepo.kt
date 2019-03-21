@@ -1,5 +1,6 @@
 package com.geobotanica.geobotanica.data_taxa.repo
 
+import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data_taxa.DEFAULT_RESULT_LIMIT
 import com.geobotanica.geobotanica.data_taxa.dao.TagDao
 import com.geobotanica.geobotanica.data_taxa.dao.TaxonDao
@@ -81,6 +82,9 @@ class TaxonRepo @Inject constructor(
     fun insertType(obj: TaxonType): Long = typeDao.insert(obj)
 
     fun getTypes(id: Long): Int {
+        if (taxonDao.getKingdom(id) == Taxon.Kingdom.FUNGI.toString())
+            return Plant.Type.FUNGUS.flag
+
         typeDao.getTaxonType(id)?.let { return it }
 
         var typeFlags = typeDao.getTaxonTypeByGeneric(id).fold(0) { acc, it -> acc or it }
@@ -91,7 +95,11 @@ class TaxonRepo @Inject constructor(
         if (typeFlags != 0)
             return typeFlags
 
-        return typeDao.getTaxonTypeByOrder(id).fold(0) { acc, it -> acc or it }
+        typeFlags =  typeDao.getTaxonTypeByOrder(id).fold(0) { acc, it -> acc or it }
+        if (typeFlags != 0)
+            return typeFlags
+
+        return Plant.Type.onlyPlantTypeFlags
     }
 
     fun getTypeCount(): Int = typeDao.getTaxonCount()

@@ -10,7 +10,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.data.entity.Plant.Type.Companion.allPlantTypeFlags
+import com.geobotanica.geobotanica.data.entity.Plant.Type.Companion.allTypeFlags
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -39,7 +39,7 @@ class NewPlantTypeFragment : BaseFragment() {
             scientificName = getNullableFromBundle(scientificNameKey)
             vernacularId = getNullableFromBundle(vernacularIdKey)
             taxonId = getNullableFromBundle(taxonIdKey)
-            plantTypeOptions = Plant.Type.flagsToList(getFromBundle(plantTypeKey, allPlantTypeFlags))
+            plantTypeOptions = Plant.Type.flagsToList(getFromBundle(plantTypeKey, allTypeFlags))
             Lg.d("Fragment args: plantTypeOptions=$plantTypeOptions, userId=$userId, commonName=$commonName, " +
                     "scientificName=$scientificName, vernId=$vernacularId, taxonId=$taxonId, photoUri=$photoUri")
         }

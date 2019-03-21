@@ -24,12 +24,12 @@ data class  Plant(
     @PrimaryKey(autoGenerate = true) var id: Long = 0L
 
     enum class Type(val flag: Int) {
-        TREE(   0b0000_0001),
-        SHRUB(  0b0000_0010),
-        HERB(   0b0000_0100),
-        GRASS(  0b0000_1000),
-        VINE(   0b0001_0000),
-        FUNGUS( 0b0010_0000);
+        TREE(   0b0000_0001), // 1
+        SHRUB(  0b0000_0010), // 2
+        HERB(   0b0000_0100), // 4
+        GRASS(  0b0000_1000), // 8
+        VINE(   0b0001_0000), // 16
+        FUNGUS( 0b0010_0000); // 32
 
         override fun toString() = when (this) {
             TREE -> "Tree"
@@ -41,7 +41,8 @@ data class  Plant(
         }
 
         companion object {
-            val allPlantTypeFlags = values().map { it.flag }.reduce { acc, it -> acc or it }
+            val allTypeFlags = values().map { it.flag }.reduce { acc, it -> acc or it }
+            val onlyPlantTypeFlags = allTypeFlags xor FUNGUS.flag
 
             fun fromFlag(flag: Int): Plant.Type = values().toList().first { it.flag and flag != 0 }
 

@@ -25,4 +25,14 @@ data class Taxon(
 
     val scientific: String
         get() = "$generic $epithet"
+
+    enum class Kingdom {
+        PLANTS, FUNGI;
+
+        override fun toString(): String =
+            when (this) {
+                PLANTS -> "plantae"
+                FUNGI -> "fungi"
+            }
+    }
 }

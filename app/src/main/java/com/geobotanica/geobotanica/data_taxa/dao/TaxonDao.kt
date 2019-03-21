@@ -29,6 +29,9 @@ interface TaxonDao : BaseDao<Taxon> {
         WHERE vernacular = (SELECT vernacular FROM vernaculars WHERE id=:vernacularId)""")
     fun fromVernacularId(vernacularId: Long): List<Long>
 
+    @Query("SELECT kingdom FROM taxa WHERE id = :id")
+    fun getKingdom(id: Long): String?
+
     @Query("SELECT COUNT(*) FROM taxa")
     fun getCount(): Int
 }
