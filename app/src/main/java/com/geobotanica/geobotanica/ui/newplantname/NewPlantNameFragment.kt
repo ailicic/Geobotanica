@@ -131,8 +131,14 @@ class NewPlantNameFragment : BaseFragment() {
             loadNamesJob?.invokeOnCompletion { completionError ->
                 if (completionError != null) // Coroutine did not complete
                     return@invokeOnCompletion
-                commonName?.let { commonNameEditText.setText(it) }
-                scientificName?.let { scientificNameEditText.setText(it) }
+                commonName?.let {
+                    if (commonNameEditText.text.toString() != it)
+                        showTypedNameAnimation(it, commonNameEditText)
+                }
+                scientificName?.let {
+                    if (scientificNameEditText.text.toString() != it)
+                        showTypedNameAnimation(it, scientificNameEditText)
+                }
             }
         }
     }
@@ -144,22 +150,25 @@ class NewPlantNameFragment : BaseFragment() {
                 activeEditText?.setText(lastSelectedName)
                 activeEditText?.setSelection(lastSelectedName.length)
             } else
-                showTypedNameAnimation()
+                showTypedNameAnimation(lastSelectedName, activeEditText!!)
 
             lastSelectedId = result.id
             lastSelectedIndex = index
         }
     }
 
-    private fun showTypedNameAnimation() {
-        val length = viewModel.lastSelectedName.length
+    private fun showTypedNameAnimation(string: String, editText: EditText) {
         animateTextJob.cancel()
         animateTextJob = mainScope.launch {
-            for (i in 1 .. length) {
-                activeEditText?.setText(viewModel.lastSelectedName.substring(0,i))
-                activeEditText?.setSelection(i)
+            for (i in 1 .. string.length) {
+                editText.setText(string.substring(0,i))
+                editText.setSelection(i)
                 delay(30)
             }
+        }
+        animateTextJob.invokeOnCompletion { completionError ->
+            if (completionError != null)
+                editText.setText(string)
         }
     }
 
@@ -185,10 +194,6 @@ class NewPlantNameFragment : BaseFragment() {
     private fun onClickFab(view: View) {
         Lg.d("NewPlantFragment: onClickFab()")
 
-        if (animateTextJob.isActive) {
-            animateTextJob.cancel()
-            activeEditText?.setText(viewModel.lastSelectedName)
-        }
        if (!areNamesValid())
             return
         saveViewModelState()
@@ -196,6 +201,7 @@ class NewPlantNameFragment : BaseFragment() {
     }
 
     private fun navigateToNext() {
+        animateTextJob.cancel()
         val navController = activity.findNavController(R.id.fragment)
 
         if (viewModel.isPlantTypeKnown())

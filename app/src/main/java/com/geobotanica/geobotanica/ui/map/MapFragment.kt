@@ -17,7 +17,6 @@ import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.User
-import com.geobotanica.geobotanica.data_taxa.TaxaDatabase
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -34,12 +33,12 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
-// TODO: Add plantType + editPhoto buttons in PlantDetails image (like confirm frag)
-// TODO: Investigate why app start time is so long
-// TODO: Show satellite stats too
+// TODO: Move photo buttons in Confirm outside photo if portrait
 
 // LONG TERM
 // TODO: Create download map/db activity and utilize offline map tiles
+// TODO: Investigate why app start time is so long (should be less of an issue after login/download screen)
+// TODO: Add plantType + editPhoto buttons in PlantDetails image (like confirm frag)
 // TODO: Use inline on functions that accept lambda parameters
 // TODO: Maybe use existing bundle when navigating (it works, but need to be careful about updating old values).
 // TODO: Group nearby markers into clusters
@@ -191,8 +190,8 @@ class MapFragment : BaseFragment() {
     private fun init() {
 //        // TODO: Remove
 //        TaxaDatabase.getInstance(appContext).close()
-//        NavHostFragment.findNavController(this).navigate(
-//                R.id.searchPlantNameFragment, createBundle() )
+        NavHostFragment.findNavController(this).navigate(
+                R.id.searchPlantNameFragment, createBundle() )
 
 
         initMap()
@@ -244,16 +243,16 @@ class MapFragment : BaseFragment() {
         }
     }
 
-    private val onNavigateToNewPlant = Observer<Unit> {
-        NavHostFragment.findNavController(this).navigate(
-                R.id.newPlantPhotoFragment,
-                bundleOf("userId" to viewModel.userId) )
-    }
+//    private val onNavigateToNewPlant = Observer<Unit> {
+//        NavHostFragment.findNavController(this).navigate(
+//                R.id.newPlantPhotoFragment,
+//                bundleOf("userId" to viewModel.userId) )
+//    }
 
 //     TODO: REMOVE (Temp for NewPlantConfirmFragment)
-//    private val onNavigateToNewPlant = Observer<Unit> {
-//        NavHostFragment.findNavController(this).navigate(R.id.newPlantConfirmFragment, createBundle() )
-//    }
+    private val onNavigateToNewPlant = Observer<Unit> {
+        NavHostFragment.findNavController(this).navigate(R.id.newPlantConfirmFragment, createBundle() )
+    }
 
     // TODO: REMOVE
     private fun createBundle(): Bundle {
@@ -271,11 +270,6 @@ class MapFragment : BaseFragment() {
                 49.477, -119.592, 1.0, 3.0f, 10, 20))
         }
     }
-
-
-
-
-
 
     private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkersData ->
         val currentGbMarkers = map.overlays.filterIsInstance<GbMarker>()
