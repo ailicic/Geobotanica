@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
@@ -20,6 +21,7 @@ import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_new_plant_confirm.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
+import kotlinx.android.synthetic.main.plant_photo_compound_view.view.*
 import java.io.File
 import javax.inject.Inject
 
@@ -66,7 +68,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         setMainPlantPhoto()
 //        initMeasurementEditViews()
-//        bindViewModel()
+        bindViewModel()
         bindClickListeners()
     }
 
@@ -81,35 +83,6 @@ class NewPlantConfirmFragment : BaseFragment() {
 //        if (viewModel.plantType == Plant.Type.TREE) {
 //            viewModel.trunkDiameterMeasurement?.let { trunkDiameterMeasurementView.setMeasurement(it) }
 //        }
-//    }
-
-//    private val onAddPhoto = Observer<PlantPhoto.Type> { plantPhotoType ->
-//        capturingPlantPhotoType = plantPhotoType
-//
-//        with (viewModel) {
-//            val photoFile = createPhotoFile()
-//            newPhotoUri = photoFile.absolutePath
-//            startPhotoIntent(photoFile)
-//        }
-//    }
-
-//    private val onEditPhoto = Observer<Int?> {
-////        capturingPlantPhotoType = plantPhotoType
-//
-//        with (viewModel) {
-//            val photoFile = createPhotoFile()
-//            newPhotoUri = photoFile.absolutePath
-//            startPhotoIntent(photoFile)
-//        }
-//    }
-
-
-//    private val onEditPhotoType = Observer<PlantPhoto.Type> { plantPhotoType ->
-//        val dialog = PhotoTypeDialogFragment()
-//        dialog.photoTypeSelected.observe(this,Observer<PlantPhoto.Type> {
-//
-//        })
-//        dialog.show(fragmentManager, "tag")
 //    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -134,9 +107,53 @@ class NewPlantConfirmFragment : BaseFragment() {
         }
     }
 
-//    private fun bindViewModel() {
-//        plantPhotoFull.editPhoto.observeAfterUnsubscribe(this, onEditPhoto)
+    private fun bindViewModel() {
+        plantPhotoFull.editPlantType.observeAfterUnsubscribe(this, onClickEditPlantType)
+        plantPhotoFull.editPhoto.observeAfterUnsubscribe(this, onClickEditPhoto)
 //        plantPhotoComplete.editPhotoType.observeAfterUnsubscribe(this, onEditPhotoType)
+    }
+
+    private val onClickEditPlantType = Observer<Plant.Type> {
+        EditPlantTypeDialog().run {
+            onPlantTypeSelected = ::onNewPlantType
+            show(this@NewPlantConfirmFragment.fragmentManager,"tag")
+        }
+    }
+
+    private fun onNewPlantType(plantType: Plant.Type) {
+        val plantTypeDrawables = resources.obtainTypedArray(R.array.plantTypes)
+        plantPhotoFull.plantTypeButton.setImageResource(plantTypeDrawables.getResourceId(plantType.ordinal, -1))
+        plantTypeDrawables.recycle()
+        viewModel.plantType = plantType
+    }
+
+    private val onClickEditPhoto = Observer<Int?> {
+        //        capturingPlantPhotoType = plantPhotoType
+
+        with (viewModel) {
+            val photoFile = createPhotoFile()
+            newPhotoUri = photoFile.absolutePath
+            startPhotoIntent(photoFile)
+        }
+    }
+
+//    private val onAddPhoto = Observer<PlantPhoto.Type> { plantPhotoType ->
+//        capturingPlantPhotoType = plantPhotoType
+//
+//        with (viewModel) {
+//            val photoFile = createPhotoFile()
+//            newPhotoUri = photoFile.absolutePath
+//            startPhotoIntent(photoFile)
+//        }
+//    }
+
+
+//    private val onEditPhotoType = Observer<PlantPhoto.Type> { plantPhotoType ->
+//        val dialog = PhotoTypeDialogFragment()
+//        dialog.photoTypeSelected.observe(this,Observer<PlantPhoto.Type> {
+//
+//        })
+//        dialog.show(fragmentManager, "tag")
 //    }
 
     private fun bindClickListeners() {

@@ -24,6 +24,7 @@
     <string name="diameter">Diameter</string>
     <string name="trunk_diameter">Trunk diameter</string>
     <string name="plant_type">Plant Type</string>
+    <string name="select_type">Select Type</string>
     <string name="starred">Starred</string>
     <string name="history">History</string>
     <string name="suggested_common">Suggested common names:</string>

@@ -116,17 +116,19 @@
                 app:layout_constraintEnd_toEndOf="@id/scientificNameTextInput"
                 tools:ignore="ContentDescription" />
 
-            <androidx.appcompat.widget.AppCompatImageView
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/editNamesButton"
-                android:layout_width="@dimen/image_button_size"
-                android:layout_height="@dimen/image_button_size"
-                android:layout_marginBottom="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
-                android:scaleType="fitCenter"
-                android:tint="@color/colorPrimaryDark"
+                app:fabSize="mini"
+                app:maxImageSize="@dimen/mini_fab_max_image_size"
+                app:backgroundTint="@color/colorWhite"
+                app:tint="@color/colorPrimaryDark"
                 app:srcCompat="@drawable/ic_edit_black_24dp"
-                app:layout_constraintBottom_toTopOf="@id/nameDivider"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toTopOf="@id/commonNameText"
+                app:layout_constraintBottom_toBottomOf="@id/scientificNameText"
+                app:layout_constraintEnd_toEndOf="parent"  />
 
             <View
                 android:id="@+id/nameDivider"

@@ -4,7 +4,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- TODO: Use a generic photo icon instead of photo_type_flower-->
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/plantPhoto"
         android:layout_width="wrap_content"
@@ -14,30 +13,41 @@
         app:srcCompat="@drawable/photo_type_flower"
         />
 
-    <!--<androidx.appcompat.widget.AppCompatImageView-->
-        <!--android:id="@+id/photoTypeIcon"-->
-        <!--android:layout_width="@dimen/image_button_size"-->
-        <!--android:layout_height="@dimen/image_button_size"-->
-        <!--android:layout_marginTop="8dp"-->
-        <!--android:layout_marginEnd="8dp"-->
-        <!--android:scaleType="fitCenter"-->
-        <!--app:layout_constraintTop_toTopOf="@id/plantPhoto"-->
-        <!--app:layout_constraintEnd_toEndOf="@id/plantPhoto"-->
-        <!--app:srcCompat="@drawable/photo_type_full" />-->
-
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/photoEditButton"
-        android:layout_width="@dimen/image_button_size"
-        android:layout_height="@dimen/image_button_size"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:scaleType="fitCenter"
-        android:tint="@color/colorPrimaryDark"
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/editPhotoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/mini_fab_margin"
+        android:layout_gravity="bottom|end"
+        app:fabSize="mini"
+        app:maxImageSize="@dimen/mini_fab_max_image_size"
+        app:backgroundTint="@color/colorWhite"
+        app:tint="@color/colorPrimaryDark"
         app:srcCompat="@drawable/ic_edit_black_24dp"
-        app:layout_constraintBottom_toBottomOf="@id/plantPhotoFull"
-        app:layout_constraintEnd_toEndOf="@id/plantPhotoFull" />
-    <!--android:foreground="@drawable/ic_edit_black_24dp"-->
-    <!--android:background="@drawable/ic_edit_outline_24dp"-->
+        app:layout_constraintBottom_toBottomOf="@id/plantPhoto"
+        app:layout_constraintEnd_toEndOf="@id/plantPhoto" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/plantTypeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/mini_fab_margin"
+        android:layout_gravity="top|end"
+        app:fabSize="mini"
+        app:maxImageSize="@dimen/mini_fab_max_image_size"
+        app:backgroundTint="@color/colorWhite"
+        app:srcCompat="@drawable/plant_type_tree"
+        app:layout_constraintTop_toTopOf="@id/plantPhoto"
+        app:layout_constraintEnd_toEndOf="@id/plantPhoto" />
 
+    <!--<androidx.appcompat.widget.AppCompatImageView-->
+    <!--android:id="@+id/photoTypeIcon"-->
+    <!--android:layout_width="@dimen/image_button_size"-->
+    <!--android:layout_height="@dimen/image_button_size"-->
+    <!--android:layout_marginTop="8dp"-->
+    <!--android:layout_marginEnd="8dp"-->
+    <!--android:scaleType="fitCenter"-->
+    <!--app:layout_constraintTop_toTopOf="@id/plantPhoto"-->
+    <!--app:layout_constraintEnd_toEndOf="@id/plantPhoto"-->
+    <!--app:srcCompat="@drawable/photo_type_full" />-->
 </merge>

@@ -34,8 +34,7 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
-
-// TODO: Show PlantType icon in confirm plant and allow edit (since might be auto-selected from db) -> create dialog
+// TODO: Add plantType + editPhoto buttons in PlantDetails image (like confirm frag)
 // TODO: Investigate why app start time is so long
 // TODO: Show satellite stats too
 
@@ -251,7 +250,7 @@ class MapFragment : BaseFragment() {
                 bundleOf("userId" to viewModel.userId) )
     }
 
-    // TODO: REMOVE (Temp for NewPlantConfirmFragment)
+//     TODO: REMOVE (Temp for NewPlantConfirmFragment)
 //    private val onNavigateToNewPlant = Observer<Unit> {
 //        NavHostFragment.findNavController(this).navigate(R.id.newPlantConfirmFragment, createBundle() )
 //    }
@@ -260,7 +259,7 @@ class MapFragment : BaseFragment() {
     private fun createBundle(): Bundle {
         return bundleOf(
                 userIdKey to viewModel.userId,
-                plantTypeKey to 2L,
+                plantTypeKey to 2,
 //                photoUriKey to "",
                 commonNameKey to "Common",
                 scientificNameKey to "Latin",
