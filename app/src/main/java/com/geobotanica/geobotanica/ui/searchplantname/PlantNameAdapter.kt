@@ -1,5 +1,6 @@
 package com.geobotanica.geobotanica.ui.searchplantname
 
+import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,6 +37,8 @@ class PlantNameAdapter(
         
         val resources = holder.view.context.resources
         holder.plantName.text = item.plantName
+        if (item.hasTag(SCIENTIFIC))
+            holder.plantName.setTypeface(null, Typeface.ITALIC)
 
         val plantNameIcon = when {
             item.hasTag(COMMON) -> R.drawable.common_name

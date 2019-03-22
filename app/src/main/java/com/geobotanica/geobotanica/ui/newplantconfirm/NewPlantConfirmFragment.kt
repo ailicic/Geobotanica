@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
@@ -24,6 +25,7 @@ import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import kotlinx.android.synthetic.main.plant_photo_compound_view.view.*
 import java.io.File
 import javax.inject.Inject
+
 
 // TODO: Clicking on photo should blow it up (show type icon and edit/delete button there too)
 
@@ -204,7 +206,10 @@ class NewPlantConfirmFragment : BaseFragment() {
     }
 
     private fun setNamesEditable(enableEdits: Boolean) {
+        val layoutParams = nameDivider.layoutParams as ConstraintLayout.LayoutParams
         if (enableEdits) {
+            layoutParams.topToBottom = scientificNameTextInput.id
+
             commonNameText.isVisible = false
             commonNameTextInput.isVisible =true
 
@@ -214,6 +219,8 @@ class NewPlantConfirmFragment : BaseFragment() {
             editNamesButton.isVisible = false
             nameDivider.isVisible = false
         } else {
+            layoutParams.topToBottom = editNamesButton.id
+
             commonNameTextInput.isVisible = false
             if (commonNameTextInput.isNotEmpty()) {
                 val text = commonNameEditText.text.toString().trim()

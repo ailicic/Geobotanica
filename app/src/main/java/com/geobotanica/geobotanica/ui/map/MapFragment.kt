@@ -33,7 +33,6 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
-// TODO: Move photo buttons in Confirm outside photo if portrait
 
 // LONG TERM
 // TODO: Create download map/db activity and utilize offline map tiles
@@ -190,8 +189,8 @@ class MapFragment : BaseFragment() {
     private fun init() {
 //        // TODO: Remove
 //        TaxaDatabase.getInstance(appContext).close()
-        NavHostFragment.findNavController(this).navigate(
-                R.id.searchPlantNameFragment, createBundle() )
+//        NavHostFragment.findNavController(this).navigate(
+//                R.id.searchPlantNameFragment, createBundle() )
 
 
         initMap()
@@ -243,16 +242,16 @@ class MapFragment : BaseFragment() {
         }
     }
 
-//    private val onNavigateToNewPlant = Observer<Unit> {
-//        NavHostFragment.findNavController(this).navigate(
-//                R.id.newPlantPhotoFragment,
-//                bundleOf("userId" to viewModel.userId) )
-//    }
+    private val onNavigateToNewPlant = Observer<Unit> {
+        NavHostFragment.findNavController(this).navigate(
+                R.id.newPlantPhotoFragment,
+                bundleOf("userId" to viewModel.userId) )
+    }
 
 //     TODO: REMOVE (Temp for NewPlantConfirmFragment)
-    private val onNavigateToNewPlant = Observer<Unit> {
-        NavHostFragment.findNavController(this).navigate(R.id.newPlantConfirmFragment, createBundle() )
-    }
+//    private val onNavigateToNewPlant = Observer<Unit> {
+//        NavHostFragment.findNavController(this).navigate(R.id.newPlantConfirmFragment, createBundle() )
+//    }
 
     // TODO: REMOVE
     private fun createBundle(): Bundle {

@@ -1,6 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <dimen name="fab_margin">16dp</dimen>
-    <dimen name="mini_fab_margin">8dp</dimen>
     <dimen name="design_fab_image_size" tools:override="true">36dp</dimen>
     <dimen name="image_button_size">30dp</dimen>
     <dimen name="plant_type_icon_layout_width">128dp</dimen>>
