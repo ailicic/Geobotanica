@@ -64,7 +64,7 @@ class SearchPlantNameFragment : BaseFragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        inflater?.inflate(com.geobotanica.geobotanica.R.menu.new_plant_name, menu)
+        inflater?.inflate(R.menu.new_plant_name, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 

@@ -17,6 +17,7 @@ import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.User
+import com.geobotanica.geobotanica.data_taxa.TaxaDatabase
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -34,8 +35,14 @@ import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
 
+// TODO: Create custom UI element for multiple photos of single plant
+//      Swipe left right for next photo. Photo selector/filter (multiselect, all/none toggle)
+
 // LONG TERM
 // TODO: Create download map/db activity and utilize offline map tiles
+// TODO: Login screen
+    // https://developer.android.com/training/id-auth/identify.html
+    // https://developer.android.com/training/id-auth/custom_auth
 // TODO: Investigate why app start time is so long (should be less of an issue after login/download screen)
 // TODO: Add plantType + editPhoto buttons in PlantDetails image (like confirm frag)
 // TODO: Use inline on functions that accept lambda parameters
@@ -187,8 +194,10 @@ class MapFragment : BaseFragment() {
     }
 
     private fun init() {
-//        // TODO: Remove
+        // TODO: Remove (USED TO INIT taxa.db)
 //        TaxaDatabase.getInstance(appContext).close()
+
+        // TODO: REMOVE
 //        NavHostFragment.findNavController(this).navigate(
 //                R.id.searchPlantNameFragment, createBundle() )
 
