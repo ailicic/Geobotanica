@@ -8,47 +8,48 @@
     android:id="@+id/plantMeasurement" >
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/measurementNameText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:textColor="@color/colorBlack"
         app:layout_constraintStart_toStartOf="@id/plantMeasurement"
-        app:layout_constraintBottom_toBottomOf="@+id/editText1" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/measurementEditText" />
+    <!--app:layout_constraintStart_toStartOf="parent"-->
 
     <EditText
-        android:id="@+id/editText1"
+        android:id="@+id/measurementEditText"
         android:layout_width="48dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:ems="10"
         android:inputType="numberDecimal"
         app:layout_constraintTop_toTopOf="@id/plantMeasurement"
-        app:layout_constraintStart_toEndOf="@id/textView"
+        app:layout_constraintStart_toEndOf="@id/measurementNameText"
         tools:ignore="LabelFor" />
 
     <Spinner
-        android:id="@+id/spinner"
+        android:id="@+id/measurementUnitSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:entries="@array/measurement_unit"
-        app:layout_constraintStart_toEndOf="@+id/editText1"
-        app:layout_constraintBottom_toBottomOf="@+id/editText1" />
+        app:layout_constraintStart_toEndOf="@+id/measurementEditText"
+        app:layout_constraintBottom_toBottomOf="@+id/measurementEditText" />
 
     <EditText
-        android:id="@+id/editText2"
+        android:id="@+id/measurementInchesEditText"
         android:layout_width="48dp"
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="numberDecimal"
         android:visibility="invisible"
         app:layout_constraintTop_toTopOf="@id/plantMeasurement"
-        app:layout_constraintStart_toEndOf="@id/spinner"
+        app:layout_constraintStart_toEndOf="@id/measurementUnitSpinner"
         tools:ignore="LabelFor" />
 
     <TextView
-        android:id="@+id/inchesTextView"
+        android:id="@+id/inchesText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -57,7 +58,7 @@
         android:textSize="16sp"
         android:textColor="@color/colorBlack"
         android:visibility="invisible"
-        app:layout_constraintStart_toEndOf="@id/editText2"
-        app:layout_constraintBottom_toBottomOf="@+id/editText1" />
+        app:layout_constraintStart_toEndOf="@id/measurementInchesEditText"
+        app:layout_constraintBottom_toBottomOf="@+id/measurementEditText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
