@@ -18,19 +18,6 @@
         />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/plantTypeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="@dimen/fab_margin"
-        app:fabSize="mini"
-        app:maxImageSize="@dimen/mini_fab_max_image_size"
-        app:backgroundTint="@color/colorWhite"
-        app:srcCompat="@drawable/plant_type_tree"
-        app:layout_constraintTop_toTopOf="@id/plantPhoto"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/editPhotoButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

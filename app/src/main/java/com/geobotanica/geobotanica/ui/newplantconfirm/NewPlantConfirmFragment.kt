@@ -7,9 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.doOnPreDraw
-import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
@@ -19,10 +17,12 @@ import com.geobotanica.geobotanica.databinding.FragmentNewPlantConfirmBinding
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.util.*
+import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.getFromBundle
+import com.geobotanica.geobotanica.util.getNullableFromBundle
+import com.geobotanica.geobotanica.util.observeAfterUnsubscribe
 import kotlinx.android.synthetic.main.fragment_new_plant_confirm.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
-import kotlinx.android.synthetic.main.plant_photo_compound_view.view.*
 import java.io.File
 import javax.inject.Inject
 
@@ -69,7 +69,6 @@ class NewPlantConfirmFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setMainPlantPhoto()
-//        initMeasurementEditViews()
         bindViewModel()
         bindClickListeners()
     }
@@ -77,15 +76,6 @@ class NewPlantConfirmFragment : BaseFragment() {
     private fun setMainPlantPhoto() {
         plantPhotoFull.doOnPreDraw { plantPhotoFull.setPhoto(viewModel.photoUri) }
     }
-
-//    private fun initMeasurementEditViews() {
-//        viewModel.heightMeasurement?.let { heightMeasurementView.setMeasurement(it) }
-//        viewModel.diameterMeasurement?.let{ diameterMeasurementView.setMeasurement(it) }
-//
-//        if (viewModel.plantType == Plant.Type.TREE) {
-//            viewModel.trunkDiameterMeasurement?.let { trunkDiameterMeasurementView.setMeasurement(it) }
-//        }
-//    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
@@ -110,23 +100,8 @@ class NewPlantConfirmFragment : BaseFragment() {
     }
 
     private fun bindViewModel() {
-        plantPhotoFull.editPlantType.observeAfterUnsubscribe(this, onClickEditPlantType)
         plantPhotoFull.editPhoto.observeAfterUnsubscribe(this, onClickEditPhoto)
-//        plantPhotoComplete.editPhotoType.observeAfterUnsubscribe(this, onEditPhotoType)
-    }
-
-    private val onClickEditPlantType = Observer<Plant.Type> {
-        EditPlantTypeDialog().run {
-            onPlantTypeSelected = ::onNewPlantType
-            show(this@NewPlantConfirmFragment.fragmentManager,"tag")
-        }
-    }
-
-    private fun onNewPlantType(plantType: Plant.Type) {
-        val plantTypeDrawables = resources.obtainTypedArray(R.array.plantTypes)
-        plantPhotoFull.plantTypeButton.setImageResource(plantTypeDrawables.getResourceId(plantType.ordinal, -1))
-        plantTypeDrawables.recycle()
-        viewModel.plantType = plantType
+//        plantPhotoComplete.editPhotoType.observeAfterUnsubscribe(this, onEditPhotoType) -> TRIGGERED BY EDIT PHOTO DIALOG
     }
 
     private val onClickEditPhoto = Observer<Int?> {
@@ -149,7 +124,6 @@ class NewPlantConfirmFragment : BaseFragment() {
 //        }
 //    }
 
-
 //    private val onEditPhotoType = Observer<PlantPhoto.Type> { plantPhotoType ->
 //        val dialog = PhotoTypeDialogFragment()
 //        dialog.photoTypeSelected.observe(this,Observer<PlantPhoto.Type> {
@@ -159,89 +133,31 @@ class NewPlantConfirmFragment : BaseFragment() {
 //    }
 
     private fun bindClickListeners() {
-        editNamesButton.setOnClickListener(::onClickEditNames)
-        commonNameEditText.onTextChanged(::onCommonEditTextChanged)
-        resetCommonButton.setOnClickListener(::onClickResetCommon)
-        scientificNameEditText.onTextChanged(::onScientificEditTextChanged)
-        resetScientificButton.setOnClickListener(::onResetScientificName)
-//        addPhotoButton.setOnClickListener(::onAddPhotoClicked)
-//        editMeasurementsButton.setOnClickListener(::onMeasurementsEditClicked)
+        plantTypeButton.setOnClickListener(::onClickEditPlantType)
+//        editNamesButton.setOnClickListener(::onClickEditNames) -> NEED DIALOG
+//        addPhotoButton.setOnClickListener(::onAddPhotoClicked) -> Should trigger photo type selection dialog
+//        editMeasurementsButton.setOnClickListener(::onMeasurementsEditClicked) -> NEED DIALOG
         fab.setOnClickListener(::onFabClicked)
     }
 
 
-    private fun onCommonEditTextChanged(editText: String) {
-        resetCommonButton.isVisible = editText != viewModel.commonName
-    }
-
     @Suppress("UNUSED_PARAMETER")
-    private fun onClickResetCommon(view: View) {
-        commonNameEditText.setText(viewModel.commonName)
-        commonNameEditText.setSelection(viewModel.commonName!!.length)
-    }
-
-    private fun onScientificEditTextChanged(editText: String) {
-        resetScientificButton.isVisible = editText != viewModel.scientificName
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    private fun onResetScientificName(view: View) {
-        scientificNameEditText.setText(viewModel.scientificName)
-        scientificNameEditText.setSelection(viewModel.scientificName!!.length)
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    private fun onClickEditNames(view: View) {
-        if (!isPlantNameValid())
-            return
-        disableTextEdits()
-        setNamesEditable(true)
-    }
-
-    private fun disableTextEdits() {
-        if (commonNameTextInput.isVisible || scientificNameTextInput.isVisible)
-            setNamesEditable(false)
-//        if (heightMeasurementView.isVisible)
-//            setMeasurementsEditable(false)
-    }
-
-    private fun setNamesEditable(enableEdits: Boolean) {
-        val layoutParams = nameDivider.layoutParams as ConstraintLayout.LayoutParams
-        if (enableEdits) {
-            layoutParams.topToBottom = scientificNameTextInput.id
-
-            commonNameText.isVisible = false
-            commonNameTextInput.isVisible =true
-
-            scientificNameText.isVisible = false
-            scientificNameTextInput.isVisible = true
-
-            editNamesButton.isVisible = false
-            nameDivider.isVisible = false
-        } else {
-            layoutParams.topToBottom = editNamesButton.id
-
-            commonNameTextInput.isVisible = false
-            if (commonNameTextInput.isNotEmpty()) {
-                val text = commonNameEditText.text.toString().trim()
-                commonNameEditText.setText(text)
-                commonNameText.text = text
-                commonNameText.isVisible = true
-            }
-            scientificNameTextInput.isVisible = false
-            if (scientificNameTextInput.isNotEmpty()) {
-                val text = scientificNameEditText.text.toString().trim()
-                scientificNameEditText.setText(text)
-                scientificNameText.text = text
-                scientificNameText.isVisible = true
-            }
-            editNamesButton.isVisible = true
-            nameDivider.isVisible = true
+    private fun onClickEditPlantType(view: View) {
+        EditPlantTypeDialog().run {
+            onPlantTypeSelected = ::onNewPlantType
+            show(this@NewPlantConfirmFragment.fragmentManager,"tag")
         }
     }
 
-    // TODO: Show icon in top right of image. Show edit icon in bottom right
-    // TODO: Create custom view for each image with icons
+    private fun onNewPlantType(plantType: Plant.Type) {
+        val plantTypeDrawables = resources.obtainTypedArray(R.array.plantTypes)
+        plantTypeButton.setImageResource(plantTypeDrawables.getResourceId(plantType.ordinal, -1))
+        plantTypeDrawables.recycle()
+        viewModel.plantType = plantType
+    }
+
+
+
     // TODO: After add photo, need screen to select photo type, then camera screen to take photo
     // TODO: Use ConstraintLayout for everything
 //    @Suppress("UNUSED_PARAMETER")
@@ -252,55 +168,11 @@ class NewPlantConfirmFragment : BaseFragment() {
 //        showToast("Add photo Clicked")
 //    }
 
-//    @Suppress("UNUSED_PARAMETER")
-//    private fun onMeasurementsEditClicked(view: View) {
-//        if (!isPlantNameValid())
-//            return
-//        disableTextEdits()
-//        setMeasurementsEditable(true)
-//    }
-
-//    private fun setMeasurementsEditable(enableEdits: Boolean) {
-//        if (enableEdits) {
-//            editMeasurementsButton.isVisible = false
-//            heightText.isVisible = false
-//            diameterText.isVisible = false
-//            trunkDiameterText.isVisible = false
-//            heightMeasurementView.isVisible = true
-//            diameterMeasurementView.isVisible = true
-//            if (viewModel.plantType == Plant.Type.TREE)
-//                trunkDiameterMeasurementView.isVisible = true
-//        } else {
-//            saveMeasurementEdits()
-//            editMeasurementsButton.isVisible = true
-//            heightMeasurementView.isVisible = false
-//            diameterMeasurementView.isVisible = false
-//            trunkDiameterMeasurementView.isVisible = false
-//            heightText.isVisible = true
-//            diameterText.isVisible = true
-//            if (viewModel.plantType == Plant.Type.TREE) {
-//                trunkDiameterText.isVisible = true
-//            }
-//        }
-//    }
-
-//    private fun saveMeasurementEdits() {
-//        viewModel.heightMeasurement = heightMeasurementView.getMeasurement()
-//        heightText.text = viewModel.heightMeasurement?.toHeightString()
-//        viewModel.diameterMeasurement = diameterMeasurementView.getMeasurement()
-//        diameterText.text = viewModel.diameterMeasurement?.toDiameterString()
-//        if (viewModel.plantType == Plant.Type.TREE) {
-//            viewModel.trunkDiameterMeasurement = trunkDiameterMeasurementView.getMeasurement()
-//            trunkDiameterText.text = viewModel.trunkDiameterMeasurement?.toTrunkDiameterString()
-//        }
-//    }
 
     @Suppress("UNUSED_PARAMETER")
     private fun onFabClicked(view: View) {
-        if (!isPlantNameValid() || !isLocationValid())
+        if (!isLocationValid())
             return
-        nullIdsIfInvalid()
-        updateViewModel()
         gps.currentLocation?.let { viewModel.location = it }
 
         viewModel.savePlantComposite()
@@ -309,19 +181,6 @@ class NewPlantConfirmFragment : BaseFragment() {
         val navController = activity.findNavController(R.id.fragment)
         navController.popBackStack(R.id.mapFragment, false)
         activity.currentLocation = null
-    }
-
-    private fun isPlantNameValid(): Boolean {
-        if (commonNameTextInput.isEmpty() && scientificNameTextInput.isEmpty()) {
-            showSnackbar("Provide a plant name")
-            return false
-        }
-
-//        if (viewModel.heightMeasurement != null && isMeasurementEmpty() ) {
-//            showSnackbar("Provide plant measurements")
-//            return false
-//        }
-        return true
     }
 
     private fun isLocationValid(): Boolean {
@@ -335,29 +194,111 @@ class NewPlantConfirmFragment : BaseFragment() {
         }
         return true
     }
+}
 
-    private fun nullIdsIfInvalid() {
-        viewModel.vernacularId?.let {
-            if (commonNameTextInput.toTrimmedString() != viewModel.commonName)
-                viewModel.vernacularId = null
-        }
-        viewModel.taxonId?.let {
-            if (scientificNameTextInput.toTrimmedString() != viewModel.scientificName)
-                viewModel.taxonId = null
-        }
-    }
 
-    private fun updateViewModel() {
-        val commonName = commonNameTextInput.toTrimmedString()
-        val scientificName = scientificNameTextInput.toTrimmedString()
+///////////////// MOVE TO EDIT PLANT NAME DIALOG
 
-        viewModel.commonName = if (commonName.isEmpty()) null else commonName
-        viewModel.scientificName = if (scientificName.isEmpty()) null else scientificName
-    }
+//        commonNameEditText.onTextChanged(::onCommonEditTextChanged)
+//        resetCommonButton.setOnClickListener(::onClickResetCommon)
+//        scientificNameEditText.onTextChanged(::onScientificEditTextChanged)
+//        resetScientificButton.setOnClickListener(::onResetScientificName)
+
+
+//    private fun onCommonEditTextChanged(editText: String) {
+//        resetCommonButton.isVisible = editText != viewModel.commonName
+//    }
+//
+//    @Suppress("UNUSED_PARAMETER")
+//    private fun onClickResetCommon(view: View) {
+//        commonNameEditText.setText(viewModel.commonName)
+//        commonNameEditText.setSelection(viewModel.commonName!!.length)
+//    }
+
+//    private fun onScientificEditTextChanged(editText: String) {
+//        resetScientificButton.isVisible = editText != viewModel.scientificName
+//    }
+//
+//    @Suppress("UNUSED_PARAMETER")
+//    private fun onResetScientificName(view: View) {
+//        scientificNameEditText.setText(viewModel.scientificName)
+//        scientificNameEditText.setSelection(viewModel.scientificName!!.length)
+//    }
+
+//    @Suppress("UNUSED_PARAMETER")
+//    private fun onClickEditNames(view: View) {
+//        if (!isPlantNameValid())
+//            return
+//        disableTextEdits()
+//        setNamesEditable(true)
+//    }
+
+//    private fun updateViewModel() {
+//        val commonName = commonNameTextInput.toTrimmedString()
+//        val scientificName = scientificNameTextInput.toTrimmedString()
+
+//        viewModel.commonName = if (commonName.isEmpty()) null else commonName
+//        viewModel.scientificName = if (scientificName.isEmpty()) null else scientificName
+//    }
+
+//    private fun nullIdsIfInvalid() {
+//        viewModel.vernacularId?.let {
+//            if (commonNameTextInput.toTrimmedString() != viewModel.commonName)
+//                viewModel.vernacularId = null
+//        }
+//        viewModel.taxonId?.let {
+//            if (scientificNameTextInput.toTrimmedString() != viewModel.scientificName)
+//                viewModel.taxonId = null
+//        }
+//    }
+
+//    private fun isPlantNameValid(): Boolean {
+//        if (commonNameTextInput.isEmpty() && scientificNameTextInput.isEmpty()) {
+//            showSnackbar("Provide a plant name")
+//            return false
+//        }
+
+//        if (viewModel.heightMeasurement != null && isMeasurementEmpty() ) {
+//            showSnackbar("Provide plant measurements")
+//            return false
+//        }
+//        return true
+//    }
+
+
+///////////////// MOVE TO EDIT MEASUREMENTS DIALOG
+
+//    private fun initMeasurementEditViews() {
+//        viewModel.heightMeasurement?.let { heightMeasurementView.setMeasurement(it) }
+//        viewModel.diameterMeasurement?.let{ diameterMeasurementView.setMeasurement(it) }
+//
+//        if (viewModel.plantType == Plant.Type.TREE) {
+//            viewModel.trunkDiameterMeasurement?.let { trunkDiameterMeasurementView.setMeasurement(it) }
+//        }
+//    }
+
+//    @Suppress("UNUSED_PARAMETER")
+//    private fun onMeasurementsEditClicked(view: View) {
+//        if (!isPlantNameValid())
+//            return
+//        disableTextEdits()
+//        setMeasurementsEditable(true)
+//    }
+
+
+//    private fun saveMeasurementEdits() {
+//        viewModel.heightMeasurement = heightMeasurementView.getMeasurement()
+//        heightText.text = viewModel.heightMeasurement?.toHeightString()
+//        viewModel.diameterMeasurement = diameterMeasurementView.getMeasurement()
+//        diameterText.text = viewModel.diameterMeasurement?.toDiameterString()
+//        if (viewModel.plantType == Plant.Type.TREE) {
+//            viewModel.trunkDiameterMeasurement = trunkDiameterMeasurementView.getMeasurement()
+//            trunkDiameterText.text = viewModel.trunkDiameterMeasurement?.toTrunkDiameterString()
+//        }
+//    }
 
 //    private fun isMeasurementEmpty(): Boolean {
 //        return heightMeasurementView.isEmpty() ||
 //                diameterMeasurementView.isEmpty() ||
 //                ( viewModel.plantType == Plant.Type.TREE && trunkDiameterMeasurementView.isEmpty() )
 //    }
-}

@@ -34,7 +34,7 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
-
+// TODO: In ConfirmPlantFragment, dialog for editing plant name or measurement. In-place editing is too wonky for layout.
 // TODO: Create custom UI element for multiple photos of single plant
 //      Swipe left right for next photo. Photo selector/filter (multiselect, all/none toggle)
 
@@ -198,8 +198,8 @@ class MapFragment : BaseFragment() {
 //        TaxaDatabase.getInstance(appContext).close()
 
         // TODO: REMOVE
-//        NavHostFragment.findNavController(this).navigate(
-//                R.id.searchPlantNameFragment, createBundle() )
+        NavHostFragment.findNavController(this).navigate(
+                R.id.newPlantConfirmFragment, createBundle() )
 
 
         initMap()

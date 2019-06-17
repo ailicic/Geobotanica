@@ -5,9 +5,8 @@ import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.util.setScaledBitmap
 import com.geobotanica.geobotanica.util.SingleLiveEvent
+import com.geobotanica.geobotanica.util.setScaledBitmap
 import kotlinx.android.synthetic.main.plant_photo_compound_view.view.*
 
 class PlantPhotoCompoundView @JvmOverloads constructor(
@@ -17,12 +16,10 @@ class PlantPhotoCompoundView @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
 //    val editPhotoType = SingleLiveEvent<PlantPhoto.Type>()
-    val editPlantType = SingleLiveEvent<Plant.Type>()
     val editPhoto = SingleLiveEvent<Int>()
 
     init {
         inflate(getContext(), R.layout.plant_photo_compound_view,this)
-        plantTypeButton.setOnClickListener { editPlantType.call() }
         editPhotoButton.setOnClickListener { editPhoto.call() }
 //        photoTypeIcon.setOnClickListener { editPhotoType.call() }
     }

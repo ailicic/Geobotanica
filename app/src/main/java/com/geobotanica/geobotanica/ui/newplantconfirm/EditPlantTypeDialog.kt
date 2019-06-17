@@ -22,7 +22,7 @@ class EditPlantTypeDialog : DialogFragment() {
         customView = LayoutInflater.from(context).inflate(R.layout.dialog_plant_type, null)
         return activity?.let {
             AlertDialog.Builder(it).run {
-                setTitle(getString(R.string.select_type))
+                setTitle(getString(R.string.select_plant_type))
                 setView(customView)
                 setNegativeButton(getString(R.string.cancel)) { _, _ -> }
                 create()

@@ -81,7 +81,7 @@ dependencies {
     // KTX
     implementation "androidx.core:core-ktx:1.0.2"
 
-    // Navigation TODO: Use androidx?
+    // Navigation TODO: Use androidx if/when it becomes available
     def navigation_version = "1.0.0"
     implementation "android.arch.navigation:navigation-fragment-ktx:$navigation_version"
     implementation "android.arch.navigation:navigation-ui-ktx:$navigation_version"
