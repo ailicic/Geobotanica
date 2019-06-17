@@ -17,10 +17,9 @@ import com.geobotanica.geobotanica.databinding.FragmentNewPlantConfirmBinding
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.getFromBundle
-import com.geobotanica.geobotanica.util.getNullableFromBundle
-import com.geobotanica.geobotanica.util.observeAfterUnsubscribe
+import com.geobotanica.geobotanica.ui.dialogs.EditPlantNameDialog
+import com.geobotanica.geobotanica.ui.dialogs.EditPlantTypeDialog
+import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_new_plant_confirm.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
 import java.io.File
@@ -33,9 +32,6 @@ class NewPlantConfirmFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantConfirmViewModel>
     private lateinit var viewModel: NewPlantConfirmViewModel
 
-//    private lateinit var capturingPlantPhotoType: PlantPhoto.Type
-//    private var plantPhotoCompoundViews = mutableMapOf<PlantPhoto.Type,PlantPhotoCompoundView>()
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
@@ -43,8 +39,8 @@ class NewPlantConfirmFragment : BaseFragment() {
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
             photoUri = getFromBundle(photoUriKey)
-            commonName = getNullableFromBundle(commonNameKey)
-            scientificName = getNullableFromBundle(scientificNameKey)
+            commonName.value = getNullableFromBundle(commonNameKey)
+            scientificName.value = getNullableFromBundle(scientificNameKey)
             vernacularId = getNullableFromBundle(vernacularIdKey)
             taxonId = getNullableFromBundle(taxonIdKey)
             plantType = Plant.Type.fromFlag(getFromBundle(plantTypeKey))
@@ -68,13 +64,19 @@ class NewPlantConfirmFragment : BaseFragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setMainPlantPhoto()
-        bindViewModel()
+        updatePlantTypeIcon()
+        updateMainPlantPhoto()
         bindClickListeners()
     }
 
-    private fun setMainPlantPhoto() {
-        plantPhotoFull.doOnPreDraw { plantPhotoFull.setPhoto(viewModel.photoUri) }
+    private fun updatePlantTypeIcon() {
+        val plantTypeDrawables = resources.obtainTypedArray(R.array.plantTypes)
+        plantTypeButton.setImageResource(plantTypeDrawables.getResourceId(viewModel.plantType.ordinal, -1))
+        plantTypeDrawables.recycle()
+    }
+
+    private fun updateMainPlantPhoto() {
+        plantPhotoCompoundView.doOnPreDraw { plantPhotoCompoundView.setPhoto(viewModel.photoUri) }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -99,20 +101,16 @@ class NewPlantConfirmFragment : BaseFragment() {
         }
     }
 
-    private fun bindViewModel() {
-        plantPhotoFull.editPhoto.observeAfterUnsubscribe(this, onClickEditPhoto)
-//        plantPhotoComplete.editPhotoType.observeAfterUnsubscribe(this, onEditPhotoType) -> TRIGGERED BY EDIT PHOTO DIALOG
-    }
 
-    private val onClickEditPhoto = Observer<Int?> {
-        //        capturingPlantPhotoType = plantPhotoType
-
-        with (viewModel) {
-            val photoFile = createPhotoFile()
-            newPhotoUri = photoFile.absolutePath
-            startPhotoIntent(photoFile)
-        }
-    }
+//    private val onClickEditPhoto = Observer<Int?> {
+//        //        capturingPlantPhotoType = plantPhotoType
+//
+//        with (viewModel) {
+//            val photoFile = createPhotoFile()
+//            newPhotoUri = photoFile.absolutePath
+//            startPhotoIntent(photoFile)
+//        }
+//    }
 
 //    private val onAddPhoto = Observer<PlantPhoto.Type> { plantPhotoType ->
 //        capturingPlantPhotoType = plantPhotoType
@@ -134,7 +132,8 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     private fun bindClickListeners() {
         plantTypeButton.setOnClickListener(::onClickEditPlantType)
-//        editNamesButton.setOnClickListener(::onClickEditNames) -> NEED DIALOG
+        editPlantNameButton.setOnClickListener(::onClickEditNames)
+        plantPhotoCompoundView.editPhoto.observeAfterUnsubscribe(this, onClickEditPhoto)
 //        addPhotoButton.setOnClickListener(::onAddPhotoClicked) -> Should trigger photo type selection dialog
 //        editMeasurementsButton.setOnClickListener(::onMeasurementsEditClicked) -> NEED DIALOG
         fab.setOnClickListener(::onFabClicked)
@@ -142,20 +141,30 @@ class NewPlantConfirmFragment : BaseFragment() {
 
 
     @Suppress("UNUSED_PARAMETER")
-    private fun onClickEditPlantType(view: View) {
-        EditPlantTypeDialog().run {
-            onPlantTypeSelected = ::onNewPlantType
-            show(this@NewPlantConfirmFragment.fragmentManager,"tag")
-        }
+    private fun onClickEditNames(view: View) {
+        with(viewModel) {
+            EditPlantNameDialog(
+                    commonName.value.orEmpty(),
+                    scientificName.value.orEmpty(),
+                    ::updatePlantName
+            )
+        }.show(this.fragmentManager,"tag")
     }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onClickEditPlantType(view: View) =
+        EditPlantTypeDialog(viewModel.plantType, ::onNewPlantType).show(this.fragmentManager,"tag")
 
     private fun onNewPlantType(plantType: Plant.Type) {
-        val plantTypeDrawables = resources.obtainTypedArray(R.array.plantTypes)
-        plantTypeButton.setImageResource(plantTypeDrawables.getResourceId(plantType.ordinal, -1))
-        plantTypeDrawables.recycle()
         viewModel.plantType = plantType
+        updatePlantTypeIcon()
     }
 
+    private val onClickEditPhoto = Observer<Int?> {
+        val photoFile = createPhotoFile()
+        viewModel.newPhotoUri = photoFile.absolutePath
+        startPhotoIntent(photoFile)
+    }
 
 
     // TODO: After add photo, need screen to select photo type, then camera screen to take photo
@@ -197,75 +206,6 @@ class NewPlantConfirmFragment : BaseFragment() {
 }
 
 
-///////////////// MOVE TO EDIT PLANT NAME DIALOG
-
-//        commonNameEditText.onTextChanged(::onCommonEditTextChanged)
-//        resetCommonButton.setOnClickListener(::onClickResetCommon)
-//        scientificNameEditText.onTextChanged(::onScientificEditTextChanged)
-//        resetScientificButton.setOnClickListener(::onResetScientificName)
-
-
-//    private fun onCommonEditTextChanged(editText: String) {
-//        resetCommonButton.isVisible = editText != viewModel.commonName
-//    }
-//
-//    @Suppress("UNUSED_PARAMETER")
-//    private fun onClickResetCommon(view: View) {
-//        commonNameEditText.setText(viewModel.commonName)
-//        commonNameEditText.setSelection(viewModel.commonName!!.length)
-//    }
-
-//    private fun onScientificEditTextChanged(editText: String) {
-//        resetScientificButton.isVisible = editText != viewModel.scientificName
-//    }
-//
-//    @Suppress("UNUSED_PARAMETER")
-//    private fun onResetScientificName(view: View) {
-//        scientificNameEditText.setText(viewModel.scientificName)
-//        scientificNameEditText.setSelection(viewModel.scientificName!!.length)
-//    }
-
-//    @Suppress("UNUSED_PARAMETER")
-//    private fun onClickEditNames(view: View) {
-//        if (!isPlantNameValid())
-//            return
-//        disableTextEdits()
-//        setNamesEditable(true)
-//    }
-
-//    private fun updateViewModel() {
-//        val commonName = commonNameTextInput.toTrimmedString()
-//        val scientificName = scientificNameTextInput.toTrimmedString()
-
-//        viewModel.commonName = if (commonName.isEmpty()) null else commonName
-//        viewModel.scientificName = if (scientificName.isEmpty()) null else scientificName
-//    }
-
-//    private fun nullIdsIfInvalid() {
-//        viewModel.vernacularId?.let {
-//            if (commonNameTextInput.toTrimmedString() != viewModel.commonName)
-//                viewModel.vernacularId = null
-//        }
-//        viewModel.taxonId?.let {
-//            if (scientificNameTextInput.toTrimmedString() != viewModel.scientificName)
-//                viewModel.taxonId = null
-//        }
-//    }
-
-//    private fun isPlantNameValid(): Boolean {
-//        if (commonNameTextInput.isEmpty() && scientificNameTextInput.isEmpty()) {
-//            showSnackbar("Provide a plant name")
-//            return false
-//        }
-
-//        if (viewModel.heightMeasurement != null && isMeasurementEmpty() ) {
-//            showSnackbar("Provide plant measurements")
-//            return false
-//        }
-//        return true
-//    }
-
-
 ///////////////// MOVE TO EDIT MEASUREMENTS DIALOG
 
 //    private fun initMeasurementEditViews() {
@@ -302,3 +242,10 @@ class NewPlantConfirmFragment : BaseFragment() {
 //                diameterMeasurementView.isEmpty() ||
 //                ( viewModel.plantType == Plant.Type.TREE && trunkDiameterMeasurementView.isEmpty() )
 //    }
+
+
+
+//        if (viewModel.heightMeasurement != null && isMeasurementEmpty() ) {
+//            showSnackbar("Provide plant measurements")
+//            return false
+//        }

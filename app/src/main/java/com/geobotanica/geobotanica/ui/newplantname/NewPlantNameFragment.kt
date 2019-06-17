@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.core.os.bundleOf
+import androidx.core.view.isEmpty
 import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -219,8 +220,8 @@ class NewPlantNameFragment : BaseFragment() {
     }
 
     private fun saveViewModelState() {
-        val commonNameText = commonNameTextInput.toTrimmedString()
-        val scientificNameText = scientificNameTextInput.toTrimmedString()
+        val commonNameText = commonNameEditText.toTrimmedString()
+        val scientificNameText = scientificNameEditText.toTrimmedString()
         Lg.d("commonNameText=$commonNameText, scientificNameText=$scientificNameText")
         with (viewModel) {
             commonName = if (commonNameText.isEmpty()) null else commonNameText

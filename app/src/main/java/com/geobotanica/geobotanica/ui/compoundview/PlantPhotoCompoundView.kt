@@ -42,7 +42,7 @@ class PlantPhotoCompoundView @JvmOverloads constructor(
 //        }
 
     fun setPhoto(photoUri: String) {
-        plantPhoto.setScaledBitmap(photoUri)
+        plantPhotoImageView.setScaledBitmap(photoUri)
         isVisible = true
     }
 }

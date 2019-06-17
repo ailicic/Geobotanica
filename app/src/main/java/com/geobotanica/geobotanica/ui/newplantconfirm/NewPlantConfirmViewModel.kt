@@ -1,5 +1,6 @@
 package com.geobotanica.geobotanica.ui.newplantconfirm
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.*
@@ -29,8 +30,9 @@ class NewPlantConfirmViewModel @Inject constructor (
 
     var userId = 0L
     lateinit var plantType: Plant.Type
-    var commonName: String? = null
-    var scientificName: String? = null
+
+    val commonName = MutableLiveData<String>()
+    val scientificName = MutableLiveData<String>()
     var taxonId: Long? = null
     var vernacularId: Long? = null
     var heightMeasurement: Measurement? = null
@@ -49,11 +51,28 @@ class NewPlantConfirmViewModel @Inject constructor (
         runBlocking { job?.join() }
     }
 
+    fun updatePlantName(newCommonName: String, newScientificName: String) {
+        nullPlantIdsIfInvalid(newCommonName, newScientificName)
+        commonName.postValue(newCommonName)
+        scientificName.postValue(newScientificName)
+    }
+
+    fun nullPlantIdsIfInvalid(newCommonName: String, newScientificName: String) {
+        vernacularId?.let {
+            if (newCommonName != commonName.value)
+                vernacularId = null
+        }
+        taxonId?.let {
+            if (newScientificName != scientificName.value)
+                taxonId = null
+        }
+    }
+
     fun savePlantComposite() {
         job = GlobalScope.launch(Dispatchers.IO) {
             database.runInTransaction {
                 Lg.d("Saving PlantComposite to database now...")
-                val plant = Plant(userId, plantType, commonName, scientificName, vernacularId, taxonId)
+                val plant = Plant(userId, plantType, commonName.value, scientificName.value, vernacularId, taxonId)
                 plant.id = plantRepo.insert(plant)
                 Lg.d("Saved: $plant (id=${plant.id})")
 

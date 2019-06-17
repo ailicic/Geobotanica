@@ -42,7 +42,7 @@
             app:layout_constraintTop_toBottomOf="@id/commonNameText" />
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/plantPhotoFull"
+            android:id="@+id/plantPhoto"
             android:layout_width="match_parent"
             android:layout_height="192dp"
             android:layout_marginTop="8dp"
@@ -63,7 +63,7 @@
             android:background="@android:color/darker_gray"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/plantPhotoFull" />
+            app:layout_constraintTop_toBottomOf="@+id/plantPhoto" />
 
         <TextView
             android:id="@+id/heightText"

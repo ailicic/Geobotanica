@@ -16,6 +16,7 @@ import androidx.navigation.fragment.NavHostFragment
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.Location
+import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.data_taxa.TaxaDatabase
 import com.geobotanica.geobotanica.ui.BaseFragment
@@ -266,7 +267,7 @@ class MapFragment : BaseFragment() {
     private fun createBundle(): Bundle {
         return bundleOf(
                 userIdKey to viewModel.userId,
-                plantTypeKey to 2,
+                plantTypeKey to Plant.Type.FUNGUS.flag,
 //                photoUriKey to "",
                 commonNameKey to "Common",
                 scientificNameKey to "Latin",

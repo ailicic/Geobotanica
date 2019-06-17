@@ -28,12 +28,11 @@
                 app:fabSize="mini"
                 app:maxImageSize="@dimen/mini_fab_max_image_size"
                 app:backgroundTint="@color/colorWhite"
-                app:srcCompat="@drawable/plant_type_tree"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/editNamesButton"
+                android:id="@+id/editPlantNameButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/fab_margin"
@@ -73,75 +72,6 @@
                 app:layout_constraintBottom_toTopOf="@id/nameDivider"
                 app:layout_constraintStart_toEndOf="@id/plantTypeButton" />
 
-            <!--<com.google.android.material.textfield.TextInputLayout-->
-                <!--android:id="@+id/commonNameTextInput"-->
-                <!--android:layout_width="368dp"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_marginTop="16dp"-->
-                <!--android:visibility="gone"-->
-                <!--app:layout_constraintTop_toTopOf="parent"-->
-                <!--app:layout_constraintStart_toStartOf="parent">-->
-
-                <!--<com.google.android.material.textfield.TextInputEditText-->
-                    <!--android:id="@+id/commonNameEditText"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_marginEnd="16dp"-->
-                    <!--android:layout_marginStart="16dp"-->
-                    <!--android:text="@{ viewModel.commonName }"-->
-                    <!--android:inputType="textNoSuggestions"-->
-                    <!--android:hint="@string/common_name"  />-->
-
-            <!--</com.google.android.material.textfield.TextInputLayout>-->
-
-            <!--<androidx.appcompat.widget.AppCompatImageView-->
-                <!--android:id="@+id/resetCommonButton"-->
-                <!--android:layout_width="30dp"-->
-                <!--android:layout_height="30dp"-->
-                <!--android:layout_margin="16dp"-->
-                <!--android:scaleType="fitCenter"-->
-                <!--android:src="@drawable/ic_reset"-->
-                <!--android:tint="@color/colorPrimaryDark"-->
-                <!--android:visibility="gone"-->
-                <!--app:layout_constraintTop_toTopOf="@id/commonNameTextInput"-->
-                <!--app:layout_constraintBottom_toBottomOf="@id/commonNameTextInput"-->
-                <!--app:layout_constraintEnd_toEndOf="@id/commonNameTextInput"-->
-                <!--tools:ignore="ContentDescription" />-->
-
-            <!--<com.google.android.material.textfield.TextInputLayout-->
-                <!--android:id="@+id/scientificNameTextInput"-->
-                <!--android:layout_width="368dp"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_marginTop="8dp"-->
-                <!--android:visibility="gone"-->
-                <!--app:layout_constraintStart_toStartOf="parent"-->
-                <!--app:layout_constraintTop_toBottomOf="@id/commonNameTextInput">-->
-
-                <!--<com.google.android.material.textfield.TextInputEditText-->
-                    <!--android:id="@+id/scientificNameEditText"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_marginEnd="16dp"-->
-                    <!--android:layout_marginStart="16dp"-->
-                    <!--android:text="@{ viewModel.scientificName }"-->
-                    <!--android:textStyle="italic"-->
-                    <!--android:inputType="textNoSuggestions"-->
-                    <!--android:hint="@string/scientific_name"  />-->
-            <!--</com.google.android.material.textfield.TextInputLayout>-->
-
-            <!--<androidx.appcompat.widget.AppCompatImageView-->
-                <!--android:id="@+id/resetScientificButton"-->
-                <!--android:layout_width="30dp"-->
-                <!--android:layout_height="30dp"-->
-                <!--android:layout_margin="16dp"-->
-                <!--android:scaleType="fitCenter"-->
-                <!--android:src="@drawable/ic_reset"-->
-                <!--android:tint="@color/colorPrimaryDark"-->
-                <!--android:visibility="gone"-->
-                <!--app:layout_constraintTop_toTopOf="@id/scientificNameTextInput"-->
-                <!--app:layout_constraintBottom_toBottomOf="@id/scientificNameTextInput"-->
-                <!--app:layout_constraintEnd_toEndOf="@id/scientificNameTextInput"-->
-                <!--tools:ignore="ContentDescription" />-->
 
             <View
                 android:id="@+id/nameDivider"
@@ -156,7 +86,7 @@
                 app:layout_constraintRight_toRightOf="parent" />
 
             <com.geobotanica.geobotanica.ui.compoundview.PlantPhotoCompoundView
-                android:id="@+id/plantPhotoFull"
+                android:id="@+id/plantPhotoCompoundView"
                 android:layout_width="match_parent"
                 android:layout_height="192dp"
                 android:layout_marginTop="8dp"
@@ -184,7 +114,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:background="@android:color/darker_gray"
-                app:layout_constraintTop_toBottomOf="@+id/plantPhotoFull"
+                app:layout_constraintTop_toBottomOf="@+id/plantPhotoCompoundView"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent" />
 

@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui.newplantconfirm
+package com.geobotanica.geobotanica.ui.dialogs
 
 import android.app.Dialog
 import android.os.Bundle
@@ -12,17 +12,19 @@ import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.ui.newplanttype.PlantTypeAdapter
 import kotlinx.android.synthetic.main.dialog_plant_type.*
 
-class EditPlantTypeDialog : DialogFragment() {
+class EditPlantTypeDialog(
+        private val currentType: Plant.Type,
+        private val onPlantTypeSelected: (plantType: Plant.Type) -> Unit
+) : DialogFragment() {
 
     private lateinit var customView: View // Required for kotlinx synthetic bindings
-    lateinit var onPlantTypeSelected: (plantType: Plant.Type) -> Unit
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
         customView = LayoutInflater.from(context).inflate(R.layout.dialog_plant_type, null)
         return activity?.let {
             AlertDialog.Builder(it).run {
-                setTitle(getString(R.string.select_plant_type))
+                setTitle(getString(R.string.change_plant_type))
                 setView(customView)
                 setNegativeButton(getString(R.string.cancel)) { _, _ -> }
                 create()
@@ -36,7 +38,9 @@ class EditPlantTypeDialog : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        recyclerView.adapter = PlantTypeAdapter(Plant.Type.values().toList(), ::onPlantTypeClicked)
+        recyclerView.adapter = PlantTypeAdapter(
+                Plant.Type.values().toList().filter { it != currentType },
+                ::onPlantTypeClicked)
     }
 
     private fun onPlantTypeClicked(plantType: Plant.Type) {
