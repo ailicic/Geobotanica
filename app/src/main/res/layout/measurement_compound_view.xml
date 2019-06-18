@@ -1,41 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/plantMeasurement" >
+    android:orientation="horizontal">
 
     <TextView
         android:id="@+id/measurementNameText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:textColor="@color/colorBlack"
-        app:layout_constraintStart_toStartOf="@id/plantMeasurement"
-        app:layout_constraintBaseline_toBaselineOf="@+id/measurementEditText" />
-    <!--app:layout_constraintStart_toStartOf="parent"-->
+        android:textColor="@color/colorBlack" />
 
     <EditText
         android:id="@+id/measurementEditText"
         android:layout_width="48dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:ems="10"
         android:inputType="numberDecimal"
-        app:layout_constraintTop_toTopOf="@id/plantMeasurement"
-        app:layout_constraintStart_toEndOf="@id/measurementNameText"
-        tools:ignore="LabelFor" />
+        tools:ignore="Autofill,LabelFor" />
 
     <Spinner
         android:id="@+id/measurementUnitSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:entries="@array/measurement_unit"
-        app:layout_constraintStart_toEndOf="@+id/measurementEditText"
-        app:layout_constraintBottom_toBottomOf="@+id/measurementEditText" />
+        android:entries="@array/measurement_unit" />
 
     <EditText
         android:id="@+id/measurementInchesEditText"
@@ -44,9 +36,7 @@
         android:ems="10"
         android:inputType="numberDecimal"
         android:visibility="invisible"
-        app:layout_constraintTop_toTopOf="@id/plantMeasurement"
-        app:layout_constraintStart_toEndOf="@id/measurementUnitSpinner"
-        tools:ignore="LabelFor" />
+        tools:ignore="Autofill,LabelFor"  />
 
     <TextView
         android:id="@+id/inchesText"
@@ -55,10 +45,9 @@
         android:layout_marginStart="8dp"
         android:layout_marginBottom="8dp"
         android:text="@string/inches"
-        android:textSize="16sp"
         android:textColor="@color/colorBlack"
-        android:visibility="invisible"
-        app:layout_constraintStart_toEndOf="@id/measurementInchesEditText"
-        app:layout_constraintBottom_toBottomOf="@+id/measurementEditText" />
+        android:textSize="16sp"
+        android:visibility="invisible" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.appcompat.widget.LinearLayoutCompat>
+

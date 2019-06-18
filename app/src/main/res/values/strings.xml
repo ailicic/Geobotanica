@@ -26,6 +26,8 @@
     <string name="plant_type">Plant Type</string>
     <string name="change_plant_type">Change Plant Type</string>
     <string name="edit_plant_name">Edit Plant Name</string>
+    <string name="provide_plant_measurements">Provide Plant Measurements</string>
+    <string name="edit_plant_measurements">Edit Plant Measurements</string>
     <string name="starred">Starred</string>
     <string name="history">History</string>
     <string name="suggested_common">Suggested common names:</string>

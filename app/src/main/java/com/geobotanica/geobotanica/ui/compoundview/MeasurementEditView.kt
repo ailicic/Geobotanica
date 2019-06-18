@@ -8,9 +8,7 @@ import android.widget.AdapterView.OnItemSelectedListener
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.Measurement
-import com.geobotanica.geobotanica.util.Units
+import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.measurement_compound_view.view.*
 
 
@@ -20,22 +18,77 @@ class MeasurementEditView @JvmOverloads constructor(
         defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
+    var measurement: Measurement?
+        get() {
+            return if (isEmpty())
+                null
+            else
+                Measurement(value, units)
+        }
+        set(value) {
+            value?.let {
+                if (it.units == Units.FT) {
+                    val (feet, inches) = it.toFtIn()
+                    measurementEditText.setText(feet.toString())
+                    measurementInchesEditText.setText(inches.toString())
+                    measurementUnitSpinner.setSelection(Units.FT.ordinal)
+                } else {
+                    measurementEditText.setText(it.value.toString())
+                    measurementUnitSpinner.setSelection(it.units.ordinal)
+                }
+            }
+        }
+
+    val value: Float
+        get() {
+            val value = measurementEditText.text.toString().toFloat()
+            return if (measurementInchesEditText.isVisible) {
+                val inches = if (measurementInchesEditText.text.isEmpty()) 0F else measurementInchesEditText.text.toString().toFloat() / 12
+                value + inches
+            } else value
+
+        }
+
+    val units: Units
+        get() = Units.values()[measurementUnitSpinner.selectedItemId.toInt()]
+
     init {
 //        Lg.v("MeasurementCompoundView()")
         inflate(getContext(), R.layout.measurement_compound_view,this)
+        setStaticViewIds()
 
         setMeasurementNameText()
         bindListeners()
     }
 
+    private fun setStaticViewIds() { // Required for restoring state from bundle (e.g. use back to return here)
+        if (this.id == R.id.heightEditView) {
+            measurementEditText.id = R.id.heightValue
+            measurementUnitSpinner.id = R.id.heightUnits
+            measurementInchesEditText.id = R.id.heightInchesValue
+        }
+
+        if (this.id == R.id.diameterEditView) {
+            measurementEditText.id = R.id.diameterValue
+            measurementUnitSpinner.id = R.id.diameterUnits
+            measurementInchesEditText.id = R.id.diameterInchesValue
+        }
+
+        if (this.id == R.id.trunkDiameterEditView) {
+            measurementEditText.id = R.id.trunkDiamValue
+            measurementUnitSpinner.id = R.id.trunkDiamUnits
+            measurementInchesEditText.id = R.id.trunkDiamInchesValue
+        }
+    }
+
     private fun setMeasurementNameText() { // Instead of defining custom attribute for text.
-        if (this.id == R.id.heightMeasurementView)
+        if (this.id == R.id.heightEditView)
             measurementNameText.text = resources.getString(R.string.height)
 
-        if (this.id == R.id.diameterMeasurementView)
+        if (this.id == R.id.diameterEditView)
             measurementNameText.text = resources.getString(R.string.diameter)
 
-        if (this.id == R.id.trunkDiameterMeasurementView)
+        if (this.id == R.id.trunkDiameterEditView)
             measurementNameText.text = resources.getString(R.string.trunk_diameter)
     }
 
@@ -59,34 +112,12 @@ class MeasurementEditView @JvmOverloads constructor(
         }
     }
 
-    fun isEmpty() = measurementEditText.text.isEmpty()
-
-    fun getValue(): Float {
-        val value = measurementEditText.text.toString().toFloat()
-        return if (measurementInchesEditText.isVisible) {
-            val inches = if (measurementInchesEditText.text.isEmpty()) 0F else measurementInchesEditText.text.toString().toFloat() / 12
-            value + inches
-        } else value
+    fun onTextChanged(watcher: (String) -> Unit) {
+        measurementEditText.onTextChanged(watcher)
+        measurementInchesEditText.onTextChanged(watcher)
     }
 
-    fun getUnits() = Units.values()[measurementUnitSpinner.selectedItemId.toInt()]
+    fun isEmpty() = measurementEditText.isEmpty()
 
-    fun getMeasurement(): Measurement? {
-        return if (isEmpty())
-            null
-        else
-            Measurement(getValue(), getUnits())
-    }
-
-    fun setMeasurement(measurement: Measurement) {
-        if (measurement.units == Units.FT) {
-            val (feet, inches) = measurement.toFtIn()
-            measurementEditText.setText(feet.toString())
-            measurementInchesEditText.setText(inches.toString())
-            measurementUnitSpinner.setSelection(Units.FT.ordinal)
-        } else {
-            measurementInchesEditText.setText(measurement.value.toString())
-            measurementUnitSpinner.setSelection(measurement.units.ordinal)
-        }
-    }
+    fun isNotEmpty() = measurementEditText.isNotEmpty()
 }

@@ -29,15 +29,15 @@ class NewPlantConfirmViewModel @Inject constructor (
 ) : ViewModel() {
 
     var userId = 0L
-    lateinit var plantType: Plant.Type
 
+    val plantType = MutableLiveData<Plant.Type>()
     val commonName = MutableLiveData<String>()
     val scientificName = MutableLiveData<String>()
     var taxonId: Long? = null
     var vernacularId: Long? = null
-    var heightMeasurement: Measurement? = null
-    var diameterMeasurement: Measurement? = null
-    var trunkDiameterMeasurement: Measurement? = null
+    var height = MutableLiveData<Measurement>()
+    var diameter = MutableLiveData<Measurement>()
+    var trunkDiameter = MutableLiveData<Measurement>()
     var location: Location? = null
     var photoUri: String = ""
 //    var photoUris = mutableMapOf<PlantPhoto.Type, String>()
@@ -51,13 +51,13 @@ class NewPlantConfirmViewModel @Inject constructor (
         runBlocking { job?.join() }
     }
 
-    fun updatePlantName(newCommonName: String, newScientificName: String) {
+    fun onNewPlantName(newCommonName: String, newScientificName: String) {
         nullPlantIdsIfInvalid(newCommonName, newScientificName)
-        commonName.postValue(newCommonName)
-        scientificName.postValue(newScientificName)
+        commonName.value = newCommonName
+        scientificName.value = newScientificName
     }
 
-    fun nullPlantIdsIfInvalid(newCommonName: String, newScientificName: String) {
+    private fun nullPlantIdsIfInvalid(newCommonName: String, newScientificName: String) {
         vernacularId?.let {
             if (newCommonName != commonName.value)
                 vernacularId = null
@@ -68,11 +68,18 @@ class NewPlantConfirmViewModel @Inject constructor (
         }
     }
 
+
+    fun onNewPlantMeasurements(height: Measurement?, diameter: Measurement?, trunkDiameter: Measurement?) {
+        this.height.value = height
+        this.diameter.value = diameter
+        this.trunkDiameter.value = trunkDiameter
+    }
+
     fun savePlantComposite() {
         job = GlobalScope.launch(Dispatchers.IO) {
             database.runInTransaction {
                 Lg.d("Saving PlantComposite to database now...")
-                val plant = Plant(userId, plantType, commonName.value, scientificName.value, vernacularId, taxonId)
+                val plant = Plant(userId, plantType.value!!, commonName.value, scientificName.value, vernacularId, taxonId)
                 plant.id = plantRepo.insert(plant)
                 Lg.d("Saved: $plant (id=${plant.id})")
 
@@ -92,17 +99,17 @@ class NewPlantConfirmViewModel @Inject constructor (
     }
 
     private fun savePlantMeasurements(plant: Plant) {
-        heightMeasurement?.let {
+        height.value?.let {
             val heightMeasurement = PlantMeasurement(userId, plant.id, PlantMeasurement.Type.HEIGHT, it.toCm())
             heightMeasurement.id = plantMeasurementRepo.insert(heightMeasurement)
             Lg.d("Saved: $heightMeasurement (id=${heightMeasurement.id})")
         }
-        diameterMeasurement?.let {
+        diameter.value?.let {
             val diameterMeasurement = PlantMeasurement(userId, plant.id, PlantMeasurement.Type.DIAMETER, it.toCm())
             diameterMeasurement.id = plantMeasurementRepo.insert(diameterMeasurement)
             Lg.d("Saved: $diameterMeasurement (id=${diameterMeasurement.id})")
         }
-        trunkDiameterMeasurement?.let {
+        trunkDiameter.value?.let {
             val trunkDiameterMeasurement = PlantMeasurement(userId, plant.id, PlantMeasurement.Type.TRUNK_DIAMETER, it.toCm())
             trunkDiameterMeasurement.id = plantMeasurementRepo.insert(trunkDiameterMeasurement)
             Lg.d("Saved: $trunkDiameterMeasurement (id=${trunkDiameterMeasurement.id})")

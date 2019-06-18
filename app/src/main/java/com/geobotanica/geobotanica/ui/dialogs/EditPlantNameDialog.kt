@@ -16,9 +16,9 @@ import com.geobotanica.geobotanica.util.toTrimmedString
 import kotlinx.android.synthetic.main.dialog_plant_name.*
 
 class EditPlantNameDialog(
-        val commonName: String,
-        val scientificName: String,
-        val onNewPlantName: (commonName: String, scientificName: String) -> Unit
+        private val commonName: String,
+        private val scientificName: String,
+        private val onNewPlantName: (commonName: String, scientificName: String) -> Unit
 ) : DialogFragment() {
 
     private lateinit var dialog: AlertDialog
@@ -31,7 +31,7 @@ class EditPlantNameDialog(
             setTitle(getString(R.string.edit_plant_name))
             setView(customView)
             setNegativeButton(getString(R.string.cancel)) { _, _ -> }
-            setPositiveButton(getString(R.string.apply), ::onClickOk)
+            setPositiveButton(getString(R.string.apply), ::onClickApply)
             create()
         }
         return dialog
@@ -43,10 +43,14 @@ class EditPlantNameDialog(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initViews()
+        bindListeners()
+    }
+
+    private fun initViews() {
         commonNameEditText.setText(commonName)
         commonNameEditText.setSelection(commonName.length)
         scientificNameEditText.setText(scientificName)
-        bindListeners()
     }
 
     private fun bindListeners() {
@@ -57,7 +61,7 @@ class EditPlantNameDialog(
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun onClickOk(dialog: DialogInterface, which: Int) =
+    private fun onClickApply(dialog: DialogInterface, which: Int) =
         onNewPlantName(commonNameEditText.toTrimmedString(), scientificNameEditText.toTrimmedString())
 
     private fun onCommonEditTextChanged(editText: String) {

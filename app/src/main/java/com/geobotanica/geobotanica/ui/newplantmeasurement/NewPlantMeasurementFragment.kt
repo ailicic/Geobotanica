@@ -57,7 +57,7 @@ class NewPlantMeasurementFragment : BaseFragment() {
 
     private fun initMeasurementCompoundViews() {
         if (viewModel.plantType != Plant.Type.TREE)
-            trunkDiameterMeasurementView.isVisible = false
+            trunkDiameterEditView.isVisible = false
     }
 
     private fun bindClickListeners() {
@@ -72,16 +72,16 @@ class NewPlantMeasurementFragment : BaseFragment() {
         if (isChecked) {
             manualRadioButton.isEnabled = true
             assistedRadioButton.isEnabled = true
-            heightMeasurementView.isVisible = true
-            diameterMeasurementView.isVisible = true
+            heightEditView.isVisible = true
+            diameterEditView.isVisible = true
             if (viewModel.plantType == Plant.Type.TREE)
-                trunkDiameterMeasurementView.isVisible = true
+                trunkDiameterEditView.isVisible = true
         } else {
             manualRadioButton.isEnabled = false
             assistedRadioButton.isEnabled = false
-            heightMeasurementView.isVisible = false
-            diameterMeasurementView.isVisible = false
-            trunkDiameterMeasurementView.isVisible = false
+            heightEditView.isVisible = false
+            diameterEditView.isVisible = false
+            trunkDiameterEditView.isVisible = false
         }
     }
 
@@ -90,25 +90,27 @@ class NewPlantMeasurementFragment : BaseFragment() {
         when (checkedId) {
             manualRadioButton.id -> {
                 Lg.d("onRadioButtonChecked(): Manual")
-                heightMeasurementView.isVisible = true
-                diameterMeasurementView.isVisible = true
+                heightEditView.isVisible = true
+                diameterEditView.isVisible = true
 
                 if (viewModel.plantType == Plant.Type.TREE)
-                    trunkDiameterMeasurementView.isVisible = true
+                    trunkDiameterEditView.isVisible = true
             }
             assistedRadioButton.id -> {
                 Lg.d("onRadioButtonChecked(): Assisted")
-                heightMeasurementView.isVisible = false
-                diameterMeasurementView.isVisible = false
-                trunkDiameterMeasurementView.isVisible = false
+                heightEditView.isVisible = false
+                diameterEditView.isVisible = false
+                trunkDiameterEditView.isVisible = false
             }
         }
     }
 
     @Suppress("UNUSED_PARAMETER")
     private fun onFabPressed(view: View) {
-        if (!isPlantValid())
+        if (!isPlantValid()) {
+            showSnackbar(resources.getString(R.string.provide_plant_measurements))
             return
+        }
         saveViewModelState()
 
         val navController = activity.findNavController(R.id.fragment)
@@ -117,25 +119,19 @@ class NewPlantMeasurementFragment : BaseFragment() {
 
     private fun saveViewModelState() {
         if (measurementsSwitch.isChecked) {
-            viewModel.heightMeasurement = heightMeasurementView.getMeasurement()
-            viewModel.diameterMeasurement = diameterMeasurementView.getMeasurement()
+            viewModel.heightMeasurement = heightEditView.measurement
+            viewModel.diameterMeasurement = diameterEditView.measurement
             if (viewModel.plantType == Plant.Type.TREE)
-                viewModel.trunkDiameterMeasurement = trunkDiameterMeasurementView.getMeasurement()
+                viewModel.trunkDiameterMeasurement = trunkDiameterEditView.measurement
         }
     }
 
-    private fun isPlantValid(): Boolean {
-        if (measurementsSwitch.isChecked && isMeasurementEmpty() ) {
-            showSnackbar("Provide plant measurements")
-            return false
-        }
-        return true
-    }
+    private fun isPlantValid(): Boolean = ! measurementsSwitch.isChecked || isMeasurementValid()
 
-    private fun isMeasurementEmpty(): Boolean {
-        return heightMeasurementView.isEmpty() ||
-                diameterMeasurementView.isEmpty() ||
-                ( viewModel.plantType == Plant.Type.TREE && trunkDiameterMeasurementView.isEmpty() )
+
+    private fun isMeasurementValid(): Boolean {
+        return heightEditView.isNotEmpty() || diameterEditView.isNotEmpty() ||
+                ( viewModel.plantType == Plant.Type.TREE && trunkDiameterEditView.isNotEmpty() )
     }
 
     private fun createBundle(): Bundle {
@@ -148,9 +144,11 @@ class NewPlantMeasurementFragment : BaseFragment() {
             viewModel.scientificName?.let { putValue(scientificNameKey, it) }
             viewModel.vernacularId?.let { putValue(vernacularIdKey, it) }
             viewModel.taxonId?.let { putValue(taxonIdKey, it) }
-            viewModel.heightMeasurement?.let { putSerializable(heightMeasurementKey, it) }
-            viewModel.diameterMeasurement?.let { putSerializable(diameterMeasurementKey, it) }
-            viewModel.trunkDiameterMeasurement?.let { putSerializable(trunkDiameterMeasurementKey, it) }
+            if (measurementsSwitch.isChecked) {
+                viewModel.heightMeasurement?.let { putSerializable(heightMeasurementKey, it) }
+                viewModel.diameterMeasurement?.let { putSerializable(diameterMeasurementKey, it) }
+                viewModel.trunkDiameterMeasurement?.let { putSerializable(trunkDiameterMeasurementKey, it) }
+            }
         }
     }
 }

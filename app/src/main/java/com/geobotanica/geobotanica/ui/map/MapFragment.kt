@@ -51,6 +51,8 @@ import javax.inject.Inject
 // TODO: Group nearby markers into clusters
 // TODO: Limit max height to recyclerview in SearchPlantName (extends below screen)
 // TODO: Make custom camera screen so Espresso can be used for UI testing
+// TODO: Consider storing temporary NewPlant values in db to synchronize all fragments across next/back cycling
+//      (back from NewPlantConfirm goes to stale values)
 
 // LONG TERM NIT PICK
 // TODO: Learn how to use only the keyboard
@@ -267,7 +269,7 @@ class MapFragment : BaseFragment() {
     private fun createBundle(): Bundle {
         return bundleOf(
                 userIdKey to viewModel.userId,
-                plantTypeKey to Plant.Type.FUNGUS.flag,
+                plantTypeKey to Plant.Type.TREE.flag,
 //                photoUriKey to "",
                 commonNameKey to "Common",
                 scientificNameKey to "Latin",

@@ -17,6 +17,7 @@ import com.geobotanica.geobotanica.databinding.FragmentNewPlantConfirmBinding
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
+import com.geobotanica.geobotanica.ui.dialogs.EditMeasurementsDialog
 import com.geobotanica.geobotanica.ui.dialogs.EditPlantNameDialog
 import com.geobotanica.geobotanica.ui.dialogs.EditPlantTypeDialog
 import com.geobotanica.geobotanica.util.*
@@ -39,29 +40,30 @@ class NewPlantConfirmFragment : BaseFragment() {
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
             photoUri = getFromBundle(photoUriKey)
+            plantType.value = Plant.Type.fromFlag(getFromBundle(plantTypeKey))
             commonName.value = getNullableFromBundle(commonNameKey)
             scientificName.value = getNullableFromBundle(scientificNameKey)
             vernacularId = getNullableFromBundle(vernacularIdKey)
             taxonId = getNullableFromBundle(taxonIdKey)
-            plantType = Plant.Type.fromFlag(getFromBundle(plantTypeKey))
-            heightMeasurement = getNullableFromBundle(heightMeasurementKey)
-            diameterMeasurement = getNullableFromBundle(diameterMeasurementKey)
-            trunkDiameterMeasurement = getNullableFromBundle(trunkDiameterMeasurementKey)
+            height.value = getNullableFromBundle(heightMeasurementKey)
+            diameter.value = getNullableFromBundle(diameterMeasurementKey)
+            trunkDiameter.value = getNullableFromBundle(trunkDiameterMeasurementKey)
             Lg.d("Fragment args: userId=$userId, plantType=$plantType, " +
                     "commonName=$commonName, scientificName=$scientificName, " +
                     "vernId=$vernacularId, taxonId=$taxonId, photoUri=$photoUri, " +
-                    "height=$heightMeasurement, diameter=$diameterMeasurement, trunkDiameter=$trunkDiameterMeasurement")
+                    "height=$height, diameter=$diameter, trunkDiameter=$trunkDiameter")
         }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val binding = DataBindingUtil.inflate<FragmentNewPlantConfirmBinding>(
-                layoutInflater, R.layout.fragment_new_plant_confirm, container, false).apply {
-            viewModel = this@NewPlantConfirmFragment.viewModel
-            lifecycleOwner = this@NewPlantConfirmFragment
+                layoutInflater, R.layout.fragment_new_plant_confirm, container, false).also {
+            it.viewModel = viewModel
+            it.lifecycleOwner = this
         }
         return binding.root
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         updatePlantTypeIcon()
@@ -71,7 +73,7 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     private fun updatePlantTypeIcon() {
         val plantTypeDrawables = resources.obtainTypedArray(R.array.plantTypes)
-        plantTypeButton.setImageResource(plantTypeDrawables.getResourceId(viewModel.plantType.ordinal, -1))
+        plantTypeButton.setImageResource(plantTypeDrawables.getResourceId(viewModel.plantType.value!!.ordinal, -1))
         plantTypeDrawables.recycle()
     }
 
@@ -135,7 +137,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         editPlantNameButton.setOnClickListener(::onClickEditNames)
         plantPhotoCompoundView.editPhoto.observeAfterUnsubscribe(this, onClickEditPhoto)
 //        addPhotoButton.setOnClickListener(::onAddPhotoClicked) -> Should trigger photo type selection dialog
-//        editMeasurementsButton.setOnClickListener(::onMeasurementsEditClicked) -> NEED DIALOG
+        editMeasurementsButton.setOnClickListener(::onClickEditMeasurements)
         fab.setOnClickListener(::onFabClicked)
     }
 
@@ -146,17 +148,19 @@ class NewPlantConfirmFragment : BaseFragment() {
             EditPlantNameDialog(
                     commonName.value.orEmpty(),
                     scientificName.value.orEmpty(),
-                    ::updatePlantName
+                    ::onNewPlantName
             )
         }.show(this.fragmentManager,"tag")
     }
 
     @Suppress("UNUSED_PARAMETER")
     private fun onClickEditPlantType(view: View) =
-        EditPlantTypeDialog(viewModel.plantType, ::onNewPlantType).show(this.fragmentManager,"tag")
+        EditPlantTypeDialog(viewModel.plantType.value!!, ::onNewPlantType).show(this.fragmentManager,"tag")
 
     private fun onNewPlantType(plantType: Plant.Type) {
-        viewModel.plantType = plantType
+        viewModel.plantType.value = plantType
+        if (plantType != Plant.Type.TREE)
+            viewModel.trunkDiameter.value = null
         updatePlantTypeIcon()
     }
 
@@ -164,6 +168,19 @@ class NewPlantConfirmFragment : BaseFragment() {
         val photoFile = createPhotoFile()
         viewModel.newPhotoUri = photoFile.absolutePath
         startPhotoIntent(photoFile)
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onClickEditMeasurements(view: View) {
+        with(viewModel) {
+            EditMeasurementsDialog(
+                    plantType.value!!,
+                    height.value,
+                    diameter.value,
+                    trunkDiameter.value,
+                    ::onNewPlantMeasurements
+            )
+        }.show(this.fragmentManager,"tag")
     }
 
 
@@ -204,48 +221,3 @@ class NewPlantConfirmFragment : BaseFragment() {
         return true
     }
 }
-
-
-///////////////// MOVE TO EDIT MEASUREMENTS DIALOG
-
-//    private fun initMeasurementEditViews() {
-//        viewModel.heightMeasurement?.let { heightMeasurementView.setMeasurement(it) }
-//        viewModel.diameterMeasurement?.let{ diameterMeasurementView.setMeasurement(it) }
-//
-//        if (viewModel.plantType == Plant.Type.TREE) {
-//            viewModel.trunkDiameterMeasurement?.let { trunkDiameterMeasurementView.setMeasurement(it) }
-//        }
-//    }
-
-//    @Suppress("UNUSED_PARAMETER")
-//    private fun onMeasurementsEditClicked(view: View) {
-//        if (!isPlantNameValid())
-//            return
-//        disableTextEdits()
-//        setMeasurementsEditable(true)
-//    }
-
-
-//    private fun saveMeasurementEdits() {
-//        viewModel.heightMeasurement = heightMeasurementView.getMeasurement()
-//        heightText.text = viewModel.heightMeasurement?.toHeightString()
-//        viewModel.diameterMeasurement = diameterMeasurementView.getMeasurement()
-//        diameterText.text = viewModel.diameterMeasurement?.toDiameterString()
-//        if (viewModel.plantType == Plant.Type.TREE) {
-//            viewModel.trunkDiameterMeasurement = trunkDiameterMeasurementView.getMeasurement()
-//            trunkDiameterText.text = viewModel.trunkDiameterMeasurement?.toTrunkDiameterString()
-//        }
-//    }
-
-//    private fun isMeasurementEmpty(): Boolean {
-//        return heightMeasurementView.isEmpty() ||
-//                diameterMeasurementView.isEmpty() ||
-//                ( viewModel.plantType == Plant.Type.TREE && trunkDiameterMeasurementView.isEmpty() )
-//    }
-
-
-
-//        if (viewModel.heightMeasurement != null && isMeasurementEmpty() ) {
-//            showSnackbar("Provide plant measurements")
-//            return false
-//        }

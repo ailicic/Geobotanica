@@ -27,13 +27,10 @@ data class Measurement(val value: Float, val units: Units = Units.CM) : Serializ
             "%.1f $units".format(value)
     }
 
-
-    private fun toPrefixedString(prefix: String) = "$prefix${toString()}"
-
     // TODO: Use string resources here (need context)
-    fun toHeightString() = toPrefixedString("Height: ")
-    fun toDiameterString() = toPrefixedString("Diameter: ")
-    fun toTrunkDiameterString() = toPrefixedString("Trunk diameter: ")
+    fun toHeightString() = "Height: ${toString()}"
+    fun toDiameterString() = "Diameter: ${toString()}"
+    fun toTrunkDiameterString() = "Trunk diameter: ${toString()}"
 
     fun convert(toUnits: Units): Measurement {
         val cm = toCm()
