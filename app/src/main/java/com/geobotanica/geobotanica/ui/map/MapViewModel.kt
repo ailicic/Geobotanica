@@ -31,7 +31,6 @@ data class PlantMarkerData(
         val icon: Int? = null
 )
 
-// TODO: Identify more concise way to expose immutable LiveData objects to view
 @Singleton
 class MapViewModel @Inject constructor(
     private val plantRepo: PlantRepo,
@@ -43,13 +42,11 @@ class MapViewModel @Inject constructor(
         map(plantRepo.getAllPlantComposites()) { extractPlantMarkerDataList(it) }
     }
 
-    val currentLocation: LiveData<Location>
-        get() = _currentLocation
     private val _currentLocation = MutableLiveData<Location>()
+    val currentLocation: LiveData<Location> = _currentLocation
 
-    val gpsFabIcon: LiveData<Int>
-        get() = _gpsFabIcon
     private val _gpsFabIcon = MutableLiveData<Int>()
+    val gpsFabIcon: LiveData<Int> = _gpsFabIcon
 
     val showGpsRequiredSnackbar = SingleLiveEvent<Unit>()
     val navigateToNewPlant = SingleLiveEvent<Unit>()
@@ -104,7 +101,7 @@ class MapViewModel @Inject constructor(
 
     fun unsubscribeGps() {
         if (isGpsSubscribed()) {
-            _gpsFabIcon.postValue(GPS_OFF.drawable)
+            _gpsFabIcon.value = GPS_OFF.drawable
             locationService.unsubscribe(this)
         }
         staleGpsTimer?.run { cancel(); staleGpsTimer = null }
@@ -120,7 +117,7 @@ class MapViewModel @Inject constructor(
     private fun isGpsEnabled(): Boolean = locationService.isGpsEnabled()
 
     private fun onLocation(location: Location) {
-        _currentLocation.postValue(location)
+        _currentLocation.value = location
     }
 
     fun setStaleGpsLocationTimer() {
@@ -128,7 +125,7 @@ class MapViewModel @Inject constructor(
         staleGpsTimer = Timer().schedule(staleGpsTimeout) {
             Lg.d("staleGpsTimer finished.")
             staleGpsTimer = null
-            _gpsFabIcon.postValue(GPS_NO_FIX.drawable)
+            _gpsFabIcon.value = GPS_NO_FIX.drawable
         }
     }
 

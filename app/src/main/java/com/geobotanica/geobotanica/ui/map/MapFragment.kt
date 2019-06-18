@@ -68,6 +68,7 @@ import javax.inject.Inject
 // TODO: Fix screen rotation crashes and consider landscape layouts
 // TODO: Figure out how to resume app state after onStop, then process death (e.g. home or switch app, then kill app)
 // https://medium.com/google-developers/viewmodels-persistence-onsaveinstancestate-restoring-ui-state-and-loaders-fc7cc4a6c090
+// TODO: Expose Location events as LiveData in LocationService
 
 // DEFERRED
 // TODO: Show PlantType icon in map bubble (and PlantDetail?)
@@ -201,8 +202,8 @@ class MapFragment : BaseFragment() {
 //        TaxaDatabase.getInstance(appContext).close()
 
         // TODO: REMOVE
-        NavHostFragment.findNavController(this).navigate(
-                R.id.newPlantConfirmFragment, createBundle() )
+//        NavHostFragment.findNavController(this).navigate(
+//                R.id.newPlantConfirmFragment, createBundle() )
 
 
         initMap()
