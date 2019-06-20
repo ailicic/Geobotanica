@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
@@ -24,6 +25,7 @@ import com.geobotanica.geobotanica.ui.dialog.ItemListDialog
 import com.geobotanica.geobotanica.ui.viewpager.PhotoData
 import com.geobotanica.geobotanica.ui.viewpager.PlantPhotoAdapter
 import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.Measurement
 import com.geobotanica.geobotanica.util.getFromBundle
 import com.geobotanica.geobotanica.util.getNullableFromBundle
 import kotlinx.android.synthetic.main.fragment_new_plant_confirm.*
@@ -85,7 +87,23 @@ class NewPlantConfirmFragment : BaseFragment() {
         addOnBackPressedCallback()
         updatePlantTypeIcon()
         initPhotoViewPager()
+        updateMeasurementsLayout()
         bindClickListeners()
+    }
+
+    private fun updateMeasurementsLayout() {
+        var measurementCount = 0
+        with(viewModel) {
+            height.value?.let { ++measurementCount }
+            diameter.value?.let { ++measurementCount }
+            trunkDiameter.value?.let { ++measurementCount }
+        }
+        val layoutParams = editMeasurementsButton.layoutParams as ConstraintLayout.LayoutParams
+        if (measurementCount > 2)
+            layoutParams.topMargin = dpToPixels(20)
+        else
+            layoutParams.topMargin = dpToPixels(8)
+        editMeasurementsButton.layoutParams = layoutParams
     }
 
     private fun initPhotoViewPager() {
@@ -289,6 +307,15 @@ class NewPlantConfirmFragment : BaseFragment() {
                     ::onNewPlantMeasurements
             )
         }.show(fragmentManager!!,"tag")
+    }
+
+    private fun onNewPlantMeasurements(newHeight: Measurement?, newDiameter: Measurement?, newTrunkDiameter: Measurement?) {
+        with(viewModel) {
+            height.value = newHeight
+            diameter.value = newDiameter
+            trunkDiameter.value = newTrunkDiameter
+        }
+        updateMeasurementsLayout()
     }
 
     @Suppress("UNUSED_PARAMETER")

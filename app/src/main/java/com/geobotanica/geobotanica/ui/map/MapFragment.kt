@@ -198,8 +198,8 @@ class MapFragment : BaseFragment() {
 //        TaxaDatabase.getInstance(appContext).close()
 
         // TODO: REMOVE
-//        NavHostFragment.findNavController(this).navigate(
-//                R.id.newPlantConfirmFragment, createBundle() )
+        NavHostFragment.findNavController(this).navigate(
+                R.id.newPlantConfirmFragment, createBundle() )
 
 
         initMap()

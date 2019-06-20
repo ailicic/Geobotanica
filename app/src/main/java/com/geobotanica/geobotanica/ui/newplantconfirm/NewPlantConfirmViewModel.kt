@@ -67,13 +67,6 @@ class NewPlantConfirmViewModel @Inject constructor (
         }
     }
 
-
-    fun onNewPlantMeasurements(height: Measurement?, diameter: Measurement?, trunkDiameter: Measurement?) {
-        this.height.value = height
-        this.diameter.value = diameter
-        this.trunkDiameter.value = trunkDiameter
-    }
-
     fun savePlantComposite() {
         job = GlobalScope.launch(Dispatchers.IO) {
             database.runInTransaction {

@@ -80,9 +80,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:background="@android:color/darker_gray"
-                app:layout_constraintTop_toBottomOf="@+id/plantTypeButton"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/plantTypeButton" />
 
             <!--Need margins to be inside ViewPager2 layout to prevent miniFab clipping-->
             <androidx.viewpager2.widget.ViewPager2
@@ -100,9 +98,8 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:background="@android:color/darker_gray"
-                app:layout_constraintTop_toBottomOf="@+id/plantPhotoPager"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/plantPhotoPager"/>
+            <!--android:layout_marginBottom="32dp" WHY DOES THIS DO NOTHING???-->
 
             <TextView
                 android:id="@+id/heightText"
@@ -121,32 +118,33 @@
                 android:id="@+id/diameterText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:layout_goneMarginTop="4dp"
                 android:layout_marginStart="16dp"
                 android:visibility="@{ viewModel.diameter != null ? View.VISIBLE : View.GONE }"
                 android:textColor="@color/colorBlack"
                 android:text="@{ viewModel.diameter.toDiameterString() }"
                 android:textSize="@dimen/measurement_text_size"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/heightText" />
+                app:layout_constraintTop_toBottomOf="@id/heightText"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
-                android:id="@+id/userTimestampText"
+                android:id="@+id/trunkDiameterText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:layout_goneMarginTop="4dp"
                 android:layout_marginStart="16dp"
                 android:visibility="@{ viewModel.trunkDiameter != null ? View.VISIBLE : View.GONE }"
                 android:textColor="@color/colorBlack"
                 android:text="@{ viewModel.trunkDiameter.toTrunkDiameterString() }"
                 android:textSize="@dimen/measurement_text_size"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/diameterText" />
+                app:layout_constraintTop_toBottomOf="@id/diameterText"
+                app:layout_constraintStart_toStartOf="parent" />
 
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/editMeasurementsButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
                 android:layout_marginEnd="@dimen/fab_margin"
                 android:layout_marginBottom="8dp"
                 app:fabSize="mini"
@@ -167,8 +165,6 @@
                 android:layout_marginEnd="16dp"
                 android:background="@android:color/darker_gray"
                 android:visibility="@{ viewModel.height != null || viewModel.diameter != null || viewModel.trunkDiameter != null ? View.VISIBLE : View.GONE }"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/editMeasurementsButton"/>
 
 

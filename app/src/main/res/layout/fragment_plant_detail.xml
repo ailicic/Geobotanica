@@ -109,7 +109,7 @@
             app:layout_constraintTop_toTopOf="@id/diameterText" />
 
         <TextView
-            android:id="@+id/userTimestampText"
+            android:id="@+id/trunkDiameterText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -127,7 +127,7 @@
             android:visibility="@{ viewModel.trunkDiameter != null ? View.VISIBLE : View.GONE }"
             android:text="@{ viewModel.trunkDiameterDateText }"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/userTimestampText" />
+            app:layout_constraintTop_toTopOf="@id/trunkDiameterText" />
 
         <TextView
             android:id="@+id/measuredByText"
@@ -137,7 +137,7 @@
             android:visibility="@{ viewModel.height != null ? View.VISIBLE : View.GONE }"
             android:text="@{ @string/measured_by(viewModel.measuredByUser) }"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/userTimestampText" />
+            app:layout_constraintTop_toBottomOf="@id/trunkDiameterText" />
 
         <View
             android:id="@+id/measurementsDivider"
