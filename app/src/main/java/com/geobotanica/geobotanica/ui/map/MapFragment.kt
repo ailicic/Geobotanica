@@ -34,9 +34,6 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
-// TODO: In ConfirmPlantFragment, dialog for editing plant name or measurement. In-place editing is too wonky for layout.
-// TODO: Create custom UI element for multiple photos of single plant
-//      Swipe left right for next photo. Photo selector/filter (multiselect, all/none toggle)
 
 // LONG TERM
 // TODO: Create download map/db activity and utilize offline map tiles

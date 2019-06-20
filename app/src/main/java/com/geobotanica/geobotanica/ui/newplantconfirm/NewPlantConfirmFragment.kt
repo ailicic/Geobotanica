@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.findNavController
@@ -53,6 +54,7 @@ class NewPlantConfirmFragment : BaseFragment() {
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
+            photos.clear()
             photos.add( PhotoData(PlantPhoto.Type.COMPLETE, getFromBundle(photoUriKey)))
             plantType.value = Plant.Type.fromFlag(getFromBundle(plantTypeKey))
             commonName.value = getNullableFromBundle(commonNameKey)
@@ -80,14 +82,38 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initUi()
+        addOnBackPressedCallback()
+        updatePlantTypeIcon()
+        initPhotoViewPager()
         bindClickListeners()
+    }
+
+    private fun initPhotoViewPager() {
         photoAdapter = PlantPhotoAdapter(::onClickPhoto, ::onClickPhotoType, ::onClickDeletePhoto, ::onClickRetakePhoto, ::onClickAddPhoto)
-
-        viewModel.photos.add(PhotoData(PlantPhoto.Type.FLOWER, fileFromDrawable(R.drawable.photo_type_flower, "photo_type_flower")))
         photoAdapter.items = viewModel.photos
-
         plantPhotoPager.adapter = photoAdapter
+    }
+
+    private fun addOnBackPressedCallback() {
+        requireActivity().onBackPressedDispatcher.addCallback(this) {
+            AlertDialog.Builder(activity).apply {
+                setTitle(getString(R.string.discard_new_plant))
+                setMessage(getString(R.string.discard_new_plant_confirm))
+                setPositiveButton(getString(R.string.yes)) { _, _ ->
+                    viewModel.photos.forEach {
+                        val photoUri = it.photoUri
+                        Lg.d("Deleting old photo: $photoUri")
+                        Lg.d("Delete photo result = ${File(photoUri).delete()}")
+                    }
+                    activity.currentLocation = null
+                    showToast(getString(R.string.plant_discarded))
+                    val navController = activity.findNavController(R.id.fragment)
+                    navController.popBackStack(R.id.mapFragment, false)
+                }
+                setNegativeButton(getString(R.string.no)) { dialog, _ -> dialog.dismiss() }
+                create()
+            }.show()
+        }
     }
 
     override fun onStop() {
@@ -95,12 +121,6 @@ class NewPlantConfirmFragment : BaseFragment() {
         job?.cancel()
     }
 
-//    job = mainScope.launch(Dispatchers.Main) {
-//        delay(300)
-//        viewModel.photos.removeAt(photoIndex)
-//        photoAdapter.notifyItemRemoved(photoIndex)
-//        showToast(getString(R.string.photo_updated))
-//    }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             requestTakePhoto -> {
@@ -136,7 +156,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         }
     }
 
-    private fun initUi() {
+    private fun updatePlantTypeIcon() {
         val plantTypeDrawables = resources.obtainTypedArray(R.array.plant_type_drawable_array)
         plantTypeButton.setImageResource(plantTypeDrawables.getResourceId(viewModel.plantType.value!!.ordinal, -1))
         plantTypeDrawables.recycle()
@@ -196,7 +216,6 @@ class NewPlantConfirmFragment : BaseFragment() {
             setMessage(getString(R.string.retake_photo_confirm))
             setPositiveButton(getString(R.string.yes)) { _, _ ->
                 isPhotoRetake = true
-                val photoIndex = plantPhotoPager.currentItem
                 val photoFile = createPhotoFile()
                 newPhotoUri = photoFile.absolutePath
                 startPhotoIntent(photoFile)
@@ -247,7 +266,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         viewModel.plantType.value = plantType
         if (plantType != Plant.Type.TREE)
             viewModel.trunkDiameter.value = null
-        initUi()
+        updatePlantTypeIcon()
     }
 
     private fun onClickEditNames(view: View) {
