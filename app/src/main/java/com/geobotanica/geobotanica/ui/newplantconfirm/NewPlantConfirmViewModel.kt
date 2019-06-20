@@ -11,6 +11,7 @@ import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
 import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.USED
+import com.geobotanica.geobotanica.ui.viewpager.PhotoData
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.Measurement
 import kotlinx.coroutines.*
@@ -39,9 +40,7 @@ class NewPlantConfirmViewModel @Inject constructor (
     var diameter = MutableLiveData<Measurement>()
     var trunkDiameter = MutableLiveData<Measurement>()
     var location: Location? = null
-    var photoUri: String = ""
-//    var photoUris = mutableMapOf<PlantPhoto.Type, String>()
-    var newPhotoUri: String = ""
+    val photos = mutableListOf<PhotoData>()
 
     private var job: Job? = null
 
@@ -83,7 +82,7 @@ class NewPlantConfirmViewModel @Inject constructor (
                 plant.id = plantRepo.insert(plant)
                 Lg.d("Saved: $plant (id=${plant.id})")
 
-                savePlantPhoto(plant)
+                savePlantPhotos(plant)
                 savePlantMeasurements(plant)
                 savePlantLocation(plant)
             }
@@ -92,10 +91,12 @@ class NewPlantConfirmViewModel @Inject constructor (
         }
     }
 
-    private fun savePlantPhoto(plant: Plant) {
-        val photo = PlantPhoto(userId, plant.id, PlantPhoto.Type.COMPLETE, photoUri) // TODO: Store only relative path/filename
-        photo.id = plantPhotoRepo.insert(photo)
-        Lg.d("Saved: $photo (id=${photo.id})")
+    private fun savePlantPhotos(plant: Plant) {
+        photos.forEach { (photoType, photoUri) ->
+            val photo = PlantPhoto(userId, plant.id, photoType, photoUri) // TODO: Store only relative path/filename
+            photo.id = plantPhotoRepo.insert(photo)
+            Lg.d("Saved: $photo (id=${photo.id})")
+        }
     }
 
     private fun savePlantMeasurements(plant: Plant) {

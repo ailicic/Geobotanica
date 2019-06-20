@@ -27,7 +27,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:entries="@array/measurement_unit" />
+        android:entries="@array/measurement_unit_array" />
 
     <EditText
         android:id="@+id/measurementInchesEditText"

@@ -25,6 +25,10 @@
     <string name="trunk_diameter">Trunk diameter</string>
     <string name="plant_type">Plant Type</string>
     <string name="change_plant_type">Change Plant Type</string>
+    <string name="select_photo_type">Select Photo Type</string>
+    <string name="select_new_photo_type">Select New Photo Type</string>
+    <string name="change_photo_type">Change Photo Type</string>
+    <string name="select_photo_action">Select Photo Action</string>
     <string name="edit_plant_name">Edit Plant Name</string>
     <string name="provide_plant_measurements">Provide Plant Measurements</string>
     <string name="edit_plant_measurements">Edit Plant Measurements</string>
@@ -52,37 +56,27 @@
     <!--<string name="photo_type_fruit">Fruit</string>-->
     <!--<string name="photo_type_trunk">Trunk</string>-->
     <string name="inches">in</string>
+    <string name="delete_plant">Delete Plant</string>
+    <string name="delete_photo">Delete Photo</string>
+    <string name="retake_photo">Retake Photo</string>
+    <string name="delete_plant_confirm">Are you sure you want to delete this plant and its photos?</string>
+    <string name="delete_photo_confirm">Are you sure you want to delete this photo?</string>
+    <string name="retake_photo_confirm">The current photo will be deleted. Are you sure you want to retake this photo?</string>
+    <string name="plant_deleted">Plant deleted</string>
+    <string name="photo_deleted">Photo deleted</string>
+    <string name="photo_updated">Photo updated</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
     <string name="enable">Enable</string>
     <string name="name_search_hint">Common or scientific name</string>
     <string name="include">Include</string>
     <string name="apply">Apply</string>
     <string name="cancel">Cancel</string>
+    <string name="reset">Reset</string>
     <string name="geobotanica">Geobotanica</string>
     <string name="plant_details">Plant Details</string>
     <string name="plant_photo">Plant Photo</string>
     <string name="search_plant_name">Search Plant Name</string>
     <string name="plant_name">Plant Name</string>
     <string name="confirm_new_plant">Confirm New Plant</string>
-    <string-array name="plant_type_array">
-        <item>Tree</item>
-        <item>Shrub</item>
-        <item>Herb</item>
-        <item>Grass</item>
-        <item>Vine</item>
-        <item>Fungus</item>
-    </string-array>
-    <string-array name="measurement_unit">
-        <item>cm</item>
-        <item>m</item>
-        <item>in</item>
-        <item>ft</item>
-    </string-array>
-    <string-array name="photo_type">
-        <item>Full</item>
-        <item>Leaf</item>
-        <!--<item>Buds</item>-->
-        <item>Flower</item>
-        <item>Fruit</item>
-        <item>Trunk</item>
-    </string-array>
 </resources>

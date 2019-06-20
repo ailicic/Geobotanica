@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui.dialogs
+package com.geobotanica.geobotanica.ui.dialog
 
 import android.app.Dialog
 import android.content.DialogInterface

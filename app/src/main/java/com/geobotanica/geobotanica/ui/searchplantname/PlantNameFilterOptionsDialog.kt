@@ -50,7 +50,7 @@ class PlantNameFilterOptionsDialog : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         // TODO: Prevent zero (default) from being passed as null below
         val filterOptions = SearchFilterOptions(
-                arguments!!.getValue<Int>(plantNameFilterOptionsKey)
+                arguments?.getValue<Int>(plantNameFilterOptionsKey)
                 ?: defaultFilterFlags)
         commonCheckbox.isChecked = ! filterOptions.hasFilter(COMMON)
         scientificCheckbox.isChecked = ! filterOptions.hasFilter(SCIENTIFIC)
@@ -59,11 +59,11 @@ class PlantNameFilterOptionsDialog : DialogFragment() {
 
         scientificCheckbox.setOnCheckedChangeListener { _, isChecked ->
             if (!isChecked)
-                dialog.commonCheckbox.isChecked = true
+                dialog!!.commonCheckbox.isChecked = true
         }
         commonCheckbox.setOnCheckedChangeListener { _, isChecked ->
             if (!isChecked)
-                dialog.scientificCheckbox.isChecked = true
+                dialog!!.scientificCheckbox.isChecked = true
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui.dialogs
+package com.geobotanica.geobotanica.ui.dialog
 
 import android.app.Dialog
 import android.content.DialogInterface
@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.util.isNotEmpty
@@ -55,35 +54,21 @@ class EditPlantNameDialog(
 
     private fun bindListeners() {
         commonNameEditText.onTextChanged(::onCommonEditTextChanged)
-        resetCommonButton.setOnClickListener(::onClickResetCommon)
         scientificNameEditText.onTextChanged(::onScientificEditTextChanged)
-        resetScientificButton.setOnClickListener(::onResetScientificName)
     }
 
     @Suppress("UNUSED_PARAMETER")
     private fun onClickApply(dialog: DialogInterface, which: Int) =
         onNewPlantName(commonNameEditText.toTrimmedString(), scientificNameEditText.toTrimmedString())
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onCommonEditTextChanged(editText: String) {
-        resetCommonButton.isVisible = editText != commonName
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = isPlantNameValid()
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun onClickResetCommon(view: View) {
-        commonNameEditText.setText(commonName)
-        commonNameEditText.setSelection(commonName.length)
-    }
-
     private fun onScientificEditTextChanged(editText: String) {
-        resetScientificButton.isVisible = editText != scientificName
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = isPlantNameValid()
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    private fun onResetScientificName(view: View) {
-        scientificNameEditText.setText(scientificName)
-        scientificNameEditText.setSelection(scientificName.length)
     }
 
     private fun isPlantNameValid() = commonNameEditText.isNotEmpty() || scientificNameEditText.isNotEmpty()

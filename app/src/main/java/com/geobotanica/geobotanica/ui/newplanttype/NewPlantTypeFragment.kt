@@ -14,6 +14,7 @@ import com.geobotanica.geobotanica.data.entity.Plant.Type.Companion.allTypeFlags
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
+import com.geobotanica.geobotanica.ui.dialog.ListItemAdapter
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.getFromBundle
 import com.geobotanica.geobotanica.util.getNullableFromBundle
@@ -26,7 +27,7 @@ class NewPlantTypeFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantTypeViewModel>
     private lateinit var viewModel: NewPlantTypeViewModel
 
-    private lateinit var plantTypeAdapter: PlantTypeAdapter
+//    private lateinit var plantTypeAdapter: PlantTypeAdapter
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -56,11 +57,10 @@ class NewPlantTypeFragment : BaseFragment() {
 
     private fun initRecyclerView() {
         recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-        plantTypeAdapter = PlantTypeAdapter(viewModel.plantTypeOptions, ::onClickItem)
-        recyclerView.adapter = plantTypeAdapter
+        recyclerView.adapter = ListItemAdapter(viewModel.plantTypeOptions, R.array.plant_type_drawable_array, ::onPlantTypeSelected)
     }
 
-    private fun onClickItem(plantType: Plant.Type) {
+    private fun onPlantTypeSelected(plantType: Plant.Type) {
         viewModel.plantType = plantType
         navigateToNext()
     }

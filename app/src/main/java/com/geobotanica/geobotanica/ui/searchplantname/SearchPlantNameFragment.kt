@@ -63,8 +63,8 @@ class SearchPlantNameFragment : BaseFragment() {
         bindListeners()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        inflater?.inflate(R.menu.new_plant_name, menu)
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.new_plant_name, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -72,7 +72,7 @@ class SearchPlantNameFragment : BaseFragment() {
     @ExperimentalCoroutinesApi
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_filter -> {
-            PlantNameFilterOptionsDialog().run {
+            PlantNameFilterOptionsDialog().apply {
                 arguments = bundleOf(
                         plantNameFilterOptionsKey to viewModel.searchFilterOptions.filterFlags)
                 onApplyFilters = { filterOptions: SearchFilterOptions ->
@@ -80,8 +80,8 @@ class SearchPlantNameFragment : BaseFragment() {
                     viewModel.searchFilterOptions = filterOptions
                     updateSearchResults()
                 }
-                show(this@SearchPlantNameFragment.fragmentManager,"tag")
-            }
+
+            }.show(this.fragmentManager!!,"tag")
             true
         }
         else -> super.onOptionsItemSelected(item)

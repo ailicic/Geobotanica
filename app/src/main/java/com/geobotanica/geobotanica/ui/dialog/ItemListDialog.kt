@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui.dialogs
+package com.geobotanica.geobotanica.ui.dialog
 
 import android.app.Dialog
 import android.os.Bundle
@@ -8,23 +8,24 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.ui.newplanttype.PlantTypeAdapter
-import kotlinx.android.synthetic.main.dialog_plant_type.*
+import kotlinx.android.synthetic.main.dialog_item_list.*
 
-class EditPlantTypeDialog(
-        private val currentType: Plant.Type,
-        private val onPlantTypeSelected: (plantType: Plant.Type) -> Unit
+
+class ItemListDialog<T: Enum<T>> (
+        private val titleResId: Int,
+        private val drawableArrayResId: Int,
+        private val enumValues: List<T>,
+        private val onItemSelected: (T) -> Unit
 ) : DialogFragment() {
 
     private lateinit var customView: View // Required for kotlinx synthetic bindings
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
-        customView = LayoutInflater.from(context).inflate(R.layout.dialog_plant_type, null)
+        customView = LayoutInflater.from(context).inflate(R.layout.dialog_item_list, null)
         return activity?.let {
             AlertDialog.Builder(it).run {
-                setTitle(getString(R.string.change_plant_type))
+                setTitle(getString(titleResId))
                 setView(customView)
                 setNegativeButton(getString(R.string.cancel)) { _, _ -> }
                 create()
@@ -38,13 +39,14 @@ class EditPlantTypeDialog(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        recyclerView.adapter = PlantTypeAdapter(
-                Plant.Type.values().toList().filter { it != currentType },
-                ::onPlantTypeClicked)
+        recyclerView.adapter = ListItemAdapter(
+                enumValues,
+                drawableArrayResId,
+                ::onClickItem)
     }
 
-    private fun onPlantTypeClicked(plantType: Plant.Type) {
-        onPlantTypeSelected(plantType)
-        dialog.dismiss()
+    private fun onClickItem(selectedItem: T) {
+        onItemSelected(selectedItem)
+        dialog?.dismiss()
     }
 }

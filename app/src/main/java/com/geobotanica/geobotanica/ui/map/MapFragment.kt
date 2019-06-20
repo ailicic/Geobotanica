@@ -18,7 +18,6 @@ import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.User
-import com.geobotanica.geobotanica.data_taxa.TaxaDatabase
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -45,7 +44,7 @@ import javax.inject.Inject
     // https://developer.android.com/training/id-auth/identify.html
     // https://developer.android.com/training/id-auth/custom_auth
 // TODO: Investigate why app start time is so long (should be less of an issue after login/download screen)
-// TODO: Add plantType + editPhoto buttons in PlantDetails image (like confirm frag)
+// TODO: Add photoType + editPhoto buttons in PlantDetails image (like confirm frag)
 // TODO: Use inline on functions that accept lambda parameters
 // TODO: Maybe use existing bundle when navigating (it works, but need to be careful about updating old values).
 // TODO: Group nearby markers into clusters
@@ -271,7 +270,7 @@ class MapFragment : BaseFragment() {
         return bundleOf(
                 userIdKey to viewModel.userId,
                 plantTypeKey to Plant.Type.TREE.flag,
-//                photoUriKey to "",
+                photoUriKey to fileFromDrawable(R.drawable.photo_type_complete, "photo_type_complete"),
                 commonNameKey to "Common",
                 scientificNameKey to "Latin",
                 heightMeasurementKey to Measurement(1.0f, Units.M),

@@ -7,31 +7,45 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.doOnPreDraw
+import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
+import com.geobotanica.geobotanica.data.entity.PlantPhoto
 import com.geobotanica.geobotanica.databinding.FragmentNewPlantConfirmBinding
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.ui.dialogs.EditMeasurementsDialog
-import com.geobotanica.geobotanica.ui.dialogs.EditPlantNameDialog
-import com.geobotanica.geobotanica.ui.dialogs.EditPlantTypeDialog
-import com.geobotanica.geobotanica.util.*
+import com.geobotanica.geobotanica.ui.dialog.EditMeasurementsDialog
+import com.geobotanica.geobotanica.ui.dialog.EditPlantNameDialog
+import com.geobotanica.geobotanica.ui.dialog.ItemListDialog
+import com.geobotanica.geobotanica.ui.viewpager.PhotoData
+import com.geobotanica.geobotanica.ui.viewpager.PlantPhotoAdapter
+import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.getFromBundle
+import com.geobotanica.geobotanica.util.getNullableFromBundle
 import kotlinx.android.synthetic.main.fragment_new_plant_confirm.*
 import kotlinx.android.synthetic.main.gps_compound_view.view.*
+import kotlinx.coroutines.*
 import java.io.File
 import javax.inject.Inject
 
 
-// TODO: Clicking on photo should blow it up (show type icon and edit/delete button there too)
-
+@Suppress("UNUSED_PARAMETER")
 class NewPlantConfirmFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantConfirmViewModel>
     private lateinit var viewModel: NewPlantConfirmViewModel
+
+
+    private var job: Job? = null
+    private val mainScope = CoroutineScope(Dispatchers.Main)
+
+    private lateinit var photoAdapter: PlantPhotoAdapter
+
+    private var isPhotoRetake: Boolean = false
+    private lateinit var newPhotoType: PlantPhoto.Type
+    private lateinit var newPhotoUri: String
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -39,7 +53,7 @@ class NewPlantConfirmFragment : BaseFragment() {
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
-            photoUri = getFromBundle(photoUriKey)
+            photos.add( PhotoData(PlantPhoto.Type.COMPLETE, getFromBundle(photoUriKey)))
             plantType.value = Plant.Type.fromFlag(getFromBundle(plantTypeKey))
             commonName.value = getNullableFromBundle(commonNameKey)
             scientificName.value = getNullableFromBundle(scientificNameKey)
@@ -48,9 +62,9 @@ class NewPlantConfirmFragment : BaseFragment() {
             height.value = getNullableFromBundle(heightMeasurementKey)
             diameter.value = getNullableFromBundle(diameterMeasurementKey)
             trunkDiameter.value = getNullableFromBundle(trunkDiameterMeasurementKey)
-            Lg.d("Fragment args: userId=$userId, plantType=$plantType, " +
+            Lg.d("Fragment args: userId=$userId, photoType=$plantType, " +
                     "commonName=$commonName, scientificName=$scientificName, " +
-                    "vernId=$vernacularId, taxonId=$taxonId, photoUri=$photoUri, " +
+                    "vernId=$vernacularId, taxonId=$taxonId, photos=$photos, " +
                     "height=$height, diameter=$diameter, trunkDiameter=$trunkDiameter")
         }
     }
@@ -66,35 +80,54 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        updatePlantTypeIcon()
-        updateMainPlantPhoto()
+        initUi()
         bindClickListeners()
+        photoAdapter = PlantPhotoAdapter(::onClickPhoto, ::onClickPhotoType, ::onClickDeletePhoto, ::onClickRetakePhoto, ::onClickAddPhoto)
+
+        viewModel.photos.add(PhotoData(PlantPhoto.Type.FLOWER, fileFromDrawable(R.drawable.photo_type_flower, "photo_type_flower")))
+        photoAdapter.items = viewModel.photos
+
+        plantPhotoPager.adapter = photoAdapter
     }
 
-    private fun updatePlantTypeIcon() {
-        val plantTypeDrawables = resources.obtainTypedArray(R.array.plantTypes)
-        plantTypeButton.setImageResource(plantTypeDrawables.getResourceId(viewModel.plantType.value!!.ordinal, -1))
-        plantTypeDrawables.recycle()
+    override fun onStop() {
+        super.onStop()
+        job?.cancel()
     }
 
-    private fun updateMainPlantPhoto() {
-        plantPhotoCompoundView.doOnPreDraw { plantPhotoCompoundView.setPhoto(viewModel.photoUri) }
-    }
-
+//    job = mainScope.launch(Dispatchers.Main) {
+//        delay(300)
+//        viewModel.photos.removeAt(photoIndex)
+//        photoAdapter.notifyItemRemoved(photoIndex)
+//        showToast(getString(R.string.photo_updated))
+//    }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             requestTakePhoto -> {
                 when (resultCode) {
                     Activity.RESULT_OK -> {
-                        Lg.d("New photo received")
-                        Lg.d("Deleting old photo: ${viewModel.photoUri}")
-                        Lg.d("Delete photo result = ${File(viewModel.photoUri).delete()}")
-                        viewModel.photoUri = viewModel.newPhotoUri
+                        val photoIndex = plantPhotoPager.currentItem
+                        Lg.d("onActivityResult: RESULT_OK (New photo received)")
+                        if (isPhotoRetake) {
+                            val oldPhotoUri = viewModel.photos[photoIndex].photoUri
+                            Lg.d("Deleting old photo: $oldPhotoUri")
+                            Lg.d("Delete photo result = ${File(oldPhotoUri).delete()}")
+
+                            viewModel.photos[photoIndex].photoUri = newPhotoUri
+                            photoAdapter.notifyDataSetChanged()
+                        } else {
+                            viewModel.photos.add(PhotoData(newPhotoType, newPhotoUri))
+                            photoAdapter.notifyDataSetChanged()
+                            job = mainScope.launch(Dispatchers.Main) {
+                                delay(300)
+                                plantPhotoPager.setCurrentItem(viewModel.photos.size, true)
+                            }
+                        }
                     }
                     Activity.RESULT_CANCELED -> { // "X" in GUI or back button pressed
                         Lg.d("onActivityResult: RESULT_CANCELED")
-                        Lg.d("Deleting unused photo file: ${viewModel.newPhotoUri}")
-                        Lg.d("Delete photo result = ${File(viewModel.newPhotoUri).delete()}")
+                        Lg.d("Deleting unused photo file: $newPhotoUri")
+                        Lg.d("Delete photo result = ${File(newPhotoUri).delete()}")
                     }
                     else -> Lg.d("onActivityResult: Unrecognized code")
                 }
@@ -103,46 +136,120 @@ class NewPlantConfirmFragment : BaseFragment() {
         }
     }
 
+    private fun initUi() {
+        val plantTypeDrawables = resources.obtainTypedArray(R.array.plant_type_drawable_array)
+        plantTypeButton.setImageResource(plantTypeDrawables.getResourceId(viewModel.plantType.value!!.ordinal, -1))
+        plantTypeDrawables.recycle()
+    }
 
-//    private val onClickEditPhoto = Observer<Int?> {
-//        //        capturingPlantPhotoType = plantPhotoType
-//
-//        with (viewModel) {
-//            val photoFile = createPhotoFile()
-//            newPhotoUri = photoFile.absolutePath
-//            startPhotoIntent(photoFile)
-//        }
-//    }
+    private fun onClickPhoto() {
+        // TODO: Clicking on the photo should blow it up
+    }
 
-//    private val onAddPhoto = Observer<PlantPhoto.Type> { plantPhotoType ->
-//        capturingPlantPhotoType = plantPhotoType
-//
-//        with (viewModel) {
-//            val photoFile = createPhotoFile()
-//            newPhotoUri = photoFile.absolutePath
-//            startPhotoIntent(photoFile)
-//        }
-//    }
+    private fun onClickPhotoType() {
+        val photoIndex = plantPhotoPager.currentItem
+        ItemListDialog(
+                R.string.change_photo_type,
+                R.array.photo_type_drawable_array,
+                PlantPhoto.Type.values().filter { it != viewModel.photos[photoIndex].photoType },
+                ::onChangePhotoType
+        ).show(fragmentManager!!,"tag")
+    }
 
-//    private val onEditPhotoType = Observer<PlantPhoto.Type> { plantPhotoType ->
-//        val dialog = PhotoTypeDialogFragment()
-//        dialog.photoTypeSelected.observe(this,Observer<PlantPhoto.Type> {
-//
-//        })
-//        dialog.show(fragmentManager, "tag")
-//    }
+    private fun onChangePhotoType(photoType: PlantPhoto.Type) {
+        val photoIndex = plantPhotoPager.currentItem
+        viewModel.photos[photoIndex].photoType = photoType
+//        photoAdapter.notifyItemChanged(photoIndex) // Re-creates view on first change!?
+        photoAdapter.notifyDataSetChanged()
+    }
+
+
+
+    private fun onClickDeletePhoto() {
+        photoAdapter.isPhotoMenuVisible = false
+
+        AlertDialog.Builder(activity).apply {
+            setTitle(getString(R.string.delete_photo))
+            setMessage(getString(R.string.delete_photo_confirm))
+            setPositiveButton(getString(R.string.yes)) { _, _ ->
+                val photoIndex = plantPhotoPager.currentItem
+                val photoUri = viewModel.photos[photoIndex].photoUri
+                Lg.d("Deleting old photo: $photoUri")
+                Lg.d("Delete photo result = ${File(photoUri).delete()}")
+                job = mainScope.launch(Dispatchers.Main) {
+                    delay(300)
+                    viewModel.photos.removeAt(photoIndex)
+                    photoAdapter.notifyItemRemoved(photoIndex)
+                    showToast(getString(R.string.photo_deleted))
+                }
+            }
+            setNegativeButton(getString(R.string.no)) { dialog, _ -> dialog.dismiss() }
+            create()
+        }.show()
+    }
+
+    private fun onClickRetakePhoto() {
+        photoAdapter.isPhotoMenuVisible = false
+
+        AlertDialog.Builder(activity).apply {
+            setTitle(getString(R.string.retake_photo))
+            setMessage(getString(R.string.retake_photo_confirm))
+            setPositiveButton(getString(R.string.yes)) { _, _ ->
+                isPhotoRetake = true
+                val photoIndex = plantPhotoPager.currentItem
+                val photoFile = createPhotoFile()
+                newPhotoUri = photoFile.absolutePath
+                startPhotoIntent(photoFile)
+            }
+            setNegativeButton(getString(R.string.no)) { dialog, _ -> dialog.dismiss() }
+            create()
+        }.show()
+
+
+    }
+
+    private fun onClickAddPhoto() {
+        photoAdapter.isPhotoMenuVisible = false
+        ItemListDialog(
+                R.string.select_new_photo_type,
+                R.array.photo_type_drawable_array,
+                PlantPhoto.Type.values().toList(),
+                ::onNewPhotoType
+        ).show(fragmentManager!!,"tag")
+    }
+
+    private fun onNewPhotoType(photoType: PlantPhoto.Type) {
+        isPhotoRetake = false
+        newPhotoType = photoType
+        val photoFile = createPhotoFile()
+        newPhotoUri = photoFile.absolutePath
+        startPhotoIntent(photoFile)
+    }
 
     private fun bindClickListeners() {
-        plantTypeButton.setOnClickListener(::onClickEditPlantType)
+        plantTypeButton.setOnClickListener(::onClickChangePlantType)
         editPlantNameButton.setOnClickListener(::onClickEditNames)
-        plantPhotoCompoundView.editPhoto.observeAfterUnsubscribe(this, onClickEditPhoto)
-//        addPhotoButton.setOnClickListener(::onAddPhotoClicked) -> Should trigger photo type selection dialog
         editMeasurementsButton.setOnClickListener(::onClickEditMeasurements)
         fab.setOnClickListener(::onFabClicked)
     }
 
+    private fun onClickChangePlantType(view: View) {
+        ItemListDialog(
+                R.string.change_plant_type,
+                R.array.plant_type_drawable_array,
+                Plant.Type.values().filter { it != viewModel.plantType.value },
+                ::onNewPlantType
+        ).show(fragmentManager!!,"tag")
+    }
 
-    @Suppress("UNUSED_PARAMETER")
+
+    private fun onNewPlantType(plantType: Plant.Type) {
+        viewModel.plantType.value = plantType
+        if (plantType != Plant.Type.TREE)
+            viewModel.trunkDiameter.value = null
+        initUi()
+    }
+
     private fun onClickEditNames(view: View) {
         with(viewModel) {
             EditPlantNameDialog(
@@ -150,27 +257,9 @@ class NewPlantConfirmFragment : BaseFragment() {
                     scientificName.value.orEmpty(),
                     ::onNewPlantName
             )
-        }.show(this.fragmentManager,"tag")
+        }.show(fragmentManager!!,"tag")
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    private fun onClickEditPlantType(view: View) =
-        EditPlantTypeDialog(viewModel.plantType.value!!, ::onNewPlantType).show(this.fragmentManager,"tag")
-
-    private fun onNewPlantType(plantType: Plant.Type) {
-        viewModel.plantType.value = plantType
-        if (plantType != Plant.Type.TREE)
-            viewModel.trunkDiameter.value = null
-        updatePlantTypeIcon()
-    }
-
-    private val onClickEditPhoto = Observer<Int?> {
-        val photoFile = createPhotoFile()
-        viewModel.newPhotoUri = photoFile.absolutePath
-        startPhotoIntent(photoFile)
-    }
-
-    @Suppress("UNUSED_PARAMETER")
     private fun onClickEditMeasurements(view: View) {
         with(viewModel) {
             EditMeasurementsDialog(
@@ -180,20 +269,8 @@ class NewPlantConfirmFragment : BaseFragment() {
                     trunkDiameter.value,
                     ::onNewPlantMeasurements
             )
-        }.show(this.fragmentManager,"tag")
+        }.show(fragmentManager!!,"tag")
     }
-
-
-    // TODO: After add photo, need screen to select photo type, then camera screen to take photo
-    // TODO: Use ConstraintLayout for everything
-//    @Suppress("UNUSED_PARAMETER")
-//    private fun onAddPhotoClicked(view: View) {
-//        if (!isPlantNameValid())
-//            return
-//        disableTextEdits()
-//        showToast("Add photo Clicked")
-//    }
-
 
     @Suppress("UNUSED_PARAMETER")
     private fun onFabClicked(view: View) {
@@ -221,3 +298,4 @@ class NewPlantConfirmFragment : BaseFragment() {
         return true
     }
 }
+

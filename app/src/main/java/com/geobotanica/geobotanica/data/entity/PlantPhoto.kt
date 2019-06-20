@@ -33,6 +33,7 @@ data class PlantPhoto(
     enum class Type {
         COMPLETE,
         LEAF,
+//        BUDS,
         FLOWER,
         FRUIT,
 //        STEM,
@@ -43,8 +44,17 @@ data class PlantPhoto(
             LEAF -> "Leaf"
             FLOWER -> "Flower"
             FRUIT -> "Fruit"
-//            STEM -> "Stem"
             TRUNK -> "Trunk"
+        }
+    }
+
+    enum class Action {
+        RETAKE,
+        DELETE;
+
+        override fun toString() = when (this) {
+            RETAKE -> "Retake"
+            DELETE -> "Delete"
         }
     }
 }

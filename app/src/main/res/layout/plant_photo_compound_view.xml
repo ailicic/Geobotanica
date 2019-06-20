@@ -1,44 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<merge
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/constraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/plantPhotoImageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/plantPhoto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:scaleType="fitCenter"
         android:adjustViewBounds="true"
-        app:srcCompat="@drawable/photo_type_flower"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/editPhotoButton"
+        android:id="@+id/changePhotoTypeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginBottom="16dp"
         app:fabSize="mini"
         app:maxImageSize="@dimen/mini_fab_max_image_size"
         app:backgroundTint="@color/colorWhite"
-        app:tint="@color/colorPrimaryDark"
-        app:srcCompat="@drawable/ic_edit_black_24dp"
-        app:layout_constraintBottom_toBottomOf="@id/plantPhoto"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:srcCompat="@drawable/photo_type_complete"
+        app:layout_constraintTop_toTopOf="@id/plantPhoto"
+        app:layout_constraintEnd_toEndOf="@id/plantPhoto" />
 
-    <!--<androidx.appcompat.widget.AppCompatImageView-->
-    <!--android:id="@+id/photoTypeIcon"-->
-    <!--android:layout_width="@dimen/image_button_size"-->
-    <!--android:layout_height="@dimen/image_button_size"-->
-    <!--android:layout_marginTop="8dp"-->
-    <!--android:layout_marginEnd="8dp"-->
-    <!--android:scaleType="fitCenter"-->
-    <!--app:layout_constraintTop_toTopOf="@id/plantPhoto"-->
-    <!--app:layout_constraintEnd_toEndOf="@id/plantPhoto"-->
-    <!--app:srcCompat="@drawable/photo_type_full" />-->
-</merge>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/deletePhotoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:fabSize="mini"
+        app:maxImageSize="@dimen/mini_fab_max_image_size"
+        app:backgroundTint="@color/colorWhite"
+        app:srcCompat="@drawable/ic_close_24dp"
+        app:tint="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toTopOf="@id/retakePhotoButton"
+        app:layout_constraintEnd_toEndOf="@id/plantPhoto" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/retakePhotoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:fabSize="mini"
+        app:maxImageSize="@dimen/mini_fab_max_image_size"
+        app:backgroundTint="@color/colorWhite"
+        app:srcCompat="@drawable/ic_refresh_24dp"
+        app:tint="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toTopOf="@id/addPhotoButton"
+        app:layout_constraintEnd_toEndOf="@id/plantPhoto" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addPhotoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:fabSize="mini"
+        app:maxImageSize="@dimen/mini_fab_max_image_size"
+        app:backgroundTint="@color/colorWhite"
+        app:srcCompat="@drawable/ic_add_24px"
+        app:tint="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toBottomOf="@id/plantPhoto"
+        app:layout_constraintEnd_toEndOf="@id/plantPhoto" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/photoMenuButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:fabSize="mini"
+        app:maxImageSize="@dimen/mini_fab_max_image_size"
+        app:backgroundTint="@color/colorWhite"
+        app:srcCompat="@drawable/ic_more_vert_black_24dp"
+        app:tint="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toBottomOf="@id/plantPhoto"
+        app:layout_constraintEnd_toEndOf="@id/plantPhoto" />
+
+    <!--<TextView-->
+        <!--android:id="@+id/userTimestampText"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginBottom="4dp"-->
+        <!--android:layout_marginStart="16dp"-->
+        <!--android:textColor="@color/colorBlack"-->
+        <!--android:text="Photo taken by user on 2000-00-00"-->
+        <!--android:textSize="14sp"-->
+        <!--app:layout_constraintStart_toStartOf="parent"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent" />-->
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -44,10 +44,9 @@ class PlantDetailFragment : BaseFragment() {
         }
 
         val binding = DataBindingUtil.inflate<FragmentPlantDetailBinding>(
-                layoutInflater, R.layout.fragment_plant_detail, container, false).apply {
-            viewModel = this@PlantDetailFragment.viewModel
-            lifecycleOwner = this@PlantDetailFragment
-        }
+                layoutInflater, R.layout.fragment_plant_detail, container, false)
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = this
         return binding.root
     }
 
@@ -68,23 +67,23 @@ class PlantDetailFragment : BaseFragment() {
     }
 
     private fun bindClickListeners() {
-        deleteButton.setOnClickListener(::onDeleteButtonClicked)
+        deleteButton.setOnClickListener(::onClickDelete)
         fab.setOnClickListener { showSnackbar("Add new photos/measurements") }
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun onDeleteButtonClicked(view: View) {
+    private fun onClickDelete(view: View) {
         AlertDialog.Builder(activity).apply {
-            setTitle("Delete Plant")
-            setMessage("Are you sure you want to delete this plant and its photos?")
-            setPositiveButton("Yes") { _, _ ->
+            setTitle(getString(R.string.delete_plant))
+            setMessage(getString(R.string.delete_plant_confirm))
+            setPositiveButton(getString(R.string.yes)) { _, _ ->
                 viewModel.deletePlant()
-                showToast("Plant deleted")
+                showToast(getString(R.string.plant_deleted))
 
                 val navController = activity.findNavController(R.id.fragment)
                 navController.popBackStack()
             }
-            setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+            setNegativeButton(getString(R.string.no)) { dialog, _ -> dialog.dismiss() }
             create()
         }.show()
     }

@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer-array name="plantTypes">
+    <string-array name="measurement_unit_array">
+        <item>cm</item>
+        <item>m</item>
+        <item>in</item>
+        <item>ft</item>
+    </string-array>
+    <integer-array name="plant_type_drawable_array">
         <item>@drawable/plant_type_tree</item>
         <item>@drawable/plant_type_shrub</item>
         <item>@drawable/plant_type_herb</item>
         <item>@drawable/plant_type_grass</item>
         <item>@drawable/plant_type_vine</item>
         <item>@drawable/plant_type_fungus</item>
+    </integer-array>
+    <integer-array name="photo_type_drawable_array">
+        <item>@drawable/photo_type_complete</item>
+        <item>@drawable/photo_type_leaf</item>
+        <item>@drawable/photo_type_flower</item>
+        <item>@drawable/photo_type_fruit</item>
+        <item>@drawable/photo_type_trunk</item>
+    </integer-array>
+    <integer-array name="photo_action_drawable_array">
+        <item>@drawable/ic_refresh_24dp</item>
+        <item>@drawable/ic_close_24dp</item>
     </integer-array>
 </resources>

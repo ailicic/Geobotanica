@@ -54,7 +54,7 @@ class PlantNameAdapter(
         val plantTypes = Plant.Type.flagsToList(item.plantTypes)
         val plantTypeCount = plantTypes.size
         if (plantTypeCount == 1 || plantTypeCount == 2) {
-            val plantTypeDrawables = resources.obtainTypedArray(R.array.plantTypes)
+            val plantTypeDrawables = resources.obtainTypedArray(R.array.plant_type_drawable_array)
             holder.plantTypeIcon.run {
                 setImageResource(plantTypeDrawables.getResourceId(plantTypes[0].ordinal, -1))
                 isVisible = true

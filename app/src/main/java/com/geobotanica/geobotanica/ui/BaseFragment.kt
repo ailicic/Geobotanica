@@ -5,6 +5,8 @@ import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -20,6 +22,7 @@ import androidx.fragment.app.Fragment
 import com.geobotanica.geobotanica.util.Lg
 import com.google.android.material.snackbar.Snackbar
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -41,7 +44,7 @@ abstract class BaseFragment : Fragment() {
     // NavBundle keys
     protected val userIdKey = "userId"
     protected val plantIdKey = "plantId"
-    protected val plantTypeKey = "plantType"
+    protected val plantTypeKey = "photoType"
     protected val taxonIdKey = "taxonId"
     protected val vernacularIdKey = "vernacularId"
     protected val commonNameKey = "commonName"
@@ -90,6 +93,18 @@ abstract class BaseFragment : Fragment() {
         val storageDir: File? = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
 //        /storage/emulated/0/Android/data/com.geobotanica/files/Pictures
         return File.createTempFile(fileName, ".jpg", storageDir)
+    }
+
+    // TODO: Remove after better approach to create test images
+    protected fun fileFromDrawable(resId: Int, filename: String): String {
+        val bitmap = BitmapFactory.decodeResource(resources, resId)
+        val extStorageDir = Environment.getExternalStorageDirectory().toString()
+        val file = File(extStorageDir, "$filename.png")
+        val outStream = FileOutputStream(file)
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream)
+        outStream.flush()
+        outStream.close()
+        return file.absolutePath
     }
 
     fun startPhotoIntent(photoFile: File) {
