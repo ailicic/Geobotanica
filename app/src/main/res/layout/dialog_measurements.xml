@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.geobotanica.geobotanica.ui.compoundview.MeasurementEditView
+    <com.geobotanica.geobotanica.ui.compoundview.MeasurementsEditView
     android:id="@+id/heightEditView"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -13,7 +13,7 @@
     app:layout_constraintTop_toTopOf="parent"
     app:layout_constraintStart_toStartOf="parent" />
 
-    <com.geobotanica.geobotanica.ui.compoundview.MeasurementEditView
+    <com.geobotanica.geobotanica.ui.compoundview.MeasurementsEditView
     android:id="@+id/diameterEditView"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -21,7 +21,7 @@
     app:layout_constraintTop_toBottomOf="@id/heightEditView"
     app:layout_constraintStart_toStartOf="parent" />
 
-    <com.geobotanica.geobotanica.ui.compoundview.MeasurementEditView
+    <com.geobotanica.geobotanica.ui.compoundview.MeasurementsEditView
     android:id="@+id/trunkDiameterEditView"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"

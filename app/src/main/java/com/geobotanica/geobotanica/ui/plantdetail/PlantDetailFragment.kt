@@ -58,7 +58,7 @@ class PlantDetailFragment : BaseFragment() {
 
     private fun setPlantPhoto() {
         plantPhoto.doOnPreDraw {
-            viewModel.mainPhoto.observe(this, Observer {mainPhoto ->
+            viewModel.mainPhoto.observe(this, Observer { mainPhoto ->
                 mainPhoto?.let { photo ->
                     plantPhoto.setScaledBitmap(photo.fileName)
                 }

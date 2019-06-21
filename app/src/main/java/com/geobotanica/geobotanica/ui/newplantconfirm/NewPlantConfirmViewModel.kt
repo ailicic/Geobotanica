@@ -32,13 +32,13 @@ class NewPlantConfirmViewModel @Inject constructor (
     var userId = 0L
 
     val plantType = MutableLiveData<Plant.Type>()
-    val commonName = MutableLiveData<String>()
-    val scientificName = MutableLiveData<String>()
+    val commonName = MutableLiveData<String>() // Used for xml data-binding
+    val scientificName = MutableLiveData<String>() // Used for xml data-binding
     var taxonId: Long? = null
     var vernacularId: Long? = null
-    var height = MutableLiveData<Measurement>()
-    var diameter = MutableLiveData<Measurement>()
-    var trunkDiameter = MutableLiveData<Measurement>()
+    var height = MutableLiveData<Measurement>() // Used for xml data-binding
+    var diameter = MutableLiveData<Measurement>() // Used for xml data-binding
+    var trunkDiameter = MutableLiveData<Measurement>() // Used for xml data-binding
     var location: Location? = null
     val photos = mutableListOf<PhotoData>()
 

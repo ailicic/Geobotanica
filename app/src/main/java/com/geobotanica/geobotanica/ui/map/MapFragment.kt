@@ -35,6 +35,9 @@ import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
 
+// TODO: Use getViewLifecycleOwner() instead of unsubscribeThenObserve()
+// https://developer.android.com/reference/androidx/fragment/app/Fragment#getViewLifecycleOwner%28%29
+
 // LONG TERM
 // TODO: Create download map/db activity and utilize offline map tiles
 // TODO: Login screen

@@ -35,6 +35,17 @@ import java.io.File
 import javax.inject.Inject
 
 
+// TODO: Break out some parts into separate classes
+// PlantTypeButton: encapsulate icon change and expose result as LiveData (EditMeasurementsButton should subscribe too)
+// Measurements: Group text and button. Encapsulate dynamic margin adjustments
+
+
+// TODO: Automatically wire up the measurements text to the plantTypeButton
+
+// TODO: Need to filter phototypes available based on plant type
+// Complete only: fungus, grass
+// Trunk on tree only
+
 @Suppress("UNUSED_PARAMETER")
 class NewPlantConfirmFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantConfirmViewModel>
@@ -85,31 +96,44 @@ class NewPlantConfirmFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         addOnBackPressedCallback()
-        updatePlantTypeIcon()
+        initPlantTypeButton()
         initPhotoViewPager()
         updateMeasurementsLayout()
         bindClickListeners()
     }
 
-    private fun updateMeasurementsLayout() {
-        var measurementCount = 0
-        with(viewModel) {
-            height.value?.let { ++measurementCount }
-            diameter.value?.let { ++measurementCount }
-            trunkDiameter.value?.let { ++measurementCount }
-        }
-        val layoutParams = editMeasurementsButton.layoutParams as ConstraintLayout.LayoutParams
-        if (measurementCount > 2)
-            layoutParams.topMargin = dpToPixels(20)
-        else
-            layoutParams.topMargin = dpToPixels(8)
-        editMeasurementsButton.layoutParams = layoutParams
+    override fun onStop() {
+        super.onStop()
+        job?.cancel()
     }
 
-    private fun initPhotoViewPager() {
-        photoAdapter = PlantPhotoAdapter(::onClickPhoto, ::onClickPhotoType, ::onClickDeletePhoto, ::onClickRetakePhoto, ::onClickAddPhoto)
-        photoAdapter.items = viewModel.photos
-        plantPhotoPager.adapter = photoAdapter
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == requestTakePhoto) {
+            when (resultCode) {
+                Activity.RESULT_OK -> {
+                    val photoIndex = plantPhotoPager.currentItem
+                    Lg.d("onActivityResult: RESULT_OK (New photo received)")
+                    if (isPhotoRetake) {
+                        val oldPhotoUri = viewModel.photos[photoIndex].photoUri
+                        Lg.d("Deleting old photo: $oldPhotoUri (Result = ${File(oldPhotoUri).delete()})")
+                        viewModel.photos[photoIndex].photoUri = newPhotoUri
+                        photoAdapter.notifyDataSetChanged()
+                    } else {
+                        viewModel.photos.add(PhotoData(newPhotoType, newPhotoUri))
+                        photoAdapter.notifyDataSetChanged()
+                        job = mainScope.launch(Dispatchers.Main) {
+                            delay(300)
+                            plantPhotoPager.setCurrentItem(viewModel.photos.size, true)
+                        }
+                    }
+                }
+                Activity.RESULT_CANCELED -> { // "X" in GUI or back button pressed
+                    Lg.d("onActivityResult: RESULT_CANCELED")
+                    Lg.d("Deleting unused photo file: $newPhotoUri (Result = ${File(newPhotoUri).delete()})")
+                }
+                else -> Lg.d("onActivityResult: Unrecognized code")
+            }
+        }
     }
 
     private fun addOnBackPressedCallback() {
@@ -134,50 +158,41 @@ class NewPlantConfirmFragment : BaseFragment() {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-        job?.cancel()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when (requestCode) {
-            requestTakePhoto -> {
-                when (resultCode) {
-                    Activity.RESULT_OK -> {
-                        val photoIndex = plantPhotoPager.currentItem
-                        Lg.d("onActivityResult: RESULT_OK (New photo received)")
-                        if (isPhotoRetake) {
-                            val oldPhotoUri = viewModel.photos[photoIndex].photoUri
-                            Lg.d("Deleting old photo: $oldPhotoUri")
-                            Lg.d("Delete photo result = ${File(oldPhotoUri).delete()}")
-
-                            viewModel.photos[photoIndex].photoUri = newPhotoUri
-                            photoAdapter.notifyDataSetChanged()
-                        } else {
-                            viewModel.photos.add(PhotoData(newPhotoType, newPhotoUri))
-                            photoAdapter.notifyDataSetChanged()
-                            job = mainScope.launch(Dispatchers.Main) {
-                                delay(300)
-                                plantPhotoPager.setCurrentItem(viewModel.photos.size, true)
-                            }
-                        }
-                    }
-                    Activity.RESULT_CANCELED -> { // "X" in GUI or back button pressed
-                        Lg.d("onActivityResult: RESULT_CANCELED")
-                        Lg.d("Deleting unused photo file: $newPhotoUri")
-                        Lg.d("Delete photo result = ${File(newPhotoUri).delete()}")
-                    }
-                    else -> Lg.d("onActivityResult: Unrecognized code")
-                }
-            }
-            else -> showToast("Unrecognized request code")
+    private fun initPlantTypeButton() {
+        plantTypeButton.init(viewModel.plantType.value!!)
+        plantTypeButton.onNewPlantType = {
+            viewModel.plantType.value = it
+            if (it != Plant.Type.TREE) // TODO: Move this out. Observe VM instead.
+                viewModel.trunkDiameter.value = null
         }
     }
 
-    private fun updatePlantTypeIcon() {
-        val plantTypeDrawables = resources.obtainTypedArray(R.array.plant_type_drawable_array)
-        plantTypeButton.setImageResource(plantTypeDrawables.getResourceId(viewModel.plantType.value!!.ordinal, -1))
-        plantTypeDrawables.recycle()
+    private fun initPhotoViewPager() {
+        photoAdapter = PlantPhotoAdapter(::onClickPhoto, ::onClickPhotoType, ::onClickDeletePhoto, ::onClickRetakePhoto, ::onClickAddPhoto)
+        photoAdapter.items = viewModel.photos
+        plantPhotoPager.adapter = photoAdapter
+    }
+
+    // ENCAPSULATE AWAY
+    private fun updateMeasurementsLayout() {
+        var measurementCount = 0
+        with(viewModel) {
+            height.value?.let { ++measurementCount }
+            diameter.value?.let { ++measurementCount }
+            trunkDiameter.value?.let { ++measurementCount }
+        }
+        val layoutParams = editMeasurementsButton.layoutParams as ConstraintLayout.LayoutParams
+        if (measurementCount > 2)
+            layoutParams.topMargin = dpToPixels(20)
+        else
+            layoutParams.topMargin = dpToPixels(8)
+        editMeasurementsButton.layoutParams = layoutParams
+    }
+
+    private fun bindClickListeners() {
+        editPlantNameButton.setOnClickListener(::onClickEditNames)
+        editMeasurementsButton.setOnClickListener(::onClickEditMeasurements)
+        fab.setOnClickListener(::onFabClicked)
     }
 
     private fun onClickPhoto() {
@@ -201,8 +216,6 @@ class NewPlantConfirmFragment : BaseFragment() {
         photoAdapter.notifyDataSetChanged()
     }
 
-
-
     private fun onClickDeletePhoto() {
         photoAdapter.isPhotoMenuVisible = false
 
@@ -212,8 +225,7 @@ class NewPlantConfirmFragment : BaseFragment() {
             setPositiveButton(getString(R.string.yes)) { _, _ ->
                 val photoIndex = plantPhotoPager.currentItem
                 val photoUri = viewModel.photos[photoIndex].photoUri
-                Lg.d("Deleting old photo: $photoUri")
-                Lg.d("Delete photo result = ${File(photoUri).delete()}")
+                Lg.d("Deleting old photo: $photoUri (Result = ${File(photoUri).delete()})")
                 job = mainScope.launch(Dispatchers.Main) {
                     delay(300)
                     viewModel.photos.removeAt(photoIndex)
@@ -241,8 +253,6 @@ class NewPlantConfirmFragment : BaseFragment() {
             setNegativeButton(getString(R.string.no)) { dialog, _ -> dialog.dismiss() }
             create()
         }.show()
-
-
     }
 
     private fun onClickAddPhoto() {
@@ -263,30 +273,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         startPhotoIntent(photoFile)
     }
 
-    private fun bindClickListeners() {
-        plantTypeButton.setOnClickListener(::onClickChangePlantType)
-        editPlantNameButton.setOnClickListener(::onClickEditNames)
-        editMeasurementsButton.setOnClickListener(::onClickEditMeasurements)
-        fab.setOnClickListener(::onFabClicked)
-    }
-
-    private fun onClickChangePlantType(view: View) {
-        ItemListDialog(
-                R.string.change_plant_type,
-                R.array.plant_type_drawable_array,
-                Plant.Type.values().filter { it != viewModel.plantType.value },
-                ::onNewPlantType
-        ).show(fragmentManager!!,"tag")
-    }
-
-
-    private fun onNewPlantType(plantType: Plant.Type) {
-        viewModel.plantType.value = plantType
-        if (plantType != Plant.Type.TREE)
-            viewModel.trunkDiameter.value = null
-        updatePlantTypeIcon()
-    }
-
+    // ENCAPSULATE AWAY
     private fun onClickEditNames(view: View) {
         with(viewModel) {
             EditPlantNameDialog(
@@ -297,6 +284,8 @@ class NewPlantConfirmFragment : BaseFragment() {
         }.show(fragmentManager!!,"tag")
     }
 
+
+    // ENCAPSULATE AWAY
     private fun onClickEditMeasurements(view: View) {
         with(viewModel) {
             EditMeasurementsDialog(
@@ -315,7 +304,9 @@ class NewPlantConfirmFragment : BaseFragment() {
             diameter.value = newDiameter
             trunkDiameter.value = newTrunkDiameter
         }
-        updateMeasurementsLayout()
+
+
+        updateMeasurementsLayout() // ENCAPSULATE AWAY
     }
 
     @Suppress("UNUSED_PARAMETER")

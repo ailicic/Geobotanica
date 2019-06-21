@@ -12,7 +12,7 @@ import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.measurement_compound_view.view.*
 
 
-class MeasurementEditView @JvmOverloads constructor(
+class MeasurementsEditView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0
