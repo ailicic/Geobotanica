@@ -20,7 +20,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.geobotanica.geobotanica.ui.compoundview.PhotoTypeButton
         android:id="@+id/changePhotoTypeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -32,7 +32,7 @@
         app:layout_constraintTop_toTopOf="@id/plantPhoto"
         app:layout_constraintEnd_toEndOf="@id/plantPhoto" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.geobotanica.geobotanica.ui.compoundview.DeletePhotoButton
         android:id="@+id/deletePhotoButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -45,7 +45,7 @@
         app:layout_constraintBottom_toTopOf="@id/retakePhotoButton"
         app:layout_constraintEnd_toEndOf="@id/plantPhoto" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.geobotanica.geobotanica.ui.compoundview.RetakePhotoButton
         android:id="@+id/retakePhotoButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -58,7 +58,7 @@
         app:layout_constraintBottom_toTopOf="@id/addPhotoButton"
         app:layout_constraintEnd_toEndOf="@id/plantPhoto" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.geobotanica.geobotanica.ui.compoundview.AddPhotoButton
         android:id="@+id/addPhotoButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

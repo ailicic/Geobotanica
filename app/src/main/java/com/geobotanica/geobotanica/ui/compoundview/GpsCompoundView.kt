@@ -10,7 +10,7 @@ import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.ui.MainActivity
 import com.geobotanica.geobotanica.util.Lg
-import kotlinx.android.synthetic.main.gps_compound_view.view.*
+import kotlinx.android.synthetic.main.compound_gps.view.*
 import javax.inject.Inject
 
 // https://medium.com/@Sserra90/android-writing-a-compound-view-1eacbf1957fc
@@ -32,7 +32,7 @@ class GpsCompoundView @JvmOverloads constructor(
     init {
 //        Lg.d("GpsCompoundView: init{}")
         activity.applicationComponent.inject(this)
-        inflate(getContext(), R.layout.gps_compound_view,this)
+        inflate(getContext(), R.layout.compound_gps,this)
     }
 
     override fun onAttachedToWindow() {

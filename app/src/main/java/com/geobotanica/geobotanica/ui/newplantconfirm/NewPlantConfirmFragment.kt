@@ -21,7 +21,6 @@ import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.dialog.EditMeasurementsDialog
 import com.geobotanica.geobotanica.ui.dialog.EditPlantNameDialog
-import com.geobotanica.geobotanica.ui.dialog.ItemListDialog
 import com.geobotanica.geobotanica.ui.viewpager.PhotoData
 import com.geobotanica.geobotanica.ui.viewpager.PlantPhotoAdapter
 import com.geobotanica.geobotanica.util.Lg
@@ -29,22 +28,16 @@ import com.geobotanica.geobotanica.util.Measurement
 import com.geobotanica.geobotanica.util.getFromBundle
 import com.geobotanica.geobotanica.util.getNullableFromBundle
 import kotlinx.android.synthetic.main.fragment_new_plant_confirm.*
-import kotlinx.android.synthetic.main.gps_compound_view.view.*
+import kotlinx.android.synthetic.main.compound_gps.view.*
 import kotlinx.coroutines.*
 import java.io.File
 import javax.inject.Inject
 
 
 // TODO: Break out some parts into separate classes
-// PlantTypeButton: encapsulate icon change and expose result as LiveData (EditMeasurementsButton should subscribe too)
 // Measurements: Group text and button. Encapsulate dynamic margin adjustments
 
-
-// TODO: Automatically wire up the measurements text to the plantTypeButton
-
-// TODO: Need to filter phototypes available based on plant type
-// Complete only: fungus, grass
-// Trunk on tree only
+// TODO: Automatically wire up the measurements text to the plantType in the VM
 
 @Suppress("UNUSED_PARAMETER")
 class NewPlantConfirmFragment : BaseFragment() {
@@ -168,25 +161,15 @@ class NewPlantConfirmFragment : BaseFragment() {
     }
 
     private fun initPhotoViewPager() {
-        photoAdapter = PlantPhotoAdapter(::onClickPhoto, ::onClickPhotoType, ::onClickDeletePhoto, ::onClickRetakePhoto, ::onClickAddPhoto)
+        photoAdapter = PlantPhotoAdapter(
+                ::onClickPhoto,
+                ::onDeletePhoto,
+                ::onRetakePhoto,
+                ::onAddPhoto,
+                viewLifecycleOwner,
+                viewModel.plantType)
         photoAdapter.items = viewModel.photos
         plantPhotoPager.adapter = photoAdapter
-    }
-
-    // ENCAPSULATE AWAY
-    private fun updateMeasurementsLayout() {
-        var measurementCount = 0
-        with(viewModel) {
-            height.value?.let { ++measurementCount }
-            diameter.value?.let { ++measurementCount }
-            trunkDiameter.value?.let { ++measurementCount }
-        }
-        val layoutParams = editMeasurementsButton.layoutParams as ConstraintLayout.LayoutParams
-        if (measurementCount > 2)
-            layoutParams.topMargin = dpToPixels(20)
-        else
-            layoutParams.topMargin = dpToPixels(8)
-        editMeasurementsButton.layoutParams = layoutParams
     }
 
     private fun bindClickListeners() {
@@ -199,73 +182,26 @@ class NewPlantConfirmFragment : BaseFragment() {
         // TODO: Clicking on the photo should blow it up
     }
 
-    private fun onClickPhotoType() {
+    private fun onDeletePhoto() {
         val photoIndex = plantPhotoPager.currentItem
-        ItemListDialog(
-                R.string.change_photo_type,
-                R.array.photo_type_drawable_array,
-                PlantPhoto.Type.values().filter { it != viewModel.photos[photoIndex].photoType },
-                ::onChangePhotoType
-        ).show(fragmentManager!!,"tag")
+        val photoUri = viewModel.photos[photoIndex].photoUri
+        Lg.d("Deleting old photo: $photoUri (Result = ${File(photoUri).delete()})")
+        job = mainScope.launch(Dispatchers.Main) {
+            delay(300)
+            viewModel.photos.removeAt(photoIndex)
+            photoAdapter.notifyItemRemoved(photoIndex)
+            showToast(getString(R.string.photo_deleted))
+        }
     }
 
-    private fun onChangePhotoType(photoType: PlantPhoto.Type) {
-        val photoIndex = plantPhotoPager.currentItem
-        viewModel.photos[photoIndex].photoType = photoType
-//        photoAdapter.notifyItemChanged(photoIndex) // Re-creates view on first change!?
-        photoAdapter.notifyDataSetChanged()
+    private fun onRetakePhoto() {
+        isPhotoRetake = true
+        val photoFile = createPhotoFile()
+        newPhotoUri = photoFile.absolutePath
+        startPhotoIntent(photoFile)
     }
 
-    private fun onClickDeletePhoto() {
-        photoAdapter.isPhotoMenuVisible = false
-
-        AlertDialog.Builder(activity).apply {
-            setTitle(getString(R.string.delete_photo))
-            setMessage(getString(R.string.delete_photo_confirm))
-            setPositiveButton(getString(R.string.yes)) { _, _ ->
-                val photoIndex = plantPhotoPager.currentItem
-                val photoUri = viewModel.photos[photoIndex].photoUri
-                Lg.d("Deleting old photo: $photoUri (Result = ${File(photoUri).delete()})")
-                job = mainScope.launch(Dispatchers.Main) {
-                    delay(300)
-                    viewModel.photos.removeAt(photoIndex)
-                    photoAdapter.notifyItemRemoved(photoIndex)
-                    showToast(getString(R.string.photo_deleted))
-                }
-            }
-            setNegativeButton(getString(R.string.no)) { dialog, _ -> dialog.dismiss() }
-            create()
-        }.show()
-    }
-
-    private fun onClickRetakePhoto() {
-        photoAdapter.isPhotoMenuVisible = false
-
-        AlertDialog.Builder(activity).apply {
-            setTitle(getString(R.string.retake_photo))
-            setMessage(getString(R.string.retake_photo_confirm))
-            setPositiveButton(getString(R.string.yes)) { _, _ ->
-                isPhotoRetake = true
-                val photoFile = createPhotoFile()
-                newPhotoUri = photoFile.absolutePath
-                startPhotoIntent(photoFile)
-            }
-            setNegativeButton(getString(R.string.no)) { dialog, _ -> dialog.dismiss() }
-            create()
-        }.show()
-    }
-
-    private fun onClickAddPhoto() {
-        photoAdapter.isPhotoMenuVisible = false
-        ItemListDialog(
-                R.string.select_new_photo_type,
-                R.array.photo_type_drawable_array,
-                PlantPhoto.Type.values().toList(),
-                ::onNewPhotoType
-        ).show(fragmentManager!!,"tag")
-    }
-
-    private fun onNewPhotoType(photoType: PlantPhoto.Type) {
+    private fun onAddPhoto(photoType: PlantPhoto.Type) {
         isPhotoRetake = false
         newPhotoType = photoType
         val photoFile = createPhotoFile()
@@ -273,7 +209,6 @@ class NewPlantConfirmFragment : BaseFragment() {
         startPhotoIntent(photoFile)
     }
 
-    // ENCAPSULATE AWAY
     private fun onClickEditNames(view: View) {
         with(viewModel) {
             EditPlantNameDialog(
@@ -298,6 +233,22 @@ class NewPlantConfirmFragment : BaseFragment() {
         }.show(fragmentManager!!,"tag")
     }
 
+    // ENCAPSULATE AWAY
+    private fun updateMeasurementsLayout() {
+        var measurementCount = 0
+        with(viewModel) {
+            height.value?.let { ++measurementCount }
+            diameter.value?.let { ++measurementCount }
+            trunkDiameter.value?.let { ++measurementCount }
+        }
+        val layoutParams = editMeasurementsButton.layoutParams as ConstraintLayout.LayoutParams
+        if (measurementCount > 2)
+            layoutParams.topMargin = dpToPixels(20)
+        else
+            layoutParams.topMargin = dpToPixels(8)
+        editMeasurementsButton.layoutParams = layoutParams
+    }
+
     private fun onNewPlantMeasurements(newHeight: Measurement?, newDiameter: Measurement?, newTrunkDiameter: Measurement?) {
         with(viewModel) {
             height.value = newHeight
@@ -306,7 +257,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         }
 
 
-        updateMeasurementsLayout() // ENCAPSULATE AWAY
+//        updateMeasurementsLayout() // ENCAPSULATE AWAY
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -335,4 +286,3 @@ class NewPlantConfirmFragment : BaseFragment() {
         return true
     }
 }
-

@@ -31,7 +31,7 @@ class NewPlantConfirmViewModel @Inject constructor (
 
     var userId = 0L
 
-    val plantType = MutableLiveData<Plant.Type>()
+    val plantType = MutableLiveData<Plant.Type>() // Observed by PhotoAdapter. Updated by PlantTypeButton.
     val commonName = MutableLiveData<String>() // Used for xml data-binding
     val scientificName = MutableLiveData<String>() // Used for xml data-binding
     var taxonId: Long? = null

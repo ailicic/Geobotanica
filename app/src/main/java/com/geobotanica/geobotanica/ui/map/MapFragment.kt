@@ -52,6 +52,7 @@ import javax.inject.Inject
 // TODO: Make custom camera screen so Espresso can be used for UI testing
 // TODO: Consider storing temporary NewPlant values in db to synchronize all fragments across next/back cycling
 //      (back from NewPlantConfirm goes to stale values)
+// TODO: Use interfaces instead of concrete classes for injected dependencies where appropriate
 
 // LONG TERM NIT PICK
 // TODO: Learn how to use only the keyboard

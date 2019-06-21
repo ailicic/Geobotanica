@@ -1,6 +1,7 @@
 package com.geobotanica.geobotanica.data.entity
 
 import androidx.room.*
+import com.geobotanica.geobotanica.data.entity.Plant.Type.*
 import org.threeten.bp.OffsetDateTime
 
 @Entity(tableName = "plantPhotos",
@@ -48,15 +49,19 @@ data class PlantPhoto(
         }
     }
 
-    enum class Action {
-        RETAKE,
-        DELETE;
+    companion object {
+        fun typesValidFor(plantType: Plant.Type) =
+            when (plantType){
+                TREE ->     listOf(Type.COMPLETE, Type.LEAF, Type.FLOWER, Type.FRUIT, Type.TRUNK)
+                SHRUB ->    listOf(Type.COMPLETE, Type.LEAF, Type.FLOWER, Type.FRUIT)
+                HERB ->     listOf(Type.COMPLETE, Type.LEAF, Type.FLOWER, Type.FRUIT)
+                GRASS ->    listOf(Type.COMPLETE)
+                VINE ->     listOf(Type.COMPLETE, Type.LEAF, Type.FLOWER, Type.FRUIT)
+                FUNGUS ->   listOf(Type.COMPLETE)
+            }
 
-        override fun toString() = when (this) {
-            RETAKE -> "Retake"
-            DELETE -> "Delete"
-        }
     }
+
 }
 
 object PhotoTypeConverter {

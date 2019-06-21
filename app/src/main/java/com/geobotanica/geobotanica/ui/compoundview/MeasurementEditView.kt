@@ -5,18 +5,18 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.isVisible
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.util.*
-import kotlinx.android.synthetic.main.measurement_compound_view.view.*
+import kotlinx.android.synthetic.main.compound_edit_measurement.view.*
 
 
-class MeasurementsEditView @JvmOverloads constructor(
+class MeasurementEditView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr) {
+) : LinearLayoutCompat(context, attrs, defStyleAttr) {
 
     var measurement: Measurement?
         get() {
@@ -54,7 +54,7 @@ class MeasurementsEditView @JvmOverloads constructor(
 
     init {
 //        Lg.v("MeasurementCompoundView()")
-        inflate(getContext(), R.layout.measurement_compound_view,this)
+        inflate(getContext(), R.layout.compound_edit_measurement,this)
         setStaticViewIds()
 
         setMeasurementNameText()
