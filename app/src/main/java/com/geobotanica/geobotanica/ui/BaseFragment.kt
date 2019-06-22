@@ -125,8 +125,6 @@ abstract class BaseFragment : Fragment() {
         }
     }
 
-    fun dpToPixels(dp: Int) = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), resources.displayMetrics).toInt()
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         Lg.v("$className: onAttach()")

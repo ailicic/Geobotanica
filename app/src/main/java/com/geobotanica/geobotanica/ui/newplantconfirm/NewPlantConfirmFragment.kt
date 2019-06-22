@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
@@ -19,25 +18,18 @@ import com.geobotanica.geobotanica.databinding.FragmentNewPlantConfirmBinding
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.ui.dialog.EditMeasurementsDialog
 import com.geobotanica.geobotanica.ui.dialog.EditPlantNameDialog
 import com.geobotanica.geobotanica.ui.viewpager.PhotoData
 import com.geobotanica.geobotanica.ui.viewpager.PlantPhotoAdapter
 import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.Measurement
 import com.geobotanica.geobotanica.util.getFromBundle
 import com.geobotanica.geobotanica.util.getNullableFromBundle
-import kotlinx.android.synthetic.main.fragment_new_plant_confirm.*
 import kotlinx.android.synthetic.main.compound_gps.view.*
+import kotlinx.android.synthetic.main.fragment_new_plant_confirm.*
 import kotlinx.coroutines.*
 import java.io.File
 import javax.inject.Inject
 
-
-// TODO: Break out some parts into separate classes
-// Measurements: Group text and button. Encapsulate dynamic margin adjustments
-
-// TODO: Automatically wire up the measurements text to the plantType in the VM
 
 @Suppress("UNUSED_PARAMETER")
 class NewPlantConfirmFragment : BaseFragment() {
@@ -91,7 +83,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         addOnBackPressedCallback()
         initPlantTypeButton()
         initPhotoViewPager()
-        updateMeasurementsLayout()
+        initMeasurements()
         bindClickListeners()
     }
 
@@ -155,8 +147,6 @@ class NewPlantConfirmFragment : BaseFragment() {
         plantTypeButton.init(viewModel.plantType.value!!)
         plantTypeButton.onNewPlantType = {
             viewModel.plantType.value = it
-            if (it != Plant.Type.TREE) // TODO: Move this out. Observe VM instead.
-                viewModel.trunkDiameter.value = null
         }
     }
 
@@ -166,16 +156,18 @@ class NewPlantConfirmFragment : BaseFragment() {
                 ::onDeletePhoto,
                 ::onRetakePhoto,
                 ::onAddPhoto,
-                viewLifecycleOwner,
                 viewModel.plantType)
         photoAdapter.items = viewModel.photos
         plantPhotoPager.adapter = photoAdapter
     }
 
-    private fun bindClickListeners() {
-        editPlantNameButton.setOnClickListener(::onClickEditNames)
-        editMeasurementsButton.setOnClickListener(::onClickEditMeasurements)
-        fab.setOnClickListener(::onFabClicked)
+    private fun initMeasurements() {
+        viewModel.let { vm ->
+            measurementsCompoundView.run {
+                init(vm.height.value, vm.diameter.value, vm.trunkDiameter.value, vm.plantType)
+                onNewMeasurements = vm::onNewMeasurements
+            }
+        }
     }
 
     private fun onClickPhoto() {
@@ -209,6 +201,11 @@ class NewPlantConfirmFragment : BaseFragment() {
         startPhotoIntent(photoFile)
     }
 
+    private fun bindClickListeners() {
+        editPlantNameButton.setOnClickListener(::onClickEditNames)
+        fab.setOnClickListener(::onFabClicked)
+    }
+
     private fun onClickEditNames(view: View) {
         with(viewModel) {
             EditPlantNameDialog(
@@ -217,47 +214,6 @@ class NewPlantConfirmFragment : BaseFragment() {
                     ::onNewPlantName
             )
         }.show(fragmentManager!!,"tag")
-    }
-
-
-    // ENCAPSULATE AWAY
-    private fun onClickEditMeasurements(view: View) {
-        with(viewModel) {
-            EditMeasurementsDialog(
-                    plantType.value!!,
-                    height.value,
-                    diameter.value,
-                    trunkDiameter.value,
-                    ::onNewPlantMeasurements
-            )
-        }.show(fragmentManager!!,"tag")
-    }
-
-    // ENCAPSULATE AWAY
-    private fun updateMeasurementsLayout() {
-        var measurementCount = 0
-        with(viewModel) {
-            height.value?.let { ++measurementCount }
-            diameter.value?.let { ++measurementCount }
-            trunkDiameter.value?.let { ++measurementCount }
-        }
-        val layoutParams = editMeasurementsButton.layoutParams as ConstraintLayout.LayoutParams
-        if (measurementCount > 2)
-            layoutParams.topMargin = dpToPixels(20)
-        else
-            layoutParams.topMargin = dpToPixels(8)
-        editMeasurementsButton.layoutParams = layoutParams
-    }
-
-    private fun onNewPlantMeasurements(newHeight: Measurement?, newDiameter: Measurement?, newTrunkDiameter: Measurement?) {
-        with(viewModel) {
-            height.value = newHeight
-            diameter.value = newDiameter
-            trunkDiameter.value = newTrunkDiameter
-        }
-
-
-//        updateMeasurementsLayout() // ENCAPSULATE AWAY
     }
 
     @Suppress("UNUSED_PARAMETER")

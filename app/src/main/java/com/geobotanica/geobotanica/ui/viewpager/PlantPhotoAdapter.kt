@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.geobotanica.geobotanica.R
@@ -27,14 +26,13 @@ class PlantPhotoAdapter(
         private val onDeletePhoto: () -> Unit,
         private val onRetakePhoto: () -> Unit,
         private val onAddPhoto: (photoType: PlantPhoto.Type) -> Unit,
-        private val lifecycleOwner: LifecycleOwner,
         private val plantType: LiveData<Plant.Type>
 ) : RecyclerView.Adapter<PlantPhotoAdapter.ViewHolder>() {
 
     lateinit var items: List<PhotoData>
     private lateinit var currentViewHolder: ViewHolder
 
-    var isPhotoMenuVisible = false
+    private var isPhotoMenuVisible = false
         set(value) {
             field = value
             updatePhotoMenuButtons()
@@ -59,11 +57,10 @@ class PlantPhotoAdapter(
 
             plantPhoto.setOnClickListener { onClickPhoto() }
 
-            changePhotoTypeButton.init(item.photoType)
+            changePhotoTypeButton.init(item.photoType, plantType)
             changePhotoTypeButton.onNewPhotoType = {
                 items[position].photoType = it
             }
-            plantType.observe(lifecycleOwner, changePhotoTypeButton.plantTypeObserver)
 
             deletePhotoButton.onDeletePhoto = {
                 isPhotoMenuVisible = false
@@ -90,8 +87,7 @@ class PlantPhotoAdapter(
 
     override fun onViewRecycled(holder: ViewHolder) {
         super.onViewRecycled(holder)
-        Lg.d("PlantPhotoAdapter.onViewRecycled()")
-        plantType.removeObserver(holder.changePhotoTypeButton.plantTypeObserver)
+        holder.changePhotoTypeButton.removeObserver()
     }
 
     override fun getItemCount(): Int = items.size

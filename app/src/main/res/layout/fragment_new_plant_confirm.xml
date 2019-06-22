@@ -98,74 +98,23 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:background="@android:color/darker_gray"
-                app:layout_constraintTop_toBottomOf="@+id/plantPhotoPager"/>
-            <!--android:layout_marginBottom="32dp" WHY DOES THIS DO NOTHING???-->
+                app:layout_constraintTop_toBottomOf="@+id/plantPhotoPager" />
 
-            <TextView
-                android:id="@+id/heightText"
-                android:layout_width="wrap_content"
+            <com.geobotanica.geobotanica.ui.compoundview.MeasurementsCompoundView
+                android:id="@+id/measurementsCompoundView"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:layout_marginStart="16dp"
-                android:visibility="@{ viewModel.height != null ? View.VISIBLE : View.GONE }"
-                android:textColor="@color/colorBlack"
-                android:text="@{ viewModel.height.toHeightString() }"
-                android:textSize="@dimen/measurement_text_size"
-                app:layout_constraintTop_toBottomOf="@id/photoDivider"
-                app:layout_constraintStart_toStartOf="parent" />
-
-            <TextView
-                android:id="@+id/diameterText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_goneMarginTop="4dp"
-                android:layout_marginStart="16dp"
-                android:visibility="@{ viewModel.diameter != null ? View.VISIBLE : View.GONE }"
-                android:textColor="@color/colorBlack"
-                android:text="@{ viewModel.diameter.toDiameterString() }"
-                android:textSize="@dimen/measurement_text_size"
-                app:layout_constraintTop_toBottomOf="@id/heightText"
-                app:layout_constraintStart_toStartOf="parent" />
-
-            <TextView
-                android:id="@+id/trunkDiameterText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_goneMarginTop="4dp"
-                android:layout_marginStart="16dp"
-                android:visibility="@{ viewModel.trunkDiameter != null ? View.VISIBLE : View.GONE }"
-                android:textColor="@color/colorBlack"
-                android:text="@{ viewModel.trunkDiameter.toTrunkDiameterString() }"
-                android:textSize="@dimen/measurement_text_size"
-                app:layout_constraintTop_toBottomOf="@id/diameterText"
-                app:layout_constraintStart_toStartOf="parent" />
-
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/editMeasurementsButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/fab_margin"
-                android:layout_marginBottom="8dp"
-                app:fabSize="mini"
-                app:maxImageSize="@dimen/mini_fab_max_image_size"
-                app:backgroundTint="@color/colorWhite"
-                app:tint="@color/colorPrimaryDark"
-                android:visibility="@{ viewModel.height != null || viewModel.diameter != null || viewModel.trunkDiameter != null ? View.VISIBLE : View.GONE }"
-                app:srcCompat="@drawable/ic_edit_black_24dp"
-                app:layout_constraintTop_toBottomOf="@id/photoDivider"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/photoDivider" />
 
             <View
                 android:id="@+id/measurementsDivider"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginTop="8dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:background="@android:color/darker_gray"
                 android:visibility="@{ viewModel.height != null || viewModel.diameter != null || viewModel.trunkDiameter != null ? View.VISIBLE : View.GONE }"
-                app:layout_constraintTop_toBottomOf="@+id/editMeasurementsButton"/>
+                app:layout_constraintTop_toBottomOf="@+id/measurementsCompoundView"/>
 
 
             <com.geobotanica.geobotanica.ui.compoundview.GpsCompoundView
