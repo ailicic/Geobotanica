@@ -7,11 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.util.Measurement
+import kotlinx.android.synthetic.main.compound_edit_measurements.view.*
 import kotlinx.android.synthetic.main.dialog_measurements.*
 
 class EditMeasurementsDialog(
@@ -38,39 +38,31 @@ class EditMeasurementsDialog(
         return dialog
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    private fun onClickApply(dialog: DialogInterface, which: Int) =
-            onNewMeasurements(heightEditView.measurement, diameterEditView.measurement, trunkDiameterEditView.measurement)
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return customView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews()
+        measurementsEditView.init(plantType, height, diameter, trunkDiameter)
         bindListeners()
     }
 
-    private fun initViews() {
-        height?.let { heightEditView.measurement = it }
-        diameter?.let { diameterEditView.measurement = it }
-        trunkDiameter?.let { trunkDiameterEditView.measurement = it }
-        if (plantType != Plant.Type.TREE)
-            trunkDiameterEditView.isVisible = false
-    }
-
     private fun bindListeners() {
-        heightEditView.onTextChanged(::onMeasurementChanged)
-        diameterEditView.onTextChanged(::onMeasurementChanged)
-        trunkDiameterEditView.onTextChanged(::onMeasurementChanged)
+        with(measurementsEditView) {
+            heightEditView.onTextChanged(::onMeasurementChanged)
+            diameterEditView.onTextChanged(::onMeasurementChanged)
+            trunkDiameterEditView.onTextChanged(::onMeasurementChanged)
+        }
     }
 
     @Suppress("UNUSED_PARAMETER")
     private fun onMeasurementChanged(text: String) {
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = isMeasurementValid()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = measurementsEditView.isNotEmpty
     }
 
-    private fun isMeasurementValid(): Boolean =
-        heightEditView.isNotEmpty() || diameterEditView.isNotEmpty() || trunkDiameterEditView.isNotEmpty()
+    @Suppress("UNUSED_PARAMETER")
+    private fun onClickApply(dialog: DialogInterface, which: Int) =
+        with(measurementsEditView) { onNewMeasurements(height, diameter, trunkDiameter) }
 }
+

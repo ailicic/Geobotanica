@@ -164,8 +164,8 @@ class NewPlantConfirmFragment : BaseFragment() {
     private fun initMeasurements() {
         viewModel.let { vm ->
             measurementsCompoundView.run {
+                onNewMeasurementsCallback = vm::onNewMeasurements
                 init(vm.height.value, vm.diameter.value, vm.trunkDiameter.value, vm.plantType)
-                onNewMeasurements = vm::onNewMeasurements
             }
         }
     }

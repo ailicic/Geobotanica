@@ -22,7 +22,7 @@ class MeasurementsCompoundView @JvmOverloads constructor(
         defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
-    lateinit var onNewMeasurements: (Measurement?, Measurement?, Measurement?) -> Unit
+    lateinit var onNewMeasurementsCallback: (Measurement?, Measurement?, Measurement?) -> Unit
 
     private var height: Measurement? = null
     private var diameter: Measurement? = null
@@ -44,7 +44,7 @@ class MeasurementsCompoundView @JvmOverloads constructor(
         plantType.observe(lifecycleOwner, Observer {
             Lg.d("plantType.Observer")
             if (it != Plant.Type.TREE)
-                onNewPlantMeasurements(this.height, this.diameter, null)
+                onNewMeasurements(this.height, this.diameter, null)
         })
     }
 
@@ -54,14 +54,14 @@ class MeasurementsCompoundView @JvmOverloads constructor(
                 height,
                 diameter,
                 trunkDiameter,
-                ::onNewPlantMeasurements
+                ::onNewMeasurements
         ).show((context as FragmentActivity).supportFragmentManager, "tag")
     }
 
-    private fun onNewPlantMeasurements(height: Measurement?, diameter: Measurement?, trunkDiameter: Measurement?) {
+    private fun onNewMeasurements(height: Measurement?, diameter: Measurement?, trunkDiameter: Measurement?) {
         Lg.d("MeasurementCompoundView.onNewMeasurements()")
         updateMeasurements(height, diameter, trunkDiameter)
-        onNewMeasurements(height, diameter, trunkDiameter)
+        onNewMeasurementsCallback(height, diameter, trunkDiameter)
     }
 
     private fun updateMeasurements(height: Measurement?, diameter: Measurement?, trunkDiameter: Measurement?) {

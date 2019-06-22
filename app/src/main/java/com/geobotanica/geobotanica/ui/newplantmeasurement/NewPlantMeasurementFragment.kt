@@ -51,13 +51,8 @@ class NewPlantMeasurementFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initMeasurementCompoundViews()
+        measurementsEditView.init(viewModel.plantType)
         bindClickListeners()
-    }
-
-    private fun initMeasurementCompoundViews() {
-        if (viewModel.plantType != Plant.Type.TREE)
-            trunkDiameterEditView.isVisible = false
     }
 
     private fun bindClickListeners() {
@@ -72,16 +67,11 @@ class NewPlantMeasurementFragment : BaseFragment() {
         if (isChecked) {
             manualRadioButton.isEnabled = true
             assistedRadioButton.isEnabled = true
-            heightEditView.isVisible = true
-            diameterEditView.isVisible = true
-            if (viewModel.plantType == Plant.Type.TREE)
-                trunkDiameterEditView.isVisible = true
+            measurementsEditView.isVisible = true
         } else {
             manualRadioButton.isEnabled = false
             assistedRadioButton.isEnabled = false
-            heightEditView.isVisible = false
-            diameterEditView.isVisible = false
-            trunkDiameterEditView.isVisible = false
+            measurementsEditView.isVisible = false
         }
     }
 
@@ -90,17 +80,11 @@ class NewPlantMeasurementFragment : BaseFragment() {
         when (checkedId) {
             manualRadioButton.id -> {
                 Lg.d("onRadioButtonChecked(): Manual")
-                heightEditView.isVisible = true
-                diameterEditView.isVisible = true
-
-                if (viewModel.plantType == Plant.Type.TREE)
-                    trunkDiameterEditView.isVisible = true
+                measurementsEditView.isVisible = true
             }
             assistedRadioButton.id -> {
                 Lg.d("onRadioButtonChecked(): Assisted")
-                heightEditView.isVisible = false
-                diameterEditView.isVisible = false
-                trunkDiameterEditView.isVisible = false
+                measurementsEditView.isVisible = false
             }
         }
     }
@@ -111,28 +95,23 @@ class NewPlantMeasurementFragment : BaseFragment() {
             showSnackbar(resources.getString(R.string.provide_plant_measurements))
             return
         }
-        saveViewModelState()
+        if (measurementsSwitch.isChecked)
+            saveViewModelState()
 
         val navController = activity.findNavController(R.id.fragment)
         navController.navigate(R.id.newPlantConfirmFragment, createBundle())
     }
 
     private fun saveViewModelState() {
-        if (measurementsSwitch.isChecked) {
-            viewModel.heightMeasurement = heightEditView.measurement
-            viewModel.diameterMeasurement = diameterEditView.measurement
-            if (viewModel.plantType == Plant.Type.TREE)
-                viewModel.trunkDiameterMeasurement = trunkDiameterEditView.measurement
-        }
+        viewModel.heightMeasurement = measurementsEditView.height
+        viewModel.diameterMeasurement = measurementsEditView.diameter
+        if (viewModel.plantType == Plant.Type.TREE)
+            viewModel.trunkDiameterMeasurement = measurementsEditView.trunkDiameter
     }
 
     private fun isPlantValid(): Boolean = ! measurementsSwitch.isChecked || isMeasurementValid()
 
-
-    private fun isMeasurementValid(): Boolean {
-        return heightEditView.isNotEmpty() || diameterEditView.isNotEmpty() ||
-                ( viewModel.plantType == Plant.Type.TREE && trunkDiameterEditView.isNotEmpty() )
-    }
+    private fun isMeasurementValid() = measurementsEditView.isNotEmpty
 
     private fun createBundle(): Bundle {
         return bundleOf(
