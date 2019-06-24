@@ -37,15 +37,15 @@ import javax.inject.Inject
 
 // TODO: Use getViewLifecycleOwner() instead of unsubscribeThenObserve()
 // https://developer.android.com/reference/androidx/fragment/app/Fragment#getViewLifecycleOwner%28%29
+// TODO: Use inline on functions that accept lambda parameters
 
 // LONG TERM
 // TODO: Create download map/db activity and utilize offline map tiles
 // TODO: Login screen
-    // https://developer.android.com/training/id-auth/identify.html
-    // https://developer.android.com/training/id-auth/custom_auth
+// https://developer.android.com/training/id-auth/identify.html
+// https://developer.android.com/training/id-auth/custom_auth
 // TODO: Investigate why app start time is so long (should be less of an issue after login/download screen)
 // TODO: Add photoType + editPhoto buttons in PlantDetails image (like confirm frag)
-// TODO: Use inline on functions that accept lambda parameters
 // TODO: Maybe use existing bundle when navigating (it works, but need to be careful about updating old values).
 // TODO: Group nearby markers into clusters
 // TODO: Limit max height to recyclerview in SearchPlantName (extends below screen)
@@ -202,8 +202,8 @@ class MapFragment : BaseFragment() {
 //        TaxaDatabase.getInstance(appContext).close()
 
         // TODO: REMOVE
-        NavHostFragment.findNavController(this).navigate(
-                R.id.newPlantConfirmFragment, createBundle() )
+//        NavHostFragment.findNavController(this).navigate(
+//                R.id.newPlantConfirmFragment, createBundle() )
 
 
         initMap()
@@ -237,15 +237,15 @@ class MapFragment : BaseFragment() {
 
     private fun bindViewModel() {
         with(viewModel) {
-            gpsFabIcon.observeAfterUnsubscribe(this@MapFragment,
+            gpsFabIcon.observe(viewLifecycleOwner,
                 Observer { @Suppress("DEPRECATION")
                     gpsFab.setImageDrawable(resources.getDrawable(it))
                 }
             )
-            showGpsRequiredSnackbar.observeAfterUnsubscribe(this@MapFragment, onGpsRequiredSnackbar)
-            navigateToNewPlant.observeAfterUnsubscribe(this@MapFragment, onNavigateToNewPlant)
-            plantMarkerData.observeAfterUnsubscribe(this@MapFragment, onPlantMarkers)
-            currentLocation.observeAfterUnsubscribe(this@MapFragment, onLocation)
+            showGpsRequiredSnackbar.observe(viewLifecycleOwner, onGpsRequiredSnackbar)
+            navigateToNewPlant.observe(viewLifecycleOwner, onNavigateToNewPlant)
+            plantMarkerData.observe(viewLifecycleOwner, onPlantMarkers)
+            currentLocation.observe(viewLifecycleOwner, onLocation)
         }
     }
 
