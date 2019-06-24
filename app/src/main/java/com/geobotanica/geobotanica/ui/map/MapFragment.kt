@@ -35,10 +35,6 @@ import org.osmdroid.views.overlay.Polygon
 import javax.inject.Inject
 
 
-// TODO: Use getViewLifecycleOwner() instead of unsubscribeThenObserve()
-// https://developer.android.com/reference/androidx/fragment/app/Fragment#getViewLifecycleOwner%28%29
-// TODO: Use inline on functions that accept lambda parameters
-
 // LONG TERM
 // TODO: Create download map/db activity and utilize offline map tiles
 // TODO: Login screen
@@ -49,10 +45,9 @@ import javax.inject.Inject
 // TODO: Maybe use existing bundle when navigating (it works, but need to be careful about updating old values).
 // TODO: Group nearby markers into clusters
 // TODO: Limit max height to recyclerview in SearchPlantName (extends below screen)
-// TODO: Make custom camera screen so Espresso can be used for UI testing
-// TODO: Consider storing temporary NewPlant values in db to synchronize all fragments across next/back cycling
-//      (back from NewPlantConfirm goes to stale values)
+// TODO: Make custom camera screen so Espresso can be used for UI testing (New CameraX API)
 // TODO: Use interfaces instead of concrete classes for injected dependencies where appropriate
+// TODO: Try using object detection for assisted plant measurements
 
 // LONG TERM NIT PICK
 // TODO: Learn how to use only the keyboard

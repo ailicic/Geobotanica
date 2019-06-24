@@ -21,6 +21,7 @@ import kotlinx.android.synthetic.main.fragment_plant_detail.*
 import javax.inject.Inject
 
 // TODO: Double check how measurements are handled here. Integrate changes to Measurement and MeasurementEditView
+// TODO: Show plant type as icon (not shown anywhere yet)
 
 class PlantDetailFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<PlantDetailViewModel>
@@ -33,7 +34,6 @@ class PlantDetailFragment : BaseFragment() {
         activity.applicationComponent.inject(this)
     }
 
-    // TODO: Show plant type as icon (not shown anywhere yet)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         plantId = arguments?.getLong("plantId", 0L) ?: 0L

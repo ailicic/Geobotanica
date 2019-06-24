@@ -27,8 +27,6 @@ class NewPlantTypeFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantTypeViewModel>
     private lateinit var viewModel: NewPlantTypeViewModel
 
-//    private lateinit var plantTypeAdapter: PlantTypeAdapter
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity.applicationComponent.inject(this)

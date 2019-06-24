@@ -162,11 +162,11 @@ class PlantNameSearchService @Inject constructor (
         return SearchResult(id, search.tags, plantTypes, plantName)
     }
 
-    class PlantNameSearch(
+    data class PlantNameSearch(
             val fun0: ( (Int) -> List<Long>? )? = null,
             val fun1: ( (String, Int) -> List<Long>? )? = null,
             val fun2: ( (String, String, Int) -> List<Long>? )? = null,
-            tagList: List<PlantNameTag> = emptyList()
+            val tagList: List<PlantNameTag> = emptyList()
     ) {
         val tags: Int = tagList.fold(0) { acc, tag -> acc or tag.flag }
 

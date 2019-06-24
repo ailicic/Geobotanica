@@ -8,7 +8,7 @@ fun EditText.toTrimmedString() = text.toString().trim()
 fun EditText.isEmpty() = text.isEmpty()
 fun EditText.isNotEmpty() = text.isNotEmpty()
 
-fun EditText.onTextChanged(block: (String) -> Unit) {
+inline fun EditText.onTextChanged(crossinline block: (String) -> Unit) {
     addTextChangedListener(object : TextWatcher {
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
             block.invoke(s.toString().trim())
