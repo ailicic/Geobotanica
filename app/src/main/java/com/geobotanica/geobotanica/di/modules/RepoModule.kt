@@ -14,7 +14,7 @@ import javax.inject.Singleton
 
 @Module
 class RepoModule {
-    @Provides @Singleton fun provideGbDatabase(context: Context): GbDatabase = GbDatabase.getInstance(context)
+    @Provides @Singleton fun provideGbDatabase(appContext: Context): GbDatabase = GbDatabase.getInstance(appContext)
     @Provides @Singleton fun provideUserDao(gbDatabase: GbDatabase): UserDao = gbDatabase.userDao()
     @Provides @Singleton fun providePlantDao(gbDatabase: GbDatabase): PlantDao = gbDatabase.plantDao()
     @Provides @Singleton fun providePlantCompositeDao(gbDatabase: GbDatabase): PlantCompositeDao = gbDatabase.plantCompositeDao()

@@ -3,8 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/mapFragment"
+    app:startDestination="@id/downloadTaxaFragment"
     >
+<!--app:startDestination="@id/mapFragment"-->
 
     <!-- TODO: Clean this up-->
         <!-- Animation data ignored?-->
@@ -53,6 +54,11 @@
         android:id="@+id/newPlantConfirmFragment"
         android:name="com.geobotanica.geobotanica.ui.newplantconfirm.NewPlantConfirmFragment"
         android:label="@string/confirm_new_plant">
+    </fragment>
+    <fragment
+        android:id="@+id/downloadTaxaFragment"
+        android:name="com.geobotanica.geobotanica.ui.downloadtaxa.DownloadTaxaFragment"
+        android:label="@string/download_plant_database">
     </fragment>
 
     <!--<fragment-->

@@ -36,7 +36,8 @@ import javax.inject.Inject
 
 
 // LONG TERM
-// TODO: Create download map/db activity and utilize offline map tiles
+// TODO: Create download map activity and utilize offline map tiles
+// TODO: Use Okio everywhere
 // TODO: Login screen
 // https://developer.android.com/training/id-auth/identify.html
 // https://developer.android.com/training/id-auth/custom_auth
@@ -45,11 +46,14 @@ import javax.inject.Inject
 // TODO: Maybe use existing bundle when navigating (it works, but need to be careful about updating old values).
 // TODO: Group nearby markers into clusters
 // TODO: Limit max height to recyclerview in SearchPlantName (extends below screen)
+// TODO: Use MediaStore to store photos. They should apppear in Gallery as an album.
 // TODO: Make custom camera screen so Espresso can be used for UI testing (New CameraX API)
 // TODO: Use interfaces instead of concrete classes for injected dependencies where appropriate
+// TODO: Implement dark theme
 // TODO: Try using object detection for assisted plant measurements
 
 // LONG TERM NIT PICK
+// TODO: Get rid of warning on using null as root layout in inflate calls in onCreateDialog()
 // TODO: Learn how to use only the keyboard
 // TODO: Check that no hard-coded strings are used -> resources.getString(R.string.trunk_diameter)
 // TODO: Use code reformatter:
@@ -64,6 +68,7 @@ import javax.inject.Inject
 // TODO: Figure out how to resume app state after onStop, then process death (e.g. home or switch app, then kill app)
 // https://medium.com/google-developers/viewmodels-persistence-onsaveinstancestate-restoring-ui-state-and-loaders-fc7cc4a6c090
 // TODO: Expose Location events as LiveData in LocationService
+// TODO: Consider allowing app to be installed on external storage
 
 // DEFERRED
 // TODO: Show PlantType icon in map bubble (and PlantDetail?)
@@ -106,6 +111,7 @@ class MapFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initAfterPermissionsGranted()
+//        map.setUseDataConnection(false) // Use to force offline mode
     }
 
     private fun initAfterPermissionsGranted() {
@@ -193,12 +199,13 @@ class MapFragment : BaseFragment() {
     }
 
     private fun init() {
+
         // TODO: Remove (USED TO INIT taxa.db)
 //        TaxaDatabase.getInstance(appContext).close()
 
-        // TODO: REMOVE
+//        // TODO: REMOVE
 //        NavHostFragment.findNavController(this).navigate(
-//                R.id.newPlantConfirmFragment, createBundle() )
+//                R.id.downloadTaxaFragment, createBundle() )
 
 
         initMap()
@@ -245,7 +252,7 @@ class MapFragment : BaseFragment() {
     }
 
     private val onGpsRequiredSnackbar = Observer<Unit> {
-        showSnackbar(R.string.gps_must_be_enabled, "Enable") {
+        showSnackbar(R.string.gps_must_be_enabled, R.string.enable) {
             startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
         }
     }

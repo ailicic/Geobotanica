@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.preference.PreferenceManager
 import android.provider.MediaStore
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -73,9 +74,9 @@ abstract class BaseFragment : Fragment() {
         else -> 0
     }
 
-    protected fun showToast(message: String) {
-        Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
-    }
+    protected fun showToast(stringResId: Int) = showToast(getString(stringResId))
+
+    protected fun showToast(message: String) = Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
 
     protected fun showSnackbar(message: String, button: String = "", action: ((View) -> Unit)? = null) {
         Snackbar.make(this.view!!, message, Snackbar.LENGTH_LONG).run {
@@ -84,8 +85,9 @@ abstract class BaseFragment : Fragment() {
         }
     }
 
-    protected fun showSnackbar(stringId: Int, button: String = "", action: ((View) -> Unit)? = null) {
-        showSnackbar(resources.getString(stringId), button, action)
+    protected fun showSnackbar(stringId: Int, buttonStringId: Int = 0, action: ((View) -> Unit)? = null) {
+        val buttonString = if (buttonStringId != 0) getString(buttonStringId) else ""
+        showSnackbar(resources.getString(stringId), buttonString, action)
     }
 
     fun createPhotoFile(): File {

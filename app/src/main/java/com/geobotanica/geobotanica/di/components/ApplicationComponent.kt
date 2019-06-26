@@ -4,6 +4,7 @@ import com.geobotanica.geobotanica.di.modules.ApplicationModule
 import com.geobotanica.geobotanica.di.modules.RepoModule
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.compoundview.GpsCompoundView
+import com.geobotanica.geobotanica.ui.downloadtaxa.DownloadTaxaFragment
 import com.geobotanica.geobotanica.ui.map.MapFragment
 import com.geobotanica.geobotanica.ui.newplantconfirm.NewPlantConfirmFragment
 import com.geobotanica.geobotanica.ui.newplantmeasurement.NewPlantMeasurementFragment
@@ -28,6 +29,7 @@ interface ApplicationComponent {
     fun inject(newPlantMeasurementFragment: NewPlantMeasurementFragment)
     fun inject(newPlantConfirmFragment: NewPlantConfirmFragment)
     fun inject(plantDetailFragment: PlantDetailFragment)
+    fun inject(downloadTaxaFragment: DownloadTaxaFragment)
 
     fun inject(gpsCompoundView: GpsCompoundView)
 }

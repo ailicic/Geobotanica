@@ -213,7 +213,7 @@ class NewPlantConfirmFragment : BaseFragment() {
                     scientificName.value.orEmpty(),
                     ::onNewPlantName
             )
-        }.show(fragmentManager!!,"tag")
+        }.show(requireFragmentManager(),"tag")
     }
 
     @Suppress("UNUSED_PARAMETER")
