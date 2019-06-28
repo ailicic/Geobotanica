@@ -13,6 +13,7 @@ import com.geobotanica.geobotanica.di.modules.RepoModule
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.isEmulator
 import kotlinx.android.synthetic.main.activity_main.*
+import org.mapsforge.map.android.graphics.AndroidGraphicFactory
 
 class MainActivity : AppCompatActivity() {
     lateinit var applicationComponent: ApplicationComponent
@@ -39,6 +40,8 @@ class MainActivity : AppCompatActivity() {
             Lg.d("Running on emulator")
         else
             Lg.d("Running on device")
+
+        AndroidGraphicFactory.createInstance(application) // Required by MapsForge
     }
 
     override fun onSupportNavigateUp() = findNavController(R.id.fragment).navigateUp()
@@ -66,5 +69,6 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         Lg.v("$className: onDestroy()")
+        AndroidGraphicFactory.clearResourceMemoryCache()
     }
 }

@@ -68,8 +68,15 @@ dependencies {
     implementation "com.google.dagger:dagger:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
 
-    // OsmDroid Maps
-    implementation 'org.osmdroid:osmdroid-android:6.0.2'
+    // MapsForge Core
+    def mapsforge_version = "0.11.0"
+    implementation "org.mapsforge:mapsforge-core:$mapsforge_version"
+    implementation "org.mapsforge:mapsforge-map:$mapsforge_version"
+    implementation "org.mapsforge:mapsforge-map-reader:$mapsforge_version"
+    implementation "org.mapsforge:mapsforge-themes:$mapsforge_version"
+    implementation "net.sf.kxml:kxml2:2.3.0"
+    implementation "org.mapsforge:mapsforge-map-android:$mapsforge_version"
+    implementation "com.caverock:androidsvg:1.3"
 
     // Room
     // TODO: Use this after 2.1 release: implementation "androidx.room:room-coroutines:${room_version}"
@@ -94,7 +101,7 @@ dependencies {
     implementation "android.arch.navigation:navigation-ui-ktx:$navigation_version"
 
     // OffsetDateTime
-    implementation 'org.threeten:threetenbp:1.3.6'
+    implementation "org.threeten:threetenbp:1.3.6"
 
     // RecyclerView
     implementation "androidx.recyclerview:recyclerview:1.0.0"

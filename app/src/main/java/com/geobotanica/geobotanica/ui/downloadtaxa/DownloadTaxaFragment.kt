@@ -35,9 +35,6 @@ import java.io.IOException
 import javax.inject.Inject
 import kotlin.system.measureTimeMillis
 
-const val DB_SIZE_UNGZIP = 129_412_096 // TODO: Get from API
-const val DB_SIZE_GZIP = 29_038_255L // TODO: Get from API
-const val url = "http://people.okanagan.bc.ca/ailicic/Markers/taxa.db.gz" // TODO: Get from API
 
 class DownloadTaxaFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<DownloadTaxaViewModel>
@@ -65,6 +62,12 @@ class DownloadTaxaFragment : BaseFragment() {
 
         @SuppressLint("UsableSpace")
         internalStorageFree = File(context.filesDir.absolutePath).usableSpace
+
+        mainScope.launch {
+            if (viewModel.isTaxaDbDownloaded() && viewModel.isTaxaDbPopulated())
+                navigateToNext()
+        }
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -149,12 +152,13 @@ class DownloadTaxaFragment : BaseFragment() {
                 }
                 Lg.d("time = $time ms")
 
-                updateUi(DOWNLOAD_COMPLETE)
                 Lg.i("DownloadTaxaFragment: Download complete")
-                if (viewModel.isDatabaseImportSuccessful())
+                if (viewModel.isTaxaDbPopulated()) {
                     showToast("Database imported")
-                else {
+                    updateUi(DOWNLOAD_COMPLETE)
+                } else {
                     showToast("Database import failed")
+                    cancelDownload()
                     Lg.e("DownloadTaxaFragment: Database import failed")
                 }
                     
@@ -185,7 +189,7 @@ class DownloadTaxaFragment : BaseFragment() {
 
     private fun getFileSink(): BufferedSink {
         Lg.d("Dir = ${viewModel.databasesPath}")
-        val file = File(viewModel.databasesPath, "taxa.db")
+        val file = File(viewModel.databasesPath, TAXA_DB_FILE)
         if (!file.exists())
             file.createNewFile()
         return file.sink().buffer()
@@ -223,6 +227,7 @@ class DownloadTaxaFragment : BaseFragment() {
 
     private fun navigateToNext() {
         val navController = activity.findNavController(R.id.fragment)
+        navController.popBackStack()
         navController.navigate(R.id.mapFragment, createBundle())
     }
 

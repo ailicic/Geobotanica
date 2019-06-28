@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.Gravity.BOTTOM
+import android.view.Gravity.CENTER_HORIZONTAL
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,18 +24,20 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.*
-import com.geobotanica.geobotanica.util.IdDiffer.computeDiffs
 import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.osmdroid.config.Configuration
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.Polygon
+import org.mapsforge.core.model.LatLong
+import org.mapsforge.map.android.graphics.AndroidGraphicFactory
+import org.mapsforge.map.android.util.AndroidUtil
+import org.mapsforge.map.datastore.MultiMapDataStore
+import org.mapsforge.map.layer.renderer.TileRendererLayer
+import org.mapsforge.map.reader.MapFile
+import org.mapsforge.map.rendertheme.InternalRenderTheme
+import org.mapsforge.map.scalebar.MapScaleBar
+import java.io.File
 import javax.inject.Inject
-
 
 // LONG TERM
 // TODO: Create download map activity and utilize offline map tiles
@@ -73,13 +77,15 @@ import javax.inject.Inject
 // DEFERRED
 // TODO: Show PlantType icon in map bubble (and PlantDetail?)
 
+private val BC_MAP_FILE = "british-columbia.map"
+private val WORLD_MAP_FILE = "world.map"
 
 class MapFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<MapViewModel>
     private lateinit var viewModel: MapViewModel
 
-    private var locationMarker: Marker? = null
-    private var locationPrecisionCircle: Polygon? = null
+//    private var locationMarker: Marker? = null
+//    private var locationPrecisionCircle: Polygon? = null
 
     private val sharedPrefsIsFirstRun = "isFirstRun"
     private val sharedPrefsMapLatitude = "mapLatitude"
@@ -101,7 +107,7 @@ class MapFragment : BaseFragment() {
         loadSharedPrefsToViewModel()
 
         //load/initialize the osmdroid configuration (should be before layout inflation)
-        Configuration.getInstance().load(context, defaultSharedPrefs)
+//        Configuration.getInstance().load(context, defaultSharedPrefs)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -111,7 +117,6 @@ class MapFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initAfterPermissionsGranted()
-//        map.setUseDataConnection(false) // Use to force offline mode
     }
 
     private fun initAfterPermissionsGranted() {
@@ -123,16 +128,6 @@ class MapFragment : BaseFragment() {
             init()
     }
 
-    override fun onResume() {
-        super.onResume()
-        map.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        map.onPause()
-    }
-
     override fun onStop() {
         super.onStop()
 
@@ -141,6 +136,11 @@ class MapFragment : BaseFragment() {
             saveMapStateToViewModel()
         saveSharedPrefsFromViewModel()
         viewModel.unsubscribeGps()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mapView.destroyAll()
     }
 
     private fun loadSharedPrefsToViewModel() {
@@ -166,9 +166,9 @@ class MapFragment : BaseFragment() {
     }
 
     private fun saveMapStateToViewModel() {
-        viewModel.mapZoomLevel = map.zoomLevelDouble
-        viewModel.mapLatitude = map.mapCenter.latitude
-        viewModel.mapLongitude = map.mapCenter.longitude
+//        viewModel.mapZoomLevel = map.zoomLevelDouble
+//        viewModel.mapLatitude = map.mapCenter.latitude
+//        viewModel.mapLongitude = map.mapCenter.longitude
         viewModel.wasGpsSubscribed = viewModel.isGpsSubscribed()
     }
 
@@ -215,17 +215,34 @@ class MapFragment : BaseFragment() {
     }
 
     private fun initMap() {
-        map.setTileSource(TileSourceFactory.MAPNIK)
-        map.setBuiltInZoomControls(true)
-        map.setMultiTouchControls(true)
+        mapView.isClickable = true
+        mapView.mapScaleBar.isVisible = true
+        mapView.mapScaleBar.scaleBarPosition = MapScaleBar.ScaleBarPosition.TOP_LEFT
+        mapView.setBuiltInZoomControls(true)
 
-        with(map.controller) {
-            setZoom(viewModel.mapZoomLevel)
-            setCenter( GeoPoint(viewModel.mapLatitude, viewModel.mapLongitude) )
-        }
+        val tileCache = AndroidUtil.createExternalStorageTileCache(context, "mapcache",
+                mapView.model.displayModel.tileSize, mapView.model.displayModel.tileSize, true)
+
+        val multiMapDataStore = MultiMapDataStore(MultiMapDataStore.DataPolicy.RETURN_ALL)
+        val worldMap = MapFile(File(context?.getExternalFilesDir(null), WORLD_MAP_FILE))
+        val bcMap = MapFile(File(context?.getExternalFilesDir(null), BC_MAP_FILE))
+        multiMapDataStore.addMapDataStore(worldMap, false, false)
+        multiMapDataStore.addMapDataStore(bcMap, false, false)
+
+        val tileRendererLayer = TileRendererLayer(tileCache, multiMapDataStore,
+                mapView.model.mapViewPosition, AndroidGraphicFactory.INSTANCE)
+        tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.DEFAULT)
+
+        mapView.layerManager.layers.add(tileRendererLayer)
+        mapView.mapZoomControls.zoomControlsGravity = BOTTOM or CENTER_HORIZONTAL
+
+
+        mapView.setCenter(LatLong(viewModel.mapLatitude, viewModel.mapLongitude))
+        mapView.setZoomLevel(12.toByte())
+
         coordinatorLayout.isVisible = true // TODO: Remove this after LoginScreen implemented
-        locationMarker = null
-        createLocationPrecisionCircle() // Add to map now to ensure always on bottom
+//        locationMarker = null
+//        createLocationPrecisionCircle() // Add to map now to ensure always on bottom
 
 //        if (viewModel.isFirstRun)
 //            viewModel.getLastLocation()?.let { centerMapOnLocation(it, false) } // TODO: CHECK IF THIS SHOULD STAY (never worked)
@@ -246,8 +263,8 @@ class MapFragment : BaseFragment() {
             )
             showGpsRequiredSnackbar.observe(viewLifecycleOwner, onGpsRequiredSnackbar)
             navigateToNewPlant.observe(viewLifecycleOwner, onNavigateToNewPlant)
-            plantMarkerData.observe(viewLifecycleOwner, onPlantMarkers)
-            currentLocation.observe(viewLifecycleOwner, onLocation)
+//            plantMarkerData.observe(viewLifecycleOwner, onPlantMarkers)
+//            currentLocation.observe(viewLifecycleOwner, onLocation)
         }
     }
 
@@ -285,98 +302,98 @@ class MapFragment : BaseFragment() {
         }
     }
 
-    private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkersData ->
-        val currentGbMarkers = map.overlays.filterIsInstance<GbMarker>()
-        val plantMarkerDiffs = computeDiffs(
-                currentGbMarkers.map { it.plantId }, newPlantMarkersData.map { it.plantId }
-        )
+//    private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkersData ->
+//        val currentGbMarkers = map.overlays.filterIsInstance<GbMarker>()
+//        val plantMarkerDiffs = computeDiffs(
+//                currentGbMarkers.map { it.plantId }, newPlantMarkersData.map { it.plantId }
+//        )
+//
+//        map.overlays.removeAll( // Must be before add (for updated markers)
+//                currentGbMarkers.filter { plantMarkerDiffs.removeIds.contains(it.plantId) } )
+//        map.overlays.addAll( // Must be after remove (for updated markers)
+//                newPlantMarkersData
+//                        .filter { plantMarkerDiffs.insertIds.contains(it.plantId) }
+//                        .map { GbMarker(it, activity, map) } )
+//        // TODO: Consider using a custom InfoWindow
+//        // https://code.google.com/archive/p/osmbonuspack/wikis/Tutorial_2.wiki
+//        // 7. Customizing the bubble behaviour:
+//        // 9. Creating your own bubble layout
+//
+//        forceLocationMarkerOnTop()
+//        map.invalidate()
+//    }
 
-        map.overlays.removeAll( // Must be before add (for updated markers)
-                currentGbMarkers.filter { plantMarkerDiffs.removeIds.contains(it.plantId) } )
-        map.overlays.addAll( // Must be after remove (for updated markers)
-                newPlantMarkersData
-                        .filter { plantMarkerDiffs.insertIds.contains(it.plantId) }
-                        .map { GbMarker(it, activity, map) } )
-        // TODO: Consider using a custom InfoWindow
-        // https://code.google.com/archive/p/osmbonuspack/wikis/Tutorial_2.wiki
-        // 7. Customizing the bubble behaviour:
-        // 9. Creating your own bubble layout
-
-        forceLocationMarkerOnTop()
-        map.invalidate()
-    }
-
-    private fun forceLocationMarkerOnTop() {
-        locationMarker?.let {
-            map.overlays.remove(it)
-            map.overlays.add(it)
-        }
-    }
+//    private fun forceLocationMarkerOnTop() {
+//        locationMarker?.let {
+//            map.overlays.remove(it)
+//            map.overlays.add(it)
+//        }
+//    }
 
     // TODO: See if logic here can be pushed to VM
-    @Suppress("DEPRECATION")
-    private val onLocation = Observer<Location> {
-//        Lg.v("MapFragment: onLocation() = $it")
-        if (it.latitude != null && it.longitude != null) { // OK in VM
-            if (it.isRecent()) { // OK in VM
-                gpsFab.setImageDrawable(resources.getDrawable(R.drawable.gps_fix)) // Could be LiveData
-                updateLocationPrecision(it) // Could be LiveData
-                if (isLocationOffScreen(it)) // Problem: Check requires map
-                    centerMapOnLocation(it) // Could be LiveData
-                viewModel.setStaleGpsLocationTimer() // OK in VM
-            }
-            updateLocationMarker(it) // Could be LiveData
-            map.invalidate() // Could be LiveData
-        }
-        // TODO: Update satellitesInUse
-    }
+//    @Suppress("DEPRECATION")
+//    private val onLocation = Observer<Location> {
+////        Lg.v("MapFragment: onLocation() = $it")
+//        if (it.latitude != null && it.longitude != null) { // OK in VM
+//            if (it.isRecent()) { // OK in VM
+//                gpsFab.setImageDrawable(resources.getDrawable(R.drawable.gps_fix)) // Could be LiveData
+//                updateLocationPrecision(it) // Could be LiveData
+//                if (isLocationOffScreen(it)) // Problem: Check requires map
+//                    centerMapOnLocation(it) // Could be LiveData
+//                viewModel.setStaleGpsLocationTimer() // OK in VM
+//            }
+//            updateLocationMarker(it) // Could be LiveData
+//            map.invalidate() // Could be LiveData
+//        }
+//        // TODO: Update satellitesInUse
+//    }
 
-    private fun updateLocationPrecision(location: Location) {
-        if (locationPrecisionCircle == null)
-            createLocationPrecisionCircle()
-        locationPrecisionCircle?.points = Polygon.pointsAsCircle(
-            GeoPoint(location.latitude!!, location.longitude!!),
-            location.precision!!.toDouble()
-        )
-    }
+//    private fun updateLocationPrecision(location: Location) {
+//        if (locationPrecisionCircle == null)
+//            createLocationPrecisionCircle()
+//        locationPrecisionCircle?.points = Polygon.pointsAsCircle(
+//            GeoPoint(location.latitude!!, location.longitude!!),
+//            location.precision!!.toDouble()
+//        )
+//    }
 
-    @Suppress("DEPRECATION")
-    private fun createLocationPrecisionCircle() {
-        locationPrecisionCircle = Polygon(map).apply {
-            fillColor = 0x12121212
-            strokeColor = resources.getColor(R.color.colorPrimaryDark)
-            strokeWidth = 3F
-            infoWindow = null
-        }
-        map.overlays.add(locationPrecisionCircle)
-    }
+//    @Suppress("DEPRECATION")
+//    private fun createLocationPrecisionCircle() {
+//        locationPrecisionCircle = Polygon(map).apply {
+//            fillColor = 0x12121212
+//            strokeColor = resources.getColor(R.color.colorPrimaryDark)
+//            strokeWidth = 3F
+//            infoWindow = null
+//        }
+//        map.overlays.add(locationPrecisionCircle)
+//    }
 
-    private fun updateLocationMarker(currentLocation: Location) {
-        if (locationMarker == null)
-            createLocationMarker()
-        locationMarker?.position?.setCoords(currentLocation.latitude!!, currentLocation.longitude!!)
-    }
+//    private fun updateLocationMarker(currentLocation: Location) {
+//        if (locationMarker == null)
+//            createLocationMarker()
+//        locationMarker?.position?.setCoords(currentLocation.latitude!!, currentLocation.longitude!!)
+//    }
 
-    @Suppress("DEPRECATION")
-    private fun createLocationMarker() {
-        locationMarker = Marker(map).apply {
-            icon = resources.getDrawable(R.drawable.person)
-            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-            setOnMarkerClickListener { _, _ ->
-                showToast("You are here")
-                true
-            }
-            map.overlays.add(this)
-        }
-    }
-
-    private fun isLocationOffScreen(location: Location): Boolean =
-        !map.projection.boundingBox.contains(location.latitude!!, location.longitude!!)
-
-    private fun centerMapOnLocation(location: Location, animate: Boolean = true) {
-        if (animate)
-            location.let { map.controller.animateTo( GeoPoint(it.latitude!!, it.longitude!!) ) }
-        else
-            location.let { map.controller.setCenter( GeoPoint(it.latitude!!, it.longitude!!) ) }
-    }
+//    @Suppress("DEPRECATION")
+//    private fun createLocationMarker() {
+//        locationMarker = Marker(map).apply {
+//            icon = resources.getDrawable(R.drawable.person)
+//            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+//            setOnMarkerClickListener { _, _ ->
+//                showToast("You are here")
+//                true
+//            }
+//            map.overlays.add(this)
+//        }
+//    }
+//
+//    private fun isLocationOffScreen(location: Location): Boolean =
+//        !map.projection.boundingBox.contains(location.latitude!!, location.longitude!!)
+//
+//    private fun centerMapOnLocation(location: Location, animate: Boolean = true) {
+//        if (animate)
+//            location.let { map.controller.animateTo( GeoPoint(it.latitude!!, it.longitude!!) ) }
+//        else
+//            location.let { map.controller.setCenter( GeoPoint(it.latitude!!, it.longitude!!) ) }
+//    }
 }
