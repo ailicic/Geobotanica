@@ -14,6 +14,8 @@ import com.geobotanica.geobotanica.ui.newplantphoto.NewPlantPhotoFragment
 import com.geobotanica.geobotanica.ui.newplanttype.NewPlantTypeFragment
 import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailFragment
 import dagger.Component
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import javax.inject.Singleton
 
 @Singleton
@@ -29,6 +31,9 @@ interface ApplicationComponent {
     fun inject(newPlantMeasurementFragment: NewPlantMeasurementFragment)
     fun inject(newPlantConfirmFragment: NewPlantConfirmFragment)
     fun inject(plantDetailFragment: PlantDetailFragment)
+
+    @ObsoleteCoroutinesApi
+    @ExperimentalCoroutinesApi
     fun inject(downloadTaxaFragment: DownloadTaxaFragment)
 
     fun inject(gpsCompoundView: GpsCompoundView)

@@ -104,7 +104,7 @@ class NewPlantNameFragment : BaseFragment() {
                             else -> null
                         }
 
-                suggestedNamesChannel?.consumeEach {results ->
+                suggestedNamesChannel?.consumeEach { results ->
                     plantNamesAdapter.items = results
                     plantNamesAdapter.notifyDataSetChanged()
                 }

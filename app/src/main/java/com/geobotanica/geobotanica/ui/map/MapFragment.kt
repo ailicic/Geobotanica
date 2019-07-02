@@ -5,6 +5,7 @@ import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Paint
 import android.os.Bundle
 import android.view.Gravity.BOTTOM
 import android.view.Gravity.CENTER_HORIZONTAL
@@ -39,10 +40,14 @@ import org.mapsforge.map.scalebar.MapScaleBar
 import java.io.File
 import javax.inject.Inject
 
+
 // LONG TERM
 // TODO: Create download map activity and utilize offline map tiles
 // TODO: Use Okio everywhere
+// TODO: Check that coroutine result is handled properly in dialog where user taps outside to close (no result given to isValid)
+// TODO: Check for memory leaks. Is coroutine holding on to Warning Dialog?
 // TODO: Login screen
+// TODO: Try to replace more callbacks with coroutines where sensible
 // https://developer.android.com/training/id-auth/identify.html
 // https://developer.android.com/training/id-auth/custom_auth
 // TODO: Investigate why app start time is so long (should be less of an issue after login/download screen)
@@ -77,8 +82,8 @@ import javax.inject.Inject
 // DEFERRED
 // TODO: Show PlantType icon in map bubble (and PlantDetail?)
 
-private val BC_MAP_FILE = "british-columbia.map"
-private val WORLD_MAP_FILE = "world.map"
+private const val BC_MAP_FILE = "british-columbia.map"
+private const val WORLD_MAP_FILE = "world.map"
 
 class MapFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<MapViewModel>
@@ -235,7 +240,6 @@ class MapFragment : BaseFragment() {
 
         mapView.layerManager.layers.add(tileRendererLayer)
         mapView.mapZoomControls.zoomControlsGravity = BOTTOM or CENTER_HORIZONTAL
-
 
         mapView.setCenter(LatLong(viewModel.mapLatitude, viewModel.mapLongitude))
         mapView.setZoomLevel(12.toByte())

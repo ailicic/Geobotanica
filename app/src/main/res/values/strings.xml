@@ -91,4 +91,5 @@
     <string name="Inspect">Inspect</string>
     <string name="download_file_name">%s (%d MB)</string>
     <string name="plant_name_database">Plant name database</string>
+    <string name="database_import_failed">Database import failed</string>
 </resources>

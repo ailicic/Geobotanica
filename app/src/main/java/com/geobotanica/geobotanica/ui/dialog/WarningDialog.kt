@@ -1,21 +1,24 @@
 package com.geobotanica.geobotanica.ui.dialog
 
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.dialog_warning.*
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
 
 class WarningDialog(
         private val titleResId: Int,
         private val messageResId: Int,
-        private val onYes: () -> Unit,
-        private val onCheckAllowForever: (Boolean) -> Unit
+        private val sharedPrefsAllowForeverKey: String,
+        private val continuation: Continuation<Boolean>
 ) : DialogFragment() {
 
     private lateinit var dialog: AlertDialog
@@ -27,8 +30,8 @@ class WarningDialog(
         dialog = with(AlertDialog.Builder(requireContext())) {
             setTitle(getString(titleResId))
             setView(customView)
-            setNegativeButton(getString(R.string.no)) { _, _ -> }
-            setPositiveButton(getString(R.string.yes), ::onClickYes)
+            setNegativeButton(getString(R.string.no)) { _, _ -> continuation.resume(false) }
+            setPositiveButton(getString(R.string.yes)) { _, _ -> continuation.resume(true) }
             create()
         }
         return dialog
@@ -47,10 +50,8 @@ class WarningDialog(
     private fun bindListeners() {
         checkbox.setOnCheckedChangeListener { _, isChecked ->
             dialog.getButton(Dialog.BUTTON_NEGATIVE).isEnabled = ! isChecked
-            onCheckAllowForever(isChecked)
+            PreferenceManager.getDefaultSharedPreferences(context?.applicationContext)
+                    .put(sharedPrefsAllowForeverKey to isChecked)
         }
     }
-
-    @Suppress("UNUSED_PARAMETER")
-    private fun onClickYes(dialog: DialogInterface, which: Int) = onYes()
 }

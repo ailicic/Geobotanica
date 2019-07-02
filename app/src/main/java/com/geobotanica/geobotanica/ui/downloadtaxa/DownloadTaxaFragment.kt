@@ -13,7 +13,10 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.network.NetworkValidator
+import com.geobotanica.geobotanica.network.FileDownloader
+import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus
+import com.geobotanica.geobotanica.network.FileDownloader.Error.NO_STORAGE
+import com.geobotanica.geobotanica.network.RemoteFile
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -22,31 +25,30 @@ import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.getFromBundle
 import kotlinx.android.synthetic.main.fragment_download_taxa.*
 import kotlinx.coroutines.*
-import okhttp3.Call
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.ResponseBody
-import okio.BufferedSink
-import okio.buffer
-import okio.gzip
-import okio.sink
+import kotlinx.coroutines.channels.consumeEach
 import java.io.File
-import java.io.IOException
 import javax.inject.Inject
-import kotlin.system.measureTimeMillis
 
+// TODO: Move stuff to ViewModel where appropriate
 
+@ExperimentalCoroutinesApi
+@ObsoleteCoroutinesApi
 class DownloadTaxaFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<DownloadTaxaViewModel>
-    @Inject lateinit var networkValidator: NetworkValidator
     private lateinit var viewModel: DownloadTaxaViewModel
 
-    private val client = OkHttpClient()
+    @Inject lateinit var fileDownloader: FileDownloader
 
-    private var internalStorageFree: Long = 0
+    private var mainScope = CoroutineScope(Dispatchers.Main) + Job() // Need var to re-instantiate after cancellation
 
-    private var job: Job? = null
-    private val mainScope = CoroutineScope(Dispatchers.Main)
+    private val remoteFile = RemoteFile( // TODO: Get from API
+            "http://people.okanagan.bc.ca/ailicic/Markers/taxa.db.gz",
+            "taxa.db",
+            "databases",
+            false,
+            29_038_255,
+            129_412_096
+    )
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -60,14 +62,10 @@ class DownloadTaxaFragment : BaseFragment() {
         viewModel.databasesPath = context.filesDir.absolutePath.replace("/files", "/databases")
         viewModel.createDatabasesFolder()
 
-        @SuppressLint("UsableSpace")
-        internalStorageFree = File(context.filesDir.absolutePath).usableSpace
-
         mainScope.launch {
-            if (viewModel.isTaxaDbDownloaded() && viewModel.isTaxaDbPopulated())
+            if (fileDownloader.isFileDownloaded(remoteFile) && viewModel.isTaxaDbPopulated())
                 navigateToNext()
         }
-
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -80,19 +78,19 @@ class DownloadTaxaFragment : BaseFragment() {
         bindClickListeners()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        mainScope.cancel()
+    }
+
+    @SuppressLint("UsableSpace")
     private fun initUi() {
         fileNameText.text = getString(
                 R.string.download_file_name,
                 getString(R.string.plant_name_database),
-                DB_SIZE_GZIP / 1024 / 1024)
-
-        internalStorageText.text = getString(
-                R.string.internal_storage, internalStorageFree / 1024 / 1024)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        job?.cancel()
+                remoteFile.compressedSize / 1024 / 1024)
+        internalStorageText.text = getString(R.string.internal_storage,
+                File(context?.filesDir?.absolutePath).usableSpace / 1024 / 1024)
     }
 
     private fun bindClickListeners() {
@@ -102,114 +100,52 @@ class DownloadTaxaFragment : BaseFragment() {
         fab.setOnClickListener(::onClickFab)
     }
 
-    // TODO: Move stuff to ViewModel where appropriate
-    // TODO: Extract download class. Might need manager + client.
-
     @Suppress("UNUSED_PARAMETER")
     private fun onClickDownload(view: View?) {
-        if (!isStorageAvailable()) {
-            showSnackbar(R.string.not_enough_internal_storage, R.string.Inspect) {
-                startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
-            }
-            return
-        }
+        mainScope.launch {
+                fileDownloader.get(remoteFile, mainScope).consumeEach { status: DownloadStatus ->
+                Lg.d("Download status = $status")
 
-        networkValidator.runIfValid { download() }
-    }
-
-    private fun isStorageAvailable(): Boolean = internalStorageFree > DB_SIZE_UNGZIP * 1.5
-
-    private fun download() {
-        updateUi(BEGIN_DOWNLOAD)
-        Lg.i("DownloadTaxaFragment: Starting download...")
-
-        job = mainScope.launch {
-            var fileSink: BufferedSink? = null
-            try {
-                val responseBody = getResponseBody()
-                val source = responseBody.source().gzip()
-                if (responseBody.contentLength() != DB_SIZE_GZIP) {
-                    Lg.e("DownloadTaxaFragment: File size error")
-                    showToast("File size error")
-                }
-
-                fileSink = getFileSink()
-                var bytesRead = 0L
-
-
-                val time = measureTimeMillis {
-                    withContext(Dispatchers.IO) {
-                        while (bytesRead < DB_SIZE_UNGZIP) {
-                            if (! isActive)
-                                break
-                            val result = source.read(fileSink.buffer(), 32768)
-                            fileSink.flush() // WARNING: OOM Exception if excluded
-                            bytesRead += if (result > 0) result else 0
-                            progressBar.progress = bytesRead.toInt()
-
+                status.error?.let {
+                    if (status.error == NO_STORAGE) {
+                        showSnackbar(R.string.not_enough_internal_storage, R.string.Inspect) {
+                            startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
                         }
+                    } else {
+                        showToast(it.toString())
+                        Lg.e("File download error: $it")
+                        cancelDownload()
                     }
+                    return@consumeEach
                 }
-                Lg.d("time = $time ms")
 
-                Lg.i("DownloadTaxaFragment: Download complete")
-                if (viewModel.isTaxaDbPopulated()) {
-                    showToast("Database imported")
-                    updateUi(DOWNLOAD_COMPLETE)
-                } else {
-                    showToast("Database import failed")
-                    cancelDownload()
-                    Lg.e("DownloadTaxaFragment: Database import failed")
-                }
-                    
-            } catch (e: IOException) {
-                Lg.i("IOException = $e")
-                val str = e.toString()
-                when {
-                    str.startsWith("java.net.UnknownHostException") -> { // Internet on but can't resolve hostname
-                        showToast(R.string.unknown_host)
+                if (status.progress == 0f)
+                    updateUi(BEGIN_DOWNLOAD)
+
+                if (status.isComplete) {
+                    if (viewModel.isTaxaDbPopulated()) {
+                        Lg.i("DownloadTaxaFragment: Database imported")
+                        showToast("Database imported")
+                        updateUi(DOWNLOAD_COMPLETE)
+                    } else {
+                        showToast(getString(R.string.database_import_failed))
+                        cancelDownload()
+                        Lg.e("DownloadTaxaFragment: Database import failed")
                     }
-                    str.startsWith("java.net.ConnectException") -> { // Internet on but host ip unreachable
-                        showToast(R.string.host_unreachable)
-                    }
-                    str.startsWith("java.net.SocketException") -> { // Connection lost mid-way
-                        showToast(R.string.connection_lost)
-                    }
-                    str.startsWith("java.net.SocketTimeoutException") -> { // Connection lost mid-way
-                        showToast(R.string.connection_timed_out)
-                    }
-                    else -> throw e
-                }
-                cancelDownload()
-            } finally {
-                fileSink?.close()
+                } else
+                    progressBar.progress = status.progress.toInt()
             }
         }
-    }
-
-    private fun getFileSink(): BufferedSink {
-        Lg.d("Dir = ${viewModel.databasesPath}")
-        val file = File(viewModel.databasesPath, TAXA_DB_FILE)
-        if (!file.exists())
-            file.createNewFile()
-        return file.sink().buffer()
-    }
-
-    private suspend fun getResponseBody(): ResponseBody {
-        val request: Request = Request.Builder()
-                .url(url)
-                .build()
-        val call: Call = client.newCall(request)
-        val response = withContext(Dispatchers.IO) { call.execute() }
-        return response.body()!!
     }
 
     @Suppress("UNUSED_PARAMETER")
     private fun onClickCancel(view: View?) = cancelDownload()
 
+    @ExperimentalCoroutinesApi
     private fun cancelDownload() {
-        job?.cancel()
         Lg.i("DownloadTaxaFragment: Download cancelled.")
+        mainScope.cancel()
+        mainScope += Job() // TODO: Required to launch another coroutine in this scope. Better approach?
         updateUi(CANCEL_DOWNLOAD)
     }
 
@@ -242,7 +178,6 @@ class DownloadTaxaFragment : BaseFragment() {
                 progressBar.isInvisible = false
                 progressSpinner.isVisible = true
                 progressBar.progress = 0
-                progressBar.max = DB_SIZE_UNGZIP // TODO: Move this
             }
             CANCEL_DOWNLOAD -> {
                 downloadButton.isVisible = true
@@ -269,7 +204,3 @@ class DownloadTaxaFragment : BaseFragment() {
         BEGIN_DOWNLOAD, CANCEL_DOWNLOAD, DOWNLOAD_COMPLETE, DELETE_DOWNLOAD
     }
 }
-
-
-//        val storageState = getExternalStorageState() // Should be: Environment.MEDIA_MOUNTED
-//        Lg.d("storageState = $storageState")

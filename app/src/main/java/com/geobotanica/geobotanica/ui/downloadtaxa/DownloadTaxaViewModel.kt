@@ -10,15 +10,10 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
-const val TAXA_DB_FILE = "taxa.db"
 const val VERNACULAR_COUNT = 25021 // TODO: Get from API
 const val TAXA_COUNT = 1103116 // TODO: Get from API
 const val VERNACULAR_TYPE_COUNT = 32201 // TODO: Get from API
 const val TAXA_TYPE_COUNT = 10340 // TODO: Get from API
-
-const val DB_SIZE_UNGZIP = 129_412_096 // TODO: Get from API
-const val DB_SIZE_GZIP = 29_038_255L // TODO: Get from API
-const val url = "http://people.okanagan.bc.ca/ailicic/Markers/taxa.db.gz" // TODO: Get from API
 
 @Singleton
 class DownloadTaxaViewModel @Inject constructor(
@@ -32,14 +27,7 @@ class DownloadTaxaViewModel @Inject constructor(
         val databasesDir = File(databasesPath)
         if(!databasesDir.exists()) {
             databasesDir.mkdir()
-            Lg.d("Created databasesDir: $databasesDir")
-        }
-    }
-
-    fun isTaxaDbDownloaded(): Boolean {
-        val taxaDbFile = File(databasesPath, TAXA_DB_FILE)
-        with (taxaDbFile) {
-            return exists() && isFile && length() == DB_SIZE_UNGZIP.toLong()
+            Lg.d("Created databases dir: $databasesDir")
         }
     }
 
