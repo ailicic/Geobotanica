@@ -88,8 +88,18 @@
     <string name="connection_timed_out">Connection timed out</string>
     <string name="internal_storage">Internal storage available: %1$d MB</string>
     <string name="not_enough_internal_storage" >Not enough free internal storage</string>
+    <string name="not_enough_external_storage">Not enough free external storage</string>
     <string name="Inspect">Inspect</string>
     <string name="download_file_name">%s (%d MB)</string>
     <string name="plant_name_database">Plant name database</string>
     <string name="database_import_failed">Database import failed</string>
+    <string name="download_maps">Download maps</string>
+    <string name="download">Download</string>
+    <string name="downloads">Downloads</string>
+    <string name="world_map">World map (3 MB)</string>
+    <string name="plant_name_db">Plant name database (27 MB)</string>
+    <string name="download_assets">Download Assets</string>
+    <string name="start_downloads">Start downloads</string>
+    <string name="error_downloading">Error downloading %s</string>
+    <string name="error_importing_plant_db">Error importing plant name database</string>
 </resources>

@@ -16,8 +16,6 @@ class ApplicationModule(private val appContext: Context, private val activity: M
 
     @Provides @Singleton fun provideActivity(): MainActivity = activity
 
-//    @Provides @Singleton fun provideResources(): Resources = appContext.resources
-
     @Provides @Singleton fun provideSharedPrefs(): SharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(appContext)
 
@@ -25,9 +23,6 @@ class ApplicationModule(private val appContext: Context, private val activity: M
             appContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
     @Provides @Singleton fun provideOkHttpClient(): OkHttpClient = OkHttpClient()
-
-//    @Provides @Singleton fun provideConnectivityManager(): ConnectivityManager =
-//            appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
 //     Not required due to constructor injection:
 //    @Provides @Singleton fun provideLocationService(locationManager: LocationManager) = LocationService(locationManager)

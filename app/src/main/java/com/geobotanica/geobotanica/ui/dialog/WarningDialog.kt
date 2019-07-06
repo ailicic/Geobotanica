@@ -31,7 +31,11 @@ class WarningDialog(
             setTitle(getString(titleResId))
             setView(customView)
             setNegativeButton(getString(R.string.no)) { _, _ -> continuation.resume(false) }
-            setPositiveButton(getString(R.string.yes)) { _, _ -> continuation.resume(true) }
+            setPositiveButton(getString(R.string.yes)) { _, _ ->
+                PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+                        .put(sharedPrefsAllowForeverKey to true)
+                continuation.resume(true)
+            }
             create()
         }
         return dialog
@@ -44,14 +48,5 @@ class WarningDialog(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         text.text = getString(messageResId)
-        bindListeners()
-    }
-
-    private fun bindListeners() {
-        checkbox.setOnCheckedChangeListener { _, isChecked ->
-            dialog.getButton(Dialog.BUTTON_NEGATIVE).isEnabled = ! isChecked
-            PreferenceManager.getDefaultSharedPreferences(context?.applicationContext)
-                    .put(sharedPrefsAllowForeverKey to isChecked)
-        }
     }
 }

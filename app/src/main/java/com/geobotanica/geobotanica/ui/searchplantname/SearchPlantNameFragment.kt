@@ -119,7 +119,7 @@ class SearchPlantNameFragment : BaseFragment() {
     private fun bindListeners() {
         searchEditText.onTextChanged(::onSearchEditTextChanged)
         clearButton.setOnClickListener { searchEditText.text.clear() }
-        skipButton.setOnClickListener(::onSkipPressed)
+        downloadButton.setOnClickListener(::onSkipPressed)
     }
 
     @ObsoleteCoroutinesApi

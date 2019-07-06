@@ -40,6 +40,7 @@ import org.mapsforge.map.scalebar.MapScaleBar
 import java.io.File
 import javax.inject.Inject
 
+// TODO: Upgrade gradle deps and see what's new in coroutines. Channels obsolete etc.
 
 // LONG TERM
 // TODO: Create download map activity and utilize offline map tiles

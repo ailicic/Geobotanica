@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/downloadTaxaFragment"
+    app:startDestination="@id/downloadAssetsFragment"
     >
 <!--app:startDestination="@id/mapFragment"-->
 
@@ -14,6 +14,16 @@
         <!-- Could Define just fragments for basic nav and ignore the rest -> Seems ok-->
     <!-- TODO: Update after 1.0 (make a decision on how to use Nav)-->
 
+    <fragment
+        android:id="@+id/downloadAssetsFragment"
+        android:name="com.geobotanica.geobotanica.ui.downloadassets.DownloadAssetsFragment"
+        android:label="@string/download_assets">
+    </fragment>
+    <fragment
+        android:id="@+id/downloadMapsFragment"
+        android:name="com.geobotanica.geobotanica.ui.downloadmaps.DownloadMapsFragment"
+        android:label="@string/download_maps">
+    </fragment>
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.geobotanica.geobotanica.ui.map.MapFragment"
@@ -54,11 +64,6 @@
         android:id="@+id/newPlantConfirmFragment"
         android:name="com.geobotanica.geobotanica.ui.newplantconfirm.NewPlantConfirmFragment"
         android:label="@string/confirm_new_plant">
-    </fragment>
-    <fragment
-        android:id="@+id/downloadTaxaFragment"
-        android:name="com.geobotanica.geobotanica.ui.downloadtaxa.DownloadTaxaFragment"
-        android:label="@string/download_plant_database">
     </fragment>
 
     <!--<fragment-->

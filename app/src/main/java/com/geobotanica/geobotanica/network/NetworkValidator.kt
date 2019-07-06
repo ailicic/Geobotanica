@@ -45,9 +45,10 @@ class NetworkValidator @Inject constructor(
         } else
             return true
     }
-    private fun isNetworkConnected(): Boolean = connectivityManager.activeNetworkInfo?.isConnected ?: false
 
-    private fun isNetworkMetered(): Boolean = connectivityManager.isActiveNetworkMetered
+    fun isNetworkMetered(): Boolean = connectivityManager.isActiveNetworkMetered
+
+    private fun isNetworkConnected(): Boolean = connectivityManager.activeNetworkInfo?.isConnected ?: false
 
     private fun isMeteredNetworkAllowed(): Boolean =
         defaultSharedPrefs.get(sharedPrefsAllowMeteredNetwork, false)
