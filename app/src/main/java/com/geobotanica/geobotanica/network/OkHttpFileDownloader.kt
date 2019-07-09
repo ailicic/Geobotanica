@@ -1,33 +1,36 @@
-//package com.geobotanica.geobotanica.network
-//
-//import com.geobotanica.geobotanica.android.file.StorageHelper
-//import com.geobotanica.geobotanica.network.FileDownloader.Error.*
-//import com.geobotanica.geobotanica.util.Lg
-//import kotlinx.coroutines.*
-//import kotlinx.coroutines.channels.SendChannel
-//import kotlinx.coroutines.channels.produce
-//import okhttp3.Call
-//import okhttp3.OkHttpClient
-//import okhttp3.Request
-//import okhttp3.ResponseBody
-//import okio.BufferedSink
-//import okio.buffer
-//import okio.gzip
-//import okio.sink
-//import java.io.File
-//import java.io.IOException
-//import javax.inject.Inject
-//import javax.inject.Singleton
-//import kotlin.coroutines.coroutineContext
-//import kotlin.system.measureTimeMillis
-//
-//@Singleton
-//class FileDownloader @Inject constructor(
-//        private val okHttpClient: OkHttpClient,
+package com.geobotanica.geobotanica.network
+
+import com.geobotanica.geobotanica.util.Lg
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.Call
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class OkHttpFileDownloader@Inject constructor(
+        private val okHttpClient: OkHttpClient
 //        private val networkValidator: NetworkValidator,
 //        private val storageHelper: StorageHelper
-//) {
-//
+) {
+    suspend fun getJson(url: String): String {
+        Lg.i("OkHttpFileDownloader: Getting JSON from $url")
+        try {
+            val request: Request = Request.Builder()
+                    .url(url)
+                    .build()
+            val call: Call = okHttpClient.newCall(request)
+            val response = withContext(Dispatchers.IO) { call.execute() }
+            return response.body()!!.string()
+        } catch (e: IOException) {
+            Lg.i("IOException = $e")
+            throw e
+        }
+    }
+
 //    @Suppress("RemoveExplicitTypeArguments")
 //    @ExperimentalCoroutinesApi
 //    suspend fun get(remoteFile: RemoteFile, scope: CoroutineScope) = scope.produce<DownloadStatus>(coroutineContext) {
@@ -37,13 +40,6 @@
 //        }
 //        if (networkValidator.isValid())
 //            download(remoteFile, channel)
-//    }
-//
-//    fun isFileDownloaded(remoteFile: RemoteFile): Boolean {
-//        val taxaDbFile = File(storageHelper.getLocalPath(remoteFile), remoteFile.fileName)
-//        with (taxaDbFile) {
-//            return exists() && isFile && length() == remoteFile.decompressedSize
-//        }
 //    }
 //
 //    @ExperimentalCoroutinesApi
@@ -146,4 +142,4 @@
 //            }
 //        }
 //    }
-//}
+}

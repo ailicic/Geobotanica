@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.location.LocationManager
 import android.preference.PreferenceManager
 import com.geobotanica.geobotanica.ui.MainActivity
+import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -23,6 +24,7 @@ class ApplicationModule(private val appContext: Context, private val activity: M
             appContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
     @Provides @Singleton fun provideOkHttpClient(): OkHttpClient = OkHttpClient()
+    @Provides @Singleton fun provideMoshi(): Moshi = Moshi.Builder().build()
 
 //     Not required due to constructor injection:
 //    @Provides @Singleton fun provideLocationService(locationManager: LocationManager) = LocationService(locationManager)
