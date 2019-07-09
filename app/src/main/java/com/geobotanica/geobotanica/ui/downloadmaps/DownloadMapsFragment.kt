@@ -10,6 +10,7 @@ import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.network.Geolocator
+import com.geobotanica.geobotanica.network.RemoteMapFolder
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -22,6 +23,8 @@ import javax.inject.Inject
 // TODO: Get from API
 private const val WORLD_MAP_URI = "http://people.okanagan.bc.ca/ailicic/Maps/world.map.gz"
 private const val BC_MAP_URI = "http://people.okanagan.bc.ca/ailicic/Maps/british-columbia.map.gz"
+private const val mapsBaseUrl = "http://download.mapsforge.org/maps/v5"
+
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
@@ -69,13 +72,24 @@ class DownloadMapsFragment : BaseFragment() {
         downloadButton.setOnClickListener(::onClickDownload)
     }
 
+    // JSoup selectors: https://jsoup.org/apidocs/org/jsoup/select/Selector.html
+    // Try/test JSoup: https://try.jsoup.org/
     @Suppress("UNUSED_PARAMETER")
     private fun onClickDownload(view: View?) {
         mainScope.launch {
             val geolocation = geolocator.get()
             Lg.d("Geolocation: $geolocation")
+
+            val mapsRemoteFolder = RemoteMapFolder(mapsBaseUrl)
+            mapsRemoteFolder.fetchEntries()
+
+            val results = mapsRemoteFolder.search(geolocation)
+            results.forEach {
+                Lg.d("Match = ${it.name}")
+            }
         }
     }
+
 
     @ExperimentalCoroutinesApi
     private fun cancelDownload() {
@@ -107,4 +121,3 @@ class DownloadMapsFragment : BaseFragment() {
         bundleOf(userIdKey to viewModel.userId)
 
 }
-

@@ -36,7 +36,7 @@ class DecompressionWorker(appContext: Context, workerParams: WorkerParameters)
             val unGzipSink = File(storageHelper.getLocalPath(remoteFile), remoteFile.fileName).sink().buffer()
 
             while (!gzipSource.exhausted()) {
-                gzipSource.read(unGzipSink.buffer(), 32768)
+                gzipSource.read(unGzipSink.buffer, 32768)
                 unGzipSink.flush()
             }
             gzipSource.close()
