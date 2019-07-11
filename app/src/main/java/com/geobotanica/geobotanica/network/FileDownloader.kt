@@ -20,7 +20,7 @@ class FileDownloader @Inject constructor (
     private var downloadManager: DownloadManager =
             activity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
-    fun download(remoteFile: RemoteFile): Long {
+    fun download(remoteFile: OnlineFile): Long {
         val file = File(storageHelper.getDownloadPath(), remoteFile.fileNameGzip)
 
         val request = DownloadManager.Request(Uri.parse(remoteFile.url))

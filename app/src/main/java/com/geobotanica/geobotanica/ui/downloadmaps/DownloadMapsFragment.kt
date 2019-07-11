@@ -9,13 +9,14 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.network.Geolocator
-import com.geobotanica.geobotanica.network.RemoteMapFolder
+import com.geobotanica.geobotanica.network.online_map.OnlineMapMatcher
+import com.geobotanica.geobotanica.network.online_map.OnlineMapScraper
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.getFromBundle
+import com.squareup.moshi.Moshi
 import kotlinx.android.synthetic.main.fragment_download_maps.*
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -23,7 +24,6 @@ import javax.inject.Inject
 // TODO: Get from API
 private const val WORLD_MAP_URI = "http://people.okanagan.bc.ca/ailicic/Maps/world.map.gz"
 private const val BC_MAP_URI = "http://people.okanagan.bc.ca/ailicic/Maps/british-columbia.map.gz"
-private const val mapsBaseUrl = "http://download.mapsforge.org/maps/v5"
 
 
 @ExperimentalCoroutinesApi
@@ -32,7 +32,9 @@ class DownloadMapsFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<DownloadMapViewModel>
     private lateinit var viewModel: DownloadMapViewModel
 
-    @Inject lateinit var geolocator: Geolocator
+    @Inject lateinit var onlineMapScraper: OnlineMapScraper
+    @Inject lateinit var onlineMapMatcher: OnlineMapMatcher
+    @Inject lateinit var moshi: Moshi
 
     private var mainScope = CoroutineScope(Dispatchers.Main) + Job() // Need var to re-instantiate after cancellation
 
@@ -72,24 +74,23 @@ class DownloadMapsFragment : BaseFragment() {
         downloadButton.setOnClickListener(::onClickDownload)
     }
 
-    // JSoup selectors: https://jsoup.org/apidocs/org/jsoup/select/Selector.html
-    // Try/test JSoup: https://try.jsoup.org/
+    // TODO: Check for disconnected network
     @Suppress("UNUSED_PARAMETER")
     private fun onClickDownload(view: View?) {
         mainScope.launch {
-            val geolocation = geolocator.get()
-            Lg.d("Geolocation: $geolocation")
 
-            val mapsRemoteFolder = RemoteMapFolder(mapsBaseUrl)
-            mapsRemoteFolder.fetchEntries()
+            val onlineMaps = onlineMapScraper.scrape() // TODO: Handle IOException. Show toast.
 
-            val results = mapsRemoteFolder.search(geolocation)
+//            val adapter = moshi.adapter<OnlineMapEntry>()
+//            val mapsJson = adapter.toJson(onlineMaps)
+//            Lg.d("mapsJson = $mapsJson")
+
+            val results = onlineMapMatcher.search(onlineMaps)
             results.forEach {
-                Lg.d("Match = ${it.name}")
+                Lg.d("Match = $it")
             }
         }
     }
-
 
     @ExperimentalCoroutinesApi
     private fun cancelDownload() {

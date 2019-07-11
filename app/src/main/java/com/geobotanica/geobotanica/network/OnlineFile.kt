@@ -3,8 +3,8 @@ package com.geobotanica.geobotanica.network
 import kotlin.math.roundToLong
 
 // TODO: Get from API
-val remoteFileList = listOf(
-        RemoteFile(
+val onlineFileList = listOf(
+        OnlineFile(
                 "World map",
                 "http://people.okanagan.bc.ca/ailicic/Maps/world.map.gz",
                 "world.map",
@@ -13,8 +13,8 @@ val remoteFileList = listOf(
                 2_715_512,
                 3_276_950
         ),
-        RemoteFile(
-                "Plant name database",
+        OnlineFile(
+                "Plant printName database",
                 "http://people.okanagan.bc.ca/ailicic/Markers/taxa.db.gz",
                 "taxa.db",
                 "databases",
@@ -24,7 +24,7 @@ val remoteFileList = listOf(
         )
 )
 
-data class RemoteFile(
+data class OnlineFile(
         val description: String,
         val url: String,
         val fileName: String,

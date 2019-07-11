@@ -92,7 +92,7 @@ class NewPlantConfirmViewModel @Inject constructor (
 
     private fun savePlantPhotos(plant: Plant) {
         photos.forEach { (photoType, photoUri) ->
-            val photo = PlantPhoto(userId, plant.id, photoType, photoUri) // TODO: Store only relative path/filename
+            val photo = PlantPhoto(userId, plant.id, photoType, photoUri) // TODO: Store only relative path/url
             photo.id = plantPhotoRepo.insert(photo)
             Lg.d("Saved: $photo (id=${photo.id})")
         }

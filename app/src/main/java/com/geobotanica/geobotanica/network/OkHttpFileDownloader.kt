@@ -17,7 +17,6 @@ class OkHttpFileDownloader@Inject constructor(
 //        private val storageHelper: StorageHelper
 ) {
     suspend fun getJson(url: String): String {
-        Lg.i("OkHttpFileDownloader: Getting JSON from $url")
         try {
             val request: Request = Request.Builder()
                     .url(url)

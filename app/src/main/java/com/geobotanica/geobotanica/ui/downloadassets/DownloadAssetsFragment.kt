@@ -15,8 +15,8 @@ import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data_taxa.TaxaDatabaseValidator
 import com.geobotanica.geobotanica.network.FileDownloader
 import com.geobotanica.geobotanica.network.NetworkValidator
-import com.geobotanica.geobotanica.network.RemoteFile
-import com.geobotanica.geobotanica.network.remoteFileList
+import com.geobotanica.geobotanica.network.OnlineFile
+import com.geobotanica.geobotanica.network.onlineFileList
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -78,8 +78,8 @@ class DownloadAssetsFragment : BaseFragment() {
     @SuppressLint("UsableSpace")
     private fun initUi() {
         // TODO: Dynamically add text views for list of files to download
-        worldMapText.text = remoteFileList[0].descriptionWithSize
-        plantNameDbText.text = remoteFileList[1].descriptionWithSize
+        worldMapText.text = onlineFileList[0].descriptionWithSize
+        plantNameDbText.text = onlineFileList[1].descriptionWithSize
         internalStorageText.text = getString(R.string.internal_storage,
                 File(context?.filesDir?.absolutePath).usableSpace / 1024 / 1024)
     }
@@ -92,7 +92,7 @@ class DownloadAssetsFragment : BaseFragment() {
     private fun onClickDownload(view: View?) {
         mainScope.launch {
             if (networkValidator.isValid()) {
-                remoteFileList.forEachIndexed { remoteFileIndex: Int, it: RemoteFile ->
+                onlineFileList.forEachIndexed { onlineFileIndex: Int, it: OnlineFile ->
                     if (storageHelper.isDecompressed(it)) { // True if already downloaded and decompressed
                         Lg.d("Skipping download: ${it.description}")
                         return@forEachIndexed
@@ -101,16 +101,16 @@ class DownloadAssetsFragment : BaseFragment() {
                         showStorageErrorSnackbar(it)
                         return@forEachIndexed
                     }
-                    activity.downloadAsset(remoteFileIndex)
+                    activity.downloadAsset(onlineFileIndex)
                 }
                 navigateToNext()
             }
         }
     }
 
-    private fun showStorageErrorSnackbar(remoteFile: RemoteFile) {
-        Lg.i("Error: Insufficient storage for ${remoteFile.description}")
-        if (remoteFile.isInternalStorage) {
+    private fun showStorageErrorSnackbar(onlineFile: OnlineFile) {
+        Lg.i("Error: Insufficient storage for ${onlineFile.description}")
+        if (onlineFile.isInternalStorage) {
             showSnackbar(R.string.not_enough_internal_storage, R.string.Inspect) {
                 startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
             }
@@ -123,7 +123,7 @@ class DownloadAssetsFragment : BaseFragment() {
 
     private suspend fun areAssetsDownloaded(): Boolean {
         var areDownloaded = true
-        remoteFileList.forEach {
+        onlineFileList.forEach {
             if (!storageHelper.isDecompressed(it))
                 areDownloaded = false
         }

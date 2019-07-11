@@ -68,7 +68,7 @@ dependencies {
     implementation "com.google.dagger:dagger:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
 
-    // MapsForge Core
+    // MapsForge
     def mapsforge_version = "0.11.0"
     implementation "org.mapsforge:mapsforge-core:$mapsforge_version"
     implementation "org.mapsforge:mapsforge-map:$mapsforge_version"
@@ -113,8 +113,10 @@ dependencies {
 
     // Moshi
     def moshi_version = "1.8.0"
-    implementation "com.squareup.moshi:moshi:$moshi_version"
     kapt "com.squareup.moshi:moshi-kotlin-codegen:$moshi_version"
+    implementation "com.squareup.moshi:moshi:$moshi_version"
+    implementation "com.squareup.moshi:moshi-adapters:$moshi_version"
+//    implementation "com.squareup.moshi:moshi-kotlin:$moshi_version" // Uses kotlin reflection
 
     // JSoup
     implementation 'org.jsoup:jsoup:1.12.1'

@@ -5,7 +5,7 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.geobotanica.geobotanica.android.file.StorageHelper
-import com.geobotanica.geobotanica.network.remoteFileList
+import com.geobotanica.geobotanica.network.onlineFileList
 import com.geobotanica.geobotanica.util.Lg
 import okio.buffer
 import okio.gzip
@@ -25,7 +25,7 @@ class DecompressionWorker(appContext: Context, workerParams: WorkerParameters)
 
     private fun unzipDownloadedFile(remoteFileIndex: Int): Result {
         try {
-            val remoteFile = remoteFileList[remoteFileIndex]
+            val remoteFile = onlineFileList[remoteFileIndex]
             Lg.d("Decompressing ${remoteFile.fileNameGzip}")
             val storageHelper = StorageHelper(applicationContext)
 

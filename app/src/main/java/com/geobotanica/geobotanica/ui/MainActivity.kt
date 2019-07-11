@@ -27,7 +27,7 @@ import com.geobotanica.geobotanica.di.components.DaggerApplicationComponent
 import com.geobotanica.geobotanica.di.modules.ApplicationModule
 import com.geobotanica.geobotanica.di.modules.RepoModule
 import com.geobotanica.geobotanica.network.FileDownloader
-import com.geobotanica.geobotanica.network.remoteFileList
+import com.geobotanica.geobotanica.network.onlineFileList
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.isEmulator
 import kotlinx.android.synthetic.main.activity_main.*
@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
     override fun onSupportNavigateUp() = findNavController(R.id.fragment).navigateUp()
 
     fun downloadAsset(remoteFileIndex: Int) {
-        val downloadId = fileDownloader.download(remoteFileList[remoteFileIndex])
+        val downloadId = fileDownloader.download(onlineFileList[remoteFileIndex])
         downloadIdMap[downloadId] = remoteFileIndex
     }
 
@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
             val downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
             if (downloadIdMap.containsKey(downloadId)) {
                 val remoteFileIndex = downloadIdMap[downloadId]!!
-                val remoteFile = remoteFileList[remoteFileIndex]
+                val remoteFile = onlineFileList[remoteFileIndex]
                 if (storageHelper.isDownloaded(remoteFile)) {
                     Lg.i("Downloaded ${remoteFile.fileNameGzip}")
                     downloadIdMap.remove(downloadId)
@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity() {
     private val decompressionWorkerObserver = Observer<WorkInfo> { info ->
         if (info != null && info.state.isFinished) {
             val remoteFileIndex = info.outputData.getInt(REMOTE_FILE_KEY, -1)
-            val remoteFile = remoteFileList[remoteFileIndex]
+            val remoteFile = onlineFileList[remoteFileIndex]
             Lg.d("Decompressed: ${remoteFile.description}")
             if (remoteFile.fileName == "taxa.db") {
                 mainScope.launch {
