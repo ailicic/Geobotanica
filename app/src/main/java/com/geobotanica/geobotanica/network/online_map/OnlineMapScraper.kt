@@ -41,18 +41,18 @@ class OnlineMapScraper @Inject constructor (private val htmlParser: HtmlParser) 
 
                 if (size == "-") {
                     val onlineMapFolder = OnlineMapFolder("$url/$name")
-                    Lg.d("Found folder: $onlineMapFolder")
+//                    Lg.d("Found folder: $onlineMapFolder")
                     onlineMapFolder.contents.addAll(fetchEntries(onlineMapFolder.url))
                     entries.add(onlineMapFolder)
                 } else {
-                    val onlineMapFile = OnlineMapFile("$url/$name", size)
-                    Lg.d("Found file: $onlineMapFile")
-                    entries.add(onlineMapFile)
+//                    val onlineMapFile = OnlineMapFile("$url/$name", size)
+//                    Lg.d("Found file: $onlineMapFile")
+                    entries.add(OnlineMapFile("$url/$name", size))
                 }
             }
 
             return entries
-        } catch (e: IOException) {
+        } catch (e: IOException) { // TODO: Try to prevent "java.io.IOException: Mark invalid"
             if (fetchRetries > 0) {
                 --fetchRetries
                 Lg.e("$url: fetchEntries() threw error: $e (retries = $fetchRetries)")

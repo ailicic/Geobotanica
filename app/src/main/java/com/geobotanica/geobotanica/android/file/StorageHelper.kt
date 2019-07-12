@@ -10,31 +10,31 @@ import javax.inject.Singleton
 @Singleton
 class StorageHelper @Inject constructor(val appContext: Context) {
 
-    fun isDownloaded(remoteFile: OnlineFile): Boolean {
-        val file = File(getDownloadPath(), remoteFile.fileNameGzip)
-        return file.exists() && file.isFile && file.length() == remoteFile.compressedSize
+    fun isDownloaded(onlineFile: OnlineFile): Boolean {
+        val file = File(getDownloadPath(), onlineFile.fileNameGzip)
+        return file.exists() && file.isFile && file.length() == onlineFile.compressedSize
     }
 
-    fun isDecompressed(remoteFile: OnlineFile): Boolean {
-        val file = File(getLocalPath(remoteFile), remoteFile.fileName)
-        return file.exists() && file.isFile && file.length() == remoteFile.decompressedSize
+    fun isDecompressed(onlineFile: OnlineFile): Boolean {
+        val file = File(getLocalPath(onlineFile), onlineFile.fileName)
+        return file.exists() && file.isFile && file.length() == onlineFile.decompressedSize
     }
 
     @SuppressLint("UsableSpace")
-    fun isStorageAvailable(remoteFile: OnlineFile): Boolean {
-        val dir = File(getRootPath(remoteFile))
-        return dir.usableSpace > 2 * remoteFile.decompressedSize
+    fun isStorageAvailable(onlineFile: OnlineFile): Boolean {
+        val dir = File(getRootPath(onlineFile))
+        return dir.usableSpace > 2 * onlineFile.decompressedSize
     }
 
-    fun mkdirs(remoteFile: OnlineFile) = File(getLocalPath(remoteFile)).mkdirs()
+    fun mkdirs(onlineFile: OnlineFile) = File(getLocalPath(onlineFile)).mkdirs()
 
     fun getDownloadPath() = appContext.getExternalFilesDir(null)?.absolutePath
 
-    fun getLocalPath(remoteFile: OnlineFile): String =
-            getRootPath(remoteFile) + "/${remoteFile.relativePath}"
+    fun getLocalPath(onlineFile: OnlineFile): String =
+            getRootPath(onlineFile) + "/${onlineFile.relativePath}"
 
-    private fun getRootPath(remoteFile: OnlineFile): String {
-        return if (remoteFile.isInternalStorage)
+    private fun getRootPath(onlineFile: OnlineFile): String {
+        return if (onlineFile.isInternalStorage)
             appContext.filesDir.absolutePath.removeSuffix("/files")
         else
             appContext.getExternalFilesDir(null)!!.absolutePath

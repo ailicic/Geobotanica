@@ -2,8 +2,21 @@ package com.geobotanica.geobotanica.network
 
 import kotlin.math.roundToLong
 
+enum class OnlineFileIndex {
+    MAPS_LIST, WORLD_MAP, PLANT_NAMES
+}
+
 // TODO: Get from API
 val onlineFileList = listOf(
+        OnlineFile(
+                "Maps list",
+                "http://people.okanagan.bc.ca/ailicic/Maps/maps.json.gz",
+                "maps.json",
+                "",
+                false,
+                3_330,
+                32_446
+        ),
         OnlineFile(
                 "World map",
                 "http://people.okanagan.bc.ca/ailicic/Maps/world.map.gz",
@@ -14,7 +27,7 @@ val onlineFileList = listOf(
                 3_276_950
         ),
         OnlineFile(
-                "Plant printName database",
+                "Plant name database",
                 "http://people.okanagan.bc.ca/ailicic/Markers/taxa.db.gz",
                 "taxa.db",
                 "databases",
@@ -33,10 +46,9 @@ data class OnlineFile(
         val compressedSize: Long,
         val decompressedSize: Long
 ) {
-
     val descriptionWithSize: String
-    get() = "$description (${(compressedSize.toFloat() / 1024 / 1024).roundToLong()} MB)"
+        get() = "$description (${(compressedSize.toFloat() / 1024 / 1024).roundToLong()} MB)"
 
     val fileNameGzip: String
-    get() = "$fileName.gz"
+        get() = "$fileName.gz"
 }

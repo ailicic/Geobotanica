@@ -102,4 +102,5 @@
     <string name="start_downloads">Start downloads</string>
     <string name="error_downloading">Error downloading %s</string>
     <string name="error_importing_plant_db">Error importing plant name database</string>
+    <string name="searching_online_maps">Searching online maps...</string>
 </resources>

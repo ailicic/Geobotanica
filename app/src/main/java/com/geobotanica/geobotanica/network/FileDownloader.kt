@@ -29,6 +29,7 @@ class FileDownloader @Inject constructor (
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
                 .setDestinationUri(Uri.fromFile(file))
                 .setVisibleInDownloadsUi(false)
+
                 // TODO: Add these options to a preferences page
                 .setAllowedOverMetered(networkValidator.isNetworkMetered()) // Warning dialog handles metered network permission.
                 .setAllowedOverRoaming(false) // True by default.

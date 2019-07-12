@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI.setupActionBarWithNavController
@@ -40,6 +41,8 @@ class MainActivity : AppCompatActivity() {
     @Inject lateinit var storageHelper: StorageHelper
     @Inject lateinit var fileDownloader: FileDownloader
     @Inject lateinit var taxaDatabaseValidator: TaxaDatabaseValidator
+
+    val downloadComplete = MutableLiveData<String>()
 
     private val className = "MainActivity"
 
@@ -115,17 +118,20 @@ class MainActivity : AppCompatActivity() {
         if (info != null && info.state.isFinished) {
             val remoteFileIndex = info.outputData.getInt(REMOTE_FILE_KEY, -1)
             val remoteFile = onlineFileList[remoteFileIndex]
+            downloadComplete.value = remoteFile.fileName
             Lg.d("Decompressed: ${remoteFile.description}")
+
             if (remoteFile.fileName == "taxa.db") {
                 mainScope.launch {
                     if (taxaDatabaseValidator.isPopulated())
                         Lg.d("isTaxaDbPopulated() = true")
-                    else
+                    else {
                         Lg.e("isTaxaDbPopulated() = false")
-                    Toast.makeText(applicationContext,
-                            getString(R.string.error_importing_plant_db),
-                            Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(applicationContext,
+                                getString(R.string.error_importing_plant_db),
+                                Toast.LENGTH_SHORT)
+                                .show()
+                    }
                 }
             }
         }

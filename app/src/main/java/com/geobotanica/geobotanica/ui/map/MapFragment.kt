@@ -40,6 +40,8 @@ import org.mapsforge.map.scalebar.MapScaleBar
 import java.io.File
 import javax.inject.Inject
 
+// TODO: Fix WarningDialog text wrapping
+
 // LONG TERM
 // TODO: Create download map activity and utilize offline map tiles
 // TODO: Use Okio everywhere

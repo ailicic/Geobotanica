@@ -9,14 +9,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
+import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data_taxa.TaxaDatabaseValidator
-import com.geobotanica.geobotanica.network.FileDownloader
-import com.geobotanica.geobotanica.network.NetworkValidator
-import com.geobotanica.geobotanica.network.OnlineFile
-import com.geobotanica.geobotanica.network.onlineFileList
+import com.geobotanica.geobotanica.network.*
+import com.geobotanica.geobotanica.network.OnlineFileIndex.*
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -77,9 +77,8 @@ class DownloadAssetsFragment : BaseFragment() {
 
     @SuppressLint("UsableSpace")
     private fun initUi() {
-        // TODO: Dynamically add text views for list of files to download
-        worldMapText.text = onlineFileList[0].descriptionWithSize
-        plantNameDbText.text = onlineFileList[1].descriptionWithSize
+        worldMapText.text = onlineFileList[WORLD_MAP.ordinal].descriptionWithSize
+        plantNameDbText.text = onlineFileList[PLANT_NAMES.ordinal].descriptionWithSize
         internalStorageText.text = getString(R.string.internal_storage,
                 File(context?.filesDir?.absolutePath).usableSpace / 1024 / 1024)
     }
@@ -92,20 +91,33 @@ class DownloadAssetsFragment : BaseFragment() {
     private fun onClickDownload(view: View?) {
         mainScope.launch {
             if (networkValidator.isValid()) {
-                onlineFileList.forEachIndexed { onlineFileIndex: Int, it: OnlineFile ->
-                    if (storageHelper.isDecompressed(it)) { // True if already downloaded and decompressed
-                        Lg.d("Skipping download: ${it.description}")
-                        return@forEachIndexed
-                    }
-                    if (!storageHelper.isStorageAvailable(it)) {
-                        showStorageErrorSnackbar(it)
-                        return@forEachIndexed
-                    }
-                    activity.downloadAsset(onlineFileIndex)
-                }
-                navigateToNext()
+                downloadButton.isVisible = false
+                progressBar.isVisible = true
+                downloadAssets()
             }
         }
+    }
+
+    private fun downloadAssets() {
+        registerMapsListDownloadedObserver()
+        onlineFileList.forEachIndexed { onlineFileIndex: Int, it: OnlineFile ->
+            if (storageHelper.isDecompressed(it)) { // True if already downloaded and decompressed
+                Lg.d("Skipping download: ${it.description}")
+                return@forEachIndexed
+            }
+            if (!storageHelper.isStorageAvailable(it)) {
+                showStorageErrorSnackbar(it)
+                return@forEachIndexed
+            }
+            activity.downloadAsset(onlineFileIndex)
+        }
+    }
+
+    private fun registerMapsListDownloadedObserver() {
+        activity.downloadComplete.observe(this, Observer { filename ->
+            if (filename == onlineFileList[MAPS_LIST.ordinal].fileName)
+                navigateToNext()
+        })
     }
 
     private fun showStorageErrorSnackbar(onlineFile: OnlineFile) {

@@ -7,23 +7,28 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.network.online_map.OnlineMapMatcher
-import com.geobotanica.geobotanica.network.online_map.OnlineMapScraper
+import com.geobotanica.geobotanica.android.file.StorageHelper
+import com.geobotanica.geobotanica.network.Geolocation
+import com.geobotanica.geobotanica.network.Geolocator
+import com.geobotanica.geobotanica.network.NetworkValidator
+import com.geobotanica.geobotanica.network.OnlineFileIndex.*
+import com.geobotanica.geobotanica.network.onlineFileList
+import com.geobotanica.geobotanica.network.online_map.*
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.adapter
 import com.geobotanica.geobotanica.util.getFromBundle
 import com.squareup.moshi.Moshi
 import kotlinx.android.synthetic.main.fragment_download_maps.*
 import kotlinx.coroutines.*
+import okio.*
+import java.io.File
 import javax.inject.Inject
-
-// TODO: Get from API
-private const val WORLD_MAP_URI = "http://people.okanagan.bc.ca/ailicic/Maps/world.map.gz"
-private const val BC_MAP_URI = "http://people.okanagan.bc.ca/ailicic/Maps/british-columbia.map.gz"
 
 
 @ExperimentalCoroutinesApi
@@ -32,9 +37,14 @@ class DownloadMapsFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<DownloadMapViewModel>
     private lateinit var viewModel: DownloadMapViewModel
 
-    @Inject lateinit var onlineMapScraper: OnlineMapScraper
-    @Inject lateinit var onlineMapMatcher: OnlineMapMatcher
+    @Inject lateinit var networkValidator: NetworkValidator
+    @Inject lateinit var storageHelper: StorageHelper
     @Inject lateinit var moshi: Moshi
+    @Inject lateinit var geolocator: Geolocator
+    @Inject lateinit var onlineMapMatcher: OnlineMapMatcher
+
+    private lateinit var onlineMapList: OnlineMapFolder
+    private lateinit var geolocation: Geolocation
 
     private var mainScope = CoroutineScope(Dispatchers.Main) + Job() // Need var to re-instantiate after cancellation
 
@@ -54,8 +64,29 @@ class DownloadMapsFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initUi()
-        bindClickListeners()
+        mainScope.launch {
+            bindClickListeners()
+            if (networkValidator.isValid()) {
+                geolocation = geolocator.get()
+                deserializeMapsList()
+                showSuggestedMaps()
+            } else {
+                // TODO: Set listener on network changes? Maybe show something permanently on screen?
+            }
+        }
+
+    }
+
+    // TODO: Verify json file exists first.
+    // TODO: Handle deserialization errors. Validate JSON?
+    // TODO: Perform on IO thread?
+    private fun deserializeMapsList() {
+        val mapsListOnlineFile = onlineFileList[MAPS_LIST.ordinal]
+        val source = File(storageHelper.getLocalPath(mapsListOnlineFile), mapsListOnlineFile.fileName).source().buffer()
+        val mapsListJson = source.readUtf8()
+        source.close()
+        val adapter = moshi.adapter<OnlineMapEntry>()
+        onlineMapList = adapter.fromJson(mapsListJson) as OnlineMapFolder
     }
 
     override fun onDestroy() {
@@ -64,33 +95,25 @@ class DownloadMapsFragment : BaseFragment() {
     }
 
     @SuppressLint("UsableSpace")
-    private fun initUi() {
-
+    private fun showSuggestedMaps() {
+        val results = onlineMapMatcher.search(onlineMapList, geolocation)
+        results.forEach {
+            Lg.d("Match = $it")
+        }
+        searchingOnlineMapsText.isVisible = false
+        progressBar.isVisible = false
+        // TODO: Populate recyclerview
     }
 
     private fun bindClickListeners() {
-        downloadButton.setOnClickListener(::onClickDownload)
 //        fab.setOnClickListener(::onClickFab)
-        downloadButton.setOnClickListener(::onClickDownload)
+//        downloadButton.setOnClickListener(::onClickDownload)
     }
 
-    // TODO: Check for disconnected network
-    @Suppress("UNUSED_PARAMETER")
-    private fun onClickDownload(view: View?) {
-        mainScope.launch {
-
-            val onlineMaps = onlineMapScraper.scrape() // TODO: Handle IOException. Show toast.
-
-//            val adapter = moshi.adapter<OnlineMapEntry>()
-//            val mapsJson = adapter.toJson(onlineMaps)
-//            Lg.d("mapsJson = $mapsJson")
-
-            val results = onlineMapMatcher.search(onlineMaps)
-            results.forEach {
-                Lg.d("Match = $it")
-            }
-        }
-    }
+//    @Suppress("UNUSED_PARAMETER")
+//    private fun onClickDownload(view: View?) {
+//
+//    }
 
     @ExperimentalCoroutinesApi
     private fun cancelDownload() {
@@ -122,3 +145,33 @@ class DownloadMapsFragment : BaseFragment() {
         bundleOf(userIdKey to viewModel.userId)
 
 }
+
+
+// TODO: Run this on server periodically to update maps.json.gz asset
+
+//    private fun scrapeMaps() {
+//        mainScope.launch {
+//            lateinit var onlineMaps: OnlineMapFolder
+//            val time = measureTimeMillis {
+//                onlineMaps = onlineMapScraper.scrape() // TODO: Handle IOException. Show toast.
+//            }
+//            Lg.d("onlineMapScraper took $time ms")
+//
+//            searchingOnlineMapsText.isVisible = false
+//            progressBar.isVisible = false
+//            showToast("Got maps")
+//
+//            saveMapsList(onlineMaps)
+//        }
+//    }
+
+
+//private fun saveMapsList(onlineMaps: OnlineMapFolder) {
+//    val adapter = moshi.adapter<OnlineMapEntry>()
+//    val mapsJson = adapter.toJson(onlineMaps)
+//    Lg.d("mapsJson = $mapsJson")
+//
+//    val sink = File(storageHelper.getDownloadPath(),"maps_list.json").sink().buffer()
+//    sink.write(mapsJson.toByteArray())
+//    sink.close()
+//}

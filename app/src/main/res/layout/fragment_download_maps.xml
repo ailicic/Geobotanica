@@ -6,46 +6,35 @@
     android:id="@+id/constraintLayout">
 
 
-    <!--<TextView-->
-    <!--android:id="@+id/noResultsText"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_marginStart="24dp"-->
-    <!--android:visibility="gone"-->
-    <!--android:textSize="18sp"-->
-    <!--android:text="@string/no_results"-->
-    <!--app:layout_constraintTop_toBottomOf="@id/searchEditText"-->
-    <!--app:layout_constraintStart_toStartOf="parent" />-->
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="vertical"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toTopOf="parent" />
+    <!--<androidx.recyclerview.widget.RecyclerView-->
+        <!--android:id="@+id/recyclerView"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:scrollbars="vertical"-->
+        <!--app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"-->
+        <!--app:layout_constraintTop_toTopOf="parent" />-->
     <!--android:layout_height="460dp"-->
+
+    <TextView
+        android:id="@+id/searchingOnlineMapsText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:textSize="18sp"
+        android:text="@string/searching_online_maps"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/recyclerView"
+        app:layout_constraintTop_toBottomOf="@id/searchingOnlineMapsText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
-    <Button
-        android:id="@+id/downloadButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginStart="16dp"
-        android:padding="16dp"
-        android:text="@string/download"
-        android:textColor="@color/colorPrimary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        style="@style/Widget.AppCompat.Button.Borderless"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
