@@ -82,6 +82,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp() = findNavController(R.id.fragment).navigateUp()
 
+    // TODO: Handle click download notification. Maybe use ACTION_VIEW_DOWNLOADS
     fun downloadAsset(remoteFileIndex: Int) {
         val downloadId = fileDownloader.download(onlineFileList[remoteFileIndex])
         downloadIdMap[downloadId] = remoteFileIndex

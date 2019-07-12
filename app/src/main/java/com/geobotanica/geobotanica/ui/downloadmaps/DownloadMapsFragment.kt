@@ -14,9 +14,11 @@ import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.network.Geolocation
 import com.geobotanica.geobotanica.network.Geolocator
 import com.geobotanica.geobotanica.network.NetworkValidator
-import com.geobotanica.geobotanica.network.OnlineFileIndex.*
+import com.geobotanica.geobotanica.network.OnlineFileIndex.MAPS_LIST
 import com.geobotanica.geobotanica.network.onlineFileList
-import com.geobotanica.geobotanica.network.online_map.*
+import com.geobotanica.geobotanica.network.online_map.OnlineMapEntry
+import com.geobotanica.geobotanica.network.online_map.OnlineMapFolder
+import com.geobotanica.geobotanica.network.online_map.OnlineMapMatcher
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -26,8 +28,10 @@ import com.geobotanica.geobotanica.util.getFromBundle
 import com.squareup.moshi.Moshi
 import kotlinx.android.synthetic.main.fragment_download_maps.*
 import kotlinx.coroutines.*
-import okio.*
+import okio.buffer
+import okio.source
 import java.io.File
+import java.io.IOException
 import javax.inject.Inject
 
 
@@ -64,29 +68,56 @@ class DownloadMapsFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mainScope.launch {
-            bindClickListeners()
-            if (networkValidator.isValid()) {
-                geolocation = geolocator.get()
-                deserializeMapsList()
-                showSuggestedMaps()
-            } else {
-                // TODO: Set listener on network changes? Maybe show something permanently on screen?
-            }
-        }
-
+        bindClickListeners()
+        deserializeMapsList()
+        getSuggestedMaps()
     }
 
-    // TODO: Verify json file exists first.
-    // TODO: Handle deserialization errors. Validate JSON?
-    // TODO: Perform on IO thread?
     private fun deserializeMapsList() {
         val mapsListOnlineFile = onlineFileList[MAPS_LIST.ordinal]
-        val source = File(storageHelper.getLocalPath(mapsListOnlineFile), mapsListOnlineFile.fileName).source().buffer()
-        val mapsListJson = source.readUtf8()
-        source.close()
-        val adapter = moshi.adapter<OnlineMapEntry>()
-        onlineMapList = adapter.fromJson(mapsListJson) as OnlineMapFolder
+        val mapsListFile = File(storageHelper.getLocalPath(mapsListOnlineFile), mapsListOnlineFile.fileName)
+        if (mapsListFile.exists() && mapsListFile.length() == mapsListOnlineFile.decompressedSize) {
+            try {
+                val source = mapsListFile.source().buffer()
+                val mapsListJson = source.readUtf8()
+                source.close()
+                val adapter = moshi.adapter<OnlineMapEntry>()
+                onlineMapList = adapter.fromJson(mapsListJson) as OnlineMapFolder
+            } catch (e: IOException){
+                Lg.e("deserializeMapsList(): IOException")
+                mapsListFile.delete()
+                handleUnexpectedMapsListEror()
+            }
+        } else {
+            Lg.e("deserializeMapsList(): Maps file absent or size error.")
+            mapsListFile.delete()
+            handleUnexpectedMapsListEror()
+        }
+    }
+
+    private fun handleUnexpectedMapsListEror() {
+        showToast("Error getting maps")
+        val navController = activity.findNavController(R.id.fragment)
+        navController.popBackStack()
+        navController.navigate(R.id.downloadAssetsFragment, createBundle())
+    }
+
+    private fun getSuggestedMaps() = mainScope.launch {
+        if (networkValidator.isValid()) {
+            getMapsButton.isVisible = false
+            searchingOnlineMapsText.isVisible = true
+            progressBar.isVisible = true
+            try {
+                geolocation = geolocator.get()
+            } catch (e: IOException) {
+                Lg.e("getSuggestedMaps(): Failed to geolocate.")
+                getMapsButton.isVisible = true
+                searchingOnlineMapsText.isVisible = false
+                progressBar.isVisible = false
+            }
+            showSuggestedMaps()
+        } else
+            getMapsButton.isVisible = true
     }
 
     override fun onDestroy() {
@@ -106,14 +137,9 @@ class DownloadMapsFragment : BaseFragment() {
     }
 
     private fun bindClickListeners() {
+        getMapsButton.setOnClickListener { getSuggestedMaps() }
 //        fab.setOnClickListener(::onClickFab)
-//        downloadButton.setOnClickListener(::onClickDownload)
     }
-
-//    @Suppress("UNUSED_PARAMETER")
-//    private fun onClickDownload(view: View?) {
-//
-//    }
 
     @ExperimentalCoroutinesApi
     private fun cancelDownload() {

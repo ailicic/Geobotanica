@@ -1,6 +1,8 @@
 package com.geobotanica.geobotanica.ui.downloadassets
 
 import android.annotation.SuppressLint
+import android.app.DownloadManager
+import android.app.DownloadManager.*
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -8,6 +10,7 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
@@ -15,8 +18,11 @@ import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data_taxa.TaxaDatabaseValidator
-import com.geobotanica.geobotanica.network.*
+import com.geobotanica.geobotanica.network.FileDownloader
+import com.geobotanica.geobotanica.network.NetworkValidator
+import com.geobotanica.geobotanica.network.OnlineFile
 import com.geobotanica.geobotanica.network.OnlineFileIndex.*
+import com.geobotanica.geobotanica.network.onlineFileList
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -101,8 +107,14 @@ class DownloadAssetsFragment : BaseFragment() {
     private fun downloadAssets() {
         registerMapsListDownloadedObserver()
         onlineFileList.forEachIndexed { onlineFileIndex: Int, it: OnlineFile ->
+            if (isDownloadActive(it)) {
+                Lg.d("Download already active: ${it.description}")
+                return@forEachIndexed
+            }
             if (storageHelper.isDecompressed(it)) { // True if already downloaded and decompressed
-                Lg.d("Skipping download: ${it.description}")
+                Lg.d("Asset already available: ${it.description}")
+                if (it.fileName == onlineFileList[MAPS_LIST.ordinal].fileName)
+                    navigateToNext()
                 return@forEachIndexed
             }
             if (!storageHelper.isStorageAvailable(it)) {
@@ -111,6 +123,17 @@ class DownloadAssetsFragment : BaseFragment() {
             }
             activity.downloadAsset(onlineFileIndex)
         }
+    }
+
+    private fun isDownloadActive(onlineFile: OnlineFile): Boolean {
+        val query = Query().setFilterByStatus(
+                STATUS_PENDING or STATUS_RUNNING or STATUS_PAUSED)
+        val cursor = appContext.getSystemService<DownloadManager>()!!.query(query)
+        while (cursor.moveToNext()) {
+            if (cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE)) == onlineFile.descriptionWithSize)
+                return true
+        }
+        return false
     }
 
     private fun registerMapsListDownloadedObserver() {
