@@ -9,7 +9,7 @@ import javax.inject.Singleton
 @Singleton
 class OnlineMapMatcher @Inject constructor() {
 
-    fun search(onlineMapFolder: OnlineMapFolder, geolocation: Geolocation): List<OnlineMapFile> {
+    fun search(onlineMapFolder: OnlineMapEntry, geolocation: Geolocation): List<OnlineMapEntry> {
         Lg.d("geolocation = $geolocation")
         val regionResults = search(onlineMapFolder, geolocation.region) // Province / state
 
@@ -19,19 +19,19 @@ class OnlineMapMatcher @Inject constructor() {
             search(onlineMapFolder, geolocation.countryName)
     }
 
-    private fun search(onlineMapFolder: OnlineMapFolder, _string: String): List<OnlineMapFile> {
+    private fun search(onlineMapFolder: OnlineMapEntry, _string: String): List<OnlineMapEntry> {
         val string = _string.toLowerCase().replace(' ', '-')
-        val results = mutableListOf<OnlineMapFile>()
+        val results = mutableListOf<OnlineMapEntry>()
 
 
         onlineMapFolder.contents.forEach {
-            if (it is OnlineMapFolder) {
+            if (it.isFolder) {
                 if (it.name.startsWith(string))
-                    results.addAll(it.contents.filterIsInstance<OnlineMapFile>())
+                    results.addAll(it.contents.filter { !it.isFolder })
                 else
                     results.addAll(search(it, string))
             }
-            else if (it is OnlineMapFile) {
+            else {
                 if (it.name.startsWith(string))
                     results.add(it)
             }

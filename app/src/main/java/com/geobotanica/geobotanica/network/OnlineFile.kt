@@ -14,8 +14,8 @@ val onlineFileList = listOf(
                 "maps.json",
                 "",
                 false,
-                3_330,
-                32_446
+                3_359,
+                35_972
         ),
         OnlineFile(
                 "World map",

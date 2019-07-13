@@ -3,15 +3,15 @@ package com.geobotanica.geobotanica.network.online_map
 import com.geobotanica.geobotanica.util.capitalizeWords
 import com.squareup.moshi.JsonClass
 
-
-interface OnlineMapEntry // Used by Moshi PolymorphicJsonAdapterFactory
+// Note: Removed File/Folder subclasses to have single data class with equals() for MapDiffCallback
 
 @JsonClass(generateAdapter = true)
-data class OnlineMapFile(
+data class OnlineMapEntry(
+        val isFolder: Boolean,
         val url: String,
-        val size: String
-) : OnlineMapEntry {
-
+        val size: String = "", // Used only if isFolder = false
+        val contents: MutableList<OnlineMapEntry> = mutableListOf() // Used only if isFolder = true
+) {
     val name: String
         get() = url.substringAfterLast('/')
 
@@ -22,25 +22,3 @@ data class OnlineMapFile(
                 .replace('-', ' ')
                 .capitalizeWords()
 }
-
-@JsonClass(generateAdapter = true)
-data class OnlineMapFolder(
-        val url: String,
-        val contents: MutableList<OnlineMapEntry> = mutableListOf()
-) : OnlineMapEntry {
-
-    val name: String
-        get() = url
-                .substringAfterLast('/')
-
-    val printName: String
-        get() = name
-                .substringAfterLast('/')
-                .replace('-', ' ')
-                .capitalizeWords()
-}
-
-
-// (OLD) MOSHI WARNING: Must use var for member variables in non-data classes,
-// otherwise they are ignored during JSON serialization.
-// https://github.com/square/moshi/issues/315#issuecomment-371978007

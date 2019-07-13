@@ -17,8 +17,8 @@ import com.geobotanica.geobotanica.network.NetworkValidator
 import com.geobotanica.geobotanica.network.OnlineFileIndex.MAPS_LIST
 import com.geobotanica.geobotanica.network.onlineFileList
 import com.geobotanica.geobotanica.network.online_map.OnlineMapEntry
-import com.geobotanica.geobotanica.network.online_map.OnlineMapFolder
 import com.geobotanica.geobotanica.network.online_map.OnlineMapMatcher
+import com.geobotanica.geobotanica.network.online_map.OnlineMapScraper
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -47,7 +47,7 @@ class DownloadMapsFragment : BaseFragment() {
     @Inject lateinit var geolocator: Geolocator
     @Inject lateinit var onlineMapMatcher: OnlineMapMatcher
 
-    private lateinit var onlineMapList: OnlineMapFolder
+    private lateinit var onlineMapList: OnlineMapEntry
     private lateinit var geolocation: Geolocation
 
     private var mainScope = CoroutineScope(Dispatchers.Main) + Job() // Need var to re-instantiate after cancellation
@@ -82,9 +82,9 @@ class DownloadMapsFragment : BaseFragment() {
                 val mapsListJson = source.readUtf8()
                 source.close()
                 val adapter = moshi.adapter<OnlineMapEntry>()
-                onlineMapList = adapter.fromJson(mapsListJson) as OnlineMapFolder
+                onlineMapList = adapter.fromJson(mapsListJson) as OnlineMapEntry
             } catch (e: IOException){
-                Lg.e("deserializeMapsList(): IOException")
+                Lg.e("deserializeMapsList(): $e")
                 mapsListFile.delete()
                 handleUnexpectedMapsListEror()
             }
@@ -170,14 +170,11 @@ class DownloadMapsFragment : BaseFragment() {
     private fun createBundle(): Bundle =
         bundleOf(userIdKey to viewModel.userId)
 
-}
-
-
 // TODO: Run this on server periodically to update maps.json.gz asset
-
+//
 //    private fun scrapeMaps() {
 //        mainScope.launch {
-//            lateinit var onlineMaps: OnlineMapFolder
+//            lateinit var onlineMaps: OnlineMapEntry
 //            val time = measureTimeMillis {
 //                onlineMaps = onlineMapScraper.scrape() // TODO: Handle IOException. Show toast.
 //            }
@@ -190,14 +187,17 @@ class DownloadMapsFragment : BaseFragment() {
 //            saveMapsList(onlineMaps)
 //        }
 //    }
-
-
-//private fun saveMapsList(onlineMaps: OnlineMapFolder) {
-//    val adapter = moshi.adapter<OnlineMapEntry>()
-//    val mapsJson = adapter.toJson(onlineMaps)
-//    Lg.d("mapsJson = $mapsJson")
 //
-//    val sink = File(storageHelper.getDownloadPath(),"maps_list.json").sink().buffer()
-//    sink.write(mapsJson.toByteArray())
-//    sink.close()
-//}
+//
+//    private fun saveMapsList(onlineMaps: OnlineMapEntry) {
+//        val adapter = moshi.adapter<OnlineMapEntry>()
+//        val mapsJson = adapter.toJson(onlineMaps)
+//        Lg.d("mapsJson = $mapsJson")
+//
+//        val sink = File(storageHelper.getDownloadPath(),"maps.json").sink().buffer()
+//        sink.write(mapsJson.toByteArray())
+//        sink.close()
+//    }
+}
+
+

@@ -18,8 +18,8 @@ import javax.inject.Singleton
 class OnlineMapScraper @Inject constructor (private val htmlParser: HtmlParser) {
     private val mapsBaseUrl = "http://download.mapsforge.org/maps/v5"
 
-    suspend fun scrape(): OnlineMapFolder {
-        return OnlineMapFolder(mapsBaseUrl).apply {
+    suspend fun scrape(): OnlineMapEntry {
+        return OnlineMapEntry(true, mapsBaseUrl).apply {
             contents.addAll(fetchEntries(mapsBaseUrl))
         }
     }
@@ -40,14 +40,14 @@ class OnlineMapScraper @Inject constructor (private val htmlParser: HtmlParser) 
                         .replace("M", " MB")
 
                 if (size == "-") {
-                    val onlineMapFolder = OnlineMapFolder("$url/$name")
+                    val onlineMapFolder = OnlineMapEntry(true,"$url/$name")
 //                    Lg.d("Found folder: $onlineMapFolder")
                     onlineMapFolder.contents.addAll(fetchEntries(onlineMapFolder.url))
                     entries.add(onlineMapFolder)
                 } else {
 //                    val onlineMapFile = OnlineMapFile("$url/$name", size)
 //                    Lg.d("Found file: $onlineMapFile")
-                    entries.add(OnlineMapFile("$url/$name", size))
+                    entries.add(OnlineMapEntry(false,"$url/$name", size))
                 }
             }
 

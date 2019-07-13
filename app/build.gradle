@@ -115,7 +115,6 @@ dependencies {
     def moshi_version = "1.8.0"
     kapt "com.squareup.moshi:moshi-kotlin-codegen:$moshi_version"
     implementation "com.squareup.moshi:moshi:$moshi_version"
-    implementation "com.squareup.moshi:moshi-adapters:$moshi_version"
 //    implementation "com.squareup.moshi:moshi-kotlin:$moshi_version" // Uses kotlin reflection
 
     // JSoup
