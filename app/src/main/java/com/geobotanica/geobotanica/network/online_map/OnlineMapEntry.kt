@@ -1,6 +1,7 @@
 package com.geobotanica.geobotanica.network.online_map
 
 import com.geobotanica.geobotanica.util.capitalizeWords
+import com.geobotanica.geobotanica.util.replacePrefix
 import com.squareup.moshi.JsonClass
 
 // Note: Removed File/Folder subclasses to have single data class with equals() for MapDiffCallback
@@ -16,9 +17,17 @@ data class OnlineMapEntry(
         get() = url.substringAfterLast('/')
 
     val printName: String
-        get() = name
-                .removeSuffix(".map")
-                .removeSuffix(">") // Present if url is too long
-                .replace('-', ' ')
-                .capitalizeWords()
+        get() {
+            var string = name
+                    .removeSuffix(".map")
+                    .removeSuffix(">") // Present if name is too long on scraped Mapsforge website
+                    .replace('-', ' ')
+                    .replacePrefix("us", "US")
+                    .capitalizeWords()
+            return if (isFolder)
+                string
+            else
+                "$string ($size)"
+        }
+
 }

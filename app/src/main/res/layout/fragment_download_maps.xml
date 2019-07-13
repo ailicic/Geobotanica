@@ -5,15 +5,14 @@
     android:layout_height="match_parent"
     android:id="@+id/constraintLayout">
 
-
-    <!--<androidx.recyclerview.widget.RecyclerView-->
-        <!--android:id="@+id/recyclerView"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:scrollbars="vertical"-->
-        <!--app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"-->
-        <!--app:layout_constraintTop_toTopOf="parent" />-->
-    <!--android:layout_height="460dp"-->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="450dp"
+        android:scrollbars="vertical"
+        android:visibility="gone"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/searchingOnlineMapsText"
@@ -46,11 +45,53 @@
         android:text="@string/get_maps"
         android:textColor="@color/colorWhite"
         android:drawablePadding="8dp"
-        android:drawableEnd="@drawable/ic_file_download_black_24dp"
+        android:drawableEnd="@drawable/ic_file_download_24dp"
+        android:drawableTint="@color/colorWhite"
         android:backgroundTint="@color/colorPrimaryDark"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <Button
+        android:id="@+id/browseMapsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="16dp"
+        android:padding="16dp"
+        android:text="@string/browse_maps"
+        android:textColor="@color/colorPrimary"
+        android:textSize="16dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        style="@style/Widget.AppCompat.Button.Borderless"/>
+
+    <Button
+        android:id="@+id/showSuggestedMapsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="16dp"
+        android:padding="16dp"
+        android:text="@string/show_suggested"
+        android:textColor="@color/colorPrimary"
+        android:textSize="16dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        style="@style/Widget.AppCompat.Button.Borderless"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:tint="@color/colorWhite"
+        app:srcCompat="@drawable/ic_navigate_next_black_24dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

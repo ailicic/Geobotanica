@@ -104,4 +104,7 @@
     <string name="error_importing_plant_db">Error importing plant name database</string>
     <string name="searching_online_maps">Searching online maps...</string>
     <string name="get_maps">Get maps</string>
+    <string name="browse_maps">Browse maps</string>
+    <string name="suggested_maps">Suggested maps:</string>
+    <string name="show_suggested">Show suggested</string>
 </resources>

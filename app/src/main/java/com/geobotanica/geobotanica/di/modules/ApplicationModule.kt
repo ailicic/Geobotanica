@@ -1,5 +1,6 @@
 package com.geobotanica.geobotanica.di.modules
 
+import android.app.DownloadManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.location.LocationManager
@@ -22,6 +23,9 @@ class ApplicationModule(private val appContext: Context, private val activity: M
 
     @Provides @Singleton fun provideLocationManager(): LocationManager =
             appContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+    @Provides @Singleton fun provideDownloadManager(): DownloadManager =
+            appContext.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
     @Provides @Singleton fun provideOkHttpClient(): OkHttpClient = OkHttpClient()
     @Provides @Singleton fun provideMoshi(): Moshi = Moshi.Builder().build()

@@ -33,7 +33,7 @@
         app:layout_constraintBottom_toBottomOf="parent"/>
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/plantTypeIcon"
+        android:id="@+id/icon"
         android:layout_width="@dimen/list_item_name_icon_size"
         android:layout_height="@dimen/list_item_name_icon_size"
         android:layout_marginStart="8dp"
@@ -49,7 +49,7 @@
         android:layout_height="@dimen/list_item_name_icon_size"
         android:layout_marginStart="8dp"
         android:visibility="gone"
-        app:layout_constraintStart_toEndOf="@id/plantTypeIcon"
+        app:layout_constraintStart_toEndOf="@id/icon"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:ignore="ContentDescription" />

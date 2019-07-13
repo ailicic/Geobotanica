@@ -41,6 +41,9 @@ import java.io.File
 import javax.inject.Inject
 
 // TODO: Fix WarningDialog text wrapping
+// TODO: Consider moving all FileDownloader/Decompression code out of MainActivity. Just keep download ids.
+// TODO: Check behaviour in PlantConfirmFragment if toolbar back is pressed (looks like it ignores back button override)
+    // NEED activity.toolbar.setNavigationOnClickListener
 
 // LONG TERM
 // TODO: Create download map activity and utilize offline map tiles
