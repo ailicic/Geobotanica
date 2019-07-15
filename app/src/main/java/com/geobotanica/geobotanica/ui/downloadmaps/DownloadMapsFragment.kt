@@ -48,6 +48,7 @@ class DownloadMapsFragment : BaseFragment() {
 
     @Inject lateinit var networkValidator: NetworkValidator
     @Inject lateinit var storageHelper: StorageHelper
+    @Inject lateinit var fileDownloader: FileDownloader
     @Inject lateinit var moshi: Moshi
     @Inject lateinit var geolocator: Geolocator
     @Inject lateinit var onlineMapMatcher: OnlineMapMatcher
@@ -210,7 +211,7 @@ class DownloadMapsFragment : BaseFragment() {
         } else {
             mainScope.launch {
                 if (networkValidator.isValid()) {
-                    activity.downloadMap(onlineMapEntry)
+                    fileDownloader.downloadMap(onlineMapEntry)
                     fab.isVisible = true
                     // TODO: show spinner, then change icon after completed
                 }
@@ -218,12 +219,12 @@ class DownloadMapsFragment : BaseFragment() {
         }
     }
 
-    @ExperimentalCoroutinesApi
-    private fun cancelDownload() {
-        Lg.i("DownloadTaxaFragment: Download cancelled.")
-        mainScope.cancel()
-//        updateUi(CANCEL_DOWNLOAD)
-    }
+//    @ExperimentalCoroutinesApi
+//    private fun cancelDownload() {
+//        Lg.i("DownloadTaxaFragment: Download cancelled.")
+//        mainScope.cancel()
+////        updateUi(CANCEL_DOWNLOAD)
+//    }
 
     private fun navigateToNext() {
         val navController = activity.findNavController(R.id.fragment)

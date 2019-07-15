@@ -106,22 +106,22 @@ class DownloadAssetsFragment : BaseFragment() {
 
     private fun downloadAssets() {
         registerMapsListDownloadedObserver()
-        onlineAssetList.forEachIndexed { onlineFileIndex: Int, it: OnlineAsset ->
-            if (isDownloadActive(it)) {
-                Lg.d("Download already active: ${it.description}")
-                return@forEachIndexed
+        onlineAssetList.forEach { onlineAsset ->
+            if (isDownloadActive(onlineAsset)) {
+                Lg.d("Download already active: ${onlineAsset.description}")
+                return@forEach
             }
-            if (storageHelper.isAssetDecompressed(it)) { // True if already downloaded and decompressed
-                Lg.d("Asset already available: ${it.description}")
-                if (it.fileName == onlineAssetList[MAPS_LIST.ordinal].fileName)
+            if (storageHelper.isAssetDecompressed(onlineAsset)) { // True if already downloaded and decompressed
+                Lg.d("Asset already available: ${onlineAsset.description}")
+                if (onlineAsset.fileName == onlineAssetList[MAPS_LIST.ordinal].fileName)
                     navigateToNext()
-                return@forEachIndexed
+                return@forEach
             }
-            if (!storageHelper.isStorageAvailable(it)) {
-                showStorageErrorSnackbar(it)
-                return@forEachIndexed
+            if (!storageHelper.isStorageAvailable(onlineAsset)) {
+                showStorageErrorSnackbar(onlineAsset)
+                return@forEach
             }
-            activity.downloadAsset(onlineFileIndex)
+            fileDownloader.downloadAsset(onlineAsset)
         }
     }
 
@@ -130,15 +130,15 @@ class DownloadAssetsFragment : BaseFragment() {
                 STATUS_PENDING or STATUS_RUNNING or STATUS_PAUSED)
         val cursor = appContext.getSystemService<DownloadManager>()!!.query(query)
         while (cursor.moveToNext()) {
-            if (cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE)) == onlineFile.descriptionWithSize)
+            if (cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)) == onlineFile.descriptionWithSize)
                 return true
         }
         return false
     }
 
     private fun registerMapsListDownloadedObserver() {
-        activity.assetDownloadComplete.observe(this, Observer { onlineAssetIndex ->
-            if (onlineAssetIndex == MAPS_LIST)
+        fileDownloader.assetDownloadComplete.observe(this, Observer { onlineAsset ->
+            if (onlineAsset == onlineAssetList[MAPS_LIST.ordinal])
                 navigateToNext()
         })
     }
