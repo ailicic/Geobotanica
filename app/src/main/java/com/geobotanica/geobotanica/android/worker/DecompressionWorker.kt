@@ -5,7 +5,7 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.geobotanica.geobotanica.android.file.StorageHelper
-import com.geobotanica.geobotanica.network.onlineFileList
+import com.geobotanica.geobotanica.network.onlineAssetList
 import com.geobotanica.geobotanica.util.Lg
 import okio.buffer
 import okio.gzip
@@ -13,19 +13,19 @@ import okio.sink
 import okio.source
 import java.io.File
 
-const val REMOTE_FILE_KEY = "RemoteFileKey"
+const val ONLINE_ASSET_INDEX_KEY = "RemoteFileKey"
 
 class DecompressionWorker(appContext: Context, workerParams: WorkerParameters)
     : Worker(appContext, workerParams) {
 
     override fun doWork(): Result {
-        val remoteFileIndex = inputData.getInt(REMOTE_FILE_KEY, -1)
+        val remoteFileIndex = inputData.getInt(ONLINE_ASSET_INDEX_KEY, -1)
         return unzipDownloadedFile(remoteFileIndex)
     }
 
     private fun unzipDownloadedFile(remoteFileIndex: Int): Result {
         try {
-            val remoteFile = onlineFileList[remoteFileIndex]
+            val remoteFile = onlineAssetList[remoteFileIndex]
             Lg.d("Decompressing ${remoteFile.fileNameGzip}")
             val storageHelper = StorageHelper(applicationContext)
 
@@ -43,7 +43,7 @@ class DecompressionWorker(appContext: Context, workerParams: WorkerParameters)
             unGzipSink.close()
             gzipSourceFile.delete()
 
-            val output = workDataOf(REMOTE_FILE_KEY to remoteFileIndex)
+            val output = workDataOf(ONLINE_ASSET_INDEX_KEY to remoteFileIndex)
             return Result.success(output)
         } catch (e: Exception) {
             e.printStackTrace()

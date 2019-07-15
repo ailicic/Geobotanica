@@ -15,7 +15,7 @@ class MapListAdapter(private val onClick: (OnlineMapEntry) -> Unit) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MapViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return MapViewHolder(inflater.inflate(R.layout.list_item, parent, false))
+        return MapViewHolder(inflater.inflate(R.layout.map_list_item, parent, false))
     }
 
 
@@ -28,9 +28,9 @@ class MapViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
 
     fun bindTo(onlineMapEntry: OnlineMapEntry, onClick: (OnlineMapEntry) -> Unit) {
         if (onlineMapEntry.isFolder)
-            view.icon.setImageResource(R.drawable.ic_folder_24dp)
+            view.downloadIcon.setImageResource(R.drawable.ic_folder_24dp)
         else
-            view.icon.setImageResource(R.drawable.ic_file_download_24dp)
+            view.downloadIcon.setImageResource(R.drawable.ic_file_download_24dp)
 
         view.text.text = onlineMapEntry.printName
         view.setOnClickListener { onClick(onlineMapEntry) }

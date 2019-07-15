@@ -26,13 +26,13 @@ class OnlineMapMatcher @Inject constructor() {
 
         onlineMapFolder.contents.forEach {
             if (it.isFolder) {
-                if (it.name.startsWith(string))
+                if (it.filename.startsWith(string))
                     results.addAll(it.contents.filter { !it.isFolder })
                 else
                     results.addAll(search(it, string))
             }
             else {
-                if (it.name.startsWith(string))
+                if (it.filename.startsWith(string))
                     results.add(it)
             }
         }

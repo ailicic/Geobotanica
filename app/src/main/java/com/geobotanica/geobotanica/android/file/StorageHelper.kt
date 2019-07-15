@@ -2,7 +2,11 @@ package com.geobotanica.geobotanica.android.file
 
 import android.annotation.SuppressLint
 import android.content.Context
-import com.geobotanica.geobotanica.network.OnlineFile
+import com.geobotanica.geobotanica.network.OnlineAsset
+import com.geobotanica.geobotanica.network.OnlineAssetIndex
+import com.geobotanica.geobotanica.network.OnlineAssetIndex.*
+import com.geobotanica.geobotanica.network.onlineAssetList
+import com.geobotanica.geobotanica.network.online_map.OnlineMapEntry
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -10,31 +14,38 @@ import javax.inject.Singleton
 @Singleton
 class StorageHelper @Inject constructor(val appContext: Context) {
 
-    fun isDownloaded(onlineFile: OnlineFile): Boolean {
-        val file = File(getDownloadPath(), onlineFile.fileNameGzip)
-        return file.exists() && file.isFile && file.length() == onlineFile.compressedSize
+    fun isAssetDownloaded(onlineAsset: OnlineAsset): Boolean {
+        val file = File(getDownloadPath(), onlineAsset.fileNameGzip)
+        return file.exists() && file.isFile && file.length() == onlineAsset.compressedSize
     }
 
-    fun isDecompressed(onlineFile: OnlineFile): Boolean {
-        val file = File(getLocalPath(onlineFile), onlineFile.fileName)
-        return file.exists() && file.isFile && file.length() == onlineFile.decompressedSize
+    fun isAssetDecompressed(onlineAsset: OnlineAsset): Boolean {
+        val file = File(getLocalPath(onlineAsset), onlineAsset.fileName)
+        return file.exists() && file.isFile && file.length() == onlineAsset.decompressedSize
+    }
+
+    fun isMapDownloaded(onlineMapEntry: OnlineMapEntry): Boolean {
+        val file = File(getLocalPath(onlineAssetList[WORLD_MAP.ordinal]), onlineMapEntry.filename)
+        return file.exists() && file.isFile
     }
 
     @SuppressLint("UsableSpace")
-    fun isStorageAvailable(onlineFile: OnlineFile): Boolean {
-        val dir = File(getRootPath(onlineFile))
-        return dir.usableSpace > 2 * onlineFile.decompressedSize
+    fun isStorageAvailable(onlineAsset: OnlineAsset): Boolean {
+        val dir = File(getRootPath(onlineAsset))
+        return dir.usableSpace > 2 * onlineAsset.decompressedSize
     }
 
-    fun mkdirs(onlineFile: OnlineFile) = File(getLocalPath(onlineFile)).mkdirs()
+    fun mkdirs(onlineAsset: OnlineAsset) = File(getLocalPath(onlineAsset)).mkdirs()
 
     fun getDownloadPath() = appContext.getExternalFilesDir(null)?.absolutePath
 
-    fun getLocalPath(onlineFile: OnlineFile): String =
-            getRootPath(onlineFile) + "/${onlineFile.relativePath}"
+    fun getMapsPath() = "${getDownloadPath()}/maps"
 
-    private fun getRootPath(onlineFile: OnlineFile): String {
-        return if (onlineFile.isInternalStorage)
+    fun getLocalPath(onlineAsset: OnlineAsset): String =
+            getRootPath(onlineAsset) + "/${onlineAsset.relativePath}"
+
+    private fun getRootPath(onlineAsset: OnlineAsset): String {
+        return if (onlineAsset.isInternalStorage)
             appContext.filesDir.absolutePath.removeSuffix("/files")
         else
             appContext.getExternalFilesDir(null)!!.absolutePath

@@ -40,7 +40,7 @@ class ListItemAdapter<T: Enum<T>>(
 
     inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val constraintLayout: ConstraintLayout = view.constraintLayout
-        val icon: ImageView= view.icon
+        val icon: ImageView= view.downloadIcon
         val text: TextView = view.text
     }
 }

@@ -20,7 +20,7 @@ import androidx.work.workDataOf
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.worker.DecompressionWorker
-import com.geobotanica.geobotanica.android.worker.REMOTE_FILE_KEY
+import com.geobotanica.geobotanica.android.worker.ONLINE_ASSET_INDEX_KEY
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data_taxa.TaxaDatabaseValidator
 import com.geobotanica.geobotanica.di.components.ApplicationComponent
@@ -28,7 +28,9 @@ import com.geobotanica.geobotanica.di.components.DaggerApplicationComponent
 import com.geobotanica.geobotanica.di.modules.ApplicationModule
 import com.geobotanica.geobotanica.di.modules.RepoModule
 import com.geobotanica.geobotanica.network.FileDownloader
-import com.geobotanica.geobotanica.network.onlineFileList
+import com.geobotanica.geobotanica.network.OnlineAssetIndex
+import com.geobotanica.geobotanica.network.onlineAssetList
+import com.geobotanica.geobotanica.network.online_map.OnlineMapEntry
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.isEmulator
 import kotlinx.android.synthetic.main.activity_main.*
@@ -42,11 +44,13 @@ class MainActivity : AppCompatActivity() {
     @Inject lateinit var fileDownloader: FileDownloader
     @Inject lateinit var taxaDatabaseValidator: TaxaDatabaseValidator
 
-    val downloadComplete = MutableLiveData<String>()
+    val assetDownloadComplete = MutableLiveData<OnlineAssetIndex>()
+    val mapDownloadComplete = MutableLiveData<OnlineMapEntry>()
 
     private val className = "MainActivity"
 
-    private val downloadIdMap = mutableMapOf<Long, Int>() // <downloadId, remoteFileIndex>
+    private val assetDownloadIds = mutableMapOf<Long, Int>() // <downloadId, onlineFileIndex>
+    private val mapDownloadIds = mutableMapOf<Long, OnlineMapEntry>()
 
     // TODO: Remove this after LocationService uses LiveData
     var currentLocation: Location? = null // Easy solution to hold location between fragments during new plant flow
@@ -82,47 +86,56 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp() = findNavController(R.id.fragment).navigateUp()
 
-    // TODO: Handle click download notification. Maybe use ACTION_VIEW_DOWNLOADS
-    fun downloadAsset(remoteFileIndex: Int) {
-        val downloadId = fileDownloader.download(onlineFileList[remoteFileIndex])
-        downloadIdMap[downloadId] = remoteFileIndex
+    // TODO: Handle click downloadAsset notification. Maybe use ACTION_VIEW_DOWNLOADS
+    fun downloadAsset(onlineFileIndex: Int) {
+        val downloadId = fileDownloader.downloadAsset(onlineAssetList[onlineFileIndex])
+        assetDownloadIds[downloadId] = onlineFileIndex
+    }
+    
+    fun downloadMap(onlineMapEntry: OnlineMapEntry) {
+        val downloadId = fileDownloader.downloadMap(onlineMapEntry)
+        mapDownloadIds[downloadId] = onlineMapEntry
     }
 
     private val onDownloadComplete = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-            if (downloadIdMap.containsKey(downloadId)) {
-                val remoteFileIndex = downloadIdMap[downloadId]!!
-                val remoteFile = onlineFileList[remoteFileIndex]
-                if (storageHelper.isDownloaded(remoteFile)) {
-                    Lg.i("Downloaded ${remoteFile.fileNameGzip}")
-                    downloadIdMap.remove(downloadId)
+            if (assetDownloadIds.containsKey(downloadId)) {
+                val onlineFileIndex = assetDownloadIds[downloadId]!!
+                val onlineFile = onlineAssetList[onlineFileIndex]
+                if (storageHelper.isAssetDownloaded(onlineFile)) {
+                    Lg.i("Downloaded ${onlineFile.fileNameGzip}")
+                    assetDownloadIds.remove(downloadId)
                     val decompressionWorkerRequest = OneTimeWorkRequestBuilder<DecompressionWorker>()
-                            .setInputData(workDataOf(REMOTE_FILE_KEY to remoteFileIndex))
+                            .setInputData(workDataOf(ONLINE_ASSET_INDEX_KEY to onlineFileIndex))
                             .build()
                     val workManager = WorkManager.getInstance()
                     workManager.getWorkInfoByIdLiveData(decompressionWorkerRequest.id)
                             .observe(this@MainActivity, decompressionWorkerObserver)
                     workManager.enqueue(decompressionWorkerRequest)
                 } else {
-                    Lg.e("Error downloading ${remoteFile.description}")
+                    Lg.e("Error downloading ${onlineFile.description}")
                     Toast.makeText(applicationContext,
-                            getString(R.string.error_downloading, remoteFile.description),
+                            getString(R.string.error_downloading, onlineFile.description),
                             Toast.LENGTH_SHORT)
                             .show()
                 }
+            } else if (mapDownloadIds.containsKey(downloadId)) {
+                val onlineMapEntry = mapDownloadIds[downloadId]
+                mapDownloadComplete.value = onlineMapEntry
+                mapDownloadIds.remove(downloadId)
             }
         }
     }
 
     private val decompressionWorkerObserver = Observer<WorkInfo> { info ->
         if (info != null && info.state.isFinished) {
-            val remoteFileIndex = info.outputData.getInt(REMOTE_FILE_KEY, -1)
-            val remoteFile = onlineFileList[remoteFileIndex]
-            downloadComplete.value = remoteFile.fileName
-            Lg.d("Decompressed: ${remoteFile.description}")
+            val onlineAssetIndex = info.outputData.getInt(ONLINE_ASSET_INDEX_KEY, -1)
+            val onlineAsset = onlineAssetList[onlineAssetIndex]
+            assetDownloadComplete.value = OnlineAssetIndex.values()[onlineAssetIndex]
+            Lg.d("Decompressed: ${onlineAsset.description}")
 
-            if (remoteFile.fileName == "taxa.db") {
+            if (onlineAsset.fileName == "taxa.db") {
                 mainScope.launch {
                     if (taxaDatabaseValidator.isPopulated())
                         Lg.d("isTaxaDbPopulated() = true")
@@ -167,10 +180,15 @@ class MainActivity : AppCompatActivity() {
         unregisterReceiver(onDownloadComplete)
     }
 
-    private fun cancelDownloads() { // Note: DownloadManager deletes the file of a cancelled download
-        if (downloadIdMap.isNotEmpty()) {
-            val result = getSystemService<DownloadManager>()?.remove(*downloadIdMap.keys.toLongArray())
-            Lg.d("MainActivity: Deleted $result downloads")
+    private fun cancelDownloads() { // Note: DownloadManager deletes the file of a cancelled downloadAsset
+        val downloadManager = getSystemService<DownloadManager>()
+        if (assetDownloadIds.isNotEmpty()) {
+            val result = downloadManager?.remove(*assetDownloadIds.keys.toLongArray())
+            Lg.d("MainActivity: Deleted $result asset downloads")
+        }
+        if (mapDownloadIds.isNotEmpty()) {
+            val result = downloadManager?.remove(*mapDownloadIds.keys.toLongArray())
+            Lg.d("MainActivity: Deleted $result map downloads")
         }
     }
 }

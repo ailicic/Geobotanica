@@ -8,22 +8,22 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.fragment.app.FragmentActivity
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.file.StorageHelper
-import com.geobotanica.geobotanica.network.Geolocation
-import com.geobotanica.geobotanica.network.Geolocator
-import com.geobotanica.geobotanica.network.NetworkValidator
-import com.geobotanica.geobotanica.network.OnlineFileIndex.MAPS_LIST
-import com.geobotanica.geobotanica.network.onlineFileList
+import com.geobotanica.geobotanica.network.*
+import com.geobotanica.geobotanica.network.OnlineAssetIndex.MAPS_LIST
 import com.geobotanica.geobotanica.network.online_map.OnlineMapEntry
 import com.geobotanica.geobotanica.network.online_map.OnlineMapMatcher
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
+import com.geobotanica.geobotanica.ui.dialog.WarningDialog
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.adapter
+import com.geobotanica.geobotanica.util.get
 import com.geobotanica.geobotanica.util.getFromBundle
 import com.squareup.moshi.Moshi
 import kotlinx.android.synthetic.main.activity_main.*
@@ -34,10 +34,11 @@ import okio.source
 import java.io.File
 import java.io.IOException
 import javax.inject.Inject
+import kotlin.coroutines.suspendCoroutine
 
 // TODO: Improve animations?
 // TODO: Reduce size of this class?
-// TODO: Use viewModel to pass downloaded maps
+// TODO: Use bundle to pass downloaded maps ids
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
@@ -51,14 +52,17 @@ class DownloadMapsFragment : BaseFragment() {
     @Inject lateinit var geolocator: Geolocator
     @Inject lateinit var onlineMapMatcher: OnlineMapMatcher
 
+    private val mapListAdapter = MapListAdapter(::onClickMapEntry)
+
+    // TODO: Put in viewModel
     private lateinit var onlineMapList: OnlineMapEntry
     private lateinit var suggestedMapList: List<OnlineMapEntry>
     private lateinit var geolocation: Geolocation
-
-    private val mapListAdapter = MapListAdapter(::onClickMapEntry)
     private val parentMapFolders = mutableListOf<OnlineMapEntry>()
 
     private val mainScope = CoroutineScope(Dispatchers.Main) + Job()
+
+    private val sharedPrefsExitOnBackInDownloadMaps = "exitOnBackPermitted"
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -93,14 +97,27 @@ class DownloadMapsFragment : BaseFragment() {
         requireActivity().onBackPressedDispatcher.addCallback(this) { onClickBackButton() }
     }
 
-    private fun onClickBackButton() {
+    private fun onClickBackButton() = mainScope.launch {
         if (parentMapFolders.size > 1) {
             parentMapFolders.removeAt(parentMapFolders.size - 1)
             mapListAdapter.submitList(parentMapFolders.last().contents)
-        } else {
-            // TODO: Show dialog confirming user wants to exit
-            activity.onBackPressed()
-        }
+        } else if (isExitOnBackPressedOk())
+            activity.finish()
+    }
+
+    private suspend fun isExitOnBackPressedOk(): Boolean {
+        val isPermitted = defaultSharedPrefs.get(sharedPrefsExitOnBackInDownloadMaps, false)
+        return if (! isPermitted) {
+            suspendCoroutine { continuation ->
+                WarningDialog(
+                        R.string.exit_app    ,
+                        R.string.exit_app_confirm,
+                        sharedPrefsExitOnBackInDownloadMaps,
+                        continuation
+                ).show((activity as FragmentActivity).supportFragmentManager, "tag")
+            }
+        } else
+            true
     }
 
     private fun bindClickListeners() {
@@ -111,7 +128,7 @@ class DownloadMapsFragment : BaseFragment() {
     }
 
     private fun deserializeMapsList() {
-        val mapsListOnlineFile = onlineFileList[MAPS_LIST.ordinal]
+        val mapsListOnlineFile = onlineAssetList[MAPS_LIST.ordinal]
         val mapsListFile = File(storageHelper.getLocalPath(mapsListOnlineFile), mapsListOnlineFile.fileName)
         if (mapsListFile.exists() && mapsListFile.length() == mapsListOnlineFile.decompressedSize) {
             try {
@@ -139,6 +156,8 @@ class DownloadMapsFragment : BaseFragment() {
         navController.navigate(R.id.downloadAssetsFragment, createBundle())
     }
 
+
+    // TODO: Put in viewModel?
     private fun getSuggestedMaps() = mainScope.launch {
         if (networkValidator.isValid()) {
             getMapsButton.isVisible = false
@@ -189,8 +208,13 @@ class DownloadMapsFragment : BaseFragment() {
             parentMapFolders.add(onlineMapEntry)
             mapListAdapter.submitList(onlineMapEntry.contents)
         } else {
-            fab.isVisible = true
-            // TODO: Download map, show spinner, then change icon after completed
+            mainScope.launch {
+                if (networkValidator.isValid()) {
+                    activity.downloadMap(onlineMapEntry)
+                    fab.isVisible = true
+                    // TODO: show spinner, then change icon after completed
+                }
+            }
         }
     }
 

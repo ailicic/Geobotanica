@@ -4,7 +4,7 @@ import com.geobotanica.geobotanica.util.capitalizeWords
 import com.geobotanica.geobotanica.util.replacePrefix
 import com.squareup.moshi.JsonClass
 
-// Note: Removed File/Folder subclasses to have single data class with equals() for MapDiffCallback
+// Note: Removed File/Folder subclasses to have simpler single data class with equals() for MapDiffCallback
 
 @JsonClass(generateAdapter = true)
 data class OnlineMapEntry(
@@ -13,14 +13,14 @@ data class OnlineMapEntry(
         val size: String = "", // Used only if isFolder = false
         val contents: MutableList<OnlineMapEntry> = mutableListOf() // Used only if isFolder = true
 ) {
-    val name: String
+    val filename: String
         get() = url.substringAfterLast('/')
 
     val printName: String
         get() {
-            var string = name
+            var string = filename
                     .removeSuffix(".map")
-                    .removeSuffix(">") // Present if name is too long on scraped Mapsforge website
+                    .removeSuffix(">") // Present if filename is too long on scraped Mapsforge website
                     .replace('-', ' ')
                     .replacePrefix("us", "US")
                     .capitalizeWords()

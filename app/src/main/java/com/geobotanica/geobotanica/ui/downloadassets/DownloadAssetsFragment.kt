@@ -20,9 +20,9 @@ import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data_taxa.TaxaDatabaseValidator
 import com.geobotanica.geobotanica.network.FileDownloader
 import com.geobotanica.geobotanica.network.NetworkValidator
-import com.geobotanica.geobotanica.network.OnlineFile
-import com.geobotanica.geobotanica.network.OnlineFileIndex.*
-import com.geobotanica.geobotanica.network.onlineFileList
+import com.geobotanica.geobotanica.network.OnlineAsset
+import com.geobotanica.geobotanica.network.OnlineAssetIndex.*
+import com.geobotanica.geobotanica.network.onlineAssetList
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -83,8 +83,8 @@ class DownloadAssetsFragment : BaseFragment() {
 
     @SuppressLint("UsableSpace")
     private fun initUi() {
-        worldMapText.text = onlineFileList[WORLD_MAP.ordinal].descriptionWithSize
-        plantNameDbText.text = onlineFileList[PLANT_NAMES.ordinal].descriptionWithSize
+        worldMapText.text = onlineAssetList[WORLD_MAP.ordinal].descriptionWithSize
+        plantNameDbText.text = onlineAssetList[PLANT_NAMES.ordinal].descriptionWithSize
         internalStorageText.text = getString(R.string.internal_storage,
                 File(context?.filesDir?.absolutePath).usableSpace / 1024 / 1024)
     }
@@ -106,14 +106,14 @@ class DownloadAssetsFragment : BaseFragment() {
 
     private fun downloadAssets() {
         registerMapsListDownloadedObserver()
-        onlineFileList.forEachIndexed { onlineFileIndex: Int, it: OnlineFile ->
+        onlineAssetList.forEachIndexed { onlineFileIndex: Int, it: OnlineAsset ->
             if (isDownloadActive(it)) {
                 Lg.d("Download already active: ${it.description}")
                 return@forEachIndexed
             }
-            if (storageHelper.isDecompressed(it)) { // True if already downloaded and decompressed
+            if (storageHelper.isAssetDecompressed(it)) { // True if already downloaded and decompressed
                 Lg.d("Asset already available: ${it.description}")
-                if (it.fileName == onlineFileList[MAPS_LIST.ordinal].fileName)
+                if (it.fileName == onlineAssetList[MAPS_LIST.ordinal].fileName)
                     navigateToNext()
                 return@forEachIndexed
             }
@@ -125,7 +125,7 @@ class DownloadAssetsFragment : BaseFragment() {
         }
     }
 
-    private fun isDownloadActive(onlineFile: OnlineFile): Boolean {
+    private fun isDownloadActive(onlineFile: OnlineAsset): Boolean {
         val query = Query().setFilterByStatus(
                 STATUS_PENDING or STATUS_RUNNING or STATUS_PAUSED)
         val cursor = appContext.getSystemService<DownloadManager>()!!.query(query)
@@ -137,13 +137,13 @@ class DownloadAssetsFragment : BaseFragment() {
     }
 
     private fun registerMapsListDownloadedObserver() {
-        activity.downloadComplete.observe(this, Observer { filename ->
-            if (filename == onlineFileList[MAPS_LIST.ordinal].fileName)
+        activity.assetDownloadComplete.observe(this, Observer { onlineAssetIndex ->
+            if (onlineAssetIndex == MAPS_LIST)
                 navigateToNext()
         })
     }
 
-    private fun showStorageErrorSnackbar(onlineFile: OnlineFile) {
+    private fun showStorageErrorSnackbar(onlineFile: OnlineAsset) {
         Lg.i("Error: Insufficient storage for ${onlineFile.description}")
         if (onlineFile.isInternalStorage) {
             showSnackbar(R.string.not_enough_internal_storage, R.string.Inspect) {
@@ -158,8 +158,8 @@ class DownloadAssetsFragment : BaseFragment() {
 
     private suspend fun areAssetsDownloaded(): Boolean {
         var areDownloaded = true
-        onlineFileList.forEach {
-            if (!storageHelper.isDecompressed(it))
+        onlineAssetList.forEach {
+            if (!storageHelper.isAssetDecompressed(it))
                 areDownloaded = false
         }
         if (areDownloaded)

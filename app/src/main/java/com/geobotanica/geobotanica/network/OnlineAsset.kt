@@ -2,13 +2,13 @@ package com.geobotanica.geobotanica.network
 
 import kotlin.math.roundToLong
 
-enum class OnlineFileIndex {
+enum class OnlineAssetIndex {
     MAPS_LIST, WORLD_MAP, PLANT_NAMES
 }
 
 // TODO: Get from API
-val onlineFileList = listOf(
-        OnlineFile(
+val onlineAssetList = listOf(
+        OnlineAsset(
                 "Maps list",
                 "http://people.okanagan.bc.ca/ailicic/Maps/maps.json.gz",
                 "maps.json",
@@ -17,7 +17,7 @@ val onlineFileList = listOf(
                 3_359,
                 35_972
         ),
-        OnlineFile(
+        OnlineAsset(
                 "World map",
                 "http://people.okanagan.bc.ca/ailicic/Maps/world.map.gz",
                 "world.map",
@@ -26,8 +26,8 @@ val onlineFileList = listOf(
                 2_715_512,
                 3_276_950
         ),
-        OnlineFile(
-                "Plant name database",
+        OnlineAsset(
+                "Plant filename database",
                 "http://people.okanagan.bc.ca/ailicic/Markers/taxa.db.gz",
                 "taxa.db",
                 "databases",
@@ -37,7 +37,7 @@ val onlineFileList = listOf(
         )
 )
 
-data class OnlineFile(
+data class OnlineAsset(
         val description: String,
         val url: String,
         val fileName: String,
