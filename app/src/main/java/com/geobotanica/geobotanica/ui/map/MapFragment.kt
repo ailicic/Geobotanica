@@ -41,7 +41,7 @@ import java.io.File
 import javax.inject.Inject
 
 // TODO: Fix WarningDialog text wrapping
-// TODO: Consider moving all FileDownloader/Decompression code out of MainActivity. Just keep download ids.
+// TODO: Determine which fragment to load initially instead of forwarding. Maybe use SharedPrefs?
 // TODO: Check behaviour in PlantConfirmFragment if toolbar back is pressed (looks like it ignores back button override)
     // NEED activity.toolbar.setNavigationOnClickListener
 

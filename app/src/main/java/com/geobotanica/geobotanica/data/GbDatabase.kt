@@ -10,6 +10,9 @@ import com.geobotanica.geobotanica.data.entity.*
 
 @Database(
         entities = [
+            OnlineAsset::class,
+            OnlineMap::class,
+            OnlineMapFolder::class,
             User::class,
             Plant::class,
             PlantLocation::class,
@@ -25,6 +28,9 @@ import com.geobotanica.geobotanica.data.entity.*
         MeasurementTypeConverter::class,
         OffsetDateTimeConverter::class )
 abstract class GbDatabase : RoomDatabase() {
+    abstract fun assetDao(): OnlineAssetDao
+    abstract fun mapDao(): OnlineMapDao
+    abstract fun mapFolderDao(): OnlineMapFolderDao
     abstract fun userDao(): UserDao
     abstract fun plantDao(): PlantDao
     abstract fun plantCompositeDao(): PlantCompositeDao

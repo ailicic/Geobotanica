@@ -4,51 +4,56 @@ import android.content.Context
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.geobotanica.geobotanica.android.file.StorageHelper
-import com.geobotanica.geobotanica.network.onlineAssetList
 import com.geobotanica.geobotanica.util.Lg
 import okio.buffer
 import okio.gzip
 import okio.sink
 import okio.source
 import java.io.File
+import kotlin.system.measureTimeMillis
 
-const val ONLINE_ASSET_INDEX_KEY = "RemoteFileKey"
 
-class DecompressionWorker(appContext: Context, workerParams: WorkerParameters)
+class DecompressionWorker(val appContext: Context, workerParams: WorkerParameters)
     : Worker(appContext, workerParams) {
 
     override fun doWork(): Result {
-        val remoteFileIndex = inputData.getInt(ONLINE_ASSET_INDEX_KEY, -1)
-        return unzipDownloadedFile(remoteFileIndex)
-    }
+        val assetId = inputData.getLong(ASSET_ID, -1)
+        val assetLocalPath = inputData.getString(ASSET_LOCAL_PATH)
+        val assetFilename = inputData.getString(ASSET_FILENAME)
+        val assetFilenameGzip = "$assetFilename.gz"
+        val assetDownloadPath = appContext.getExternalFilesDir(null)?.absolutePath
 
-    private fun unzipDownloadedFile(remoteFileIndex: Int): Result {
         try {
-            val remoteFile = onlineAssetList[remoteFileIndex]
-            Lg.d("Decompressing ${remoteFile.fileNameGzip}")
-            val storageHelper = StorageHelper(applicationContext)
+//            Lg.d("Decompressing $assetFilenameGzip (assetId = $assetId, assetFilenameGzip = $assetFilenameGzip, assetLocalPath = $assetLocalPath)")
+            Lg.d("Decompressing asset: $assetFilenameGzip")
 
-            val gzipSourceFile = File(storageHelper.getDownloadPath(), remoteFile.fileNameGzip)
-            val gzipSource = gzipSourceFile.source().gzip().buffer()
+            val time = measureTimeMillis {
+                val gzipSourceFile = File(assetDownloadPath, assetFilenameGzip)
+                val gzipSource = gzipSourceFile.source().gzip().buffer()
 
-            storageHelper.mkdirs(remoteFile)
-            val unGzipSink = File(storageHelper.getLocalPath(remoteFile), remoteFile.fileName).sink().buffer()
+                val unGzipSink = File(assetLocalPath, assetFilename).sink().buffer()
 
-            while (!gzipSource.exhausted()) {
-                gzipSource.read(unGzipSink.buffer, 32768)
-                unGzipSink.flush()
+                while (!gzipSource.exhausted()) {
+                    gzipSource.read(unGzipSink.buffer, 32768)
+                    unGzipSink.flush()
+                }
+                gzipSource.close()
+                unGzipSink.close()
+                gzipSourceFile.delete()
             }
-            gzipSource.close()
-            unGzipSink.close()
-            gzipSourceFile.delete()
-
-            val output = workDataOf(ONLINE_ASSET_INDEX_KEY to remoteFileIndex)
+            Lg.d("Decompressed asset: $assetFilenameGzip ($time ms)")
+            val output = workDataOf(ASSET_ID to assetId)
             return Result.success(output)
         } catch (e: Exception) {
             e.printStackTrace()
-            Lg.e("unzipDownloadedFile(): ERROR - $e")
+            Lg.e("DecompressionWorker: $e")
             return Result.failure()
         }
+    }
+
+    companion object {
+        val ASSET_ID = "AssetIdKey"
+        val ASSET_FILENAME = "AssetFilenameKey"
+        val ASSET_LOCAL_PATH = "AssetLocalPathKey"
     }
 }

@@ -1,8 +1,6 @@
 package com.geobotanica.geobotanica.ui.downloadassets
 
 import android.annotation.SuppressLint
-import android.app.DownloadManager
-import android.app.DownloadManager.*
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -10,19 +8,22 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.file.StorageHelper
-import com.geobotanica.geobotanica.data_taxa.TaxaDatabaseValidator
+import com.geobotanica.geobotanica.data.entity.OnlineAsset
+import com.geobotanica.geobotanica.data.entity.OnlineAssetId
+import com.geobotanica.geobotanica.data.repo.AssetRepo
+import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.network.FileDownloader
+import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.DECOMPRESSING
+import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.DOWNLOADED
+import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOWNLOADED
 import com.geobotanica.geobotanica.network.NetworkValidator
-import com.geobotanica.geobotanica.network.OnlineAsset
-import com.geobotanica.geobotanica.network.OnlineAssetIndex.*
-import com.geobotanica.geobotanica.network.onlineAssetList
+import com.geobotanica.geobotanica.network.online_map.OnlineMapScraper
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -33,6 +34,7 @@ import kotlinx.coroutines.*
 import java.io.File
 import javax.inject.Inject
 
+// TODO: Move stuff to VM. Clean up.
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
@@ -43,7 +45,9 @@ class DownloadAssetsFragment : BaseFragment() {
     @Inject lateinit var storageHelper: StorageHelper
     @Inject lateinit var networkValidator: NetworkValidator
     @Inject lateinit var fileDownloader: FileDownloader
-    @Inject lateinit var taxaDatabaseValidator: TaxaDatabaseValidator
+    @Inject lateinit var assetRepo: AssetRepo
+    @Inject lateinit var mapRepo: MapRepo
+    @Inject lateinit var mapScraper: OnlineMapScraper
 
     private var job = Job()
     private val mainScope = CoroutineScope(Dispatchers.Main) + job
@@ -56,14 +60,6 @@ class DownloadAssetsFragment : BaseFragment() {
             userId = getFromBundle(userIdKey)
             Lg.d("Fragment args: userId=$userId")
         }
-
-        // TODO: Remove this after login screen is implemented (conditional navigation should start there)
-        mainScope.launch {
-            if (areAssetsDownloaded()) {
-                Lg.d("DownloadAssetsFragment: Assets already downloaded. Navigating to next...")
-                navigateToNext()
-            }
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -72,8 +68,18 @@ class DownloadAssetsFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initUi()
-        bindClickListeners()
+        mainScope.launch {
+//            mapScraper.scrape(); return@launch
+            bindClickListeners()
+            importOnlineAssetInfo()
+            monitorAssetDownloads()
+            initUi()
+        }
+    }
+
+    private suspend fun importOnlineAssetInfo() = withContext(Dispatchers.IO) {
+        if (assetRepo.isEmpty())
+            assetRepo.insert(onlineAssetList)
     }
 
     override fun onDestroy() {
@@ -82,9 +88,13 @@ class DownloadAssetsFragment : BaseFragment() {
     }
 
     @SuppressLint("UsableSpace")
-    private fun initUi() {
-        worldMapText.text = onlineAssetList[WORLD_MAP.ordinal].descriptionWithSize
-        plantNameDbText.text = onlineAssetList[PLANT_NAMES.ordinal].descriptionWithSize
+    private suspend fun initUi() {
+        worldMapText.text = withContext(Dispatchers.IO) {
+            assetRepo.get(OnlineAssetId.WORLD_MAP.id).printName
+        }
+        plantNameDbText.text = withContext(Dispatchers.IO) {
+            assetRepo.get(OnlineAssetId.PLANT_NAMES.id).printName
+        }
         internalStorageText.text = getString(R.string.internal_storage,
                 File(context?.filesDir?.absolutePath).usableSpace / 1024 / 1024)
     }
@@ -104,48 +114,46 @@ class DownloadAssetsFragment : BaseFragment() {
         }
     }
 
-    private fun downloadAssets() {
-        registerMapsListDownloadedObserver()
-        onlineAssetList.forEach { onlineAsset ->
-            if (isDownloadActive(onlineAsset)) {
-                Lg.d("Download already active: ${onlineAsset.description}")
+    private suspend fun downloadAssets() = withContext(Dispatchers.IO) {
+        assetRepo.getAll().forEach { asset ->
+            if (asset.isDownloading) {
+                Lg.d("Asset already downloading: ${asset.filenameGzip}")
                 return@forEach
-            }
-            if (storageHelper.isAssetDecompressed(onlineAsset)) { // True if already downloaded and decompressed
-                Lg.d("Asset already available: ${onlineAsset.description}")
-                if (onlineAsset.fileName == onlineAssetList[MAPS_LIST.ordinal].fileName)
+            } else if (asset.status == DECOMPRESSING) {
+                Lg.d("Asset already decompressing: ${asset.filenameGzip}")
+                return@forEach
+            } else if (asset.status == DOWNLOADED) {
+                Lg.d("Asset already available: ${asset.filename}")
+                return@forEach
+            } else if (!storageHelper.isStorageAvailable(asset)) {
+                showStorageErrorSnackbar(asset)
+                return@forEach
+            } else
+                fileDownloader.downloadAsset(asset)
+        }
+    }
+
+    private suspend fun monitorAssetDownloads() {
+        val onlineAssets = withContext(Dispatchers.IO) { assetRepo.getAllLiveData() }
+        onlineAssets.observe(this@DownloadAssetsFragment, Observer { assets ->
+            mainScope.launch() {
+                val mapFoldersAsset = assets.find { it.id == OnlineAssetId.MAP_FOLDER_LIST.id }!!
+                val mapListAsset = assets.find { it.id == OnlineAssetId.MAP_LIST.id }!!
+                val worldMapAsset = assets.find { it.id == OnlineAssetId.WORLD_MAP.id }!!
+                val plantNamesAsset = assets.find { it.id == OnlineAssetId.PLANT_NAMES.id }!!
+                if (mapFoldersAsset.status == DOWNLOADED && mapListAsset.status == DOWNLOADED &&
+                        worldMapAsset.status != NOT_DOWNLOADED && plantNamesAsset.status != NOT_DOWNLOADED)
+                {
+                    Lg.d("DownloadAssetsFragment: Map data imported and asset downloads initialized -> navigateToNext()")
                     navigateToNext()
-                return@forEach
+                }
             }
-            if (!storageHelper.isStorageAvailable(onlineAsset)) {
-                showStorageErrorSnackbar(onlineAsset)
-                return@forEach
-            }
-            fileDownloader.downloadAsset(onlineAsset)
-        }
-    }
-
-    private fun isDownloadActive(onlineFile: OnlineAsset): Boolean {
-        val query = Query().setFilterByStatus(
-                STATUS_PENDING or STATUS_RUNNING or STATUS_PAUSED)
-        val cursor = appContext.getSystemService<DownloadManager>()!!.query(query)
-        while (cursor.moveToNext()) {
-            if (cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)) == onlineFile.descriptionWithSize)
-                return true
-        }
-        return false
-    }
-
-    private fun registerMapsListDownloadedObserver() {
-        fileDownloader.assetDownloadComplete.observe(this, Observer { onlineAsset ->
-            if (onlineAsset == onlineAssetList[MAPS_LIST.ordinal])
-                navigateToNext()
         })
     }
 
-    private fun showStorageErrorSnackbar(onlineFile: OnlineAsset) {
-        Lg.i("Error: Insufficient storage for ${onlineFile.description}")
-        if (onlineFile.isInternalStorage) {
+    private fun showStorageErrorSnackbar(asset: OnlineAsset) {
+        Lg.i("Error: Insufficient storage for ${asset.description}")
+        if (asset.isInternalStorage) {
             showSnackbar(R.string.not_enough_internal_storage, R.string.Inspect) {
                 startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
             }
@@ -156,18 +164,8 @@ class DownloadAssetsFragment : BaseFragment() {
         }
     }
 
-    private suspend fun areAssetsDownloaded(): Boolean {
-        var areDownloaded = true
-        onlineAssetList.forEach {
-            if (!storageHelper.isAssetDecompressed(it))
-                areDownloaded = false
-        }
-        if (areDownloaded)
-            areDownloaded = taxaDatabaseValidator.isPopulated()
-        return areDownloaded
-    }
 
-    private fun navigateToNext() {
+    private suspend fun navigateToNext() = withContext(Dispatchers.Main) {
         val navController = activity.findNavController(R.id.fragment)
         navController.popBackStack()
         navController.navigate(R.id.downloadMapsFragment, createBundle())
@@ -175,4 +173,41 @@ class DownloadAssetsFragment : BaseFragment() {
 
     private fun createBundle(): Bundle =
         bundleOf(userIdKey to viewModel.userId)
+
+
+    // TODO: Get from API
+    private val onlineAssetList = listOf(
+        OnlineAsset(
+            "Map metadata",
+            "http://people.okanagan.bc.ca/ailicic/Maps/map_folders.json.gz",
+            "",
+            false,
+            353,
+            1_407
+        ),
+        OnlineAsset(
+            "Map list",
+            "http://people.okanagan.bc.ca/ailicic/Maps/maps.json.gz",
+            "",
+            false,
+            5_792,
+            42_619
+        ),
+        OnlineAsset(
+            "World map",
+            "http://people.okanagan.bc.ca/ailicic/Maps/world.map.gz",
+            "maps",
+            false,
+            2_715_512,
+            3_276_950
+        ),
+        OnlineAsset(
+            "Plant name database",
+            "http://people.okanagan.bc.ca/ailicic/Markers/taxa.db.gz",
+            "databases",
+            true,
+            29_038_255,
+            129_412_096
+        )
+    )
 }

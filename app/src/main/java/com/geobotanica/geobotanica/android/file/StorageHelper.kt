@@ -2,32 +2,13 @@ package com.geobotanica.geobotanica.android.file
 
 import android.annotation.SuppressLint
 import android.content.Context
-import com.geobotanica.geobotanica.network.OnlineAsset
-import com.geobotanica.geobotanica.network.OnlineAssetIndex
-import com.geobotanica.geobotanica.network.OnlineAssetIndex.*
-import com.geobotanica.geobotanica.network.onlineAssetList
-import com.geobotanica.geobotanica.network.online_map.OnlineMapEntry
+import com.geobotanica.geobotanica.data.entity.OnlineAsset
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class StorageHelper @Inject constructor(val appContext: Context) {
-
-    fun isAssetDownloaded(onlineAsset: OnlineAsset): Boolean {
-        val file = File(getDownloadPath(), onlineAsset.fileNameGzip)
-        return file.exists() && file.isFile && file.length() == onlineAsset.compressedSize
-    }
-
-    fun isAssetDecompressed(onlineAsset: OnlineAsset): Boolean {
-        val file = File(getLocalPath(onlineAsset), onlineAsset.fileName)
-        return file.exists() && file.isFile && file.length() == onlineAsset.decompressedSize
-    }
-
-    fun isMapDownloaded(onlineMapEntry: OnlineMapEntry): Boolean {
-        val file = File(getLocalPath(onlineAssetList[WORLD_MAP.ordinal]), onlineMapEntry.filename)
-        return file.exists() && file.isFile
-    }
 
     @SuppressLint("UsableSpace")
     fun isStorageAvailable(onlineAsset: OnlineAsset): Boolean {
@@ -49,5 +30,10 @@ class StorageHelper @Inject constructor(val appContext: Context) {
             appContext.filesDir.absolutePath.removeSuffix("/files")
         else
             appContext.getExternalFilesDir(null)!!.absolutePath
+    }
+
+    fun isAssetAvailable(asset: OnlineAsset): Boolean {
+        val file = File(getLocalPath(asset), asset.filename)
+        return file.exists() && file.length() == asset.decompressedSize
     }
 }
