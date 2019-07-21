@@ -47,7 +47,7 @@ class DownloadAssetsFragment : BaseFragment() {
     @Inject lateinit var fileDownloader: FileDownloader
     @Inject lateinit var assetRepo: AssetRepo
     @Inject lateinit var mapRepo: MapRepo
-    @Inject lateinit var mapScraper: OnlineMapScraper
+//    @Inject lateinit var mapScraper: OnlineMapScraper
 
     private var job = Job()
     private val mainScope = CoroutineScope(Dispatchers.Main) + job
@@ -68,18 +68,9 @@ class DownloadAssetsFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mainScope.launch {
-//            mapScraper.scrape(); return@launch
-            bindClickListeners()
-            importOnlineAssetInfo()
-            monitorAssetDownloads()
-            initUi()
-        }
-    }
-
-    private suspend fun importOnlineAssetInfo() = withContext(Dispatchers.IO) {
-        if (assetRepo.isEmpty())
-            assetRepo.insert(onlineAssetList)
+        downloadButton.setOnClickListener(::onClickDownload)
+        bindViewModel()
+        initUi()
     }
 
     override fun onDestroy() {
@@ -87,8 +78,33 @@ class DownloadAssetsFragment : BaseFragment() {
         job.cancel()
     }
 
+    private fun bindViewModel() {
+        with(viewModel) {
+
+            navigateToNext.observe(this@DownloadAssetsFragment, Observer {
+                if (it) {
+                    Lg.d("DownloadAssetsFragment: Map data imported and asset downloads initialized -> navigateToNext()")
+                    navigateToNext()
+                }
+            })
+
+            showStorageSnackbar.observe(this@DownloadAssetsFragment, Observer { asset ->
+                Lg.i("Error: Insufficient storage for ${asset.description}")
+                if (asset.isInternalStorage) {
+                    showSnackbar(R.string.not_enough_internal_storage, R.string.Inspect) {
+                        startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
+                    }
+                } else {
+                    showSnackbar(R.string.not_enough_external_storage, R.string.Inspect) {
+                        startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
+                    }
+                }
+            })
+        }
+    }
+
     @SuppressLint("UsableSpace")
-    private suspend fun initUi() {
+    private fun initUi() = mainScope.launch {
         worldMapText.text = withContext(Dispatchers.IO) {
             assetRepo.get(OnlineAssetId.WORLD_MAP.id).printName
         }
@@ -99,73 +115,18 @@ class DownloadAssetsFragment : BaseFragment() {
                 File(context?.filesDir?.absolutePath).usableSpace / 1024 / 1024)
     }
 
-    private fun bindClickListeners() {
-        downloadButton.setOnClickListener(::onClickDownload)
-    }
-
     @Suppress("UNUSED_PARAMETER")
     private fun onClickDownload(view: View?) {
         mainScope.launch {
             if (networkValidator.isValid()) {
                 downloadButton.isVisible = false
                 progressBar.isVisible = true
-                downloadAssets()
+                viewModel.downloadAssets()
             }
         }
     }
 
-    private suspend fun downloadAssets() = withContext(Dispatchers.IO) {
-        assetRepo.getAll().forEach { asset ->
-            if (asset.isDownloading) {
-                Lg.d("Asset already downloading: ${asset.filenameGzip}")
-                return@forEach
-            } else if (asset.status == DECOMPRESSING) {
-                Lg.d("Asset already decompressing: ${asset.filenameGzip}")
-                return@forEach
-            } else if (asset.status == DOWNLOADED) {
-                Lg.d("Asset already available: ${asset.filename}")
-                return@forEach
-            } else if (!storageHelper.isStorageAvailable(asset)) {
-                showStorageErrorSnackbar(asset)
-                return@forEach
-            } else
-                fileDownloader.downloadAsset(asset)
-        }
-    }
-
-    private suspend fun monitorAssetDownloads() {
-        val onlineAssets = withContext(Dispatchers.IO) { assetRepo.getAllLiveData() }
-        onlineAssets.observe(this@DownloadAssetsFragment, Observer { assets ->
-            mainScope.launch() {
-                val mapFoldersAsset = assets.find { it.id == OnlineAssetId.MAP_FOLDER_LIST.id }!!
-                val mapListAsset = assets.find { it.id == OnlineAssetId.MAP_LIST.id }!!
-                val worldMapAsset = assets.find { it.id == OnlineAssetId.WORLD_MAP.id }!!
-                val plantNamesAsset = assets.find { it.id == OnlineAssetId.PLANT_NAMES.id }!!
-                if (mapFoldersAsset.status == DOWNLOADED && mapListAsset.status == DOWNLOADED &&
-                        worldMapAsset.status != NOT_DOWNLOADED && plantNamesAsset.status != NOT_DOWNLOADED)
-                {
-                    Lg.d("DownloadAssetsFragment: Map data imported and asset downloads initialized -> navigateToNext()")
-                    navigateToNext()
-                }
-            }
-        })
-    }
-
-    private fun showStorageErrorSnackbar(asset: OnlineAsset) {
-        Lg.i("Error: Insufficient storage for ${asset.description}")
-        if (asset.isInternalStorage) {
-            showSnackbar(R.string.not_enough_internal_storage, R.string.Inspect) {
-                startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
-            }
-        } else {
-            showSnackbar(R.string.not_enough_external_storage, R.string.Inspect) {
-                startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
-            }
-        }
-    }
-
-
-    private suspend fun navigateToNext() = withContext(Dispatchers.Main) {
+    private fun navigateToNext() {
         val navController = activity.findNavController(R.id.fragment)
         navController.popBackStack()
         navController.navigate(R.id.downloadMapsFragment, createBundle())
@@ -173,41 +134,4 @@ class DownloadAssetsFragment : BaseFragment() {
 
     private fun createBundle(): Bundle =
         bundleOf(userIdKey to viewModel.userId)
-
-
-    // TODO: Get from API
-    private val onlineAssetList = listOf(
-        OnlineAsset(
-            "Map metadata",
-            "http://people.okanagan.bc.ca/ailicic/Maps/map_folders.json.gz",
-            "",
-            false,
-            353,
-            1_407
-        ),
-        OnlineAsset(
-            "Map list",
-            "http://people.okanagan.bc.ca/ailicic/Maps/maps.json.gz",
-            "",
-            false,
-            5_792,
-            42_619
-        ),
-        OnlineAsset(
-            "World map",
-            "http://people.okanagan.bc.ca/ailicic/Maps/world.map.gz",
-            "maps",
-            false,
-            2_715_512,
-            3_276_950
-        ),
-        OnlineAsset(
-            "Plant name database",
-            "http://people.okanagan.bc.ca/ailicic/Markers/taxa.db.gz",
-            "databases",
-            true,
-            29_038_255,
-            129_412_096
-        )
-    )
 }

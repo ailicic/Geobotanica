@@ -8,7 +8,8 @@ import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.adapter
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import okio.buffer
 import okio.sink
 import org.jsoup.Jsoup
@@ -35,11 +36,11 @@ class OnlineMapScraper @Inject constructor (
 ) {
     private val mapsBaseUrl = "http://download.mapsforge.org/maps/v5/"
 
-    suspend fun scrape() {
-        withContext(Dispatchers.IO) {
-            fetchMaps(mapsBaseUrl)
-            exportMapsToJsonFiles()
-        }
+    init { scrape() }
+
+    fun scrape() = GlobalScope.launch(Dispatchers.IO) {
+        fetchMaps(mapsBaseUrl)
+        exportMapsToJsonFiles()
     }
 
     private fun fetchMaps(baseUrl: String, parentFolderId: Long? = null) {
