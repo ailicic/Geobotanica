@@ -19,7 +19,7 @@ class MapListAdapter(
         private val onClickDownload: (OnlineMapListItem) -> Unit,
         private val onClickCancel: (OnlineMapListItem) -> Unit,
         private val onClickDelete: (OnlineMapListItem) -> Unit
-) : ListAdapter<OnlineMapListItem, MapViewHolder>(MapDiffCallback()) {
+    ) : ListAdapter<OnlineMapListItem, MapViewHolder>(MapDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MapViewHolder {
         val inflater = LayoutInflater.from(parent.context)

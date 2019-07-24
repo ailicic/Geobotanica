@@ -85,7 +85,6 @@ class FileDownloader @Inject constructor (
 
         Lg.i("Downloading map: ${onlineMap.filename}")
         val downloadId = downloadManager.enqueue(request)
-        val onlineMap = mapRepo.get(onlineMap.id)
         onlineMap.status = downloadId
         mapRepo.update(onlineMap)
     }

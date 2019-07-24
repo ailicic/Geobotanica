@@ -100,10 +100,12 @@ class DownloadAssetsFragment : BaseFragment() {
             VALID -> downloadAssets()
             VALID_IF_METERED_PERMITTED -> {
                 WarningDialog(
-                        R.string.metered_network,
-                        R.string.metered_network_confirm,
-                        { networkValidator.allowMeteredNetwork(); downloadAssets() }
-                ).show(requireFragmentManager(), "tag")
+                        getString(R.string.metered_network),
+                        getString(R.string.metered_network_confirm))
+                {
+                    networkValidator.allowMeteredNetwork(); downloadAssets()
+                }
+                .show(requireFragmentManager(), "tag")
             }
         }
     }

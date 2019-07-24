@@ -76,11 +76,9 @@ class DownloadMapViewModel @Inject constructor(
         val result = MediatorLiveData<List<OnlineMapListItem>>()
 
         result.addSource(maps) {
-//            Lg.d("OnlineMaps updated")
             result.value = combineMapListItems(folders.value, maps.value)
         }
         result.addSource(folders) {
-//            Lg.d("OnlineMapFolders updated")
             result.value = combineMapListItems(folders.value, maps.value)
         }
         return result

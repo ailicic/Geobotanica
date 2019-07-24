@@ -109,4 +109,6 @@
     <string name="show_suggested">Show suggested</string>
     <string name="exit_app">Exit App?</string>
     <string name="exit_app_confirm">Are you sure you want to exit?</string>
+    <string name="delete_map">Delete Map?</string>
+    <string name="confirm_delete_map">Are you sure you want to delete the %1$s map?</string>
 </resources>

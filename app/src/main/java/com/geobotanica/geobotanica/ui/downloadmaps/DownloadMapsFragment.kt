@@ -30,8 +30,6 @@ import kotlinx.android.synthetic.main.fragment_download_maps.*
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
-// TODO: Show confirmation dialog for map deletion
-// TODO: Improve animations?
 
 class DownloadMapsFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<DownloadMapViewModel>
@@ -101,13 +99,12 @@ class DownloadMapsFragment : BaseFragment() {
             activity.finish()
         else {
             WarningDialog(
-                    R.string.exit_app,
-                    R.string.exit_app_confirm,
-                    {
-                        defaultSharedPrefs.put(sharedPrefsExitOnBackInDownloadMaps to true)
-                        activity.finish()
-                    }
-            ).show((activity as FragmentActivity).supportFragmentManager, "tag")
+                    getString(R.string.exit_app),
+                    getString(R.string.exit_app_confirm)
+            ) {
+                defaultSharedPrefs.put(sharedPrefsExitOnBackInDownloadMaps to true)
+                activity.finish()
+            }.show((activity as FragmentActivity).supportFragmentManager, "tag")
         }
     }
 
@@ -184,10 +181,11 @@ class DownloadMapsFragment : BaseFragment() {
             VALID -> downloadMap(mapListItem)
             VALID_IF_METERED_PERMITTED -> {
                 WarningDialog(
-                        R.string.metered_network,
-                        R.string.metered_network_confirm,
-                        { networkValidator.allowMeteredNetwork(); downloadMap(mapListItem) }
-                ).show(requireFragmentManager(), "tag")
+                        getString(R.string.metered_network),
+                        getString(R.string.metered_network_confirm)
+                ) {
+                    networkValidator.allowMeteredNetwork(); downloadMap(mapListItem)
+                }.show(requireFragmentManager(), "tag")
             }
         }
     }
@@ -205,9 +203,12 @@ class DownloadMapsFragment : BaseFragment() {
     }
 
     private fun onClickDelete(mapListItem: OnlineMapListItem) {
-        mainScope.launch {
-            viewModel.deleteMap(mapListItem.id)
-        }
+        WarningDialog(
+                getString(R.string.delete_map),
+                getString(R.string.confirm_delete_map, mapListItem.printName)
+        ) {
+            mainScope.launch { viewModel.deleteMap(mapListItem.id) }
+        }.show(requireFragmentManager(), null)
     }
 
     private fun navigateToNext() {
