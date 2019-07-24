@@ -14,7 +14,6 @@ import com.geobotanica.geobotanica.data.repo.AssetRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.data_taxa.TaxaDatabaseValidator
 import com.geobotanica.geobotanica.ui.MainActivity
-import com.geobotanica.geobotanica.ui.downloadmaps.OnlineMapListItem
 import com.geobotanica.geobotanica.util.Lg
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -30,12 +29,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.system.measureTimeMillis
 
-// TODO: Seems like FileDownloader has too many responsibilities: decompression, deserialization, download status management
 // TODO: Handle click downloadAsset notification. Maybe use ACTION_VIEW_DOWNLOADS
+// TODO: Seems like FileDownloader has too many responsibilities: decompression, deserialization, download status management
+// -> Number and breadth of dependencies is concerning but encapsulation of implementation details is working well now.
 
 @Singleton
 class FileDownloader @Inject constructor (
-        private val mainActivity: MainActivity,
+        private val mainActivity: MainActivity, // TODO: Uncomfortable with this reference but need downloadComplete notifications
         private val storageHelper: StorageHelper,
         private val networkValidator: NetworkValidator,
         private val downloadManager: DownloadManager,
@@ -47,7 +47,7 @@ class FileDownloader @Inject constructor (
 
     init {
         synchronizeDownloadStatuses()
-        mainActivity.downloadComplete.observeForever { onDownloadComplete(it) }
+        mainActivity.downloadComplete.observe(mainActivity, Observer { onDownloadComplete(it) })
     }
 
     suspend fun downloadAsset(asset: OnlineAsset) = withContext(Dispatchers.IO){
@@ -67,16 +67,15 @@ class FileDownloader @Inject constructor (
         val downloadId = downloadManager.enqueue(request)
         asset.status = downloadId
         assetRepo.update(asset)
-//        Lg.i("Downloading asset: ${asset.description} (assetId = ${asset.id}, downloadId = $downloadId)")
         Lg.i("Downloading asset: ${asset.filenameGzip}")
 
     }
 
-    suspend fun downloadMap(mapListItem: OnlineMapListItem) = withContext(Dispatchers.IO) {
-        val file = File(storageHelper.getMapsPath(), mapListItem.filename)
+    suspend fun downloadMap(onlineMap: OnlineMap) = withContext(Dispatchers.IO) {
+        val file = File(storageHelper.getMapsPath(), onlineMap.filename)
 
-        val request = DownloadManager.Request(Uri.parse(mapListItem.url))
-                .setTitle(mapListItem.printName)
+        val request = DownloadManager.Request(Uri.parse(onlineMap.url))
+                .setTitle(onlineMap.printName)
                 .setDescription("Downloading")
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
                 .setDestinationUri(Uri.fromFile(file))
@@ -84,9 +83,9 @@ class FileDownloader @Inject constructor (
                 .setAllowedOverMetered(networkValidator.isNetworkMetered()) // Warning dialog handles metered network permission.
                 .setAllowedOverRoaming(false) // True by default.
 
-        Lg.i("Downloading map: ${mapListItem.filename}")
+        Lg.i("Downloading map: ${onlineMap.filename}")
         val downloadId = downloadManager.enqueue(request)
-        val onlineMap = mapRepo.get(mapListItem.id)
+        val onlineMap = mapRepo.get(onlineMap.id)
         onlineMap.status = downloadId
         mapRepo.update(onlineMap)
     }
@@ -130,11 +129,9 @@ class FileDownloader @Inject constructor (
         return false
     }
 
-    // TODO: Get rid of Globalscope
     private fun onDownloadComplete(downloadId: Long) {
         GlobalScope.launch(Dispatchers.IO) {
             assetRepo.getByDownloadId(downloadId)?.let { asset ->
-//                Lg.i("Downloaded asset: ${asset.filenameGzip} (assetId = ${asset.id}, downloadId = $downloadId)")
                 Lg.i("Downloaded asset: ${asset.filenameGzip}")
                 val decompressionWorkerRequest = OneTimeWorkRequestBuilder<DecompressionWorker>()
                         .addTag(asset.filenameGzip)
@@ -152,7 +149,6 @@ class FileDownloader @Inject constructor (
                 return@launch
             }
             mapRepo.getByDownloadId(downloadId)?.let { map ->
-//                Lg.i("Downloaded map: ${map.filename} (downloadId = $downloadId)")
                 Lg.i("Downloaded map: ${map.filename}")
                 map.status = DOWNLOADED
                 mapRepo.update(map)
@@ -198,10 +194,7 @@ class FileDownloader @Inject constructor (
 
 
     fun deserializeMapFolderList(mapFoldersAsset: OnlineAsset) {
-//        val mapFolderListInfo = onlineAssetList[OnlineAssetId.MAP_FOLDER_LIST.ordinal]
-//        val mapFoldersAsset = onlineAssetList[OnlineAssetId.MAP_FOLDER_LIST.ordinal]
         val mapFolderListFile = File(storageHelper.getLocalPath(mapFoldersAsset), mapFoldersAsset.filename)
-//        if (storageHelper.isAssetDecompressed(mapFolderListInfo)) {
         try {
             val time = measureTimeMillis {
                 val source = mapFolderListFile.source().buffer()
@@ -218,17 +211,11 @@ class FileDownloader @Inject constructor (
             Lg.e("deserializeMapList(): $e")
             mapFolderListFile.delete()
         }
-//        } else {
-//            Lg.e("deserializeMapList(): Map list file absent or size error.")
-//            mapFolderListFile.delete()
-//        }
     }
 
     fun deserializeMapList(mapListAsset: OnlineAsset) {
-//        val mapListAsset = onlineAssetList[OnlineAssetId.MAP_LIST.ordinal]
         Lg.d("Deserializing asset: ${mapListAsset.filename}")
         val mapListFile = File(storageHelper.getLocalPath(mapListAsset), mapListAsset.filename)
-//        if (storageHelper.isAssetDecompressed(mapListInfo)) {
         try {
             val time = measureTimeMillis {
                 val source = mapListFile.source().buffer()
@@ -245,14 +232,10 @@ class FileDownloader @Inject constructor (
             Lg.e("deserializeMapList(): $e")
             mapListFile.delete()
         }
-//        } else {
-//            Lg.e("deserializeMapList(): Map list file absent or size error.")
-//            mapListFile.delete()
-//        }
     }
 
-    fun cancelDownload(downloadId: Long) {
-        downloadManager.remove(downloadId)
+    fun cancelDownload(downloadId: Long): Int {
+        return downloadManager.remove(downloadId)
     }
 
     companion object DownloadStatus {

@@ -40,7 +40,9 @@ import org.mapsforge.map.scalebar.MapScaleBar
 import java.io.File
 import javax.inject.Inject
 
+// TODO: Should use in every databinding fragment? binding.lifecycleOwner = viewLifecycleOwner
 // TODO: Fix WarningDialog text wrapping
+// TODO: Let Room do the withContext(Dispatchers.IO)...
 // TODO: Determine which fragment to load initially instead of forwarding. Maybe use SharedPrefs?
 // TODO: Check behaviour in PlantConfirmFragment if toolbar back is pressed (looks like it ignores back button override)
     // NEED activity.toolbar.setNavigationOnClickListener
@@ -48,7 +50,7 @@ import javax.inject.Inject
 // LONG TERM
 // TODO: Create download map activity and utilize offline map tiles
 // TODO: Use Okio everywhere
-// TODO: Check that coroutine result is handled properly in dialog where user taps outside to close (no result given to isValid)
+// TODO: Check that coroutine result is handled properly in dialog where user taps outside to close (no result given to getStatus)
 // TODO: Check for memory leaks. Is coroutine holding on to Warning Dialog?
 // TODO: Login screen
 // TODO: Try to replace more callbacks with coroutines where sensible
@@ -208,10 +210,6 @@ class MapFragment : BaseFragment() {
     }
 
     private fun init() {
-
-        // TODO: Remove (USED TO INIT taxa.db)
-//        TaxaDatabase.getInstance(appContext).close()
-
 //        // TODO: REMOVE
 //        NavHostFragment.findNavController(this).navigate(
 //                R.id.downloadTaxaFragment, createBundle() )

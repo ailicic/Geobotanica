@@ -6,45 +6,33 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations.map
 import androidx.lifecycle.Transformations.switchMap
 import androidx.lifecycle.ViewModel
+import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data.entity.OnlineMap
 import com.geobotanica.geobotanica.data.entity.OnlineMapFolder
 import com.geobotanica.geobotanica.data.repo.MapRepo
+import com.geobotanica.geobotanica.network.FileDownloader
+import com.geobotanica.geobotanica.util.Lg
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
-//const val VERNACULAR_COUNT = 25021 // TODO: Get from API
-//const val TAXA_COUNT = 1103116 // TODO: Get from API
-//const val VERNACULAR_TYPE_COUNT = 32201 // TODO: Get from API
-//const val TAXA_TYPE_COUNT = 10340 // TODO: Get from API
-
 @Singleton
 class DownloadMapViewModel @Inject constructor(
+        private val storageHelper: StorageHelper,
+        private val fileDownloader: FileDownloader,
         private val mapRepo: MapRepo
+//        private val geolocator: Geolocator
 ): ViewModel() {
     var userId = 0L
-
-//    var mapListMode = MutableLiveData<MapListMode>().apply { value = SUGGESTED }
-
-//    enum class MapListMode { SUGGESTED, BROWSING }
-
-//    val mapListItems: LiveData<List<OnlineMapListItem>> = switchMap(mapListMode) { mode ->
-//        when (mode) {
-//            SUGGESTED ->{
-//                map(mapRepo.search("British Columbia"
-//
-//                )) { mapList -> mapList.map { it.toListItem() } }
-//            }
-//            BROWSING -> switchMap(mapFolderId) { mapFolderId ->
-//                childMapListItemsOf(mapFolderId)
-//            }
-//        }
-//    }
 
 //    mapRepo.search("British Columbia").observe(this, Observer {
 //        mapListAdapter.submitList(it.map { onlineMap -> onlineMap.toListItem() })
 //    })
+
     val showFab: LiveData<Boolean> = map(mapRepo.getInitiatedDownloads()) { mapList ->
-        mapList.size > 0
+        mapList.isNotEmpty()
     }
 
     private var mapFolderId = MutableLiveData<Long?>().apply { value = null }
@@ -57,6 +45,28 @@ class DownloadMapViewModel @Inject constructor(
         mapFolderId.value = folderId
     }
 
+    suspend fun downloadMap(onlineMapId: Long) = withContext(Dispatchers.IO) {
+        val onlineMap = mapRepo.get(onlineMapId)
+        fileDownloader.downloadMap(onlineMap)
+    }
+
+    suspend fun cancelDownload(downloadId: Long) = withContext(Dispatchers.IO) {
+        val result = fileDownloader.cancelDownload(downloadId)
+        mapRepo.getByDownloadId(downloadId)?.let { onlineMap ->
+            onlineMap.status = FileDownloader.NOT_DOWNLOADED
+            mapRepo.update(onlineMap)
+            Lg.i("Cancelled map download: ${onlineMap.filename} (Result=$result)")
+        }
+    }
+
+    suspend fun deleteMap(onlineMapId: Long) = withContext(Dispatchers.IO) {
+        val onlineMap = mapRepo.get(onlineMapId)
+        val mapFile = File(storageHelper.getMapsPath(), onlineMap.filename)
+        val result = mapFile.delete()
+        onlineMap.status = FileDownloader.NOT_DOWNLOADED
+        mapRepo.update(onlineMap)
+        Lg.i("Deleted map: ${onlineMap.filename} (Result=$result)")
+    }
 
     private fun childMapListItemsOf(mapFolderId: Long?): LiveData<List<OnlineMapListItem>> {
 

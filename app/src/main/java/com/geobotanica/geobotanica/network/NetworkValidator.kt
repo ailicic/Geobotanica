@@ -1,55 +1,42 @@
 package com.geobotanica.geobotanica.network
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.net.ConnectivityManager
-import android.view.View
-import androidx.fragment.app.FragmentActivity
-import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.ui.MainActivity
-import com.geobotanica.geobotanica.ui.dialog.WarningDialog
+import android.preference.PreferenceManager
+import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
 import com.geobotanica.geobotanica.util.get
-import com.google.android.material.snackbar.Snackbar
+import com.geobotanica.geobotanica.util.put
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.suspendCoroutine
 
 
 @Singleton
-class NetworkValidator @Inject constructor(
-        private val activity: MainActivity,
-        private val defaultSharedPrefs: SharedPreferences
-) {
-    private val resources = activity.resources
-    private val rootView: View = activity.window.decorView.findViewById(android.R.id.content)
-    private val connectivityManager = activity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+class NetworkValidator @Inject constructor(appContext: Context) {
+
+    private val connectivityManager = appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    private val defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(appContext)
 
     private val sharedPrefsAllowMeteredNetwork = "allowMeteredNetwork"
 
-    suspend fun isValid(): Boolean {
-        if (! isNetworkConnected()) {
-            Snackbar.make(
-                    rootView,
-                    resources.getString(R.string.internet_unavailable),
-                    Snackbar.LENGTH_SHORT).show()
-            return false
-        } else if (isNetworkMetered() && ! isMeteredNetworkAllowed()) {
-            return suspendCoroutine { continuation ->
-                WarningDialog(
-                        R.string.metered_network,
-                        R.string.metered_network_confirm,
-                        sharedPrefsAllowMeteredNetwork,
-                        continuation
-                ).show((activity as FragmentActivity).supportFragmentManager, "tag")
-            }
-        } else
-            return true
+    fun getStatus(): NetworkState {
+        return if (! isNetworkConnected())
+            INVALID
+        else if (isNetworkMetered() && ! isMeteredNetworkAllowed())
+            VALID_IF_METERED_PERMITTED
+        else
+            VALID
     }
 
     fun isNetworkMetered(): Boolean = connectivityManager.isActiveNetworkMetered
+
+    fun allowMeteredNetwork() = defaultSharedPrefs.put(sharedPrefsAllowMeteredNetwork to true)
 
     private fun isNetworkConnected(): Boolean = connectivityManager.activeNetworkInfo?.isConnected ?: false
 
     private fun isMeteredNetworkAllowed(): Boolean =
         defaultSharedPrefs.get(sharedPrefsAllowMeteredNetwork, false)
+
+    enum class NetworkState {
+        INVALID, VALID, VALID_IF_METERED_PERMITTED
+    }
 }

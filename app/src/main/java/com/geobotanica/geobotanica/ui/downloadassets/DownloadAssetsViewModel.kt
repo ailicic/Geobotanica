@@ -8,14 +8,12 @@ import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data.entity.OnlineAsset
 import com.geobotanica.geobotanica.data.entity.OnlineAssetId
 import com.geobotanica.geobotanica.data.repo.AssetRepo
-import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.network.FileDownloader
 import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.DECOMPRESSING
 import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.DOWNLOADED
 import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOWNLOADED
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
-import com.squareup.moshi.Moshi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,10 +23,8 @@ import javax.inject.Singleton
 @Singleton
 class DownloadAssetsViewModel @Inject constructor(
         private val storageHelper: StorageHelper,
-        private val moshi: Moshi,
         private val fileDownloader: FileDownloader,
-        private val assetRepo: AssetRepo,
-        private val mapRepo: MapRepo
+        private val assetRepo: AssetRepo
 ): ViewModel() {
     var userId = 0L
 
@@ -70,6 +66,14 @@ class DownloadAssetsViewModel @Inject constructor(
     private fun importOnlineAssetInfo() = viewModelScope.launch (Dispatchers.IO) {
         if (assetRepo.isEmpty())
             assetRepo.insert(onlineAssetList)
+    }
+
+    suspend fun getWorldMapText(): String = withContext(Dispatchers.IO) {
+        assetRepo.get(OnlineAssetId.WORLD_MAP.id).printName
+    }
+
+    suspend fun getPlantNameDbText(): String = withContext(Dispatchers.IO) {
+        assetRepo.get(OnlineAssetId.PLANT_NAMES.id).printName
     }
 
     // TODO: Get from API

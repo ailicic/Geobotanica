@@ -2,23 +2,14 @@ package com.geobotanica.geobotanica.network
 
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.util.Lg
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.ResponseBody
-import okio.BufferedSink
-import okio.buffer
-import okio.gzip
-import okio.sink
-import java.io.File
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.coroutineContext
-import kotlin.system.measureTimeMillis
 
 
 @Singleton
@@ -48,7 +39,7 @@ class OkHttpFileDownloader@Inject constructor(
 //            send(DownloadStatus(error = NO_STORAGE))
 //            return@produce
 //        }
-//        if (networkValidator.isValid())
+//        if (networkValidator.getStatus())
 //            download(onlineFile, channel)
 //    }
 //

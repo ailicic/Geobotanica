@@ -17,8 +17,7 @@ import kotlin.coroutines.resume
 class WarningDialog(
         private val titleResId: Int,
         private val messageResId: Int,
-        private val sharedPrefsAllowForeverKey: String,
-        private val continuation: Continuation<Boolean>
+        private val onClickYes: () -> Unit
 ) : DialogFragment() {
 
     private lateinit var dialog: AlertDialog
@@ -30,12 +29,8 @@ class WarningDialog(
         dialog = with(AlertDialog.Builder(requireContext())) {
             setTitle(getString(titleResId))
             setView(customView)
-            setNegativeButton(getString(R.string.no)) { _, _ -> continuation.resume(false) }
-            setPositiveButton(getString(R.string.yes)) { _, _ ->
-                PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
-                        .put(sharedPrefsAllowForeverKey to true)
-                continuation.resume(true)
-            }
+            setNegativeButton(getString(R.string.no)) { _, _ -> }
+            setPositiveButton(getString(R.string.yes)) { _, _ -> onClickYes() }
             create()
         }
         return dialog

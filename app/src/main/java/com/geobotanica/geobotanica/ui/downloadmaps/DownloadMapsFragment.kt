@@ -14,13 +14,9 @@ import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.android.file.StorageHelper
-import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.databinding.FragmentDownloadMapsBinding
-import com.geobotanica.geobotanica.network.FileDownloader
-import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOWNLOADED
-import com.geobotanica.geobotanica.network.Geolocator
 import com.geobotanica.geobotanica.network.NetworkValidator
+import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -28,36 +24,24 @@ import com.geobotanica.geobotanica.ui.dialog.WarningDialog
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.get
 import com.geobotanica.geobotanica.util.getFromBundle
-import com.squareup.moshi.Moshi
+import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_download_maps.*
 import kotlinx.coroutines.*
-import java.io.File
 import javax.inject.Inject
-import kotlin.coroutines.suspendCoroutine
 
 // TODO: Show confirmation dialog for map deletion
 // TODO: Improve animations?
-// TODO: Reduce size of this class?
-// TODO: Use bundle to pass downloaded maps ids
 
-@ExperimentalCoroutinesApi
-@ObsoleteCoroutinesApi
 class DownloadMapsFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<DownloadMapViewModel>
     private lateinit var viewModel: DownloadMapViewModel
 
     @Inject lateinit var networkValidator: NetworkValidator
-    @Inject lateinit var storageHelper: StorageHelper
-    @Inject lateinit var fileDownloader: FileDownloader
-    @Inject lateinit var moshi: Moshi
-    @Inject lateinit var geolocator: Geolocator
-    @Inject lateinit var mapRepo: MapRepo
 
     private val mapListAdapter = MapListAdapter(::onClickFolder, ::onClickDownload, ::onClickCancel, ::onClickDelete)
     private val parentMapFolderIds = mutableListOf<Long>()
 
-    // TODO: Put in viewModel
 //    private lateinit var suggestedMapList: List<OnlineMapListItem>
 //    private lateinit var geolocation: Geolocation
 
@@ -90,11 +74,9 @@ class DownloadMapsFragment : BaseFragment() {
         bindClickListeners()
 //        getSuggestedMaps()
         initRecyclerView()
-        viewModel.showFab.observe(this, Observer {
-            Lg.d("showFab = $it")
-        })
     }
 
+    @ExperimentalCoroutinesApi
     override fun onDestroy() {
         super.onDestroy()
         mainScope.cancel()
@@ -107,30 +89,34 @@ class DownloadMapsFragment : BaseFragment() {
     }
 
     private fun onClickBackButton() = mainScope.launch {
-        if (parentMapFolderIds.isNotEmpty()) {
-            parentMapFolderIds.removeAt(parentMapFolderIds.size - 1)
-            if (parentMapFolderIds.isEmpty())
-//                viewModel.mapFolderId.value = null
-                viewModel.browseMapFolder(null)
-            else
-                viewModel.browseMapFolder(parentMapFolderIds.last())
-        } else if (isExitOnBackPressedOk())
-            activity.finish()
+        if (parentMapFolderIds.isNotEmpty())
+            browseParentFolder()
+        else
+            exitAppWithWarning()
     }
 
-    private suspend fun isExitOnBackPressedOk(): Boolean {
+    private fun exitAppWithWarning() {
         val isPermitted = defaultSharedPrefs.get(sharedPrefsExitOnBackInDownloadMaps, false)
-        return if (! isPermitted) {
-            suspendCoroutine { continuation ->
-                WarningDialog(
-                        R.string.exit_app    ,
-                        R.string.exit_app_confirm,
-                        sharedPrefsExitOnBackInDownloadMaps,
-                        continuation
-                ).show((activity as FragmentActivity).supportFragmentManager, "tag")
-            }
-        } else
-            true
+        if (isPermitted)
+            activity.finish()
+        else {
+            WarningDialog(
+                    R.string.exit_app,
+                    R.string.exit_app_confirm,
+                    {
+                        defaultSharedPrefs.put(sharedPrefsExitOnBackInDownloadMaps to true)
+                        activity.finish()
+                    }
+            ).show((activity as FragmentActivity).supportFragmentManager, "tag")
+        }
+    }
+
+    private fun browseParentFolder() {
+        parentMapFolderIds.removeAt(parentMapFolderIds.size - 1)
+        if (parentMapFolderIds.isEmpty())
+            viewModel.browseMapFolder(null)
+        else
+            viewModel.browseMapFolder(parentMapFolderIds.last())
     }
 
     private fun bindClickListeners() {
@@ -141,9 +127,8 @@ class DownloadMapsFragment : BaseFragment() {
     }
 
 
-//    // TODO: Put in viewModel?
 //    private fun getSuggestedMaps() = mainScope.launch {
-//        if (networkValidator.isValid()) {
+//        if (networkValidator.getStatus()) {
 //            getMapsButton.isVisible = false
 //            searchingOnlineMapsText.isVisible = true
 //            progressBar.isVisible = true
@@ -189,66 +174,41 @@ class DownloadMapsFragment : BaseFragment() {
         Lg.d("onClickFolder(): ${mapFolderItem.printName}")
         parentMapFolderIds.add(mapFolderItem.id)
         viewModel.browseMapFolder(mapFolderItem.id)
-//        viewModel.mapFolderId.value = mapFolderItem.id
     }
 
+
+    @Suppress("UNUSED_PARAMETER")
     private fun onClickDownload(mapListItem: OnlineMapListItem) {
-        Lg.d("onClickDownload(): ${mapListItem.filename}")
-        mainScope.launch {
-            if (networkValidator.isValid()) {
-                fileDownloader.downloadMap(mapListItem)
-                fab.isVisible = true
-                // TODO: show spinner, then change icon after completed
+        when (networkValidator.getStatus()) {
+            INVALID -> showSnackbar(resources.getString(R.string.internet_unavailable))
+            VALID -> downloadMap(mapListItem)
+            VALID_IF_METERED_PERMITTED -> {
+                WarningDialog(
+                        R.string.metered_network,
+                        R.string.metered_network_confirm,
+                        { networkValidator.allowMeteredNetwork(); downloadMap(mapListItem) }
+                ).show(requireFragmentManager(), "tag")
             }
         }
-//        if (mapListItem.isFolder) {
-//            mutableListOf<OnlineMapListItem>().apply {
-//                add(mapRepo.getChildFoldersOf(mapListItem.id). { it.to})
-//            }
-//            // TODO: Use live data map to supply child entries
-////            parentMapFolders.add(mapListItem)
-////            mapListAdapter.submitList(mapListItem.contents)
-//        } else {
-//            mainScope.launch {
-//                if (networkValidator.isValid()) {
-//                    fileDownloader.downloadMap(mapListItem)
-//                    fab.isVisible = true
-//                    // TODO: show spinner, then change icon after completed
-//                }
-//            }
-//        }
     }
 
+    private fun downloadMap(mapListItem: OnlineMapListItem) {
+        mainScope.launch {
+            viewModel.downloadMap(mapListItem.id)
+        }
+    }
 
     private fun onClickCancel(mapListItem: OnlineMapListItem) {
-        Lg.d("onClickCancel(): ${mapListItem.filename}")
-        mainScope.launch(Dispatchers.IO) {
-            fileDownloader.cancelDownload(downloadId = mapListItem.status)
-            val onlineMap = mapRepo.get(mapListItem.id)
-            onlineMap.status = NOT_DOWNLOADED
-            mapRepo.update(onlineMap)
-            Lg.i("Cancelled map download: ${onlineMap.filename}")
+        mainScope.launch {
+            viewModel.cancelDownload(mapListItem.status)
         }
     }
 
     private fun onClickDelete(mapListItem: OnlineMapListItem) {
-        Lg.d("onClickDelete(): ${mapListItem.filename}")
-        mainScope.launch(Dispatchers.IO) {
-            val onlineMap = mapRepo.get(mapListItem.id)
-            val mapFile = File(storageHelper.getMapsPath(), onlineMap.filename)
-            val result = mapFile.delete()
-            onlineMap.status = NOT_DOWNLOADED
-            mapRepo.update(onlineMap)
-            Lg.i("Deleted map: ${onlineMap.filename} (result=$result)")
+        mainScope.launch {
+            viewModel.deleteMap(mapListItem.id)
         }
     }
-
-//    @ExperimentalCoroutinesApi
-//    private fun cancelDownload() {
-//        Lg.i("DownloadTaxaFragment: Download cancelled.")
-//        mainScope.cancel()
-////        updateUi(CANCEL_DOWNLOAD)
-//    }
 
     private fun navigateToNext() {
         val navController = activity.findNavController(R.id.fragment)

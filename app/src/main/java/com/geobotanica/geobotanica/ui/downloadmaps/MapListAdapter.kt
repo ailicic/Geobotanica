@@ -75,7 +75,7 @@ class MapViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
 class MapDiffCallback : DiffUtil.ItemCallback<OnlineMapListItem>() {
 
     override fun areItemsTheSame(oldItem: OnlineMapListItem, newItem: OnlineMapListItem): Boolean =
-        oldItem.url == newItem.url
+        oldItem.id == newItem.id && oldItem.isFolder == newItem.isFolder
 
     override fun areContentsTheSame(oldItem: OnlineMapListItem, newItem: OnlineMapListItem): Boolean =
         oldItem == newItem
@@ -86,14 +86,10 @@ data class OnlineMapListItem(
         val id: Long,
         val isFolder: Boolean,
         val printName: String,
-        val url: String,
         val status: Long = NOT_DOWNLOADED // Relevant only if isFolder = false
 ) {
-    val filename: String
-        get() = url.substringAfterLast('/')
-
     val isDownloading = status > 0L
 }
 
-fun OnlineMapFolder.toListItem(): OnlineMapListItem = OnlineMapListItem(id,true, printName, url)
-fun OnlineMap.toListItem(): OnlineMapListItem = OnlineMapListItem(id,false, printName, url, status)
+fun OnlineMapFolder.toListItem(): OnlineMapListItem = OnlineMapListItem(id,true, printName)
+fun OnlineMap.toListItem(): OnlineMapListItem = OnlineMapListItem(id,false, printName, status)

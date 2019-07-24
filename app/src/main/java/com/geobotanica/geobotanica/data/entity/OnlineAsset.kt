@@ -32,7 +32,7 @@ data class  OnlineAsset(
         get() = status > 0L
 }
 
-// TODO: This is fragile if asset list changes in updated version
+// TODO: This is fragile. If asset list changes in updated version it will break.
 enum class OnlineAssetId(val id: Long) {
     MAP_FOLDER_LIST(1L), MAP_LIST(2L), WORLD_MAP(3L), PLANT_NAMES(4L)
 }

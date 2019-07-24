@@ -35,11 +35,7 @@ interface ApplicationComponent {
     fun inject(newPlantConfirmFragment: NewPlantConfirmFragment)
     fun inject(plantDetailFragment: PlantDetailFragment)
 
-    @ObsoleteCoroutinesApi
-    @ExperimentalCoroutinesApi
     fun inject(downloadAssetsFragment: DownloadAssetsFragment)
-    @ObsoleteCoroutinesApi
-    @ExperimentalCoroutinesApi
     fun inject(downloadMapsFragment: DownloadMapsFragment)
 
     fun inject(gpsCompoundView: GpsCompoundView)

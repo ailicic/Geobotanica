@@ -109,7 +109,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/fab_margin"
-            android:visibility="@{ viewModel.showFab == true ? View.VISIBLE : View.GONE }"
+            android:visibility="@{ viewModel.showFab ? View.VISIBLE : View.GONE }"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:tint="@color/colorWhite"
