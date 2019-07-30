@@ -58,7 +58,7 @@ class SuggestedMapsFragment : BaseFragment() {
         val binding = DataBindingUtil.inflate<FragmentSuggestedMapsBinding>(
                 layoutInflater, R.layout.fragment_suggested_maps, container, false).also {
             it.viewModel = viewModel
-            it.lifecycleOwner = this
+            it.lifecycleOwner = viewLifecycleOwner
         }
         return binding.root
     }
@@ -105,7 +105,7 @@ class SuggestedMapsFragment : BaseFragment() {
 
     private fun bindClickListeners() {
         browseMapsButton.setOnClickListener { browseMaps() }
-        getMapsButton.setOnClickListener { unbindViewModel(); bindViewModel() }
+        getMapsButton.setOnClickListener { rebindViewModel() }
         fab.setOnClickListener { navigateToNext() }
     }
 
@@ -113,8 +113,9 @@ class SuggestedMapsFragment : BaseFragment() {
         viewModel.suggestedMaps.observe(viewLifecycleOwner, onSuggestedMaps)
     }
 
-    private fun unbindViewModel()  {
+    private fun rebindViewModel()  {
         viewModel.suggestedMaps.removeObserver(onSuggestedMaps)
+        bindViewModel()
     }
 
     private val onSuggestedMaps = Observer<Resource<List<OnlineMapListItem>>> { mapListItems ->

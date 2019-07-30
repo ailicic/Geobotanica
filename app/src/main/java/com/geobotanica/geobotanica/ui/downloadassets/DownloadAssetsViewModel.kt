@@ -76,39 +76,41 @@ class DownloadAssetsViewModel @Inject constructor(
         assetRepo.get(OnlineAssetId.PLANT_NAMES.id).printName
     }
 
-    // TODO: Get from API
-    private val onlineAssetList = listOf(
-        OnlineAsset(
-            "Map metadata",
-            "http://people.okanagan.bc.ca/ailicic/Maps/map_folders.json.gz",
-            "",
-            false,
-            353,
-            1_407
-        ),
-        OnlineAsset(
-            "Map list",
-            "http://people.okanagan.bc.ca/ailicic/Maps/maps.json.gz",
-            "",
-            false,
-            5_792,
-            42_619
-        ),
-        OnlineAsset(
-            "World map",
-            "http://people.okanagan.bc.ca/ailicic/Maps/world.map.gz",
-            "maps",
-            false,
-            2_715_512,
-            3_276_950
-        ),
-        OnlineAsset(
-            "Plant name database",
-            "http://people.okanagan.bc.ca/ailicic/Markers/taxa.db.gz",
-            "databases",
-            true,
-            29_038_255,
-            129_412_096
-        )
-    )
 }
+
+
+// TODO: Get from API
+val onlineAssetList = listOf(
+    OnlineAsset(
+        "Map metadata",
+        "http://people.okanagan.bc.ca/ailicic/Maps/map_folders.json.gz",
+        "",
+        false,
+        353,
+        1_407
+    ),
+    OnlineAsset(
+        "Map list",
+        "http://people.okanagan.bc.ca/ailicic/Maps/maps.json.gz",
+        "",
+        false,
+        5_792,
+        42_619
+    ),
+    OnlineAsset(
+        "World map",
+        "http://people.okanagan.bc.ca/ailicic/Maps/world.map.gz",
+        "maps",
+        false,
+        2_715_512,
+        3_276_950
+    ),
+    OnlineAsset(
+        "Plant name database",
+        "http://people.okanagan.bc.ca/ailicic/Markers/taxa.db.gz",
+        "databases",
+        true,
+        29_038_255,
+        129_412_096
+    )
+)

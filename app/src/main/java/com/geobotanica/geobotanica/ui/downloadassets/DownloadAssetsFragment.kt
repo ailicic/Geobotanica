@@ -63,7 +63,7 @@ class DownloadAssetsFragment : BaseFragment() {
     }
 
     private fun bindViewModel() {
-        viewModel.navigateToNext.observe(this, Observer {
+        viewModel.navigateToNext.observe(viewLifecycleOwner, Observer {
             if (it) {
                 Lg.d("DownloadAssetsFragment: Map data imported and asset downloads initialized -> navigateToNext()")
                 navigateToNext()

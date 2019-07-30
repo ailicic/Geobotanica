@@ -73,7 +73,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         val binding = DataBindingUtil.inflate<FragmentNewPlantConfirmBinding>(
                 layoutInflater, R.layout.fragment_new_plant_confirm, container, false).also {
             it.viewModel = viewModel
-            it.lifecycleOwner = this
+            it.lifecycleOwner = viewLifecycleOwner
         }
         return binding.root
     }

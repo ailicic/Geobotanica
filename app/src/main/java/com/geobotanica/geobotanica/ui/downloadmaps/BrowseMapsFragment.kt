@@ -53,7 +53,7 @@ class BrowseMapsFragment : BaseFragment() {
         val binding = DataBindingUtil.inflate<FragmentBrowseMapsBinding>(
                 layoutInflater, R.layout.fragment_browse_maps, container, false).also {
             it.viewModel = viewModel
-            it.lifecycleOwner = this
+            it.lifecycleOwner = viewLifecycleOwner
         }
         return binding.root
     }
@@ -105,7 +105,7 @@ class BrowseMapsFragment : BaseFragment() {
         recyclerView.isVisible = true
         recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
         recyclerView.adapter = mapListAdapter
-        viewModel.mapListItems.observe(this, Observer {
+        viewModel.mapListItems.observe(viewLifecycleOwner, Observer {
             mapListAdapter.submitList(it)
         })
     }

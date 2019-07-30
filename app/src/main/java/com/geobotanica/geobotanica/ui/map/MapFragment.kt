@@ -40,10 +40,9 @@ import org.mapsforge.map.scalebar.MapScaleBar
 import java.io.File
 import javax.inject.Inject
 
-// TODO: IMPORTANT NOTE: Room queries that return LiveData automatically execute on a worker thread.
-    // Check that no LiveData queries have explicit withContext(Dispatchers.IO)
 // TODO: Use viewModelScope where appropriate
-// TODO: Should use in every databinding fragment? binding.lifecycleOwner = viewLifecycleOwner (FOR SURE USE FOR ALL OBSERVES)
+// TODO: IMPORTANT NOTE: Room queries that return LiveData automatically execute on a worker thread.
+// Check that no LiveData queries have explicit withContext(Dispatchers.IO)
 // TODO: Fix WarningDialog text wrapping
 // TODO: Let Room do the withContext(Dispatchers.IO)...
 // TODO: Determine which fragment to load initially instead of forwarding. Maybe use SharedPrefs?

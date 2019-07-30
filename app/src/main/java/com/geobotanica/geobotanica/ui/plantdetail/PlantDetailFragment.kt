@@ -46,7 +46,7 @@ class PlantDetailFragment : BaseFragment() {
         val binding = DataBindingUtil.inflate<FragmentPlantDetailBinding>(
                 layoutInflater, R.layout.fragment_plant_detail, container, false)
         binding.viewModel = viewModel
-        binding.lifecycleOwner = this
+        binding.lifecycleOwner = viewLifecycleOwner
         return binding.root
     }
 
@@ -58,7 +58,7 @@ class PlantDetailFragment : BaseFragment() {
 
     private fun setPlantPhoto() {
         plantPhoto.doOnPreDraw {
-            viewModel.mainPhoto.observe(this, Observer { mainPhoto ->
+            viewModel.mainPhoto.observe(viewLifecycleOwner, Observer { mainPhoto ->
                 mainPhoto?.let { photo ->
                     plantPhoto.setScaledBitmap(photo.fileName)
                 }
