@@ -6,7 +6,8 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.MainActivity
 import com.geobotanica.geobotanica.ui.compoundview.GpsCompoundView
 import com.geobotanica.geobotanica.ui.downloadassets.DownloadAssetsFragment
-import com.geobotanica.geobotanica.ui.downloadmaps.DownloadMapsFragment
+import com.geobotanica.geobotanica.ui.downloadmaps.BrowseMapsFragment
+import com.geobotanica.geobotanica.ui.downloadmaps.SuggestedMapsFragment
 import com.geobotanica.geobotanica.ui.map.MapFragment
 import com.geobotanica.geobotanica.ui.newplantconfirm.NewPlantConfirmFragment
 import com.geobotanica.geobotanica.ui.newplantmeasurement.NewPlantMeasurementFragment
@@ -16,8 +17,6 @@ import com.geobotanica.geobotanica.ui.newplanttype.NewPlantTypeFragment
 import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailFragment
 import com.geobotanica.geobotanica.ui.searchplantname.SearchPlantNameFragment
 import dagger.Component
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import javax.inject.Singleton
 
 @Singleton
@@ -36,7 +35,8 @@ interface ApplicationComponent {
     fun inject(plantDetailFragment: PlantDetailFragment)
 
     fun inject(downloadAssetsFragment: DownloadAssetsFragment)
-    fun inject(downloadMapsFragment: DownloadMapsFragment)
+    fun inject(suggestedMapsFragment: SuggestedMapsFragment)
+    fun inject(browseMapsFragment: BrowseMapsFragment)
 
     fun inject(gpsCompoundView: GpsCompoundView)
 }

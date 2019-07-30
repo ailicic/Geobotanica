@@ -1,6 +1,5 @@
 package com.geobotanica.geobotanica.network
 
-import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -14,9 +13,7 @@ import javax.inject.Singleton
 
 @Singleton
 class OkHttpFileDownloader@Inject constructor(
-        private val okHttpClient: OkHttpClient,
-        private val networkValidator: NetworkValidator,
-        private val storageHelper: StorageHelper
+        private val okHttpClient: OkHttpClient
 ) {
     suspend fun getJson(url: String): String {
         try {
@@ -27,10 +24,11 @@ class OkHttpFileDownloader@Inject constructor(
             val response = withContext(Dispatchers.IO) { call.execute() }
             return response.body()!!.string()
         } catch (e: IOException) {
-            Lg.i("IOException = $e")
+            Lg.e("IOException = $e")
             throw e
         }
     }
+}
 
 //    @Suppress("RemoveExplicitTypeArguments")
 //    @ExperimentalCoroutinesApi
@@ -143,4 +141,3 @@ class OkHttpFileDownloader@Inject constructor(
 //            }
 //        }
 //    }
-}

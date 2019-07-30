@@ -15,11 +15,11 @@ import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOW
 import kotlinx.android.synthetic.main.map_list_item.view.*
 
 class MapListAdapter(
-        private val onClickFolder: (OnlineMapListItem) -> Unit,
         private val onClickDownload: (OnlineMapListItem) -> Unit,
         private val onClickCancel: (OnlineMapListItem) -> Unit,
-        private val onClickDelete: (OnlineMapListItem) -> Unit
-    ) : ListAdapter<OnlineMapListItem, MapViewHolder>(MapDiffCallback()) {
+        private val onClickDelete: (OnlineMapListItem) -> Unit,
+        private val onClickFolder: (OnlineMapListItem) -> Unit = { }
+) : ListAdapter<OnlineMapListItem, MapViewHolder>(MapDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MapViewHolder {
         val inflater = LayoutInflater.from(parent.context)

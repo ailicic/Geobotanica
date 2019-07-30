@@ -19,24 +19,19 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class DownloadMapViewModel @Inject constructor(
+class BrowseMapsViewModel @Inject constructor(
         private val storageHelper: StorageHelper,
         private val fileDownloader: FileDownloader,
         private val mapRepo: MapRepo
-//        private val geolocator: Geolocator
 ): ViewModel() {
     var userId = 0L
-
-//    mapRepo.search("British Columbia").observe(this, Observer {
-//        mapListAdapter.submitList(it.map { onlineMap -> onlineMap.toListItem() })
-//    })
 
     val showFab: LiveData<Boolean> = map(mapRepo.getInitiatedDownloads()) { mapList ->
         mapList.isNotEmpty()
     }
 
     private var mapFolderId = MutableLiveData<Long?>().apply { value = null }
-//
+
     val mapListItems = switchMap(mapFolderId) { mapFolderId ->
         childMapListItemsOf(mapFolderId)
     }

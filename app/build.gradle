@@ -83,12 +83,14 @@ dependencies {
     def room_version = "2.1.0"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-ktx:$room_version" // Suspendable DAO queries
     testImplementation "androidx.room:room-testing:$room_version"
 
     // LiveData
     def lifecycle_version = "2.0.0"
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version" // ViewModel and LiveData
     kapt "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.2.0-alpha02" // liveData { } coroutine builder
     testImplementation "androidx.arch.core:core-testing:$lifecycle_version" // Test helpers for LiveData
 
     // KTX

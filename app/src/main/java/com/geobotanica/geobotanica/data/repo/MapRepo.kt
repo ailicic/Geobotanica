@@ -5,6 +5,7 @@ import com.geobotanica.geobotanica.data.dao.OnlineMapDao
 import com.geobotanica.geobotanica.data.dao.OnlineMapFolderDao
 import com.geobotanica.geobotanica.data.entity.OnlineMap
 import com.geobotanica.geobotanica.data.entity.OnlineMapFolder
+import com.geobotanica.geobotanica.util.formatAsMapFilename
 import javax.inject.Inject
 
 
@@ -41,7 +42,8 @@ class MapRepo @Inject constructor(
         } ?: mapFolderDao.getAllRoot()
     }
 
-    fun search(string: String): LiveData<List<OnlineMap>> = mapDao.search(string.replace(' ', '-').toLowerCase())
+    fun search(region: String?, country: String?): LiveData<List<OnlineMap>> =
+            mapDao.search(region.formatAsMapFilename(), country.formatAsMapFilename())
 
     fun delete(map: OnlineMap) = mapDao.delete(map)
     fun deleteFolder(folder: OnlineMapFolder) = mapFolderDao.delete(folder)

@@ -20,8 +20,13 @@
         android:label="@string/download_assets">
     </fragment>
     <fragment
-        android:id="@+id/downloadMapsFragment"
-        android:name="com.geobotanica.geobotanica.ui.downloadmaps.DownloadMapsFragment"
+        android:id="@+id/suggestedMapsFragment"
+        android:name="com.geobotanica.geobotanica.ui.downloadmaps.SuggestedMapsFragment"
+        android:label="@string/download_local_maps">
+    </fragment>
+    <fragment
+        android:id="@+id/browseMapsFragment"
+        android:name="com.geobotanica.geobotanica.ui.downloadmaps.BrowseMapsFragment"
         android:label="@string/download_maps">
     </fragment>
     <fragment

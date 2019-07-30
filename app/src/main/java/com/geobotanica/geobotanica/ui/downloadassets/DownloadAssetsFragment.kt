@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
@@ -85,9 +86,11 @@ class DownloadAssetsFragment : BaseFragment() {
 
     @SuppressLint("UsableSpace")
     private fun initUi() {
-        mainScope.launch {
-            worldMapText.text = viewModel.getWorldMapText()
-            plantNameDbText.text = viewModel.getPlantNameDbText()
+        worldMapText.doOnPreDraw {  // TODO: Does this fix the random crashes of worldMapText = null?
+            mainScope.launch {
+                worldMapText.text = viewModel.getWorldMapText()
+                plantNameDbText.text = viewModel.getPlantNameDbText()
+            }
         }
         internalStorageText.text = getString(R.string.internal_storage,
                 File(appContext.filesDir.absolutePath).usableSpace / 1024 / 1024)
@@ -121,7 +124,7 @@ class DownloadAssetsFragment : BaseFragment() {
     private fun navigateToNext() {
         val navController = activity.findNavController(R.id.fragment)
         navController.popBackStack()
-        navController.navigate(R.id.downloadMapsFragment, createBundle())
+        navController.navigate(R.id.suggestedMapsFragment, createBundle())
     }
 
     private fun createBundle(): Bundle =

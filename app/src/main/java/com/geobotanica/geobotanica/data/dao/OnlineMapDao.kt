@@ -34,8 +34,10 @@ interface OnlineMapDao : BaseDao<OnlineMap> {
     @Query("SELECT * FROM maps WHERE status = :downloadId")
     fun getByDownloadId(downloadId: Long): OnlineMap?
 
-    @Query("SELECT * FROM maps WHERE url LIKE '%' || :string || '.map'")
-    fun search(string: String): LiveData<List<OnlineMap>>
+    @Query("""SELECT * FROM maps 
+        WHERE :region IS NOT NULL AND url LIKE '%' || :region || '.map' OR
+        :country IS NOT NULL AND url LIKE  '%' || :country || '.map'""")
+    fun search(region: String?, country: String?): LiveData<List<OnlineMap>>
 }
 
 @Dao
