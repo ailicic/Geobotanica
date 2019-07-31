@@ -1,11 +1,6 @@
 package com.geobotanica.geobotanica.ui.downloadmaps
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations.map
-import androidx.lifecycle.Transformations.switchMap
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data.entity.OnlineMap
 import com.geobotanica.geobotanica.data.entity.OnlineMapFolder
@@ -13,7 +8,7 @@ import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.network.FileDownloader
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,26 +21,22 @@ class BrowseMapsViewModel @Inject constructor(
 ): ViewModel() {
     var userId = 0L
 
-    val showFab: LiveData<Boolean> = map(mapRepo.getInitiatedDownloads()) { mapList ->
+    val showFab: LiveData<Boolean> = mapRepo.getInitiatedDownloads().map { mapList ->
         mapList.isNotEmpty()
     }
 
     private var mapFolderId = MutableLiveData<Long?>().apply { value = null }
 
-    val mapListItems = switchMap(mapFolderId) { mapFolderId ->
-        childMapListItemsOf(mapFolderId)
-    }
+    val mapListItems = mapFolderId.switchMap { childMapListItemsOf(it) }
 
-    fun browseMapFolder(folderId: Long?) {
-        mapFolderId.value = folderId
-    }
+    fun browseMapFolder(folderId: Long?) { mapFolderId.value = folderId }
 
-    suspend fun downloadMap(onlineMapId: Long) = withContext(Dispatchers.IO) {
+    fun downloadMap(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
         val onlineMap = mapRepo.get(onlineMapId)
         fileDownloader.downloadMap(onlineMap)
     }
 
-    suspend fun cancelDownload(downloadId: Long) = withContext(Dispatchers.IO) {
+    fun cancelDownload(downloadId: Long) = viewModelScope.launch(Dispatchers.IO) {
         val result = fileDownloader.cancelDownload(downloadId)
         mapRepo.getByDownloadId(downloadId)?.let { onlineMap ->
             onlineMap.status = FileDownloader.NOT_DOWNLOADED
@@ -54,7 +45,7 @@ class BrowseMapsViewModel @Inject constructor(
         }
     }
 
-    suspend fun deleteMap(onlineMapId: Long) = withContext(Dispatchers.IO) {
+    fun deleteMap(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
         val onlineMap = mapRepo.get(onlineMapId)
         val mapFile = File(storageHelper.getMapsPath(), onlineMap.filename)
         val result = mapFile.delete()

@@ -9,6 +9,7 @@ import android.widget.EditText
 import androidx.core.os.bundleOf
 import androidx.core.view.isEmpty
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
@@ -33,7 +34,6 @@ class NewPlantNameFragment : BaseFragment() {
 
     private var loadNamesJob: Job? = null
     private var animateTextJob: Job = Job().apply { cancel() } // Ensure job is not active (needed non-null for simplicity)
-    private val mainScope = CoroutineScope(Dispatchers.Main)
 
     private var activeEditText: EditText? = null
 
@@ -83,7 +83,7 @@ class NewPlantNameFragment : BaseFragment() {
         animateTextJob.cancel()
     }
 
-    private fun initRecyclerView() = mainScope.launch {
+    private fun initRecyclerView() {
         recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
         plantNamesAdapter = PlantNameAdapter(::onClickItem, ::onClickStar, true)
         viewModel.lastSelectedIndex?. let { plantNamesAdapter.selectedIndex = it }
@@ -94,7 +94,7 @@ class NewPlantNameFragment : BaseFragment() {
     @ExperimentalCoroutinesApi
     private fun loadPlantNames() {
         with (viewModel) {
-            loadNamesJob = mainScope.launch {
+            loadNamesJob = lifecycleScope.launch {
                 loadNamesFromIds()
 
                 val suggestedNamesChannel: ReceiveChannel<List<SearchResult>>? =
@@ -160,7 +160,7 @@ class NewPlantNameFragment : BaseFragment() {
 
     private fun showTypedNameAnimation(string: String, editText: EditText) {
         animateTextJob.cancel()
-        animateTextJob = mainScope.launch {
+        animateTextJob = lifecycleScope.launch {
             for (i in 1 .. string.length) {
                 editText.setText(string.substring(0,i))
                 editText.setSelection(i)
@@ -173,8 +173,7 @@ class NewPlantNameFragment : BaseFragment() {
         }
     }
 
-    private fun onClickStar(result: SearchResult) =
-            viewModel.updateIsStarred(result)
+    private fun onClickStar(result: SearchResult) { viewModel.updateIsStarred(result) }
 
     private fun bindListeners() {
         activeEditText?.onTextChanged(::onSearchEditTextChanged)

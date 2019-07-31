@@ -1,8 +1,8 @@
 package com.geobotanica.geobotanica.ui.downloadassets
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Transformations.map
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data.entity.OnlineAsset
@@ -16,7 +16,6 @@ import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -30,7 +29,7 @@ class DownloadAssetsViewModel @Inject constructor(
 
     val showStorageSnackbar = SingleLiveEvent<OnlineAsset>()
 
-    val navigateToNext: LiveData<Boolean> = map(assetRepo.getAllLiveData()) { assets ->
+    val navigateToNext: LiveData<Boolean> = assetRepo.getAllLiveData().map { assets ->
         val mapFoldersAsset = assets.find { it.id == OnlineAssetId.MAP_FOLDER_LIST.id }!!
         val mapListAsset = assets.find { it.id == OnlineAssetId.MAP_LIST.id }!!
         val worldMapAsset = assets.find { it.id == OnlineAssetId.WORLD_MAP.id }!!
@@ -44,7 +43,7 @@ class DownloadAssetsViewModel @Inject constructor(
         importOnlineAssetInfo()
     }
 
-    suspend fun downloadAssets() = withContext(Dispatchers.IO) {
+    fun downloadAssets() = viewModelScope.launch(Dispatchers.IO) {
         assetRepo.getAll().forEach { asset ->
             if (asset.isDownloading) {
                 Lg.d("Asset already downloading: ${asset.filenameGzip}")
@@ -68,14 +67,9 @@ class DownloadAssetsViewModel @Inject constructor(
             assetRepo.insert(onlineAssetList)
     }
 
-    suspend fun getWorldMapText(): String = withContext(Dispatchers.IO) {
-        assetRepo.get(OnlineAssetId.WORLD_MAP.id).printName
-    }
+    suspend fun getWorldMapText(): String = assetRepo.get(OnlineAssetId.WORLD_MAP.id).printName
 
-    suspend fun getPlantNameDbText(): String = withContext(Dispatchers.IO) {
-        assetRepo.get(OnlineAssetId.PLANT_NAMES.id).printName
-    }
-
+    suspend fun getPlantNameDbText(): String = assetRepo.get(OnlineAssetId.PLANT_NAMES.id).printName
 }
 
 

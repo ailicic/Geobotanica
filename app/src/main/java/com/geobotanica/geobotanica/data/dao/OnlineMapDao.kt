@@ -11,10 +11,10 @@ import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOW
 @Dao
 interface OnlineMapDao : BaseDao<OnlineMap> {
     @Query("SELECT * FROM maps WHERE id = :id")
-    fun get(id: Long): OnlineMap
+    suspend fun get(id: Long): OnlineMap
 
     @Query("SELECT * FROM maps")
-    fun getAll(): List<OnlineMap>
+    suspend fun getAll(): List<OnlineMap>
 
     @Query("SELECT * FROM maps WHERE parentFolderId IS NULL")
     fun getAllRoot(): LiveData<List<OnlineMap>>
@@ -23,16 +23,16 @@ interface OnlineMapDao : BaseDao<OnlineMap> {
     fun getChildMaps(parentFolderId: Long): LiveData<List<OnlineMap>>
 
     @Query("SELECT * FROM maps WHERE status > 0")
-    fun getDownloading(): List<OnlineMap>
+    suspend fun getDownloading(): List<OnlineMap>
 
     @Query("SELECT * FROM maps WHERE status != :notDownloaded")
     fun getInitiatedDownloads(notDownloaded: Long = NOT_DOWNLOADED): LiveData<List<OnlineMap>>
 
     @Query("SELECT * FROM maps WHERE status = :decompressing")
-    fun getDecompressing(decompressing: Long = DECOMPRESSING): List<OnlineMap>
+    suspend fun getDecompressing(decompressing: Long = DECOMPRESSING): List<OnlineMap>
 
     @Query("SELECT * FROM maps WHERE status = :downloadId")
-    fun getByDownloadId(downloadId: Long): OnlineMap?
+    suspend fun getByDownloadId(downloadId: Long): OnlineMap?
 
     @Query("""SELECT * FROM maps 
         WHERE :region IS NOT NULL AND url LIKE '%' || :region || '.map' OR
@@ -43,10 +43,10 @@ interface OnlineMapDao : BaseDao<OnlineMap> {
 @Dao
 interface OnlineMapFolderDao : BaseDao<OnlineMapFolder> {
     @Query("SELECT * FROM mapFolders WHERE id = :id")
-    fun get(id: Long): OnlineMapFolder
+    suspend fun get(id: Long): OnlineMapFolder
 
     @Query("SELECT * FROM mapFolders")
-    fun getAll(): List<OnlineMapFolder>
+    suspend fun getAll(): List<OnlineMapFolder>
 
     @Query("SELECT * FROM mapFolders WHERE parentFolderId IS NULL")
     fun getAllRoot(): LiveData<List<OnlineMapFolder>>

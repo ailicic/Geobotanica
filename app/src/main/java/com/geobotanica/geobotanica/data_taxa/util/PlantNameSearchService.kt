@@ -134,7 +134,8 @@ class PlantNameSearchService @Inject constructor (
         }
     }
 
-    private fun getSearchResults(
+    // TODO: Why is fun0/fun1/fun2 not detected as suspending?
+    private suspend fun getSearchResults(
             words: List<String>,
             search: PlantNameSearch,
             limit: Int,
@@ -148,7 +149,7 @@ class PlantNameSearchService @Inject constructor (
         }
     }
 
-    private fun mapIdToSearchResult(id: Long, search: PlantNameSearch): SearchResult {
+    private suspend fun mapIdToSearchResult(id: Long, search: PlantNameSearch): SearchResult {
         val plantName: String = when {
             search.hasTag(COMMON) -> vernacularRepo.get(id)!!.vernacular!!.capitalize()
             search.hasTag(SCIENTIFIC) -> taxonRepo.get(id)!!.scientific.capitalize()
@@ -163,9 +164,9 @@ class PlantNameSearchService @Inject constructor (
     }
 
     data class PlantNameSearch(
-            val fun0: ( (Int) -> List<Long>? )? = null,
-            val fun1: ( (String, Int) -> List<Long>? )? = null,
-            val fun2: ( (String, String, Int) -> List<Long>? )? = null,
+            val fun0: ( suspend (Int) -> List<Long>? )? = null,
+            val fun1: ( suspend (String, Int) -> List<Long>? )? = null,
+            val fun2: ( suspend (String, String, Int) -> List<Long>? )? = null,
             val tagList: List<PlantNameTag> = emptyList()
     ) {
         val tags: Int = tagList.fold(0) { acc, tag -> acc or tag.flag }

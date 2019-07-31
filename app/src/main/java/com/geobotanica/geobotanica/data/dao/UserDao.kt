@@ -16,9 +16,6 @@ interface UserDao : BaseDao<User> {
     @Query("SELECT * FROM users")
     fun getAll(): LiveData<List<User>>
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE) // TODO: Remove this after Login screen
-    override fun insert(obj: User): Long
-
 //    @Query( "SELECT * FROM users WHERE nickname = :nickname" LIMIT 1)
 //    fun getByNickname(nickname: String): User
 }

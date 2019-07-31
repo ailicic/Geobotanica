@@ -1,6 +1,7 @@
 package com.geobotanica.geobotanica.ui.newplantname
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
 import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
@@ -46,24 +47,19 @@ class NewPlantNameViewModel @Inject constructor (
     fun searchSuggestedScientificNames(vernacularId: Long): ReceiveChannel<List<SearchResult>> =
         plantNameSearchService.searchSuggestedScientificNames(vernacularId)
 
-    fun updateIsStarred(result: SearchResult) {
-        GlobalScope.launch(Dispatchers.IO) {
-            when {
-                result.hasTag(COMMON) -> vernacularRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
-                result.hasTag(SCIENTIFIC) -> taxonRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
-            }
+    fun updateIsStarred(result: SearchResult) = viewModelScope.launch {
+        when {
+            result.hasTag(COMMON) -> vernacularRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
+            result.hasTag(SCIENTIFIC) -> taxonRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
         }
     }
 
-    fun getPlantTypes() = runBlocking {
-        plantTypes = null
-        GlobalScope.launch(Dispatchers.IO) {
-            taxonId?.let {
-                plantTypes = taxonRepo.getTypes(it)
-            } ?: vernacularId?.let {
-                plantTypes = vernacularRepo.getTypes(it)
-            }
-        }.join()
+    fun getPlantTypes() = viewModelScope.launch {
+        taxonId?.let {
+            plantTypes = taxonRepo.getTypes(it)
+        } ?: vernacularId?.let {
+            plantTypes = vernacularRepo.getTypes(it)
+        }
     }
 
     fun isPlantTypeKnown(): Boolean {

@@ -10,6 +10,7 @@ import com.squareup.moshi.Moshi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okio.buffer
 import okio.sink
 import org.jsoup.Jsoup
@@ -29,7 +30,6 @@ import javax.inject.Singleton
 class OnlineMapScraper @Inject constructor (
         private val htmlParser: HtmlParser,
         private val moshi: Moshi,
-//        private val assetRepo: AssetRepo,
         private val mapRepo: MapRepo,
         private val storageHelper: StorageHelper
 
@@ -43,43 +43,45 @@ class OnlineMapScraper @Inject constructor (
         exportMapsToJsonFiles()
     }
 
-    private fun fetchMaps(baseUrl: String, parentFolderId: Long? = null) {
-        var fetchRetries = 5 // Fetch fails periodically on USA for some reason.
-        try {
-            val doc = htmlParser.parse(baseUrl)
-            val rows = doc.select("tr")
+    private suspend fun fetchMaps(baseUrl: String, parentFolderId: Long? = null) {
+        withContext(Dispatchers.IO) {
+            var fetchRetries = 5 // Fetch fails periodically on USA for some reason.
+            try {
+                val doc = htmlParser.parse(baseUrl)
+                val rows = doc.select("tr")
 
-            for (i in 3 until rows.size - 1) { // Skip first 3 rows and last row
+                for (i in 3 until rows.size - 1) { // Skip first 3 rows and last row
 
-                val columns = rows[i].select("td")
-                val url = baseUrl + columns[1].select("a[href]").text()
-                val timestamp = columns[2].text()
-                val size = columns[3].text()
-                        .replace("G", " GB")
-                        .replace("M", " MB")
+                    val columns = rows[i].select("td")
+                    val url = baseUrl + columns[1].select("a[href]").text()
+                    val timestamp = columns[2].text()
+                    val size = columns[3].text()
+                            .replace("G", " GB")
+                            .replace("M", " MB")
 
-                if (size == "-") {
-                    val onlineMapFolder = OnlineMapFolder(url, timestamp, parentFolderId)
-                    val folderId = mapRepo.insertFolder(onlineMapFolder)
-                    Lg.d("Found folder: ${onlineMapFolder.printName}")
-                    fetchMaps(url, folderId)
-                } else {
-                    val onlineMap = OnlineMap(url, size, timestamp, parentFolderId)
-                    mapRepo.insert(onlineMap)
-                    Lg.d("Found map: ${onlineMap.printName}")
+                    if (size == "-") {
+                        val onlineMapFolder = OnlineMapFolder(url, timestamp, parentFolderId)
+                        val folderId = mapRepo.insertFolder(onlineMapFolder)
+                        Lg.d("Found folder: ${onlineMapFolder.printName}")
+                        fetchMaps(url, folderId)
+                    } else {
+                        val onlineMap = OnlineMap(url, size, timestamp, parentFolderId)
+                        mapRepo.insert(onlineMap)
+                        Lg.d("Found map: ${onlineMap.printName}")
+                    }
                 }
+            } catch (e: IOException) { // TODO: Try to prevent "java.io.IOException: Mark invalid"
+                if (fetchRetries > 0) {
+                    --fetchRetries
+                    Lg.e("$baseUrl: fetchMaps() threw error: $e (retries = $fetchRetries)")
+                    fetchMaps(baseUrl, parentFolderId)
+                } else
+                    throw e
             }
-        } catch (e: IOException) { // TODO: Try to prevent "java.io.IOException: Mark invalid"
-            if (fetchRetries > 0) {
-                --fetchRetries
-                Lg.e("$baseUrl: fetchMaps() threw error: $e (retries = $fetchRetries)")
-                fetchMaps(baseUrl, parentFolderId)
-            } else
-                throw e
         }
     }
 
-    private fun exportMapsToJsonFiles() {
+    private suspend fun exportMapsToJsonFiles() {
         val maps = mapRepo.getAll()
         val mapsAdapter = moshi.adapter<List<OnlineMap>>()
         val mapsJson = mapsAdapter.toJson(maps)
@@ -101,8 +103,6 @@ class OnlineMapScraper @Inject constructor (
         foldersSink.close()
     }
 }
-
-
 
 
 @Singleton

@@ -50,7 +50,7 @@ class FileDownloader @Inject constructor (
         mainActivity.downloadComplete.observe(mainActivity, Observer { onDownloadComplete(it) })
     }
 
-    suspend fun downloadAsset(asset: OnlineAsset) = withContext(Dispatchers.IO){
+    suspend fun downloadAsset(asset: OnlineAsset) {
         val file = File(storageHelper.getDownloadPath(), asset.filenameGzip)
 
         val request = DownloadManager.Request(Uri.parse(asset.url))
@@ -68,10 +68,9 @@ class FileDownloader @Inject constructor (
         asset.status = downloadId
         assetRepo.update(asset)
         Lg.i("Downloading asset: ${asset.filenameGzip}")
-
     }
 
-    suspend fun downloadMap(onlineMap: OnlineMap) = withContext(Dispatchers.IO) {
+    suspend fun downloadMap(onlineMap: OnlineMap) {
         val file = File(storageHelper.getMapsPath(), onlineMap.filename)
 
         val request = DownloadManager.Request(Uri.parse(onlineMap.url))
@@ -121,6 +120,7 @@ class FileDownloader @Inject constructor (
         val cursor = downloadManager.query(query)
         if (cursor.moveToFirst()) {
             val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
+            cursor.close()
             return status == DownloadManager.STATUS_SUCCESSFUL
         }
         cursor.close()
@@ -192,7 +192,7 @@ class FileDownloader @Inject constructor (
     }
 
 
-    fun deserializeMapFolderList(mapFoldersAsset: OnlineAsset) {
+    suspend fun deserializeMapFolderList(mapFoldersAsset: OnlineAsset) {
         val mapFolderListFile = File(storageHelper.getLocalPath(mapFoldersAsset), mapFoldersAsset.filename)
         try {
             val time = measureTimeMillis {
@@ -212,7 +212,7 @@ class FileDownloader @Inject constructor (
         }
     }
 
-    fun deserializeMapList(mapListAsset: OnlineAsset) {
+    suspend fun deserializeMapList(mapListAsset: OnlineAsset) {
         Lg.d("Deserializing asset: ${mapListAsset.filename}")
         val mapListFile = File(storageHelper.getLocalPath(mapListAsset), mapListAsset.filename)
         try {

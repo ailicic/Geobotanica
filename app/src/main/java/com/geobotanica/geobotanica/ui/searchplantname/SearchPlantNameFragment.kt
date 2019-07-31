@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.*
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
@@ -29,7 +30,6 @@ class SearchPlantNameFragment : BaseFragment() {
     private lateinit var plantNameAdapter: PlantNameAdapter
 
     private var searchJob: Job? = null
-    private val mainScope = CoroutineScope(Dispatchers.Main)
 
     private val sharedPrefsFilterFlags = "filterFlags"
 
@@ -94,7 +94,7 @@ class SearchPlantNameFragment : BaseFragment() {
 
     @ObsoleteCoroutinesApi
     @ExperimentalCoroutinesApi
-    private fun initRecyclerView() = mainScope.launch {
+    private fun initRecyclerView() {
         recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
         plantNameAdapter = PlantNameAdapter(::onClickItem, ::onClickStar, true)
         recyclerView.adapter = plantNameAdapter
@@ -112,7 +112,7 @@ class SearchPlantNameFragment : BaseFragment() {
         navigateToNext()
     }
 
-    private fun onClickStar(result: SearchResult) = viewModel.updateIsStarred(result)
+    private fun onClickStar(result: SearchResult) { viewModel.updateIsStarred(result) }
 
     @ObsoleteCoroutinesApi
     @ExperimentalCoroutinesApi
@@ -142,7 +142,7 @@ class SearchPlantNameFragment : BaseFragment() {
     @ObsoleteCoroutinesApi
     private fun updateSearchResults() {
         noResultsText.isVisible = false
-        searchJob = mainScope.launch {
+        searchJob = lifecycleScope.launch {
             delay(300)
             progressBar.isVisible = true
             viewModel.searchPlantName(viewModel.searchText).consumeEach {

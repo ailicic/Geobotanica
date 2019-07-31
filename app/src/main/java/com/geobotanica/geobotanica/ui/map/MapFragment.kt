@@ -5,7 +5,6 @@ import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Paint
 import android.os.Bundle
 import android.view.Gravity.BOTTOM
 import android.view.Gravity.CENTER_HORIZONTAL
@@ -15,6 +14,7 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.GbDatabase
@@ -27,7 +27,6 @@ import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.mapsforge.core.model.LatLong
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
@@ -40,17 +39,11 @@ import org.mapsforge.map.scalebar.MapScaleBar
 import java.io.File
 import javax.inject.Inject
 
-// TODO: Use viewModelScope where appropriate
-// TODO: IMPORTANT NOTE: Room queries that return LiveData automatically execute on a worker thread.
-// Check that no LiveData queries have explicit withContext(Dispatchers.IO)
-// TODO: Fix WarningDialog text wrapping
-// TODO: Let Room do the withContext(Dispatchers.IO)...
 // TODO: Determine which fragment to load initially instead of forwarding. Maybe use SharedPrefs?
 // TODO: Check behaviour in PlantConfirmFragment if toolbar back is pressed (looks like it ignores back button override)
     // NEED activity.toolbar.setNavigationOnClickListener
 
 // LONG TERM
-// TODO: Create download map activity and utilize offline map tiles
 // TODO: Use Okio everywhere
 // TODO: Check that coroutine result is handled properly in dialog where user taps outside to close (no result given to getStatus)
 // TODO: Check for memory leaks. Is coroutine holding on to Warning Dialog?
@@ -110,7 +103,7 @@ class MapFragment : BaseFragment() {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
-        GlobalScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.IO) {
 //            GbDatabase.getInstance(appContext).clearAllTables()
             GbDatabase.getInstance(appContext).userDao().insert(User(1, "Guest")) // TODO: Move to Login Screen
         }

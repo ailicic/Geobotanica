@@ -20,14 +20,12 @@ inline fun <T> createNetworkBoundResource(
 ) = liveData {
 
     emit(Resource.loading<T>())
-    withContext(SupervisorJob()) {
+    withContext(SupervisorJob() + Dispatchers.IO) {
         val dbResult = loadFromDb()
         if (shouldFetch(dbResult)) {
             try {
                 emit(Resource.loading(dbResult))
-                withContext(Dispatchers.IO) {
-                    saveToDb(fetchData())
-                }
+                saveToDb(fetchData())
                 Lg.v("NetworkBoundResource: Returning data fetched from network")
                 emit(Resource.success(loadFromDb()!!))
             } catch (e: Exception) {
@@ -54,35 +52,3 @@ enum class ResourceStatus {
     SUCCESS,
     ERROR
 }
-
-
-//suspend inline fun <ResultType, RequestType> createNetworkBoundResource(
-//        crossinline loadFromDb: suspend () -> ResultType?,
-//        crossinline shouldFetch: (ResultType?) -> Boolean,
-//        crossinline fetchData: suspend () -> RequestType,
-//        crossinline processResponse: (RequestType) -> ResultType,
-//        crossinline saveToDb: suspend (ResultType) -> Unit
-//) = liveData {
-//
-//    emit(Resource.loading<ResultType>())
-//    withContext(SupervisorJob()) {
-//        val dbResult = loadFromDb()
-//        Lg.d("NetworkBoundResource: Initial loadFromDb() = $dbResult")
-//        if (shouldFetch(dbResult)) {
-//            try {
-//                emit(Resource.loading(dbResult))
-//                withContext(Dispatchers.IO) {
-//                    saveToDb(processResponse(fetchData()))
-//                }
-//                Lg.v("NetworkBoundResource: Returning data fetched from network")
-//                emit(Resource.success(loadFromDb()!!))
-//            } catch (e: Exception) {
-//                Lg.e("NetworkBoundResource Error: $e")
-//                emit(Resource.error(e, dbResult))
-//            }
-//        } else {
-//            Lg.v("NetworkBoundResource: Returning data from local database")
-//            emit(Resource.success(dbResult!!))
-//        }
-//    }
-//}

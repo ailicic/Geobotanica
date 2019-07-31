@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
@@ -35,10 +36,6 @@ import javax.inject.Inject
 class NewPlantConfirmFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantConfirmViewModel>
     private lateinit var viewModel: NewPlantConfirmViewModel
-
-
-    private var job: Job? = null
-    private val mainScope = CoroutineScope(Dispatchers.Main)
 
     private lateinit var photoAdapter: PlantPhotoAdapter
 
@@ -87,11 +84,6 @@ class NewPlantConfirmFragment : BaseFragment() {
         bindClickListeners()
     }
 
-    override fun onStop() {
-        super.onStop()
-        job?.cancel()
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == requestTakePhoto) {
             when (resultCode) {
@@ -106,7 +98,7 @@ class NewPlantConfirmFragment : BaseFragment() {
                     } else {
                         viewModel.photos.add(PhotoData(newPhotoType, newPhotoUri))
                         photoAdapter.notifyDataSetChanged()
-                        job = mainScope.launch(Dispatchers.Main) {
+                        lifecycleScope.launch(Dispatchers.Main) {
                             delay(300)
                             plantPhotoPager.setCurrentItem(viewModel.photos.size, true)
                         }
@@ -178,7 +170,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         val photoIndex = plantPhotoPager.currentItem
         val photoUri = viewModel.photos[photoIndex].photoUri
         Lg.d("Deleting old photo: $photoUri (Result = ${File(photoUri).delete()})")
-        job = mainScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch(Dispatchers.Main) {
             delay(300)
             viewModel.photos.removeAt(photoIndex)
             photoAdapter.notifyItemRemoved(photoIndex)

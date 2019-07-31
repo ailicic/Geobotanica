@@ -9,7 +9,7 @@ import com.geobotanica.geobotanica.network.Resource
 import com.geobotanica.geobotanica.network.ResourceStatus.*
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -29,33 +29,33 @@ class SuggestedMapsViewModel @Inject constructor(
             .map { it.isNotEmpty() }
 
     val suggestedMaps: LiveData<Resource<List<OnlineMapListItem>>> =
-        geolocationRepo.get().switchMap { geolocation ->
-            when (geolocation.status) {
-                LOADING -> {
-                    mapRepo.search(geolocation.data?.region, geolocation.data?.countryName)
-                            .map { mapList ->
-                                Resource.loading(mapList.map { it.toListItem() })
-                            }
-                }
-                SUCCESS -> {
-                    mapRepo.search(geolocation.data?.region, geolocation.data?.countryName)
-                            .map { mapList ->
-                                Resource.success(mapList.map { it.toListItem() })
-                            }
-                }
-                ERROR -> {
-                    MutableLiveData<Resource<List<OnlineMapListItem>>>()
-                            .apply { value = Resource.error(geolocation.error!!) }
+            geolocationRepo.get().switchMap { geolocation ->
+                when (geolocation.status) {
+                    LOADING -> {
+                        mapRepo.search(geolocation.data?.region, geolocation.data?.countryName)
+                                .map { mapList ->
+                                    Resource.loading(mapList.map { it.toListItem() })
+                                }
+                    }
+                    SUCCESS -> {
+                        mapRepo.search(geolocation.data?.region, geolocation.data?.countryName)
+                                .map { mapList ->
+                                    Resource.success(mapList.map { it.toListItem() })
+                                }
+                    }
+                    ERROR -> {
+                        MutableLiveData<Resource<List<OnlineMapListItem>>>()
+                                .apply { value = Resource.error(geolocation.error!!) }
+                    }
                 }
             }
-        }
 
-    suspend fun downloadMap(onlineMapId: Long) = withContext(Dispatchers.IO) {
+    fun downloadMap(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
         val onlineMap = mapRepo.get(onlineMapId)
         fileDownloader.downloadMap(onlineMap)
     }
 
-    suspend fun cancelDownload(downloadId: Long) = withContext(Dispatchers.IO) {
+    fun cancelDownload(downloadId: Long) = viewModelScope.launch(Dispatchers.IO) {
         val result = fileDownloader.cancelDownload(downloadId)
         mapRepo.getByDownloadId(downloadId)?.let { onlineMap ->
             onlineMap.status = FileDownloader.NOT_DOWNLOADED
@@ -64,7 +64,7 @@ class SuggestedMapsViewModel @Inject constructor(
         }
     }
 
-    suspend fun deleteMap(onlineMapId: Long) = withContext(Dispatchers.IO) {
+    fun deleteMap(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
         val onlineMap = mapRepo.get(onlineMapId)
         val mapFile = File(storageHelper.getMapsPath(), onlineMap.filename)
         val result = mapFile.delete()

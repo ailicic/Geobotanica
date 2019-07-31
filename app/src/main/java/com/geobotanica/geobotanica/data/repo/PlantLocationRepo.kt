@@ -6,7 +6,7 @@ import com.geobotanica.geobotanica.data.entity.PlantLocation
 import javax.inject.Inject
 
 class PlantLocationRepo @Inject constructor(private val plantLocationDao: PlantLocationDao) {
-    fun insert(plantLocation: PlantLocation): Long = plantLocationDao.insert(plantLocation)
+    suspend fun insert(plantLocation: PlantLocation): Long = plantLocationDao.insert(plantLocation)
 
     fun get(id: Long): LiveData<PlantLocation> = plantLocationDao.get(id)
 

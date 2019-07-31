@@ -14,12 +14,12 @@ class GeolocationRepo @Inject constructor(
         private val geolocationDao: GeolocationDao,
         private val geolocator: Geolocator
 ) {
-    fun insert(geolocation: Geolocation): Long = geolocationDao.insert(geolocation)
+    suspend fun insert(geolocation: Geolocation): Long = geolocationDao.insert(geolocation)
 
-    fun get(id: Long): Geolocation = geolocationDao.get(id)
+    suspend fun get(id: Long): Geolocation = geolocationDao.get(id)
     fun getAll(): LiveData<List <Geolocation>> = geolocationDao.getAll()
 
-    fun delete(geolocation: Geolocation) = geolocationDao.delete(geolocation)
+    suspend fun delete(geolocation: Geolocation) = geolocationDao.delete(geolocation)
 
     fun get(): LiveData<Resource<Geolocation>> = createNetworkBoundResource(
             loadFromDb = { geolocationDao.getNewest() },

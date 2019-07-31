@@ -9,9 +9,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
-import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.network.NetworkValidator
@@ -23,7 +23,7 @@ import com.geobotanica.geobotanica.ui.dialog.WarningDialog
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.getFromBundle
 import kotlinx.android.synthetic.main.fragment_download_assets.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
@@ -32,9 +32,6 @@ class DownloadAssetsFragment : BaseFragment() {
     private lateinit var viewModel: DownloadAssetsViewModel
 
     @Inject lateinit var networkValidator: NetworkValidator
-
-    private var job = Job()
-    private val mainScope = CoroutineScope(Dispatchers.Main) + job
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -53,13 +50,8 @@ class DownloadAssetsFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         downloadButton.setOnClickListener(::onClickDownload)
-        bindViewModel()
         initUi()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        job.cancel()
+        bindViewModel()
     }
 
     private fun bindViewModel() {
@@ -86,12 +78,12 @@ class DownloadAssetsFragment : BaseFragment() {
 
     @SuppressLint("UsableSpace")
     private fun initUi() {
-        worldMapText.doOnPreDraw {  // TODO: Does this fix the random crashes of worldMapText = null?
-            mainScope.launch {
+//        worldMapText.doOnPreDraw {  // TODO: Does this fix the random crashes of worldMapText = null?
+            lifecycleScope.launch {
                 worldMapText.text = viewModel.getWorldMapText()
                 plantNameDbText.text = viewModel.getPlantNameDbText()
             }
-        }
+//        }
         internalStorageText.text = getString(R.string.internal_storage,
                 File(appContext.filesDir.absolutePath).usableSpace / 1024 / 1024)
     }
@@ -114,11 +106,9 @@ class DownloadAssetsFragment : BaseFragment() {
     }
 
     private fun downloadAssets() {
-        mainScope.launch {
-            downloadButton.isVisible = false
-            progressBar.isVisible = true
-            viewModel.downloadAssets()
-        }
+        downloadButton.isVisible = false
+        progressBar.isVisible = true
+        viewModel.downloadAssets()
     }
 
     private fun navigateToNext() {

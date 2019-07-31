@@ -1,15 +1,12 @@
 package com.geobotanica.geobotanica.ui.plantdetail
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations.map
-import androidx.lifecycle.Transformations.switchMap
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
+import androidx.room.withTransaction
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.data.repo.*
 import com.geobotanica.geobotanica.util.Lg
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
@@ -48,62 +45,44 @@ class PlantDetailViewModel @Inject constructor(
     lateinit var locationText: LiveData<String>
     lateinit var createdDateText: LiveData<String>
 
-    private var job: Job? = null
-
     private fun init() {
         Lg.d("PlantDetailViewModel: init(plantId=$plantId)")
         plant = plantRepo.get(plantId)
-        user = switchMap(plant) { plant ->
-            plant?.let { userRepo.get(plant.userId) }
-        }
+        user = plant.switchMap { userRepo.get(it.userId) }
 
-        location = map( plantLocationRepo.getLastPlantLocation(plantId) ) { it?.location }
+        location = plantLocationRepo.getLastPlantLocation(plantId).map { it.location }
 
         plantPhotos = plantPhotoRepo.getAllPhotosOfPlant(plantId)
 
         mainPhoto = plantPhotoRepo.getMainPhotoOfPlant(plantId)
 
         height = plantMeasurementRepo.getHeightOfPlant(plantId)
-        heightDateText = map(height) { it?.timestamp?.toSimpleDate() ?: "" }
+        heightDateText = height.map { it.timestamp.toSimpleDate() }
 
         diameter = plantMeasurementRepo.getDiameterOfPlant(plantId)
-        diameterDateText = map(diameter) { it?.timestamp?.toSimpleDate() ?: "" }
+        diameterDateText = diameter.map { it.timestamp.toSimpleDate() }
 
         trunkDiameter = plantMeasurementRepo.getTrunkDiameterOfPlant(plantId)
-        trunkDiameterDateText = map(trunkDiameter) { it?.timestamp?.toSimpleDate() ?: "" }
+        trunkDiameterDateText = trunkDiameter.map { it.timestamp.toSimpleDate() }
 
-        measuredByUser = switchMap(height) {
-            it?.let { height ->
-                map(userRepo.get(height.userId)) { it.nickname }
-            } ?: MutableLiveData<String>().apply { value = "" }
+        measuredByUser = height.switchMap { height ->
+            userRepo.get(height.userId).map { it.nickname }
         }
-        createdDateText = map(plant) {
-            it?.run { timestamp.toSimpleDate() }
-        }
+        createdDateText = plant.map { it.timestamp.toSimpleDate() }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        Lg.d("PlantDetailViewModel: OnCleared()")
-        runBlocking { job?.join() }
-    }
-
-    fun deletePlant() {
+    fun deletePlant() = viewModelScope.launch {
         deletePlantPhotoFiles()
-        job = GlobalScope.launch(Dispatchers.IO) {
-            database.runInTransaction {
-                Lg.d("Deleting plant: ${plant.value!!}")
-                plantRepo.delete(plant.value!!)
-            }
+        database.withTransaction {
+            Lg.d("Deleting plant: ${plant.value!!}")
+            plantRepo.delete(plant.value!!)
         }
     }
 
     private fun deletePlantPhotoFiles() {
-        plantPhotos.observeForever {
-            it.forEach { plantPhoto ->
-                val fileName = plantPhoto.fileName
-                Lg.d("Deleting photo: $fileName (Result=${File(fileName).delete()})")
-            }
+        plantPhotos.value?.forEach { plantPhoto ->
+            val fileName = plantPhoto.fileName
+            Lg.d("Deleting photo: $fileName (Result=${File(fileName).delete()})")
         }
     }
 }

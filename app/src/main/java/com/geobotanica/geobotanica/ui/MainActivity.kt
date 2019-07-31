@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
     private val _downloadComplete = MutableLiveData<Long>()
     val downloadComplete: LiveData<Long> = _downloadComplete // Used by FileDownloader
 
-    // TODO: Remove this after LocationService uses LiveData
+    // TODO: Either serialize this into bundle or store it some other way
     var currentLocation: Location? = null // Easy solution to hold location between fragments during new plant flow
 
     override fun onCreate(savedInstanceState: Bundle?) {

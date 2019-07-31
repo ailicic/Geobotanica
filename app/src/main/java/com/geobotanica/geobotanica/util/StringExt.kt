@@ -9,4 +9,4 @@ fun String.replacePrefix(oldPrefix: String, newPrefix: String): String {
         this
 }
 
-fun String?.formatAsMapFilename() = this?.replace(' ', '-')?.toLowerCase()
+fun String?.formatAsMapFilename() = this?.toLowerCase()?.replace(' ', '-')

@@ -11,6 +11,7 @@ import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
@@ -39,8 +40,6 @@ class SuggestedMapsFragment : BaseFragment() {
     private lateinit var viewModel: SuggestedMapsViewModel
 
     private val mapListAdapter = MapListAdapter(::onClickDownload, ::onClickCancel, ::onClickDelete)
-
-    private val mainScope = CoroutineScope(Dispatchers.Main) + Job()
 
     private val sharedPrefsExitOnBackInDownloadMaps = "exitOnBackPermittedInDownloadMaps"
 
@@ -71,12 +70,6 @@ class SuggestedMapsFragment : BaseFragment() {
         bindViewModel()
     }
 
-    @ExperimentalCoroutinesApi
-    override fun onDestroy() {
-        super.onDestroy()
-        mainScope.cancel()
-    }
-
     // TODO: Need to deregister after navigation?
     private fun addOnBackPressedCallback() {
         activity.toolbar.setNavigationOnClickListener { exitAppWithWarning() }
@@ -105,7 +98,7 @@ class SuggestedMapsFragment : BaseFragment() {
 
     private fun bindClickListeners() {
         browseMapsButton.setOnClickListener { browseMaps() }
-        getMapsButton.setOnClickListener { rebindViewModel() }
+        getMapsButton.setOnClickListener { lifecycleScope.launch { rebindViewModel() } }
         fab.setOnClickListener { navigateToNext() }
     }
 
@@ -113,13 +106,13 @@ class SuggestedMapsFragment : BaseFragment() {
         viewModel.suggestedMaps.observe(viewLifecycleOwner, onSuggestedMaps)
     }
 
-    private fun rebindViewModel()  {
+    private fun rebindViewModel() {
         viewModel.suggestedMaps.removeObserver(onSuggestedMaps)
         bindViewModel()
     }
 
     private val onSuggestedMaps = Observer<Resource<List<OnlineMapListItem>>> { mapListItems ->
-        Lg.d("Got suggestedMaps: $mapListItems")
+        Lg.d("SuggestedMapsFragment: onSuggestedMaps: $mapListItems")
         when (mapListItems.status) {
             LOADING -> {
                 searchingOnlineMapsText.isVisible = true
@@ -171,24 +164,16 @@ class SuggestedMapsFragment : BaseFragment() {
         }
     }
 
-    private fun downloadMap(mapListItem: OnlineMapListItem) {
-        mainScope.launch {
-            viewModel.downloadMap(mapListItem.id)
-        }
-    }
+    private fun downloadMap(mapListItem: OnlineMapListItem) { viewModel.downloadMap(mapListItem.id) }
 
-    private fun onClickCancel(mapListItem: OnlineMapListItem) {
-        mainScope.launch {
-            viewModel.cancelDownload(mapListItem.status)
-        }
-    }
+    private fun onClickCancel(mapListItem: OnlineMapListItem) { viewModel.cancelDownload(mapListItem.status) }
 
     private fun onClickDelete(mapListItem: OnlineMapListItem) {
         WarningDialog(
                 getString(R.string.delete_map),
                 getString(R.string.confirm_delete_map, mapListItem.printName)
         ) {
-            mainScope.launch { viewModel.deleteMap(mapListItem.id) }
+            viewModel.deleteMap(mapListItem.id)
         }.show(requireFragmentManager(), null)
     }
 

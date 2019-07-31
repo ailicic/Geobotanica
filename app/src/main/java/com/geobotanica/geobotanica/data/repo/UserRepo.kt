@@ -8,7 +8,7 @@ import javax.inject.Inject
 
 class UserRepo @Inject constructor(private val userDao: UserDao) {
 
-    fun insert(user: User): Long = userDao.insert(user)
+    suspend fun insert(user: User): Long = userDao.insert(user)
 
     fun get(id: Long): LiveData<User> = userDao.get(id)
 

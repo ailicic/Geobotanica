@@ -1,6 +1,7 @@
 package com.geobotanica.geobotanica.ui.searchplantname
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
 import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
@@ -10,7 +11,6 @@ import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchR
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,7 +32,7 @@ class SearchPlantNameViewModel @Inject constructor (
 
     // TODO: Remove this init block (for testing)
     init {
-        GlobalScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             Lg.d("Count vern: ${vernacularRepo.getCount()}")
             Lg.d("Count taxa: ${taxonRepo.getCount()}")
             Lg.d("Count vernType: ${vernacularRepo.getTypeCount()}")
@@ -76,21 +76,17 @@ class SearchPlantNameViewModel @Inject constructor (
     fun searchPlantName(string: String): ReceiveChannel<List<SearchResult>> =
         plantNameSearchService.search(string, searchFilterOptions)
 
-    fun updateIsStarred(result: SearchResult) {
-        GlobalScope.launch(Dispatchers.IO) {
-            when {
-                result.hasTag(COMMON) -> vernacularRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
-                result.hasTag(SCIENTIFIC) -> taxonRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
-            }
+    fun updateIsStarred(result: SearchResult) = viewModelScope.launch {
+        when {
+            result.hasTag(COMMON) -> vernacularRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
+            result.hasTag(SCIENTIFIC) -> taxonRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
         }
     }
 
-    fun updateStarredTimestamp(result: SearchResult) {
-        GlobalScope.launch(Dispatchers.IO) {
-            when {
-                result.hasTag(COMMON) -> vernacularRepo.updateTagTimestamp(result.id, STARRED)
-                result.hasTag(SCIENTIFIC) -> taxonRepo.updateTagTimestamp(result.id, STARRED)
-            }
+    fun updateStarredTimestamp(result: SearchResult) = viewModelScope.launch {
+        when {
+            result.hasTag(COMMON) -> vernacularRepo.updateTagTimestamp(result.id, STARRED)
+            result.hasTag(SCIENTIFIC) -> taxonRepo.updateTagTimestamp(result.id, STARRED)
         }
     }
 }

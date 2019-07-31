@@ -8,7 +8,7 @@ import javax.inject.Inject
 
 class PlantPhotoRepo @Inject constructor(private val plantPhotoDao: PlantPhotoDao) {
 
-    fun insert(plantPhoto: PlantPhoto): Long = plantPhotoDao.insert(plantPhoto)
+    suspend fun insert(plantPhoto: PlantPhoto): Long = plantPhotoDao.insert(plantPhoto)
 
     fun get(id: Long): LiveData<PlantPhoto> = plantPhotoDao.get(id)
 

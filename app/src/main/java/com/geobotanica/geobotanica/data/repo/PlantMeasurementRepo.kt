@@ -8,7 +8,7 @@ import javax.inject.Inject
 
 class PlantMeasurementRepo @Inject constructor(private val measurementDao: PlantMeasurementDao) {
 
-    fun insert(plantMeasurement: PlantMeasurement): Long = measurementDao.insert(plantMeasurement)
+    suspend fun insert(plantMeasurement: PlantMeasurement): Long = measurementDao.insert(plantMeasurement)
 
     fun get(id: Long): LiveData<PlantMeasurement> = measurementDao.get(id)
 

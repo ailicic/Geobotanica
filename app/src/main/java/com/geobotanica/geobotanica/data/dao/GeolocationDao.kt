@@ -8,10 +8,10 @@ import com.geobotanica.geobotanica.data.entity.Geolocation
 @Dao
 interface GeolocationDao : BaseDao<Geolocation> {
     @Query("SELECT COUNT(*) FROM geolocations")
-    fun count(): Int
+    suspend fun count(): Int
 
     @Query("SELECT * FROM geolocations WHERE id = :id")
-    fun get(id: Long): Geolocation
+    suspend fun get(id: Long): Geolocation
 
     @Query("SELECT * FROM geolocations")
     fun getAll(): LiveData<List<Geolocation>>

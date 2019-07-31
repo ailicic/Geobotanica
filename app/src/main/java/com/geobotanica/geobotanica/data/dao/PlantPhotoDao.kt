@@ -17,5 +17,5 @@ interface PlantPhotoDao : BaseDao<PlantPhoto> {
     fun getMainPhotoOfPlant(plantId: Long, type: PlantPhoto.Type): LiveData<PlantPhoto>
 
     @Query("SELECT * FROM plantPhotos WHERE userId = :userId")
-    fun getAllPhotosByUser(userId: Long): List<PlantPhoto>
+    suspend fun getAllPhotosByUser(userId: Long): List<PlantPhoto>
 }

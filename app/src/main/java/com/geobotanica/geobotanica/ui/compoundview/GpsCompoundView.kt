@@ -97,19 +97,3 @@ class GpsCompoundView @JvmOverloads constructor(
         satellitesText.text = context.resources.getString(R.string.satellites, satellitesInUse, satellitesVisible)
     }
 }
-
-
-// EXAMPLE OF RX -> LIVEDATA CONVERSION IN VIEWMODEL
-// https://github.com/googlesamples/android-architecture-components/issues/41
-//class UserListViewModel @Inject
-//constructor(@NonNull userRepository: UserRepository) : ViewModel() {
-//
-//    internal val userList: LiveData<Resource<List<User>>>
-//
-//    init {
-//        userList = LiveDataReactiveStreams.fromPublisher(userRepository
-//                .getUserList()
-//                .subscribeOn(Schedulers.newThread())
-//                .observeOn(AndroidSchedulers.mainThread()))
-//    }
-//}

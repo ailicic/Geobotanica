@@ -10,6 +10,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
@@ -37,8 +38,6 @@ class BrowseMapsFragment : BaseFragment() {
     private val mapListAdapter = MapListAdapter(::onClickDownload, ::onClickCancel, ::onClickDelete, ::onClickFolder)
     private val parentMapFolderIds = mutableListOf<Long>()
 
-    private val mainScope = CoroutineScope(Dispatchers.Main) + Job()
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
@@ -65,19 +64,13 @@ class BrowseMapsFragment : BaseFragment() {
         initRecyclerView()
     }
 
-    @ExperimentalCoroutinesApi
-    override fun onDestroy() {
-        super.onDestroy()
-        mainScope.cancel()
-    }
-
     // TODO: Need to deregister after navigation?
     private fun addOnBackPressedCallback() {
         activity.toolbar.setNavigationOnClickListener { onClickBackButton() }
         requireActivity().onBackPressedDispatcher.addCallback(this) { onClickBackButton() }
     }
 
-    private fun onClickBackButton() = mainScope.launch {
+    private fun onClickBackButton() = lifecycleScope.launch {
         if (parentMapFolderIds.isNotEmpty())
             browseParentFolder()
         else
@@ -133,24 +126,16 @@ class BrowseMapsFragment : BaseFragment() {
         }
     }
 
-    private fun downloadMap(mapListItem: OnlineMapListItem) {
-        mainScope.launch {
-            viewModel.downloadMap(mapListItem.id)
-        }
-    }
+    private fun downloadMap(mapListItem: OnlineMapListItem) { viewModel.downloadMap(mapListItem.id) }
 
-    private fun onClickCancel(mapListItem: OnlineMapListItem) {
-        mainScope.launch {
-            viewModel.cancelDownload(mapListItem.status)
-        }
-    }
+    private fun onClickCancel(mapListItem: OnlineMapListItem) { viewModel.cancelDownload(mapListItem.status) }
 
     private fun onClickDelete(mapListItem: OnlineMapListItem) {
         WarningDialog(
                 getString(R.string.delete_map),
                 getString(R.string.confirm_delete_map, mapListItem.printName)
         ) {
-            mainScope.launch { viewModel.deleteMap(mapListItem.id) }
+            viewModel.deleteMap(mapListItem.id)
         }.show(requireFragmentManager(), null)
     }
 

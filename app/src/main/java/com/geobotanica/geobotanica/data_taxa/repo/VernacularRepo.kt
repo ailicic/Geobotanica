@@ -18,33 +18,33 @@ class VernacularRepo @Inject constructor(
         private val typeDao: TypeDao
 ) {
 
-    fun get(id: Long): Vernacular? = vernacularDao.get(id)
+    suspend fun get(id: Long): Vernacular? = vernacularDao.get(id)
 
-    fun nonFirstWordStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+    suspend fun nonFirstWordStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             vernacularDao.nonFirstWordStartsWith(string, limit)
 
-    fun firstWordStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+    suspend fun firstWordStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             vernacularDao.firstWordStartsWith(string, limit)
 
-    fun anyWordStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+    suspend fun anyWordStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             vernacularDao.anyWordStartsWith(first, second, limit)
 
-    fun fromTaxonId(taxonId: Int): List<Long>? = vernacularDao.fromTaxonId(taxonId.toLong())
+    suspend fun fromTaxonId(taxonId: Int): List<Long>? = vernacularDao.fromTaxonId(taxonId.toLong())
 
-    fun getCount(): Int = vernacularDao.getCount()
+    suspend fun getCount(): Int = vernacularDao.getCount()
 
 //    fun contains(string: String): List<Long>? = vernacularDao.contains(string)
 
 
     // Tagged Vernaculars
 
-    fun getAllStarred(limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+    suspend fun getAllStarred(limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             tagDao.getAllVernacularsWithTag(STARRED.ordinal, limit)
 
-    fun getAllUsed(limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+    suspend fun getAllUsed(limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             tagDao.getAllVernacularsWithTag(USED.ordinal, limit)
 
-    fun setTagged(id: Long, tag: PlantNameTag, isTagged: Boolean = true) {
+    suspend fun setTagged(id: Long, tag: PlantNameTag, isTagged: Boolean = true) {
         if (isTagged) {
             tagDao.getVernacularWithTag(id, tag.ordinal)?.let {
                 updateTagTimestamp(it.vernacularId!!, tag)
@@ -53,30 +53,30 @@ class VernacularRepo @Inject constructor(
             tagDao.unsetVernacularTag(id, tag.ordinal)
     }
 
-    fun updateTagTimestamp(id: Long, tag: PlantNameTag) = tagDao.updateVernacularTimestamp(id, tag.ordinal)
+    suspend fun updateTagTimestamp(id: Long, tag: PlantNameTag) = tagDao.updateVernacularTimestamp(id, tag.ordinal)
 
-    fun starredStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+    suspend fun starredStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             tagDao.taggedVernacularStartsWith(string, STARRED.ordinal, limit)
 
-    fun starredStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+    suspend fun starredStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             tagDao.taggedVernacularStartsWith(first, second, STARRED.ordinal, limit)
 
-    fun usedStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+    suspend fun usedStartsWith(string: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             tagDao.taggedVernacularStartsWith(string, USED.ordinal, limit)
 
-    fun usedStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
+    suspend fun usedStartsWith(first: String, second: String, limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             tagDao.taggedVernacularStartsWith(first, second, USED.ordinal, limit)
 
-    fun starredFromTaxonId(taxonId: Int): List<Long>? =
+    suspend fun starredFromTaxonId(taxonId: Int): List<Long>? =
             tagDao.taggedVernacularFromTaxonId(taxonId.toLong(), STARRED.ordinal)
 
-    fun usedFromTaxonId(taxonId: Int): List<Long>? =
+    suspend fun usedFromTaxonId(taxonId: Int): List<Long>? =
             tagDao.taggedVernacularFromTaxonId(taxonId.toLong(), USED.ordinal)
 
 
     // Plant Types
 
-    fun getTypes(id: Long): Int = typeDao.getVernacularType(id).fold(0) { acc, it -> acc or it }
+    suspend fun getTypes(id: Long): Int = typeDao.getVernacularType(id).fold(0) { acc, it -> acc or it }
 
-    fun getTypeCount(): Int = typeDao.getVernacularCount()
+    suspend fun getTypeCount(): Int = typeDao.getVernacularCount()
 }
