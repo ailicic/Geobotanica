@@ -1,15 +1,22 @@
 package com.geobotanica.geobotanica.network
 
 import android.app.DownloadManager
+import android.app.DownloadManager.*
 import android.net.Uri
 import androidx.lifecycle.Observer
-import androidx.work.*
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.worker.DecompressionWorker
 import com.geobotanica.geobotanica.android.worker.DecompressionWorker.Companion.ASSET_FILENAME
 import com.geobotanica.geobotanica.android.worker.DecompressionWorker.Companion.ASSET_ID
 import com.geobotanica.geobotanica.android.worker.DecompressionWorker.Companion.ASSET_LOCAL_PATH
-import com.geobotanica.geobotanica.data.entity.*
+import com.geobotanica.geobotanica.data.entity.OnlineAsset
+import com.geobotanica.geobotanica.data.entity.OnlineAssetId
+import com.geobotanica.geobotanica.data.entity.OnlineMap
+import com.geobotanica.geobotanica.data.entity.OnlineMapFolder
 import com.geobotanica.geobotanica.data.repo.AssetRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.data_taxa.TaxaDatabaseValidator
@@ -29,7 +36,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.system.measureTimeMillis
 
-// TODO: Handle click downloadAsset notification. Maybe use ACTION_VIEW_DOWNLOADS
 // TODO: Seems like FileDownloader has too many responsibilities: decompression, deserialization, download status management
 // -> Number and breadth of dependencies is concerning but encapsulation of implementation details is working well now.
 
@@ -53,10 +59,10 @@ class FileDownloader @Inject constructor (
     suspend fun downloadAsset(asset: OnlineAsset) {
         val file = File(storageHelper.getDownloadPath(), asset.filenameGzip)
 
-        val request = DownloadManager.Request(Uri.parse(asset.url))
+        val request = Request(Uri.parse(asset.url))
                 .setTitle(asset.printName)
                 .setDescription("Downloading")
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+                .setNotificationVisibility(Request.VISIBILITY_VISIBLE)
                 .setDestinationUri(Uri.fromFile(file))
                 .setVisibleInDownloadsUi(false)
 
@@ -73,10 +79,10 @@ class FileDownloader @Inject constructor (
     suspend fun downloadMap(onlineMap: OnlineMap) {
         val file = File(storageHelper.getMapsPath(), onlineMap.filename)
 
-        val request = DownloadManager.Request(Uri.parse(onlineMap.url))
+        val request = Request(Uri.parse(onlineMap.url))
                 .setTitle(onlineMap.printName)
                 .setDescription("Downloading")
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+                .setNotificationVisibility(Request.VISIBILITY_VISIBLE)
                 .setDestinationUri(Uri.fromFile(file))
                 .setVisibleInDownloadsUi(false)
                 .setAllowedOverMetered(networkValidator.isNetworkMetered()) // Warning dialog handles metered network permission.
@@ -87,6 +93,62 @@ class FileDownloader @Inject constructor (
         onlineMap.status = downloadId
         mapRepo.update(onlineMap)
     }
+
+
+    fun isMap(downloadId: Long): Boolean {
+        val cursor = downloadManager.query(Query().setFilterById(downloadId))
+        cursor.moveToFirst()
+        val uri = cursor.getString(cursor.getColumnIndex(COLUMN_URI))
+        return uri.endsWith(".map")
+    }
+
+
+    fun filenameFrom(downloadId: Long): String {
+        val cursor = downloadManager.query(Query().setFilterById(downloadId))
+        cursor.moveToFirst()
+        val uri = cursor.getString(cursor.getColumnIndex(COLUMN_URI))
+        return uri.substringAfterLast('/')
+    }
+
+//    suspend fun removeQueuedDownloads() {
+//        val query = Query().setFilterByStatus(STATUS_PENDING or STATUS_PAUSED or STATUS_RUNNING)
+//        val cursor = downloadManager.query(query)
+//        while (cursor.moveToNext()) {
+//            val downloadId = cursor.getLong(cursor.getColumnIndex(COLUMN_ID))
+//            val uri = cursor.getString(cursor.getColumnIndex(COLUMN_URI))
+//            val status = cursor.getInt(cursor.getColumnIndex(COLUMN_STATUS))
+//            val title = cursor.getString(cursor.getColumnIndex(COLUMN_TITLE))
+//            val bytes = cursor.getLong(cursor.getColumnIndex(COLUMN_BYTES_DOWNLOADED_SO_FAR))
+//            val totalBytes = cursor.getLong(cursor.getColumnIndex(COLUMN_TOTAL_SIZE_BYTES))
+//            val progress = bytes.toFloat() / totalBytes.toFloat()
+//
+//            if (status == STATUS_RUNNING || status == STATUS_PAUSED) {
+//                if (bytes == 0L ) {
+//                    Lg.d("Removed zero progress download: $title")
+//                    if (uri.endsWith(".map")) {
+//                        val map = mapRepo.getByDownloadId(downloadId)
+//                        map?.let {
+//                            it.status = NOT_DOWNLOADED
+//                            mapRepo.update(it)
+//                        }
+//                        Lg.e("FileDownloader: removeQueuedDownloads() -> ${map.filename} download not in OnlineMap database table")
+//                    } else {
+//                        val asset
+//                    }
+//                    downloadManager.remove(downloadId)
+//
+//                } else {
+//                    Lg.d("Observed $progress% complete download: $title")
+//                }
+//            } else {
+//                Lg.d("Removed pending download: $title")
+//                downloadManager.remove(downloadId)
+//            }
+//            Lg.d("Removed download: $title (id = $downloadId, status = $status, bytes = $bytes B)")
+//            downloadManager.remove(downloadId)
+//        }
+//        cursor.close()
+//    }
 
     private fun synchronizeDownloadStatuses() { // Catch download/decompression completed while app not in foreground.
         GlobalScope.launch(Dispatchers.IO) {
@@ -116,12 +178,12 @@ class FileDownloader @Inject constructor (
     }
 
     private fun isDownloadComplete(downloadId: Long): Boolean {
-        val query = DownloadManager.Query().setFilterById(downloadId)
+        val query = Query().setFilterById(downloadId)
         val cursor = downloadManager.query(query)
         if (cursor.moveToFirst()) {
-            val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
+            val status = cursor.getInt(cursor.getColumnIndex(COLUMN_STATUS))
             cursor.close()
-            return status == DownloadManager.STATUS_SUCCESSFUL
+            return status == STATUS_SUCCESSFUL
         }
         cursor.close()
         Lg.e("FileDownloader.isDownloadComplete(): downloadId $downloadId not found")
@@ -165,8 +227,8 @@ class FileDownloader @Inject constructor (
         }
     }
 
-    private val decompressionWorkerObserver = Observer<MutableList<WorkInfo>> { infos ->
-        infos.forEach {  info ->
+    private val decompressionWorkerObserver = Observer<MutableList<WorkInfo>> { infoList ->
+        infoList.forEach {  info ->
             if (info.state.isFinished) {
                 GlobalScope.launch(Dispatchers.IO) {
                     val assetId = info.outputData.getLong(ASSET_ID, -1)
@@ -174,11 +236,7 @@ class FileDownloader @Inject constructor (
 
                     when (assetId) {
                         OnlineAssetId.PLANT_NAMES.id -> {
-                            if (taxaDatabaseValidator.isPopulated())
-                                Lg.d("isTaxaDbPopulated() = true")
-                            else {
-                                Lg.e("isTaxaDbPopulated() = false")
-                            }
+                            Lg.d("isTaxaDbPopulated() = ${taxaDatabaseValidator.isPopulated()}")
                         }
                         OnlineAssetId.MAP_FOLDER_LIST.id -> deserializeMapFolderList(asset)
                         OnlineAssetId.MAP_LIST.id -> deserializeMapList(asset)
@@ -192,7 +250,7 @@ class FileDownloader @Inject constructor (
     }
 
 
-    suspend fun deserializeMapFolderList(mapFoldersAsset: OnlineAsset) {
+    private suspend fun deserializeMapFolderList(mapFoldersAsset: OnlineAsset) {
         val mapFolderListFile = File(storageHelper.getLocalPath(mapFoldersAsset), mapFoldersAsset.filename)
         try {
             val time = measureTimeMillis {
@@ -206,13 +264,14 @@ class FileDownloader @Inject constructor (
                 mapRepo.insertFolders(mapFolderList)
             }
             Lg.d("Deserialized asset: ${mapFoldersAsset.filename} ($time ms)")
+            mapFolderListFile.delete()
         } catch (e: IOException){
             Lg.e("deserializeMapList(): $e")
             mapFolderListFile.delete()
         }
     }
 
-    suspend fun deserializeMapList(mapListAsset: OnlineAsset) {
+    private suspend fun deserializeMapList(mapListAsset: OnlineAsset) {
         Lg.d("Deserializing asset: ${mapListAsset.filename}")
         val mapListFile = File(storageHelper.getLocalPath(mapListAsset), mapListAsset.filename)
         try {
@@ -227,6 +286,7 @@ class FileDownloader @Inject constructor (
                 mapRepo.insert(onlineMapList)
             }
             Lg.d("Deserialized asset: ${mapListAsset.filename} ($time ms)")
+            mapListFile.delete()
         } catch (e: IOException){
             Lg.e("deserializeMapList(): $e")
             mapListFile.delete()
@@ -238,9 +298,9 @@ class FileDownloader @Inject constructor (
     }
 
     companion object DownloadStatus {
-        val NOT_DOWNLOADED = 0L
+        const val NOT_DOWNLOADED = 0L
         // DOWNLOADING > 0  ( = downloadId)
-        val DECOMPRESSING = -1L
-        val DOWNLOADED = -2L
+        const val DECOMPRESSING = -1L
+        const val DOWNLOADED = -2L
     }
 }

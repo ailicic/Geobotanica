@@ -112,7 +112,7 @@ class SuggestedMapsFragment : BaseFragment() {
     }
 
     private val onSuggestedMaps = Observer<Resource<List<OnlineMapListItem>>> { mapListItems ->
-        Lg.d("SuggestedMapsFragment: onSuggestedMaps: $mapListItems")
+//        Lg.v("SuggestedMapsFragment: onSuggestedMaps: $mapListItems")
         when (mapListItems.status) {
             LOADING -> {
                 searchingOnlineMapsText.isVisible = true

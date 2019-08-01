@@ -5,17 +5,22 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations.map
 import androidx.lifecycle.ViewModel
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.Location
+import com.geobotanica.geobotanica.data.entity.OnlineAssetId
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.Plant.Type.*
 import com.geobotanica.geobotanica.data.entity.PlantComposite
+import com.geobotanica.geobotanica.data.repo.AssetRepo
+import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_NO_FIX
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_OFF
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
 import com.geobotanica.geobotanica.util.schedule
+import java.io.File
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -33,6 +38,9 @@ data class PlantMarkerData(
 
 @Singleton
 class MapViewModel @Inject constructor(
+    private val storageHelper: StorageHelper,
+    private val mapRepo: MapRepo,
+    private val assetRepo: AssetRepo,
     private val plantRepo: PlantRepo,
     private val locationService: LocationService
 ): ViewModel() {
@@ -64,10 +72,22 @@ class MapViewModel @Inject constructor(
     private var staleGpsTimer: Timer? = null
     private val staleGpsTimeout = 120_000L // ms
 
+    // TODO: Use drawable array + enum ordinal for this
     enum class GpsFabDrawable(val drawable: Int) {
         GPS_OFF(R.drawable.gps_off),
         GPS_NO_FIX(R.drawable.gps_no_fix),
         GPS_FIX(R.drawable.gps_fix)
+    }
+
+    suspend fun getDownloadedMapFileList(): List<File> {
+        val mapsPath = storageHelper.getMapsPath()
+        return mutableListOf(
+                File(mapsPath, assetRepo.get(OnlineAssetId.WORLD_MAP.id).filename)
+        ).apply {
+            mapRepo.getDownloaded().forEach { map ->
+                add(File(mapsPath, map.filename))
+            }
+        }
     }
 
     fun initGpsSubscribe() {
@@ -151,6 +171,7 @@ class MapViewModel @Inject constructor(
         )
     }
 
+    // TODO: Use drawable array + enum ordinal for this
     fun getPlantIconFromType(plantType: Plant.Type): Int {
         return when (plantType) {
             TREE -> R.drawable.marker_purple

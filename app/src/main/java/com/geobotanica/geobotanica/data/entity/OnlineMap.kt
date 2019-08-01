@@ -11,12 +11,13 @@ import com.squareup.moshi.JsonClass
 
 
 @Entity(tableName = "maps",
-    foreignKeys = [ForeignKey(
-        entity = OnlineMapFolder::class,
-        parentColumns = ["id"],
-        childColumns = ["parentFolderId"],
-        onDelete = ForeignKey.CASCADE)
-    ],
+// NOTE: Disabled foreign key constraint as asynchronous nature of asset downloads causes crashes
+//    foreignKeys = [ForeignKey(
+//        entity = OnlineMapFolder::class,
+//        parentColumns = ["id"],
+//        childColumns = ["parentFolderId"],
+//        onDelete = ForeignKey.CASCADE)
+//    ],
     indices = [
         Index(value = ["url"]),
         Index(value = ["parentFolderId"]),

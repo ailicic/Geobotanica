@@ -21,6 +21,7 @@ import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.User
+import com.geobotanica.geobotanica.network.FileDownloader
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -32,12 +33,18 @@ import org.mapsforge.core.model.LatLong
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
 import org.mapsforge.map.android.util.AndroidUtil
 import org.mapsforge.map.datastore.MultiMapDataStore
+import org.mapsforge.map.layer.cache.TileCache
 import org.mapsforge.map.layer.renderer.TileRendererLayer
 import org.mapsforge.map.reader.MapFile
 import org.mapsforge.map.rendertheme.InternalRenderTheme
 import org.mapsforge.map.scalebar.MapScaleBar
-import java.io.File
 import javax.inject.Inject
+
+// TODO: Get Storage permissions in DownloadAssetsFragment, not MapFragment
+// TODO: Handle click downloadAsset notification. Maybe use ACTION_VIEW_DOWNLOADS
+// TODO: Ensure world map is downloaded before permitting nav to MapFragment
+// TODO: Figure out how to deal with stagnant downloads. Tried removing if not progressing but db updates got hairy.
+// TODO: Detect and update failed downloads on app start and during app run
 
 // TODO: Determine which fragment to load initially instead of forwarding. Maybe use SharedPrefs?
 // TODO: Check behaviour in PlantConfirmFragment if toolbar back is pressed (looks like it ignores back button override)
@@ -83,12 +90,16 @@ import javax.inject.Inject
 // DEFERRED
 // TODO: Show PlantType icon in map bubble (and PlantDetail?)
 
-private const val BC_MAP_FILE = "british-columbia.map"
-private const val WORLD_MAP_FILE = "world.map"
 
 class MapFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<MapViewModel>
+    @Inject lateinit var fileDownloader: FileDownloader
+
     private lateinit var viewModel: MapViewModel
+
+    private lateinit var tileRendererLayer: TileRendererLayer
+    private lateinit var tileCache: TileCache
+    private val loadedMaps = mutableListOf<String>()
 
 //    private var locationMarker: Marker? = null
 //    private var locationPrecisionCircle: Polygon? = null
@@ -209,29 +220,21 @@ class MapFragment : BaseFragment() {
 //        NavHostFragment.findNavController(this).navigate(
 //                R.id.downloadTaxaFragment, createBundle() )
 
-
         initMap()
         viewModel.initGpsSubscribe()
         setClickListeners()
         bindViewModel()
     }
 
-    private fun initMap() {
+    private fun initMap() = lifecycleScope.launch {
         mapView.isClickable = true
         mapView.mapScaleBar.isVisible = true
         mapView.mapScaleBar.scaleBarPosition = MapScaleBar.ScaleBarPosition.TOP_LEFT
         mapView.setBuiltInZoomControls(true)
 
-        val tileCache = AndroidUtil.createExternalStorageTileCache(context, "mapcache",
+        tileCache = AndroidUtil.createExternalStorageTileCache(context, "mapcache",
                 mapView.model.displayModel.tileSize, mapView.model.displayModel.tileSize, true)
-
-        val multiMapDataStore = MultiMapDataStore(MultiMapDataStore.DataPolicy.RETURN_ALL)
-        val worldMap = MapFile(File(context?.getExternalFilesDir(null), WORLD_MAP_FILE))
-        val bcMap = MapFile(File(context?.getExternalFilesDir(null), BC_MAP_FILE))
-        multiMapDataStore.addMapDataStore(worldMap, false, false)
-        multiMapDataStore.addMapDataStore(bcMap, false, false)
-
-        val tileRendererLayer = TileRendererLayer(tileCache, multiMapDataStore,
+        tileRendererLayer = TileRendererLayer(tileCache, createMultiMapDataStore(),
                 mapView.model.mapViewPosition, AndroidGraphicFactory.INSTANCE)
         tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.DEFAULT)
 
@@ -247,6 +250,40 @@ class MapFragment : BaseFragment() {
 
 //        if (viewModel.isFirstRun)
 //            viewModel.getLastLocation()?.let { centerMapOnLocation(it, false) } // TODO: CHECK IF THIS SHOULD STAY (never worked)
+
+
+        registerMapDownloadObserver()
+    }
+
+    private fun registerMapDownloadObserver() {
+        activity.downloadComplete.observe(activity, Observer { downloadId ->
+            if (fileDownloader.isMap(downloadId) && ! loadedMaps.contains(fileDownloader.filenameFrom(downloadId)))
+                reloadMaps()
+        })
+    }
+
+    private suspend fun createMultiMapDataStore(): MultiMapDataStore {
+        val multiMapDataStore = MultiMapDataStore(MultiMapDataStore.DataPolicy.RETURN_ALL)
+
+        loadedMaps.clear()
+        viewModel.getDownloadedMapFileList().forEach { mapFile ->
+            Lg.d("Loading downloaded map: ${mapFile.name}")
+            loadedMaps.add(mapFile.name)
+            multiMapDataStore.addMapDataStore(MapFile(mapFile), false, false)
+        }
+        return multiMapDataStore
+    }
+
+    private fun reloadMaps() = lifecycleScope.launch {
+        Lg.d("MapFragment: reloadMaps()")
+        mapView.layerManager.layers.remove(tileRendererLayer)
+        tileRendererLayer.onDestroy()
+        tileCache.purge() // Delete all cache files. If omitted, existing cache will override new maps.
+        tileRendererLayer = TileRendererLayer(tileCache, createMultiMapDataStore(),
+                mapView.model.mapViewPosition, AndroidGraphicFactory.INSTANCE)
+        tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.DEFAULT)
+        mapView.layerManager.layers.add(tileRendererLayer)
+        mapView.layerManager.redrawLayers()
     }
 
     @Suppress("DEPRECATION")

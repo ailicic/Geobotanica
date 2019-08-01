@@ -40,7 +40,10 @@ class DownloadAssetsViewModel @Inject constructor(
     }
 
     init {
-        importOnlineAssetInfo()
+        viewModelScope.launch (Dispatchers.IO) {
+//             fileDownloader.removeQueuedDownloads()
+            importOnlineAssetInfo()
+        }
     }
 
     fun downloadAssets() = viewModelScope.launch(Dispatchers.IO) {
@@ -62,7 +65,7 @@ class DownloadAssetsViewModel @Inject constructor(
         }
     }
 
-    private fun importOnlineAssetInfo() = viewModelScope.launch (Dispatchers.IO) {
+    private suspend fun importOnlineAssetInfo() {
         if (assetRepo.isEmpty())
             assetRepo.insert(onlineAssetList)
     }

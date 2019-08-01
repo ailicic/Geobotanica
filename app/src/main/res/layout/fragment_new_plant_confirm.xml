@@ -104,6 +104,7 @@
                 android:id="@+id/measurementsCompoundView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="@{ viewModel.height != null || viewModel.diameter != null || viewModel.trunkDiameter != null ? View.VISIBLE : View.GONE }"
                 app:layout_constraintTop_toBottomOf="@+id/photoDivider" />
 
             <View

@@ -6,6 +6,7 @@ import androidx.room.Query
 import com.geobotanica.geobotanica.data.entity.OnlineMap
 import com.geobotanica.geobotanica.data.entity.OnlineMapFolder
 import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.DECOMPRESSING
+import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.DOWNLOADED
 import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOWNLOADED
 
 @Dao
@@ -24,6 +25,9 @@ interface OnlineMapDao : BaseDao<OnlineMap> {
 
     @Query("SELECT * FROM maps WHERE status > 0")
     suspend fun getDownloading(): List<OnlineMap>
+
+    @Query("SELECT * FROM maps WHERE status == :downloaded")
+    suspend fun getDownloaded(downloaded: Long = DOWNLOADED): List<OnlineMap>
 
     @Query("SELECT * FROM maps WHERE status != :notDownloaded")
     fun getInitiatedDownloads(notDownloaded: Long = NOT_DOWNLOADED): LiveData<List<OnlineMap>>
