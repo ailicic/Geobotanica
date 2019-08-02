@@ -59,12 +59,12 @@ class MapViewModel @Inject constructor(
     val showGpsRequiredSnackbar = SingleLiveEvent<Unit>()
     val navigateToNewPlant = SingleLiveEvent<Unit>()
 
-    private val defaultMapZoomLevel = 16.0
+    private val defaultMapZoomLevel = 16
     private val defaultMapLatitude = 49.477
     private val defaultMapLongitude = -119.59
 
     var isFirstRun = true
-    var mapZoomLevel: Double = defaultMapZoomLevel
+    var mapZoomLevel: Int = defaultMapZoomLevel
     var mapLatitude: Double = defaultMapLatitude
     var mapLongitude: Double = defaultMapLongitude
     var wasGpsSubscribed = true

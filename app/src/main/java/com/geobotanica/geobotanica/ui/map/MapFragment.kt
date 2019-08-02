@@ -1,7 +1,6 @@
 package com.geobotanica.geobotanica.ui.map
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -30,10 +29,12 @@ import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.mapsforge.core.model.LatLong
+import org.mapsforge.core.model.Point
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
 import org.mapsforge.map.android.util.AndroidUtil
 import org.mapsforge.map.datastore.MultiMapDataStore
 import org.mapsforge.map.layer.cache.TileCache
+import org.mapsforge.map.layer.overlay.Marker
 import org.mapsforge.map.layer.renderer.TileRendererLayer
 import org.mapsforge.map.reader.MapFile
 import org.mapsforge.map.rendertheme.InternalRenderTheme
@@ -41,6 +42,7 @@ import org.mapsforge.map.scalebar.MapScaleBar
 import javax.inject.Inject
 
 // TODO: Determine which fragment to load initially instead of forwarding. Maybe use SharedPrefs?
+// TODO: Figure out how to handle tap events from markers vs. map
 // TODO: Check behaviour in PlantConfirmFragment if toolbar back is pressed (looks like it ignores back button override)
     // NEED activity.toolbar.setNavigationOnClickListener
 
@@ -96,7 +98,7 @@ class MapFragment : BaseFragment() {
     private lateinit var tileCache: TileCache
     private val loadedMaps = mutableListOf<String>()
 
-//    private var locationMarker: Marker? = null
+    private var locationMarker: Marker? = null
 //    private var locationPrecisionCircle: Polygon? = null
 
     private val sharedPrefsIsFirstRun = "isFirstRun"
@@ -117,9 +119,6 @@ class MapFragment : BaseFragment() {
             userId = 1L // TODO: Retrieve userId from LoginFragment Navigation bundle (or shared prefs)
         }
         loadSharedPrefsToViewModel()
-
-        //load/initialize the osmdroid configuration (should be before layout inflation)
-//        Configuration.getInstance().load(context, defaultSharedPrefs)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -176,9 +175,9 @@ class MapFragment : BaseFragment() {
     }
 
     private fun saveMapStateToViewModel() {
-//        viewModel.mapZoomLevel = map.zoomLevelDouble
-//        viewModel.mapLatitude = map.mapCenter.latitude
-//        viewModel.mapLongitude = map.mapCenter.longitude
+        viewModel.mapZoomLevel = mapView.model.mapViewPosition.zoomLevel.toInt()
+        viewModel.mapLatitude = mapView.model.mapViewPosition.center.latitude
+        viewModel.mapLongitude = mapView.model.mapViewPosition.center.longitude
         viewModel.wasGpsSubscribed = viewModel.isGpsSubscribed()
     }
 
@@ -229,7 +228,7 @@ class MapFragment : BaseFragment() {
         mapView.setZoomLevel(12.toByte())
 
         coordinatorLayout.isVisible = true // TODO: Remove this after LoginScreen implemented
-//        locationMarker = null
+        locationMarker = null
 //        createLocationPrecisionCircle() // Add to map now to ensure always on bottom
 
 //        if (viewModel.isFirstRun)
@@ -286,7 +285,7 @@ class MapFragment : BaseFragment() {
             showGpsRequiredSnackbar.observe(viewLifecycleOwner, onGpsRequiredSnackbar)
             navigateToNewPlant.observe(viewLifecycleOwner, onNavigateToNewPlant)
 //            plantMarkerData.observe(viewLifecycleOwner, onPlantMarkers)
-//            currentLocation.observe(viewLifecycleOwner, onLocation)
+            currentLocation.observe(viewLifecycleOwner, onLocation)
         }
     }
 
@@ -353,22 +352,22 @@ class MapFragment : BaseFragment() {
 //    }
 
     // TODO: See if logic here can be pushed to VM
-//    @Suppress("DEPRECATION")
-//    private val onLocation = Observer<Location> {
-////        Lg.v("MapFragment: onLocation() = $it")
-//        if (it.latitude != null && it.longitude != null) { // OK in VM
-//            if (it.isRecent()) { // OK in VM
-//                gpsFab.setImageDrawable(resources.getDrawable(R.drawable.gps_fix)) // Could be LiveData
+    @Suppress("DEPRECATION")
+    private val onLocation = Observer<Location> {
+//        Lg.v("MapFragment: onLocation() = $it")
+        if (it.latitude != null && it.longitude != null) { // OK in VM
+            if (it.isRecent()) { // OK in VM
+                gpsFab.setImageDrawable(resources.getDrawable(R.drawable.gps_fix)) // Could be LiveData
 //                updateLocationPrecision(it) // Could be LiveData
 //                if (isLocationOffScreen(it)) // Problem: Check requires map
 //                    centerMapOnLocation(it) // Could be LiveData
-//                viewModel.setStaleGpsLocationTimer() // OK in VM
-//            }
-//            updateLocationMarker(it) // Could be LiveData
-//            map.invalidate() // Could be LiveData
-//        }
-//        // TODO: Update satellitesInUse
-//    }
+                viewModel.setStaleGpsLocationTimer() // OK in VM
+            }
+            updateLocationMarker(it) // Could be LiveData
+            mapView.invalidate() // Could be LiveData
+        }
+        // TODO: Update satellitesInUse
+    }
 
 //    private fun updateLocationPrecision(location: Location) {
 //        if (locationPrecisionCircle == null)
@@ -390,24 +389,34 @@ class MapFragment : BaseFragment() {
 //        map.overlays.add(locationPrecisionCircle)
 //    }
 
-//    private fun updateLocationMarker(currentLocation: Location) {
-//        if (locationMarker == null)
-//            createLocationMarker()
-//        locationMarker?.position?.setCoords(currentLocation.latitude!!, currentLocation.longitude!!)
-//    }
+    private fun updateLocationMarker(currentLocation: Location) {
+        if (locationMarker == null)
+            createLocationMarker(currentLocation)
+        locationMarker?.latLong = LatLong(currentLocation.latitude!!, currentLocation.longitude!!)
+        mapView.layerManager.redrawLayers()
+    }
 
-//    @Suppress("DEPRECATION")
-//    private fun createLocationMarker() {
-//        locationMarker = Marker(map).apply {
-//            icon = resources.getDrawable(R.drawable.person)
-//            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-//            setOnMarkerClickListener { _, _ ->
-//                showToast("You are here")
-//                true
-//            }
-//            map.overlays.add(this)
-//        }
-//    }
+    @Suppress("DEPRECATION")
+    private fun createLocationMarker(currentLocation: Location) {
+        val drawable = AndroidGraphicFactory.convertToBitmap(resources.getDrawable(R.drawable.person))
+        val yOffset = (-1)  * drawable.height / 2
+        locationMarker = object : Marker(
+                LatLong(currentLocation.latitude!!, currentLocation.longitude!!),
+                drawable,
+                0, yOffset
+        ) {
+            override fun onTap(tapLatLong: LatLong?, layerXY: Point?, tapXY: Point?): Boolean {
+                showToast("Tap")
+                return true
+            }
+
+            override fun onLongPress(tapLatLong: LatLong?, layerXY: Point?, tapXY: Point?): Boolean {
+                showToast("Long tap")
+                return true
+            }
+        }
+        mapView.layerManager.layers.add(locationMarker)
+    }
 //
 //    private fun isLocationOffScreen(location: Location): Boolean =
 //        !map.projection.boundingBox.contains(location.latitude!!, location.longitude!!)
