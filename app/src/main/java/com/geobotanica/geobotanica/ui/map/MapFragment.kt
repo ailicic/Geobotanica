@@ -40,8 +40,8 @@ import org.mapsforge.map.rendertheme.InternalRenderTheme
 import org.mapsforge.map.scalebar.MapScaleBar
 import javax.inject.Inject
 
+
 // TODO: Get Storage permissions in DownloadAssetsFragment, not MapFragment
-// TODO: Handle click downloadAsset notification. Maybe use ACTION_VIEW_DOWNLOADS
 // TODO: Ensure world map is downloaded before permitting nav to MapFragment
 // TODO: Figure out how to deal with stagnant downloads. Tried removing if not progressing but db updates got hairy.
 // TODO: Detect and update failed downloads on app start and during app run

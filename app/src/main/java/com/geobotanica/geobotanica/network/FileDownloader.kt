@@ -39,6 +39,7 @@ import kotlin.system.measureTimeMillis
 // TODO: Seems like FileDownloader has too many responsibilities: decompression, deserialization, download status management
 // -> Number and breadth of dependencies is concerning but encapsulation of implementation details is working well now.
 
+
 @Singleton
 class FileDownloader @Inject constructor (
         private val mainActivity: MainActivity, // TODO: Uncomfortable with this reference but need downloadComplete notifications
@@ -52,7 +53,7 @@ class FileDownloader @Inject constructor (
 ) {
 
     init {
-        synchronizeDownloadStatuses()
+        synchronizeDbDownloadStatuses()
         mainActivity.downloadComplete.observe(mainActivity, Observer { onDownloadComplete(it) })
     }
 
@@ -64,7 +65,7 @@ class FileDownloader @Inject constructor (
                 .setDescription("Downloading")
                 .setNotificationVisibility(Request.VISIBILITY_VISIBLE)
                 .setDestinationUri(Uri.fromFile(file))
-                .setVisibleInDownloadsUi(false)
+//                .setVisibleInDownloadsUi(false) // True by default -> allows user to delete misbehaving downloads
 
                 // TODO: Add these options to a preferences page
                 .setAllowedOverMetered(networkValidator.isNetworkMetered()) // Warning dialog handles metered network permission.
@@ -84,7 +85,8 @@ class FileDownloader @Inject constructor (
                 .setDescription("Downloading")
                 .setNotificationVisibility(Request.VISIBILITY_VISIBLE)
                 .setDestinationUri(Uri.fromFile(file))
-                .setVisibleInDownloadsUi(false)
+//                .setVisibleInDownloadsUi(false) // True by default -> allows user to delete misbehaving downloads
+
                 .setAllowedOverMetered(networkValidator.isNetworkMetered()) // Warning dialog handles metered network permission.
                 .setAllowedOverRoaming(false) // True by default.
 
@@ -96,10 +98,21 @@ class FileDownloader @Inject constructor (
 
 
     fun isMap(downloadId: Long): Boolean {
-        val cursor = downloadManager.query(Query().setFilterById(downloadId))
-        cursor.moveToFirst()
-        val uri = cursor.getString(cursor.getColumnIndex(COLUMN_URI))
-        return uri.endsWith(".map")
+        return downloadManager.query(Query().setFilterById(downloadId))
+                .run {
+                    moveToFirst()
+                    getString(this.getColumnIndex(COLUMN_URI)).endsWith(".map")
+                }
+    }
+
+    suspend fun isAsset(downloadId: Long): Boolean {
+        return downloadManager.query(Query().setFilterById(downloadId))
+                .run {
+                    moveToFirst()
+                    assetRepo.getAll().any {
+                        it.url == getString(this.getColumnIndex(COLUMN_URI))
+                    }
+                }
     }
 
 
@@ -150,13 +163,22 @@ class FileDownloader @Inject constructor (
 //        cursor.close()
 //    }
 
-    private fun synchronizeDownloadStatuses() { // Catch download/decompression completed while app not in foreground.
+    // TODO: Handle downloaded files that are manually deleted
+    // TODO: Implementation is messy. But it catches some common incorrect db states.
+    private fun synchronizeDbDownloadStatuses() { // Catch download/decompression completed while app not in foreground.
+        Lg.d("FileDownloader: synchronizeDbDownloadStatuses()")
         GlobalScope.launch(Dispatchers.IO) {
             assetRepo.getDownloading().forEach { asset ->
-                if (isDownloadComplete(asset.status)) {
-                    asset.status = DECOMPRESSING
+                if (downloadExists(asset.status)) {
+                    if (isDownloadSuccessful(asset.status)) {
+                        asset.status = DECOMPRESSING
+                        assetRepo.update(asset)
+                        Lg.d("Updated ${asset.filenameGzip} download status to decompressing")
+                    }
+                } else {
+                    asset.status = NOT_DOWNLOADED
                     assetRepo.update(asset)
-                    Lg.d("Updated ${asset.filenameGzip} download status to decompressing")
+                    Lg.d("Reset ${asset.filenameGzip} download to NOT_DOWNLOADED")
                 }
             }
             assetRepo.getDecompressing().forEach { asset ->
@@ -168,16 +190,29 @@ class FileDownloader @Inject constructor (
                     registerDecompressionObserver(asset.filenameGzip)
             }
             mapRepo.getDownloading().forEach { map ->
-                if (isDownloadComplete(map.status)) {
-                    map.status = DOWNLOADED
+                if (downloadExists(map.status)) {
+                    if (isDownloadSuccessful(map.status)) {
+                        map.status = DOWNLOADED
+                        mapRepo.update(map)
+                        Lg.d("Updated ${map.filename} download status to downloaded")
+                    }
+                } else {
+                    map.status = NOT_DOWNLOADED
                     mapRepo.update(map)
-                    Lg.d("Updated ${map.filename} download status to downloaded")
+                    Lg.d("Reset ${map.filename} download to NOT_DOWNLOADED")
                 }
             }
         }
     }
 
-    private fun isDownloadComplete(downloadId: Long): Boolean {
+    // NOTE: Manually cancelled downloads appear to be non-referencable by their downloadId
+    private fun downloadExists(downloadId: Long): Boolean {
+        val query = Query().setFilterById(downloadId)
+        val cursor = downloadManager.query(query)
+        return cursor.moveToFirst()
+    }
+
+    private fun isDownloadSuccessful(downloadId: Long): Boolean {
         val query = Query().setFilterById(downloadId)
         val cursor = downloadManager.query(query)
         if (cursor.moveToFirst()) {
@@ -186,36 +221,44 @@ class FileDownloader @Inject constructor (
             return status == STATUS_SUCCESSFUL
         }
         cursor.close()
-        Lg.e("FileDownloader.isDownloadComplete(): downloadId $downloadId not found")
+        Lg.w("FileDownloader.isDownloadSuccessful(): downloadId $downloadId not found")
         return false
     }
 
     private fun onDownloadComplete(downloadId: Long) {
-        GlobalScope.launch(Dispatchers.IO) {
-            assetRepo.getByDownloadId(downloadId)?.let { asset ->
-                Lg.i("Downloaded asset: ${asset.filenameGzip}")
-                val decompressionWorkerRequest = OneTimeWorkRequestBuilder<DecompressionWorker>()
-                        .addTag(asset.filenameGzip)
-                        .setInputData(workDataOf(
-                                ASSET_ID to asset.id,
-                                ASSET_LOCAL_PATH to storageHelper.getLocalPath(asset),
-                                ASSET_FILENAME to asset.filename))
-                        .build()
-                val workManager = WorkManager.getInstance()
-                registerDecompressionObserver(asset.filenameGzip)
-                storageHelper.mkdirs(asset)
-                asset.status = DECOMPRESSING
-                assetRepo.update(asset)
-                workManager.enqueue(decompressionWorkerRequest)
-                return@launch
-            }
-            mapRepo.getByDownloadId(downloadId)?.let { map ->
-                Lg.i("Downloaded map: ${map.filename}")
-                map.status = DOWNLOADED
-                mapRepo.update(map)
-                return@launch
-            }
+        if (! downloadExists(downloadId)) // Catches manually cancelled download
+            synchronizeDbDownloadStatuses()
+        else if (isDownloadSuccessful(downloadId)) {
+            GlobalScope.launch(Dispatchers.IO) {
+                if (isAsset(downloadId)) {
+                    assetRepo.getByDownloadId(downloadId)?.let { asset ->
+                        Lg.i("Downloaded asset: ${asset.filenameGzip}")
+                        val decompressionWorkerRequest = OneTimeWorkRequestBuilder<DecompressionWorker>()
+                                .addTag(asset.filenameGzip)
+                                .setInputData(workDataOf(
+                                        ASSET_ID to asset.id,
+                                        ASSET_LOCAL_PATH to storageHelper.getLocalPath(asset),
+                                        ASSET_FILENAME to asset.filename))
+                                .build()
+                        val workManager = WorkManager.getInstance()
+                        registerDecompressionObserver(asset.filenameGzip)
+                        storageHelper.mkdirs(asset)
+                        asset.status = DECOMPRESSING
+                        assetRepo.update(asset)
+                        workManager.enqueue(decompressionWorkerRequest)
+                        return@launch
+                    }
 
+                }
+                if (isMap(downloadId)) {
+                    mapRepo.getByDownloadId(downloadId)?.let { map ->
+                        Lg.i("Downloaded map: ${map.filename}")
+                        map.status = DOWNLOADED
+                        mapRepo.update(map)
+                        return@launch
+                    }
+                }
+            }
         }
     }
 

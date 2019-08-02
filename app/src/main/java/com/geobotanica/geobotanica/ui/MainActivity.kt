@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity() {
 
         AndroidGraphicFactory.createInstance(application) // Required by MapsForge
         registerReceiver(onDownloadComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+        registerReceiver(onClickDownloadNotification, IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED))
 
         if (isEmulator())
             Lg.d("Running on emulator")
@@ -65,6 +66,12 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: Context, intent: Intent) {
             val downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
             _downloadComplete.value = downloadId
+        }
+    }
+
+    private val onClickDownloadNotification = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            startActivity(Intent(DownloadManager.ACTION_VIEW_DOWNLOADS))
         }
     }
 
@@ -94,5 +101,6 @@ class MainActivity : AppCompatActivity() {
         Lg.v("$className: onDestroy()")
         AndroidGraphicFactory.clearResourceMemoryCache()
         unregisterReceiver(onDownloadComplete)
+        unregisterReceiver(onClickDownloadNotification)
     }
 }
