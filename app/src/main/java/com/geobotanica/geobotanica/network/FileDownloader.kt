@@ -98,29 +98,33 @@ class FileDownloader @Inject constructor (
 
 
     fun isMap(downloadId: Long): Boolean {
-        return downloadManager.query(Query().setFilterById(downloadId))
-                .run {
-                    moveToFirst()
-                    getString(this.getColumnIndex(COLUMN_URI)).endsWith(".map")
-                }
+        return downloadManager.query(Query().setFilterById(downloadId)).run {
+            moveToFirst()
+            val uri = getString(getColumnIndex(COLUMN_URI))
+            close()
+            uri.endsWith(".map")
+        }
     }
 
-    suspend fun isAsset(downloadId: Long): Boolean {
-        return downloadManager.query(Query().setFilterById(downloadId))
-                .run {
-                    moveToFirst()
-                    assetRepo.getAll().any {
-                        it.url == getString(this.getColumnIndex(COLUMN_URI))
-                    }
-                }
+    private suspend fun isAsset(downloadId: Long): Boolean {
+        return downloadManager.query(Query().setFilterById(downloadId)).run {
+            moveToFirst()
+            val isAsset = assetRepo.getAll().any {
+                it.url == getString(this.getColumnIndex(COLUMN_URI))
+            }
+            close()
+            isAsset
+        }
     }
 
 
     fun filenameFrom(downloadId: Long): String {
-        val cursor = downloadManager.query(Query().setFilterById(downloadId))
-        cursor.moveToFirst()
-        val uri = cursor.getString(cursor.getColumnIndex(COLUMN_URI))
-        return uri.substringAfterLast('/')
+        return downloadManager.query(Query().setFilterById(downloadId)).run {
+            moveToFirst()
+            val uri = getString(getColumnIndex(COLUMN_URI))
+            close()
+            uri.substringAfterLast('/')
+        }
     }
 
 //    suspend fun removeQueuedDownloads() {
@@ -169,6 +173,7 @@ class FileDownloader @Inject constructor (
         Lg.d("FileDownloader: synchronizeDbDownloadStatuses()")
         GlobalScope.launch(Dispatchers.IO) {
             assetRepo.getDownloading().forEach { asset ->
+                Lg.d("synchronizeDbDownloadStatuses(): Processing downloading asset $asset")
                 if (downloadExists(asset.status)) {
                     if (isDownloadSuccessful(asset.status)) {
                         asset.status = DECOMPRESSING
@@ -190,6 +195,7 @@ class FileDownloader @Inject constructor (
                     registerDecompressionObserver(asset.filenameGzip)
             }
             mapRepo.getDownloading().forEach { map ->
+                Lg.d("synchronizeDbDownloadStatuses(): Processing downloading map $map")
                 if (downloadExists(map.status)) {
                     if (isDownloadSuccessful(map.status)) {
                         map.status = DOWNLOADED
@@ -207,25 +213,24 @@ class FileDownloader @Inject constructor (
 
     // NOTE: Manually cancelled downloads appear to be non-referencable by their downloadId
     private fun downloadExists(downloadId: Long): Boolean {
-        val query = Query().setFilterById(downloadId)
-        val cursor = downloadManager.query(query)
-        return cursor.moveToFirst()
+        return downloadManager.query(Query().setFilterById(downloadId)).run {
+            val exists = moveToFirst()
+            close()
+            exists
+        }
     }
 
     private fun isDownloadSuccessful(downloadId: Long): Boolean {
-        val query = Query().setFilterById(downloadId)
-        val cursor = downloadManager.query(query)
-        if (cursor.moveToFirst()) {
-            val status = cursor.getInt(cursor.getColumnIndex(COLUMN_STATUS))
-            cursor.close()
-            return status == STATUS_SUCCESSFUL
+        return downloadManager.query(Query().setFilterById(downloadId)).run {
+            moveToFirst()
+            val status = getInt(getColumnIndex(COLUMN_STATUS))
+            close()
+            status == STATUS_SUCCESSFUL
         }
-        cursor.close()
-        Lg.w("FileDownloader.isDownloadSuccessful(): downloadId $downloadId not found")
-        return false
     }
 
     private fun onDownloadComplete(downloadId: Long) {
+        Lg.v("FileDownloader: onDownloadComplete() ${getDownloadInfo(downloadId)}")
         if (! downloadExists(downloadId)) // Catches manually cancelled download
             synchronizeDbDownloadStatuses()
         else if (isDownloadSuccessful(downloadId)) {
@@ -261,6 +266,28 @@ class FileDownloader @Inject constructor (
             }
         }
     }
+
+    private fun getDownloadInfo(downloadId: Long): DownloadInfo? {
+        return downloadManager.query(Query().setFilterById(downloadId)).run {
+            if (moveToFirst()) {
+                return DownloadInfo(
+                        downloadId,
+                        getString(getColumnIndex(COLUMN_TITLE)),
+                        getString(getColumnIndex(COLUMN_DESCRIPTION)),
+                        getString(getColumnIndex(COLUMN_URI)),
+                        getInt(getColumnIndex(COLUMN_STATUS)),
+                        getInt(getColumnIndex(COLUMN_REASON)),
+                        getLong(getColumnIndex(COLUMN_BYTES_DOWNLOADED_SO_FAR)),
+                        getLong(getColumnIndex(COLUMN_TOTAL_SIZE_BYTES)),
+                        getLong(getColumnIndex(COLUMN_LAST_MODIFIED_TIMESTAMP))
+                )
+            } else {
+                null
+            }
+        }
+
+    }
+
 
     private suspend fun registerDecompressionObserver(workRequestTag: String) {
         withContext(Dispatchers.Main) {
@@ -347,3 +374,15 @@ class FileDownloader @Inject constructor (
         const val DOWNLOADED = -2L
     }
 }
+
+data class DownloadInfo(
+        val id: Long,
+        val title: String,
+        val description: String,
+        val uri: String,
+        val status: Int,
+        val reason: Int,
+        val bytes: Long,
+        val totalBytes: Long,
+        val lastModifiedTimestamp: Long
+)

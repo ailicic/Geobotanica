@@ -40,12 +40,6 @@ import org.mapsforge.map.rendertheme.InternalRenderTheme
 import org.mapsforge.map.scalebar.MapScaleBar
 import javax.inject.Inject
 
-
-// TODO: Get Storage permissions in DownloadAssetsFragment, not MapFragment
-// TODO: Ensure world map is downloaded before permitting nav to MapFragment
-// TODO: Figure out how to deal with stagnant downloads. Tried removing if not progressing but db updates got hairy.
-// TODO: Detect and update failed downloads on app start and during app run
-
 // TODO: Determine which fragment to load initially instead of forwarding. Maybe use SharedPrefs?
 // TODO: Check behaviour in PlantConfirmFragment if toolbar back is pressed (looks like it ignores back button override)
     // NEED activity.toolbar.setNavigationOnClickListener
@@ -68,6 +62,7 @@ import javax.inject.Inject
 // TODO: Use interfaces instead of concrete classes for injected dependencies where appropriate
 // TODO: Implement dark theme
 // TODO: Try using object detection for assisted plant measurements
+// TODO: Show warning dialog to user on zooming out far. Rendering vector maps at low zoom is slow but is only required once for caching.
 
 // LONG TERM NIT PICK
 // TODO: Get rid of warning on using null as root layout in inflate calls in onCreateDialog()
@@ -137,9 +132,7 @@ class MapFragment : BaseFragment() {
     }
 
     private fun initAfterPermissionsGranted() {
-        if (!wasPermissionGranted(WRITE_EXTERNAL_STORAGE))
-            requestPermission(WRITE_EXTERNAL_STORAGE)
-        else if (!wasPermissionGranted(ACCESS_FINE_LOCATION))
+        if (! wasPermissionGranted(ACCESS_FINE_LOCATION))
             requestPermission(ACCESS_FINE_LOCATION)
         else
             init()
@@ -191,16 +184,6 @@ class MapFragment : BaseFragment() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
-            getRequestCode(WRITE_EXTERNAL_STORAGE) -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    Lg.i("permission.WRITE_EXTERNAL_STORAGE: PERMISSION_GRANTED")
-                    initAfterPermissionsGranted()
-                } else {
-                    Lg.i("permission.WRITE_EXTERNAL_STORAGE: PERMISSION_DENIED")
-                    showToast("External storage permission required") // TODO: Find better UX approach (separate screen)
-                    activity.finish()
-                }
-            }
             getRequestCode(ACCESS_FINE_LOCATION) -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     Lg.i("permission.ACCESS_FINE_LOCATION: PERMISSION_GRANTED")
@@ -232,8 +215,9 @@ class MapFragment : BaseFragment() {
         mapView.mapScaleBar.scaleBarPosition = MapScaleBar.ScaleBarPosition.TOP_LEFT
         mapView.setBuiltInZoomControls(true)
 
-        tileCache = AndroidUtil.createExternalStorageTileCache(context, "mapcache",
-                mapView.model.displayModel.tileSize, mapView.model.displayModel.tileSize, true)
+        tileCache = AndroidUtil.createTileCache(context, "mapcache",
+                mapView.model.displayModel.tileSize, 1f, mapView.model.frameBufferModel.overdrawFactor, true)
+        Lg.v("tileCache: capacity = ${tileCache.capacity}, capacityFirstLevel = ${tileCache.capacityFirstLevel}")
         tileRendererLayer = TileRendererLayer(tileCache, createMultiMapDataStore(),
                 mapView.model.mapViewPosition, AndroidGraphicFactory.INSTANCE)
         tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.DEFAULT)

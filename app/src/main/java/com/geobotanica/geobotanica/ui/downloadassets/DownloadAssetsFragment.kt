@@ -1,8 +1,10 @@
 package com.geobotanica.geobotanica.ui.downloadassets
 
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
@@ -49,6 +51,34 @@ class DownloadAssetsFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initAfterPermissionsGranted()
+    }
+
+    private fun initAfterPermissionsGranted() {
+        if (! wasPermissionGranted(WRITE_EXTERNAL_STORAGE))
+            requestPermission(WRITE_EXTERNAL_STORAGE)
+        else
+            init()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            getRequestCode(WRITE_EXTERNAL_STORAGE) -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    Lg.i("permission.WRITE_EXTERNAL_STORAGE: PERMISSION_GRANTED")
+                    initAfterPermissionsGranted()
+                } else {
+                    Lg.i("permission.WRITE_EXTERNAL_STORAGE: PERMISSION_DENIED")
+                    showToast("External storage permission required") // TODO: Find better UX approach (separate screen)
+                    activity.finish()
+                }
+            }
+            else -> { }
+        }
+    }
+
+    private fun init() {
+        constraintLayout.isVisible = true
         downloadButton.setOnClickListener(::onClickDownload)
         initUi()
         bindViewModel()
