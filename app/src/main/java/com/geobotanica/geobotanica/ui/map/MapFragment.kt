@@ -28,12 +28,15 @@ import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.mapsforge.core.graphics.Color
+import org.mapsforge.core.graphics.Style
 import org.mapsforge.core.model.LatLong
 import org.mapsforge.core.model.Point
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
 import org.mapsforge.map.android.util.AndroidUtil
 import org.mapsforge.map.datastore.MultiMapDataStore
 import org.mapsforge.map.layer.cache.TileCache
+import org.mapsforge.map.layer.overlay.Circle
 import org.mapsforge.map.layer.overlay.Marker
 import org.mapsforge.map.layer.renderer.TileRendererLayer
 import org.mapsforge.map.reader.MapFile
@@ -99,7 +102,7 @@ class MapFragment : BaseFragment() {
     private val loadedMaps = mutableListOf<String>()
 
     private var locationMarker: Marker? = null
-//    private var locationPrecisionCircle: Polygon? = null
+    private var locationPrecisionCircle: Circle? = null
 
     private val sharedPrefsIsFirstRun = "isFirstRun"
     private val sharedPrefsMapLatitude = "mapLatitude"
@@ -228,8 +231,8 @@ class MapFragment : BaseFragment() {
         mapView.setZoomLevel(12.toByte())
 
         coordinatorLayout.isVisible = true // TODO: Remove this after LoginScreen implemented
+        locationPrecisionCircle = null
         locationMarker = null
-//        createLocationPrecisionCircle() // Add to map now to ensure always on bottom
 
 //        if (viewModel.isFirstRun)
 //            viewModel.getLastLocation()?.let { centerMapOnLocation(it, false) } // TODO: CHECK IF THIS SHOULD STAY (never worked)
@@ -354,57 +357,44 @@ class MapFragment : BaseFragment() {
     // TODO: See if logic here can be pushed to VM
     @Suppress("DEPRECATION")
     private val onLocation = Observer<Location> {
-//        Lg.v("MapFragment: onLocation() = $it")
+        Lg.v("MapFragment: onLocation() = $it")
         if (it.latitude != null && it.longitude != null) { // OK in VM
             if (it.isRecent()) { // OK in VM
                 gpsFab.setImageDrawable(resources.getDrawable(R.drawable.gps_fix)) // Could be LiveData
-//                updateLocationPrecision(it) // Could be LiveData
-//                if (isLocationOffScreen(it)) // Problem: Check requires map
-//                    centerMapOnLocation(it) // Could be LiveData
+                updateLocationPrecision(it) // Could be LiveData
+                if (isLocationOffScreen(it)) // Problem: Check requires map
+                    centerMapOnLocation(it) // Could be LiveData
                 viewModel.setStaleGpsLocationTimer() // OK in VM
             }
             updateLocationMarker(it) // Could be LiveData
-            mapView.invalidate() // Could be LiveData
+            mapView.layerManager.redrawLayers()
         }
         // TODO: Update satellitesInUse
     }
 
-//    private fun updateLocationPrecision(location: Location) {
-//        if (locationPrecisionCircle == null)
-//            createLocationPrecisionCircle()
-//        locationPrecisionCircle?.points = Polygon.pointsAsCircle(
-//            GeoPoint(location.latitude!!, location.longitude!!),
-//            location.precision!!.toDouble()
-//        )
-//    }
+    private fun updateLocationPrecision(location: Location) {
+        if (locationPrecisionCircle == null)
+            createLocationPrecisionCircle()
+        locationPrecisionCircle?.setLatLong(location.toLatLong())
+        locationPrecisionCircle?.radius = location.precision!!
+    }
 
-//    @Suppress("DEPRECATION")
-//    private fun createLocationPrecisionCircle() {
-//        locationPrecisionCircle = Polygon(map).apply {
-//            fillColor = 0x12121212
-//            strokeColor = resources.getColor(R.color.colorPrimaryDark)
-//            strokeWidth = 3F
-//            infoWindow = null
-//        }
-//        map.overlays.add(locationPrecisionCircle)
-//    }
+    private fun createLocationPrecisionCircle() {
+        locationPrecisionCircle  = LocationCircle()
+        mapView.layerManager.layers.add(locationPrecisionCircle)
+    }
 
-    private fun updateLocationMarker(currentLocation: Location) {
+    private fun updateLocationMarker(location: Location) {
         if (locationMarker == null)
-            createLocationMarker(currentLocation)
-        locationMarker?.latLong = LatLong(currentLocation.latitude!!, currentLocation.longitude!!)
-        mapView.layerManager.redrawLayers()
+            createLocationMarker()
+        locationMarker?.latLong = location.toLatLong()
     }
 
     @Suppress("DEPRECATION")
-    private fun createLocationMarker(currentLocation: Location) {
+    private fun createLocationMarker() {
         val drawable = AndroidGraphicFactory.convertToBitmap(resources.getDrawable(R.drawable.person))
         val yOffset = (-1)  * drawable.height / 2
-        locationMarker = object : Marker(
-                LatLong(currentLocation.latitude!!, currentLocation.longitude!!),
-                drawable,
-                0, yOffset
-        ) {
+        locationMarker = object : Marker(LatLong(0.0,0.0), drawable, 0, yOffset) {
             override fun onTap(tapLatLong: LatLong?, layerXY: Point?, tapXY: Point?): Boolean {
                 showToast("Tap")
                 return true
@@ -417,14 +407,27 @@ class MapFragment : BaseFragment() {
         }
         mapView.layerManager.layers.add(locationMarker)
     }
-//
-//    private fun isLocationOffScreen(location: Location): Boolean =
-//        !map.projection.boundingBox.contains(location.latitude!!, location.longitude!!)
-//
-//    private fun centerMapOnLocation(location: Location, animate: Boolean = true) {
-//        if (animate)
-//            location.let { map.controller.animateTo( GeoPoint(it.latitude!!, it.longitude!!) ) }
-//        else
-//            location.let { map.controller.setCenter( GeoPoint(it.latitude!!, it.longitude!!) ) }
-//    }
+
+    private fun isLocationOffScreen(location: Location): Boolean =
+        ! mapView.boundingBox.contains(location.toLatLong())
+
+    private fun centerMapOnLocation(location: Location, animate: Boolean = true) {
+        if (animate)
+            mapView.model.mapViewPosition.animateTo(location.toLatLong())
+        else
+            mapView.setCenter(location.toLatLong())
+    }
+
+    class LocationCircle :Circle(LatLong(0.0, 0.0), 0f,
+            AndroidGraphicFactory.INSTANCE.createPaint(). apply {
+                setStyle(Style.FILL)
+                color = AndroidGraphicFactory.INSTANCE.createColor(64, 0, 0, 0)
+            },
+            AndroidGraphicFactory.INSTANCE.createPaint(). apply {
+                setStyle(Style.STROKE)
+                color = AndroidGraphicFactory.INSTANCE.createColor(Color.BLACK)
+                strokeWidth = 2f
+            }, true
+    )
 }
+

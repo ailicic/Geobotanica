@@ -1,6 +1,7 @@
 package com.geobotanica.geobotanica.data.entity
 
 import androidx.room.*
+import org.mapsforge.core.model.LatLong
 import org.threeten.bp.OffsetDateTime
 import java.io.Serializable
 import kotlin.math.max
@@ -26,6 +27,8 @@ data class Location(
                 satellitesVisible = max(satellitesVisible, location.satellitesVisible)
         )
     }
+
+    fun toLatLong() = LatLong(latitude!!, longitude!!)
 }
 
 
