@@ -30,19 +30,16 @@ class MeasurementsCompoundView @JvmOverloads constructor(
     private lateinit var plantType: LiveData<Plant.Type>
 
     init {
-        Lg.d("MeasurementsCompoundView.init{ }")
         inflate(getContext(), R.layout.compound_measurements, this)
         editMeasurementsButton.setOnClickListener { showEditMeasurementsDialog() }
     }
 
     fun init(height: Measurement?, diameter: Measurement?, trunkDiameter: Measurement?, plantType: LiveData<Plant.Type>) {
-        Lg.d("MeasurementsCompoundView.init()")
         updateMeasurements(height, diameter, trunkDiameter)
 
         this.plantType = plantType
         val lifecycleOwner = (context as FragmentActivity).fragment.viewLifecycleOwner
         plantType.observe(lifecycleOwner, Observer {
-            Lg.d("plantType.Observer")
             if (it != Plant.Type.TREE)
                 onNewMeasurements(this.height, this.diameter, null)
         })
@@ -59,13 +56,11 @@ class MeasurementsCompoundView @JvmOverloads constructor(
     }
 
     private fun onNewMeasurements(height: Measurement?, diameter: Measurement?, trunkDiameter: Measurement?) {
-        Lg.d("MeasurementCompoundView.onNewMeasurements()")
         updateMeasurements(height, diameter, trunkDiameter)
         onNewMeasurementsCallback(height, diameter, trunkDiameter)
     }
 
     private fun updateMeasurements(height: Measurement?, diameter: Measurement?, trunkDiameter: Measurement?) {
-        Lg.d("MeasurementCompoundView.updateMeasurements()")
         this.height = height
         this.diameter = diameter
         this.trunkDiameter = trunkDiameter

@@ -6,6 +6,7 @@ import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.data.repo.*
 import com.geobotanica.geobotanica.util.Lg
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -32,13 +33,13 @@ class PlantDetailViewModel @Inject constructor(
     lateinit var plantPhotos: LiveData<List<PlantPhoto>>
     lateinit var mainPhoto: LiveData<PlantPhoto>
 
-    lateinit var height: LiveData<PlantMeasurement>
+    lateinit var height: LiveData<PlantMeasurement?>
     lateinit var heightDateText: LiveData<String>
 
-    lateinit var diameter: LiveData<PlantMeasurement>
+    lateinit var diameter: LiveData<PlantMeasurement?>
     lateinit var diameterDateText: LiveData<String>
 
-    lateinit var trunkDiameter: LiveData<PlantMeasurement>
+    lateinit var trunkDiameter: LiveData<PlantMeasurement?>
     lateinit var trunkDiameterDateText: LiveData<String>
 
     lateinit var measuredByUser: LiveData<String>
@@ -46,7 +47,6 @@ class PlantDetailViewModel @Inject constructor(
     lateinit var createdDateText: LiveData<String>
 
     private fun init() {
-        Lg.d("PlantDetailViewModel: init(plantId=$plantId)")
         plant = plantRepo.get(plantId)
         user = plant.switchMap { userRepo.get(it.userId) }
 
@@ -57,21 +57,23 @@ class PlantDetailViewModel @Inject constructor(
         mainPhoto = plantPhotoRepo.getMainPhotoOfPlant(plantId)
 
         height = plantMeasurementRepo.getHeightOfPlant(plantId)
-        heightDateText = height.map { it.timestamp.toSimpleDate() }
+        heightDateText = height.map { it?.timestamp?.toSimpleDate().orEmpty() }
 
         diameter = plantMeasurementRepo.getDiameterOfPlant(plantId)
-        diameterDateText = diameter.map { it.timestamp.toSimpleDate() }
+        diameterDateText = diameter.map { it?.timestamp?.toSimpleDate().orEmpty() }
 
         trunkDiameter = plantMeasurementRepo.getTrunkDiameterOfPlant(plantId)
-        trunkDiameterDateText = trunkDiameter.map { it.timestamp.toSimpleDate() }
+        trunkDiameterDateText = trunkDiameter.map { it?.timestamp?.toSimpleDate().orEmpty() }
 
         measuredByUser = height.switchMap { height ->
-            userRepo.get(height.userId).map { it.nickname }
+            height?.let {
+                userRepo.get(height.userId).map { it.nickname }
+            } ?: MutableLiveData<String>().apply { value = "" }
         }
         createdDateText = plant.map { it.timestamp.toSimpleDate() }
     }
 
-    fun deletePlant() = viewModelScope.launch {
+    fun deletePlant() = viewModelScope.launch(Dispatchers.IO) {
         deletePlantPhotoFiles()
         database.withTransaction {
             Lg.d("Deleting plant: ${plant.value!!}")

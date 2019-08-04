@@ -77,7 +77,7 @@ class DownloadAssetsFragment : BaseFragment() {
         }
     }
 
-    private fun init() {
+    private fun init() = lifecycleScope.launch {
         constraintLayout.isVisible = true
         downloadButton.setOnClickListener(::onClickDownload)
         initUi()
@@ -107,13 +107,9 @@ class DownloadAssetsFragment : BaseFragment() {
     }
 
     @SuppressLint("UsableSpace")
-    private fun initUi() {
-//        worldMapText.doOnPreDraw {  // TODO: Does this fix the random crashes of worldMapText = null?
-            lifecycleScope.launch {
-                worldMapText.text = viewModel.getWorldMapText()
-                plantNameDbText.text = viewModel.getPlantNameDbText()
-            }
-//        }
+    private suspend fun initUi() {
+        worldMapText.text = viewModel.getWorldMapText()
+        plantNameDbText.text = viewModel.getPlantNameDbText()
         internalStorageText.text = getString(R.string.internal_storage,
                 File(appContext.filesDir.absolutePath).usableSpace / 1024 / 1024)
     }

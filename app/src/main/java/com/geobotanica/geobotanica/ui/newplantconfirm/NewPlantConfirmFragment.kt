@@ -50,7 +50,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
             photos.clear()
-            photos.add( PhotoData(PlantPhoto.Type.COMPLETE, getFromBundle(photoUriKey)))
+            photos.add(PhotoData(PlantPhoto.Type.COMPLETE, getFromBundle(photoUriKey)))
             plantType.value = Plant.Type.fromFlag(getFromBundle(plantTypeKey))
             commonName.value = getNullableFromBundle(commonNameKey)
             scientificName.value = getNullableFromBundle(scientificNameKey)
@@ -59,10 +59,10 @@ class NewPlantConfirmFragment : BaseFragment() {
             height.value = getNullableFromBundle(heightMeasurementKey)
             diameter.value = getNullableFromBundle(diameterMeasurementKey)
             trunkDiameter.value = getNullableFromBundle(trunkDiameterMeasurementKey)
-            Lg.d("Fragment args: userId=$userId, photoType=$plantType, " +
-                    "commonName=$commonName, scientificName=$scientificName, " +
+            Lg.d("Fragment args: userId=$userId, photoType=${plantType.value}, " +
+                    "commonName=${commonName.value}, scientificName=${scientificName.value}, " +
                     "vernId=$vernacularId, taxonId=$taxonId, photos=$photos, " +
-                    "height=$height, diameter=$diameter, trunkDiameter=$trunkDiameter")
+                    "height=${height.value}, diameter=${diameter.value}, trunkDiameter=${trunkDiameter.value}")
         }
     }
 
@@ -210,16 +210,18 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     @Suppress("UNUSED_PARAMETER")
     private fun onFabClicked(view: View) {
-        if (!isLocationValid())
-            return
-        gps.currentLocation?.let { viewModel.location = it }
+        lifecycleScope.launch {
+            if (!isLocationValid())
+                return@launch
+            gps.currentLocation?.let { viewModel.location = it }
 
-        viewModel.savePlantComposite()
-        showToast("Plant saved") // TODO: Make snackbar (maybe?)
+            viewModel.savePlantComposite()
+            showToast("Plant saved") // TODO: Make snackbar (maybe?)
 
-        val navController = activity.findNavController(R.id.fragment)
-        navController.popBackStack(R.id.mapFragment, false)
-        activity.currentLocation = null
+            val navController = activity.findNavController(R.id.fragment)
+            navController.popBackStack(R.id.mapFragment, false)
+            activity.currentLocation = null
+        }
     }
 
     private fun isLocationValid(): Boolean {

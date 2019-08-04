@@ -2,7 +2,6 @@ package com.geobotanica.geobotanica.ui.newplantconfirm
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.room.withTransaction
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.*
@@ -16,7 +15,6 @@ import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNa
 import com.geobotanica.geobotanica.ui.viewpager.PhotoData
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.Measurement
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -67,7 +65,7 @@ class NewPlantConfirmViewModel @Inject constructor (
         this.trunkDiameter.value = trunkDiameter
     }
 
-    fun savePlantComposite() = viewModelScope.launch {
+    suspend fun savePlantComposite() {
         database.withTransaction {
             Lg.d("Saving PlantComposite to database now...")
             val plant = Plant(userId, plantType.value!!, commonName.value, scientificName.value, vernacularId, taxonId)
@@ -77,14 +75,14 @@ class NewPlantConfirmViewModel @Inject constructor (
             savePlantPhotos(plant)
             savePlantMeasurements(plant)
             savePlantLocation(plant)
+            vernacularId?.let { vernacularRepo.setTagged(it, USED) }
+            taxonId?.let { taxonRepo.setTagged(it, USED) }
         }
-        vernacularId?.let {vernacularRepo.setTagged(it, USED) }
-        taxonId?.let {taxonRepo.setTagged(it, USED) }
     }
 
     private suspend fun savePlantPhotos(plant: Plant) {
         photos.forEach { (photoType, photoUri) ->
-            val photo = PlantPhoto(userId, plant.id, photoType, photoUri) // TODO: Store only relative path/url
+            val photo = PlantPhoto(userId, plant.id, photoType, photoUri)
             photo.id = plantPhotoRepo.insert(photo)
             Lg.d("Saved: $photo (id=${photo.id})")
         }

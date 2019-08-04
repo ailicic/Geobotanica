@@ -4,6 +4,7 @@ import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.Gravity.BOTTOM
 import android.view.Gravity.CENTER_HORIZONTAL
@@ -25,29 +26,35 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.util.*
+import com.geobotanica.geobotanica.util.IdDiffer.computeDiffs
 import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.mapsforge.core.graphics.Color
 import org.mapsforge.core.graphics.Style
 import org.mapsforge.core.model.LatLong
-import org.mapsforge.core.model.Point
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
 import org.mapsforge.map.android.util.AndroidUtil
 import org.mapsforge.map.datastore.MultiMapDataStore
 import org.mapsforge.map.layer.cache.TileCache
+import org.mapsforge.map.layer.labels.LabelLayer
 import org.mapsforge.map.layer.overlay.Circle
-import org.mapsforge.map.layer.overlay.Marker
 import org.mapsforge.map.layer.renderer.TileRendererLayer
 import org.mapsforge.map.reader.MapFile
 import org.mapsforge.map.rendertheme.InternalRenderTheme
 import org.mapsforge.map.scalebar.MapScaleBar
 import javax.inject.Inject
 
+
+// TODO: Force location markers to be drawn on top of plant markers
+// TODO: Prohibit search plant names (earlier: add plant in MapFragment) until taxa are loaded
+
 // TODO: Determine which fragment to load initially instead of forwarding. Maybe use SharedPrefs?
 // TODO: Figure out how to handle tap events from markers vs. map
 // TODO: Check behaviour in PlantConfirmFragment if toolbar back is pressed (looks like it ignores back button override)
     // NEED activity.toolbar.setNavigationOnClickListener
+// TODO: Store only relative path/url in PlantPhoto
+// TODO: Need to revisit back button override in SuggestedMaps/BrowseMaps. How to reset toolbar listener?
 
 // LONG TERM
 // TODO: Use Okio everywhere
@@ -101,8 +108,8 @@ class MapFragment : BaseFragment() {
     private lateinit var tileCache: TileCache
     private val loadedMaps = mutableListOf<String>()
 
-    private var locationMarker: Marker? = null
-    private var locationPrecisionCircle: Circle? = null
+    private var locationMarker: LocationMarker? = null
+    private var locationPrecisionCircle: LocationCircle? = null
 
     private val sharedPrefsIsFirstRun = "isFirstRun"
     private val sharedPrefsMapLatitude = "mapLatitude"
@@ -200,7 +207,7 @@ class MapFragment : BaseFragment() {
         }
     }
 
-    private fun init() {
+    private fun init() = lifecycleScope.launch {
 //        // TODO: REMOVE
 //        NavHostFragment.findNavController(this).navigate(
 //                R.id.downloadTaxaFragment, createBundle() )
@@ -211,24 +218,35 @@ class MapFragment : BaseFragment() {
         bindViewModel()
     }
 
-    private fun initMap() = lifecycleScope.launch {
+    private suspend fun initMap() {
         mapView.isClickable = true
         mapView.mapScaleBar.isVisible = true
         mapView.mapScaleBar.scaleBarPosition = MapScaleBar.ScaleBarPosition.TOP_LEFT
         mapView.setBuiltInZoomControls(true)
+        mapView.setCenter(LatLong(viewModel.mapLatitude, viewModel.mapLongitude))
+        mapView.setZoomLevel(viewModel.mapZoomLevel.toByte())
+        mapView.mapZoomControls.zoomControlsGravity = BOTTOM or CENTER_HORIZONTAL
+
 
         tileCache = AndroidUtil.createTileCache(context, "mapcache",
                 mapView.model.displayModel.tileSize, 1f, mapView.model.frameBufferModel.overdrawFactor, true)
         Lg.v("tileCache: capacity = ${tileCache.capacity}, capacityFirstLevel = ${tileCache.capacityFirstLevel}")
-        tileRendererLayer = TileRendererLayer(tileCache, createMultiMapDataStore(),
-                mapView.model.mapViewPosition, AndroidGraphicFactory.INSTANCE)
-        tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.DEFAULT)
 
+
+//        tileRendererLayer = TileRendererLayer(tileCache, createMultiMapDataStore(),
+//                mapView.model.mapViewPosition, AndroidGraphicFactory.INSTANCE)
+//        tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.DEFAULT)
+        // See new approach here: https://github.com/mapsforge/mapsforge/blob/master/docs/LabelLayer.md
+        tileRendererLayer = AndroidUtil.createTileRendererLayer(
+                tileCache,
+                mapView.model.mapViewPosition,
+                createMultiMapDataStore(),
+                InternalRenderTheme.DEFAULT,
+                false, false, true)
         mapView.layerManager.layers.add(tileRendererLayer)
-        mapView.mapZoomControls.zoomControlsGravity = BOTTOM or CENTER_HORIZONTAL
 
-        mapView.setCenter(LatLong(viewModel.mapLatitude, viewModel.mapLongitude))
-        mapView.setZoomLevel(12.toByte())
+        val labelLayer = LabelLayer(AndroidGraphicFactory.INSTANCE, tileRendererLayer.labelStore)
+        mapView.layerManager.layers.add(labelLayer)
 
         coordinatorLayout.isVisible = true // TODO: Remove this after LoginScreen implemented
         locationPrecisionCircle = null
@@ -242,7 +260,7 @@ class MapFragment : BaseFragment() {
     }
 
     private fun registerMapDownloadObserver() {
-        activity.downloadComplete.observe(activity, Observer { downloadId ->
+        activity.downloadComplete.observe(viewLifecycleOwner, Observer { downloadId ->
             if (fileDownloader.isMap(downloadId) && ! loadedMaps.contains(fileDownloader.filenameFrom(downloadId)))
                 reloadMaps()
         })
@@ -262,14 +280,32 @@ class MapFragment : BaseFragment() {
 
     private fun reloadMaps() = lifecycleScope.launch {
         Lg.d("MapFragment: reloadMaps()")
-        mapView.layerManager.layers.remove(tileRendererLayer)
+        mapView.layerManager.layers.clear()
         tileRendererLayer.onDestroy()
         tileCache.purge() // Delete all cache files. If omitted, existing cache will override new maps.
         tileRendererLayer = TileRendererLayer(tileCache, createMultiMapDataStore(),
                 mapView.model.mapViewPosition, AndroidGraphicFactory.INSTANCE)
         tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.DEFAULT)
         mapView.layerManager.layers.add(tileRendererLayer)
-        mapView.layerManager.redrawLayers()
+        reloadMarkers()
+    }
+
+    private fun reloadMarkers() {
+        viewModel.plantMarkerData.removeObserver(onPlantMarkers)
+        viewModel.plantMarkerData.observe(viewLifecycleOwner, onPlantMarkers)
+    }
+
+    private fun forceLocationMarkerOnTop() {
+        locationPrecisionCircle?.let {
+            mapView.layerManager.layers.remove(it, false)
+            locationPrecisionCircle = null
+            createLocationPrecisionCircle()
+        }
+        locationMarker?.let {
+            mapView.layerManager.layers.remove(it, false)
+            locationMarker = null
+            createLocationMarker()
+        }
     }
 
     @Suppress("DEPRECATION")
@@ -287,7 +323,7 @@ class MapFragment : BaseFragment() {
             )
             showGpsRequiredSnackbar.observe(viewLifecycleOwner, onGpsRequiredSnackbar)
             navigateToNewPlant.observe(viewLifecycleOwner, onNavigateToNewPlant)
-//            plantMarkerData.observe(viewLifecycleOwner, onPlantMarkers)
+            plantMarkerData.observe(viewLifecycleOwner, onPlantMarkers)
             currentLocation.observe(viewLifecycleOwner, onLocation)
         }
     }
@@ -326,33 +362,35 @@ class MapFragment : BaseFragment() {
         }
     }
 
-//    private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkersData ->
-//        val currentGbMarkers = map.overlays.filterIsInstance<GbMarker>()
-//        val plantMarkerDiffs = computeDiffs(
-//                currentGbMarkers.map { it.plantId }, newPlantMarkersData.map { it.plantId }
-//        )
-//
-//        map.overlays.removeAll( // Must be before add (for updated markers)
-//                currentGbMarkers.filter { plantMarkerDiffs.removeIds.contains(it.plantId) } )
-//        map.overlays.addAll( // Must be after remove (for updated markers)
-//                newPlantMarkersData
-//                        .filter { plantMarkerDiffs.insertIds.contains(it.plantId) }
-//                        .map { GbMarker(it, activity, map) } )
-//        // TODO: Consider using a custom InfoWindow
-//        // https://code.google.com/archive/p/osmbonuspack/wikis/Tutorial_2.wiki
-//        // 7. Customizing the bubble behaviour:
-//        // 9. Creating your own bubble layout
-//
-//        forceLocationMarkerOnTop()
-//        map.invalidate()
-//    }
+    private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkersData ->
+        Lg.d("onPlantMarkers: $newPlantMarkersData")
 
-//    private fun forceLocationMarkerOnTop() {
-//        locationMarker?.let {
-//            map.overlays.remove(it)
-//            map.overlays.add(it)
+        val currentPlantMarkers = mapView.layerManager.layers.filterIsInstance<PlantMarker>()
+        val plantMarkerDiffs = computeDiffs(
+                currentPlantMarkers.map { it.plantId }, newPlantMarkersData.map { it.plantId }
+        )
+
+
+//        mapView.layerManager.layers.removeAll { // CowArray -> UnsupportedOperationException!!
+//            it is PlantMarker && plantMarkerDiffs.removeIds.contains(it.plantId)
 //        }
-//    }
+
+        mapView.layerManager.layers.filter {
+            it is PlantMarker && plantMarkerDiffs.removeIds.contains(it.plantId)
+        }.forEach {
+            mapView.layerManager.layers.remove(it, false)
+        }
+
+        mapView.layerManager.layers.addAll(
+            newPlantMarkersData
+                .filter { plantMarkerDiffs.insertIds.contains(it.plantId) }
+                .map { PlantMarker(it, activity) },
+            false)
+
+        forceLocationMarkerOnTop()
+        mapView.layerManager.redrawLayers()
+        // TODO: Consider using a custom InfoWindow
+    }
 
     // TODO: See if logic here can be pushed to VM
     @Suppress("DEPRECATION")
@@ -380,7 +418,7 @@ class MapFragment : BaseFragment() {
     }
 
     private fun createLocationPrecisionCircle() {
-        locationPrecisionCircle  = LocationCircle()
+        locationPrecisionCircle = LocationCircle()
         mapView.layerManager.layers.add(locationPrecisionCircle)
     }
 
@@ -392,19 +430,7 @@ class MapFragment : BaseFragment() {
 
     @Suppress("DEPRECATION")
     private fun createLocationMarker() {
-        val drawable = AndroidGraphicFactory.convertToBitmap(resources.getDrawable(R.drawable.person))
-        val yOffset = (-1)  * drawable.height / 2
-        locationMarker = object : Marker(LatLong(0.0,0.0), drawable, 0, yOffset) {
-            override fun onTap(tapLatLong: LatLong?, layerXY: Point?, tapXY: Point?): Boolean {
-                showToast("Tap")
-                return true
-            }
-
-            override fun onLongPress(tapLatLong: LatLong?, layerXY: Point?, tapXY: Point?): Boolean {
-                showToast("Long tap")
-                return true
-            }
-        }
+        locationMarker = LocationMarker(resources.getDrawable(R.drawable.person))
         mapView.layerManager.layers.add(locationMarker)
     }
 
@@ -418,16 +444,31 @@ class MapFragment : BaseFragment() {
             mapView.setCenter(location.toLatLong())
     }
 
-    class LocationCircle :Circle(LatLong(0.0, 0.0), 0f,
-            AndroidGraphicFactory.INSTANCE.createPaint(). apply {
+    // TODO: Move these classes out
+    class LocationCircle : Circle(LatLong(0.0, 0.0), 0f,
+            AndroidGraphicFactory.INSTANCE.createPaint().apply {
                 setStyle(Style.FILL)
                 color = AndroidGraphicFactory.INSTANCE.createColor(64, 0, 0, 0)
             },
-            AndroidGraphicFactory.INSTANCE.createPaint(). apply {
+            AndroidGraphicFactory.INSTANCE.createPaint().apply {
                 setStyle(Style.STROKE)
                 color = AndroidGraphicFactory.INSTANCE.createColor(Color.BLACK)
                 strokeWidth = 2f
             }, true
     )
+
+    // TODO: Remove toast dep (expose SingleLiveDataEvent?)
+    inner class LocationMarker(
+            drawable: Drawable
+    ) : GbMarker(
+            drawable,
+            onPress = { showToast("You are here") },
+            onLongPress = { showToast("Long tap") }
+    ) {
+
+        override fun toString(): String {
+            return latLong.toString()
+        }
+    }
 }
 

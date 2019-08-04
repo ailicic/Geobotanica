@@ -70,13 +70,19 @@ class SuggestedMapsFragment : BaseFragment() {
         bindViewModel()
     }
 
-    // TODO: Need to deregister after navigation?
+    override fun onDestroy() {
+        super.onDestroy()
+        activity.toolbar.setNavigationOnClickListener(null)
+    }
+
+    // TODO: Need to deregister before navigation?
     private fun addOnBackPressedCallback() {
         activity.toolbar.setNavigationOnClickListener { exitAppWithWarning() }
         requireActivity().onBackPressedDispatcher.addCallback(this) { exitAppWithWarning() }
     }
 
     private fun exitAppWithWarning() {
+        Lg.d("SuggestedMapsFragment: exitAppWithWarning()")
         val isPermitted = defaultSharedPrefs.get(sharedPrefsExitOnBackInDownloadMaps, false)
         if (isPermitted)
             activity.finish()

@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations.map
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.map
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.LocationService
@@ -47,7 +48,7 @@ class MapViewModel @Inject constructor(
     var userId = 0L    // Field injected dynamic parameter
 
     val plantMarkerData: LiveData< List<PlantMarkerData> > by lazy {
-        map(plantRepo.getAllPlantComposites()) { extractPlantMarkerDataList(it) }
+        plantRepo.getAllPlantComposites().map { extractPlantMarkerDataList(it) }
     }
 
     private val _currentLocation = MutableLiveData<Location>()

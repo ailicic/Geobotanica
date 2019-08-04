@@ -64,6 +64,11 @@ class BrowseMapsFragment : BaseFragment() {
         initRecyclerView()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        activity.toolbar.setNavigationOnClickListener(null)
+    }
+
     // TODO: Need to deregister after navigation?
     private fun addOnBackPressedCallback() {
         activity.toolbar.setNavigationOnClickListener { onClickBackButton() }

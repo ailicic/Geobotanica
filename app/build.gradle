@@ -32,6 +32,10 @@ android {
         targetCompatibility = "8"
         sourceCompatibility = "8"
     }
+
+    kotlinOptions { // TODO: Added to fix WorkManager compile issues. Remove in future?
+        jvmTarget = "1.8"
+    }
 }
 
 dependencies {
@@ -41,7 +45,7 @@ dependencies {
     implementation "androidx.activity:activity-ktx:1.1.0-alpha01"
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
     implementation "androidx.recyclerview:recyclerview:1.0.0"
-    implementation "androidx.viewpager2:viewpager2:1.0.0-alpha06"
+    implementation "androidx.viewpager2:viewpager2:1.0.0-beta02"
     implementation 'com.google.android.material:material:1.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
@@ -102,7 +106,7 @@ dependencies {
     implementation "android.arch.navigation:navigation-ui-ktx:$navigation_version"
 
     // Work manager
-    implementation "androidx.work:work-runtime-ktx:2.0.1"
+    implementation "androidx.work:work-runtime-ktx:2.1.0"
 
     // OffsetDateTime
     implementation "org.threeten:threetenbp:1.3.6"
