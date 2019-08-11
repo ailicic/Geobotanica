@@ -11,8 +11,8 @@ import org.mapsforge.map.layer.overlay.Marker
  */
 open class GbMarker(
         drawable: Drawable,
-        private val onPress: (() -> Unit)? = null,
-        private val onLongPress: (() -> Unit)? = null
+        var onPress: (() -> Unit)? = null,
+        var onLongPress: (() -> Unit)? = null
 ): Marker(
         LatLong(0.0, 0.0),
         AndroidGraphicFactory.convertToBitmap(drawable),

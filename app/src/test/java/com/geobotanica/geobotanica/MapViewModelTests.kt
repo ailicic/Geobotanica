@@ -113,7 +113,7 @@ class MapViewModelTests : Spek({
                         1L, "common", "latin",
                         1.0, 2.0, "photoPath",
                         OffsetDateTime.MAX.toString().substringBefore('T'),
-                        mapViewModel.getPlantIconFromType(Plant.Type.TREE)
+                        mapViewModel.getPlantMarkerIconFromType(Plant.Type.TREE)
                     ))
                 }
             }

@@ -104,7 +104,7 @@ class PlantNameAdapter(
         val constraintLayout: ConstraintLayout = view.constraintLayout
         val plantNameIcon: ImageView = view.plantNameIcon
         val plantName: TextView = view.plantName
-        val plantTypeIcon: ImageView= view.downloadIcon
+        val plantTypeIcon: ImageView= view.icon
         val altPlantTypeIcon: ImageView= view.altPlantTypeIcon
         val historyIcon: ImageView= view.historyIcon
         val starredIcon: ImageView= view.starIcon

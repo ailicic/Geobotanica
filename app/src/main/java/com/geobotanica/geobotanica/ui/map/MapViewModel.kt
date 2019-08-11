@@ -2,7 +2,6 @@ package com.geobotanica.geobotanica.ui.map
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations.map
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.map
 import com.geobotanica.geobotanica.R
@@ -11,7 +10,6 @@ import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.OnlineAssetId
 import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.data.entity.Plant.Type.*
 import com.geobotanica.geobotanica.data.entity.PlantComposite
 import com.geobotanica.geobotanica.data.repo.AssetRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
@@ -28,13 +26,13 @@ import javax.inject.Singleton
 
 data class PlantMarkerData(
         val plantId: Long,
+        val plantType: Plant.Type? = null,
         val commonName: String? = null,
         val scientificName: String? = null,
         val latitude: Double? = null,
         val longitude: Double? = null,
         val photoPath: String? = null,
-        val dateCreated: String? = null,
-        val icon: Int? = null
+        val dateCreated: String? = null
 )
 
 @Singleton
@@ -159,28 +157,15 @@ class MapViewModel @Inject constructor(
         val plant = plantComposite.plant
         val photoPath = plantComposite.plantPhotos.first().fileName
         val location = plantComposite.plantLocations.first().location
-        val plantIcon = getPlantIconFromType(plant.type)
         return PlantMarkerData(
             plant.id,
+            plantComposite.plant.type,
             plant.commonName,
             plant.scientificName,
             location.latitude,
             location.longitude,
             photoPath,
-            plant.timestamp.toString().substringBefore('T'),
-            plantIcon
+            plant.timestamp.toString().substringBefore('T')
         )
-    }
-
-    // TODO: Use drawable array + enum ordinal for this
-    fun getPlantIconFromType(plantType: Plant.Type): Int {
-        return when (plantType) {
-            TREE -> R.drawable.marker_purple
-            SHRUB -> R.drawable.marker_blue
-            HERB -> R.drawable.marker_green
-            GRASS -> R.drawable.marker_light_green
-            VINE -> R.drawable.marker_yellow
-            FUNGUS -> R.drawable.marker_yellow // TODO: Use different color
-        }
     }
 }

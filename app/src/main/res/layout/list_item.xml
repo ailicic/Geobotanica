@@ -11,7 +11,7 @@
     android:background="?android:attr/selectableItemBackground">
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/downloadIcon"
+        android:id="@+id/icon"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginStart="24dp"
@@ -29,7 +29,7 @@
         android:layout_marginBottom="8dp"
         android:textSize="18sp"
         android:textColor="@color/colorBlack"
-        app:layout_constraintStart_toEndOf="@id/downloadIcon"
+        app:layout_constraintStart_toEndOf="@id/icon"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 

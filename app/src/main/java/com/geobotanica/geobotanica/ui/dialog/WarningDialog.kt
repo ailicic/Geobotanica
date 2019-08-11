@@ -29,6 +29,10 @@ class WarningDialog(
             setPositiveButton(getString(R.string.yes)) { _, _ -> onClickYes() }
             create()
         }
+        dialog.setOnShowListener {
+            dialog.getButton(Dialog.BUTTON_NEGATIVE).textSize = resources.getDimension(R.dimen.dialogButtonTextSize)
+            dialog.getButton(Dialog.BUTTON_POSITIVE).textSize = resources.getDimension(R.dimen.dialogButtonTextSize)
+        }
         return dialog
     }
 

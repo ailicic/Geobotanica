@@ -22,4 +22,6 @@
     <dimen name="list_item_filter_text_size">18sp</dimen>
     <dimen name="measurement_text_size">14sp</dimen>
     <dimen name="mini_fab_max_image_size">24dp</dimen>
+    <dimen name="dialogButtonTextSize">8sp</dimen>
+    <dimen name="bubbleTitleTextSize">14sp</dimen>
 </resources>

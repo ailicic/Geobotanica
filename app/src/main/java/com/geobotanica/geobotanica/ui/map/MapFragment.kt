@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 import org.mapsforge.core.graphics.Color
 import org.mapsforge.core.graphics.Style
 import org.mapsforge.core.model.LatLong
+import org.mapsforge.core.model.Point
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
 import org.mapsforge.map.android.util.AndroidUtil
 import org.mapsforge.map.datastore.MultiMapDataStore
@@ -45,30 +46,30 @@ import org.mapsforge.map.rendertheme.InternalRenderTheme
 import org.mapsforge.map.scalebar.MapScaleBar
 import javax.inject.Inject
 
+// TODO: Limit max height to recyclerview in SearchPlantName (extends below screen)
 
-// TODO: Force location markers to be drawn on top of plant markers
+
 // TODO: Prohibit search plant names (earlier: add plant in MapFragment) until taxa are loaded
+// TODO: Force location markers to be drawn on top of plant markers (sometimes incorrect after delete plant)
+// -> Required to remove all markers to get order right? (currently diffing the plant markers)
 
 // TODO: Determine which fragment to load initially instead of forwarding. Maybe use SharedPrefs?
-// TODO: Figure out how to handle tap events from markers vs. map
 // TODO: Check behaviour in PlantConfirmFragment if toolbar back is pressed (looks like it ignores back button override)
     // NEED activity.toolbar.setNavigationOnClickListener
 // TODO: Store only relative path/url in PlantPhoto
 // TODO: Need to revisit back button override in SuggestedMaps/BrowseMaps. How to reset toolbar listener?
+// TODO: Fix MapViewModelTests
 
 // LONG TERM
+// TODO: Add photoType + editPhoto buttons in PlantDetails image (like confirm frag)
 // TODO: Use Okio everywhere
 // TODO: Check that coroutine result is handled properly in dialog where user taps outside to close (no result given to getStatus)
 // TODO: Check for memory leaks. Is coroutine holding on to Warning Dialog?
 // TODO: Login screen
-// TODO: Try to replace more callbacks with coroutines where sensible
 // https://developer.android.com/training/id-auth/identify.html
 // https://developer.android.com/training/id-auth/custom_auth
 // TODO: Investigate why app start time is so long (should be less of an issue after login/download screen)
-// TODO: Add photoType + editPhoto buttons in PlantDetails image (like confirm frag)
-// TODO: Maybe use existing bundle when navigating (it works, but need to be careful about updating old values).
 // TODO: Group nearby markers into clusters
-// TODO: Limit max height to recyclerview in SearchPlantName (extends below screen)
 // TODO: Use MediaStore to store photos. They should apppear in Gallery as an album.
 // TODO: Make custom camera screen so Espresso can be used for UI testing (New CameraX API)
 // TODO: Use interfaces instead of concrete classes for injected dependencies where appropriate
@@ -232,17 +233,25 @@ class MapFragment : BaseFragment() {
                 mapView.model.displayModel.tileSize, 1f, mapView.model.frameBufferModel.overdrawFactor, true)
         Lg.v("tileCache: capacity = ${tileCache.capacity}, capacityFirstLevel = ${tileCache.capacityFirstLevel}")
 
+        val multiMapDataStore = createMultiMapDataStore()
 
-//        tileRendererLayer = TileRendererLayer(tileCache, createMultiMapDataStore(),
-//                mapView.model.mapViewPosition, AndroidGraphicFactory.INSTANCE)
-//        tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.DEFAULT)
-        // See new approach here: https://github.com/mapsforge/mapsforge/blob/master/docs/LabelLayer.md
-        tileRendererLayer = AndroidUtil.createTileRendererLayer(
-                tileCache,
-                mapView.model.mapViewPosition,
-                createMultiMapDataStore(),
-                InternalRenderTheme.DEFAULT,
-                false, false, true)
+        tileRendererLayer = object : TileRendererLayer(
+                tileCache, multiMapDataStore,
+                this.mapView.model.mapViewPosition,
+                false, false, true,
+                AndroidGraphicFactory.INSTANCE)
+        {
+            override fun onTap(tapLatLong: LatLong?, layerXY: Point?, tapXY: Point?): Boolean {
+                Lg.d("onTap")
+                mapView.layerManager.layers.forEach { layer ->
+                    if (layer is PlantMarker && layer.isShowingMarkerBubble) {
+                        layer.hideMarkerBubble()
+                        return true
+                    }
+                }
+                return super.onTap(tapLatLong, layerXY, tapXY)
+            }
+        }
         mapView.layerManager.layers.add(tileRendererLayer)
 
         val labelLayer = LabelLayer(AndroidGraphicFactory.INSTANCE, tileRendererLayer.labelStore)
@@ -254,7 +263,6 @@ class MapFragment : BaseFragment() {
 
 //        if (viewModel.isFirstRun)
 //            viewModel.getLastLocation()?.let { centerMapOnLocation(it, false) } // TODO: CHECK IF THIS SHOULD STAY (never worked)
-
 
         registerMapDownloadObserver()
     }
@@ -384,7 +392,7 @@ class MapFragment : BaseFragment() {
         mapView.layerManager.layers.addAll(
             newPlantMarkersData
                 .filter { plantMarkerDiffs.insertIds.contains(it.plantId) }
-                .map { PlantMarker(it, activity) },
+                .map { PlantMarker(it, activity, mapView) },
             false)
 
         forceLocationMarkerOnTop()
