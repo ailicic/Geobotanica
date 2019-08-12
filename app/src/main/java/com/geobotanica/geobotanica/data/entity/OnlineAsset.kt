@@ -2,6 +2,7 @@ package com.geobotanica.geobotanica.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.DOWNLOADED
 import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOWNLOADED
 import kotlin.math.roundToLong
 
@@ -30,6 +31,9 @@ data class  OnlineAsset(
 
     val isDownloading: Boolean
         get() = status > 0L
+
+    val isDownloaded: Boolean
+        get() = status == DOWNLOADED
 }
 
 // TODO: This is fragile. If asset list changes in updated version it will break.

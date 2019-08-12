@@ -1,9 +1,6 @@
 package com.geobotanica.geobotanica.ui.map
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.map
+import androidx.lifecycle.*
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.LocationService
@@ -19,6 +16,7 @@ import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_OFF
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
 import com.geobotanica.geobotanica.util.schedule
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
 import javax.inject.Inject
@@ -56,6 +54,7 @@ class MapViewModel @Inject constructor(
     val gpsFabIcon: LiveData<Int> = _gpsFabIcon
 
     val showGpsRequiredSnackbar = SingleLiveEvent<Unit>()
+    val showPlantNamesMissingSnackbar = SingleLiveEvent<Unit>()
     val navigateToNewPlant = SingleLiveEvent<Unit>()
 
     private val defaultMapZoomLevel = 16
@@ -108,10 +107,12 @@ class MapViewModel @Inject constructor(
             subscribeGps()
     }
 
-    fun onClickNewPlantFab() {
+    fun onClickNewPlantFab() = viewModelScope.launch {
         if (!isGpsEnabled()) {
             _gpsFabIcon.value = GPS_OFF.drawable
             showGpsRequiredSnackbar.call()
+        } else if (! assetRepo.get(OnlineAssetId.PLANT_NAMES.id).isDownloaded) {
+            showPlantNamesMissingSnackbar.call()
         } else
             navigateToNewPlant.call()
     }

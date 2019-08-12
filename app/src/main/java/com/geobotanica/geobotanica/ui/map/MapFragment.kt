@@ -46,19 +46,14 @@ import org.mapsforge.map.rendertheme.InternalRenderTheme
 import org.mapsforge.map.scalebar.MapScaleBar
 import javax.inject.Inject
 
-// TODO: Limit max height to recyclerview in SearchPlantName (extends below screen)
-
-
-// TODO: Prohibit search plant names (earlier: add plant in MapFragment) until taxa are loaded
-// TODO: Force location markers to be drawn on top of plant markers (sometimes incorrect after delete plant)
-// -> Required to remove all markers to get order right? (currently diffing the plant markers)
-
 // TODO: Determine which fragment to load initially instead of forwarding. Maybe use SharedPrefs?
 // TODO: Check behaviour in PlantConfirmFragment if toolbar back is pressed (looks like it ignores back button override)
     // NEED activity.toolbar.setNavigationOnClickListener
 // TODO: Store only relative path/url in PlantPhoto
 // TODO: Need to revisit back button override in SuggestedMaps/BrowseMaps. How to reset toolbar listener?
 // TODO: Fix MapViewModelTests
+// TODO: Force location markers to be drawn on top of plant markers (sometimes incorrect after delete plant)
+// -> Required to remove all markers to get order right? (currently diffing the plant markers)
 
 // LONG TERM
 // TODO: Add photoType + editPhoto buttons in PlantDetails image (like confirm frag)
@@ -330,6 +325,7 @@ class MapFragment : BaseFragment() {
                 }
             )
             showGpsRequiredSnackbar.observe(viewLifecycleOwner, onGpsRequiredSnackbar)
+            showPlantNamesMissingSnackbar.observe(viewLifecycleOwner, onPlantNamesMissingSnackbar)
             navigateToNewPlant.observe(viewLifecycleOwner, onNavigateToNewPlant)
             plantMarkerData.observe(viewLifecycleOwner, onPlantMarkers)
             currentLocation.observe(viewLifecycleOwner, onLocation)
@@ -340,6 +336,10 @@ class MapFragment : BaseFragment() {
         showSnackbar(R.string.gps_must_be_enabled, R.string.enable) {
             startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
         }
+    }
+
+    private val onPlantNamesMissingSnackbar = Observer<Unit> {
+        showSnackbar(R.string.wait_for_plant_name_database_to_download)
     }
 
     private val onNavigateToNewPlant = Observer<Unit> {
