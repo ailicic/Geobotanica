@@ -22,10 +22,9 @@ class SuggestedMapsViewModel @Inject constructor(
         private val mapRepo: MapRepo,
         geolocationRepo: GeolocationRepo
 ): ViewModel() {
-    var userId = 0L
 
     val showFab: LiveData<Boolean> = mapRepo
-            .getInitiatedDownloads()
+            .getInitiatedDownloadsLiveData()
             .map { it.isNotEmpty() }
 
     val suggestedMaps: LiveData<Resource<List<OnlineMapListItem>>> =

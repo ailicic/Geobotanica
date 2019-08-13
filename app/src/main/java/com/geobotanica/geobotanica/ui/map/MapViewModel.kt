@@ -61,7 +61,6 @@ class MapViewModel @Inject constructor(
     private val defaultMapLatitude = 49.477
     private val defaultMapLongitude = -119.59
 
-    var isFirstRun = true
     var mapZoomLevel: Int = defaultMapZoomLevel
     var mapLatitude: Double = defaultMapLatitude
     var mapLongitude: Double = defaultMapLongitude

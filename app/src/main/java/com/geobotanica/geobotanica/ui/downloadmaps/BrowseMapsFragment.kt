@@ -12,6 +12,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.databinding.FragmentBrowseMapsBinding
@@ -22,6 +23,7 @@ import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.dialog.WarningDialog
 import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.get
 import com.geobotanica.geobotanica.util.getFromBundle
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_browse_maps.*
@@ -145,9 +147,13 @@ class BrowseMapsFragment : BaseFragment() {
     }
 
     private fun navigateToNext() {
-        val navController = activity.findNavController(R.id.fragment)
-        navController.popBackStack()
-        navController.navigate(R.id.mapFragment, createBundle())
+        val navController = NavHostFragment.findNavController(this)
+
+        if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true)) {
+            navController.popBackStack()
+            navController.navigate(R.id.mapFragment, createBundle())
+        } else
+            navController.navigateUp()
     }
 
     private fun createBundle(): Bundle =

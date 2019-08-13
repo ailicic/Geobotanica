@@ -6,18 +6,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.databinding.FragmentSuggestedMapsBinding
-import com.geobotanica.geobotanica.network.*
+import com.geobotanica.geobotanica.network.NetworkValidator
 import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
+import com.geobotanica.geobotanica.network.Resource
 import com.geobotanica.geobotanica.network.ResourceStatus.*
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
@@ -25,11 +26,10 @@ import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.dialog.WarningDialog
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.get
-import com.geobotanica.geobotanica.util.getFromBundle
 import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_suggested_maps.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -47,10 +47,7 @@ class SuggestedMapsFragment : BaseFragment() {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
-        viewModel = getViewModel(viewModelFactory) {
-            userId = getFromBundle(userIdKey)
-            Lg.d("Fragment args: userId=$userId")
-        }
+        viewModel = getViewModel(viewModelFactory)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -77,8 +74,10 @@ class SuggestedMapsFragment : BaseFragment() {
 
     // TODO: Need to deregister before navigation?
     private fun addOnBackPressedCallback() {
-        activity.toolbar.setNavigationOnClickListener { exitAppWithWarning() }
-        requireActivity().onBackPressedDispatcher.addCallback(this) { exitAppWithWarning() }
+        if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true)) {
+            activity.toolbar.setNavigationOnClickListener { exitAppWithWarning() }
+            requireActivity().onBackPressedDispatcher.addCallback(this) { exitAppWithWarning() }
+        }
     }
 
     private fun exitAppWithWarning() {
@@ -184,15 +183,22 @@ class SuggestedMapsFragment : BaseFragment() {
     }
 
     private fun browseMaps() {
-        val navController = activity.findNavController(R.id.fragment)
-        navController.navigate(R.id.browseMapsFragment, createBundle())
+        val navController = NavHostFragment.findNavController(this)
+
+        if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true))
+            navController.popBackStack()
+        else
+            navController.popBackStack(R.id.mapFragment, false)
+        navController.navigate(R.id.browseMapsFragment)
     }
 
     private fun navigateToNext() {
         val navController = activity.findNavController(R.id.fragment)
-        navController.popBackStack()
-        navController.navigate(R.id.mapFragment, createBundle())
+        if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true)) {
+            navController.popBackStack()
+            navController.navigate(R.id.mapFragment)
+        } else
+            navController.navigateUp()
     }
 
-    private fun createBundle(): Bundle = bundleOf(userIdKey to viewModel.userId)
 }

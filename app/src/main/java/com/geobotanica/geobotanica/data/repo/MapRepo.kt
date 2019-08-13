@@ -24,7 +24,8 @@ class MapRepo @Inject constructor(
     suspend fun getAll(): List<OnlineMap> = mapDao.getAll()
     suspend fun getDownloading(): List<OnlineMap> = mapDao.getDownloading()
     suspend fun getDownloaded(): List<OnlineMap> = mapDao.getDownloaded()
-    fun getInitiatedDownloads(): LiveData<List<OnlineMap>> = mapDao.getInitiatedDownloads()
+    suspend fun getInitiatedDownloads(): List<OnlineMap> = mapDao.getInitiatedDownloads()
+    fun getInitiatedDownloadsLiveData(): LiveData<List<OnlineMap>> = mapDao.getInitiatedDownloadsLiveData()
     suspend fun getDecompressing(): List<OnlineMap> = mapDao.getDecompressing()
     suspend fun getByDownloadId(downloadId: Long): OnlineMap? = mapDao.getByDownloadId(downloadId)
 

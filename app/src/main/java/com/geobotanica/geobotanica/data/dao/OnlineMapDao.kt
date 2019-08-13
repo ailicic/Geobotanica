@@ -30,7 +30,10 @@ interface OnlineMapDao : BaseDao<OnlineMap> {
     suspend fun getDownloaded(downloaded: Long = DOWNLOADED): List<OnlineMap>
 
     @Query("SELECT * FROM maps WHERE status != :notDownloaded")
-    fun getInitiatedDownloads(notDownloaded: Long = NOT_DOWNLOADED): LiveData<List<OnlineMap>>
+    suspend fun getInitiatedDownloads(notDownloaded: Long = NOT_DOWNLOADED): List<OnlineMap>
+
+    @Query("SELECT * FROM maps WHERE status != :notDownloaded")
+    fun getInitiatedDownloadsLiveData(notDownloaded: Long = NOT_DOWNLOADED): LiveData<List<OnlineMap>>
 
     @Query("SELECT * FROM maps WHERE status = :decompressing")
     suspend fun getDecompressing(decompressing: Long = DECOMPRESSING): List<OnlineMap>

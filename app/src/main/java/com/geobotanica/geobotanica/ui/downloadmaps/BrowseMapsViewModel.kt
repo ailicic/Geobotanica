@@ -21,7 +21,7 @@ class BrowseMapsViewModel @Inject constructor(
 ): ViewModel() {
     var userId = 0L
 
-    val showFab: LiveData<Boolean> = mapRepo.getInitiatedDownloads().map { mapList ->
+    val showFab: LiveData<Boolean> = mapRepo.getInitiatedDownloadsLiveData().map { mapList ->
         mapList.isNotEmpty()
     }
 

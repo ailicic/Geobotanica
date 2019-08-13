@@ -8,6 +8,7 @@ import com.geobotanica.geobotanica.ui.compoundview.GpsCompoundView
 import com.geobotanica.geobotanica.ui.downloadassets.DownloadAssetsFragment
 import com.geobotanica.geobotanica.ui.downloadmaps.BrowseMapsFragment
 import com.geobotanica.geobotanica.ui.downloadmaps.SuggestedMapsFragment
+import com.geobotanica.geobotanica.ui.main.MainFragment
 import com.geobotanica.geobotanica.ui.map.MapFragment
 import com.geobotanica.geobotanica.ui.newplantconfirm.NewPlantConfirmFragment
 import com.geobotanica.geobotanica.ui.newplantmeasurement.NewPlantMeasurementFragment
@@ -25,6 +26,11 @@ interface ApplicationComponent {
     fun inject(mainActivity: MainActivity)
     fun inject(baseFragment: BaseFragment)
 
+    fun inject(mainFragment: MainFragment)
+    fun inject(downloadAssetsFragment: DownloadAssetsFragment)
+    fun inject(suggestedMapsFragment: SuggestedMapsFragment)
+    fun inject(browseMapsFragment: BrowseMapsFragment)
+
     fun inject(mapFragment: MapFragment)
     fun inject(newPlantTypeFragment: NewPlantTypeFragment)
     fun inject(newPlantPhotoFragment: NewPlantPhotoFragment)
@@ -34,9 +40,6 @@ interface ApplicationComponent {
     fun inject(newPlantConfirmFragment: NewPlantConfirmFragment)
     fun inject(plantDetailFragment: PlantDetailFragment)
 
-    fun inject(downloadAssetsFragment: DownloadAssetsFragment)
-    fun inject(suggestedMapsFragment: SuggestedMapsFragment)
-    fun inject(browseMapsFragment: BrowseMapsFragment)
 
     fun inject(gpsCompoundView: GpsCompoundView)
 }

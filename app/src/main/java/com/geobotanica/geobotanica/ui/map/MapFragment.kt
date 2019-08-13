@@ -6,11 +6,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.view.*
 import android.view.Gravity.BOTTOM
 import android.view.Gravity.CENTER_HORIZONTAL
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
@@ -46,7 +44,8 @@ import org.mapsforge.map.rendertheme.InternalRenderTheme
 import org.mapsforge.map.scalebar.MapScaleBar
 import javax.inject.Inject
 
-// TODO: Determine which fragment to load initially instead of forwarding. Maybe use SharedPrefs?
+// TODO: Use NavHostFragment.findNavController(this).navigate(R.id.xxx) everywhere
+// TODO: PlantNameFragment: require at least one name
 // TODO: Check behaviour in PlantConfirmFragment if toolbar back is pressed (looks like it ignores back button override)
     // NEED activity.toolbar.setNavigationOnClickListener
 // TODO: Store only relative path/url in PlantPhoto
@@ -54,6 +53,7 @@ import javax.inject.Inject
 // TODO: Fix MapViewModelTests
 // TODO: Force location markers to be drawn on top of plant markers (sometimes incorrect after delete plant)
 // -> Required to remove all markers to get order right? (currently diffing the plant markers)
+// TODO: Correct fragment navigation animations
 
 // LONG TERM
 // TODO: Add photoType + editPhoto buttons in PlantDetails image (like confirm frag)
@@ -63,7 +63,6 @@ import javax.inject.Inject
 // TODO: Login screen
 // https://developer.android.com/training/id-auth/identify.html
 // https://developer.android.com/training/id-auth/custom_auth
-// TODO: Investigate why app start time is so long (should be less of an issue after login/download screen)
 // TODO: Group nearby markers into clusters
 // TODO: Use MediaStore to store photos. They should apppear in Gallery as an album.
 // TODO: Make custom camera screen so Espresso can be used for UI testing (New CameraX API)
@@ -107,7 +106,6 @@ class MapFragment : BaseFragment() {
     private var locationMarker: LocationMarker? = null
     private var locationPrecisionCircle: LocationCircle? = null
 
-    private val sharedPrefsIsFirstRun = "isFirstRun"
     private val sharedPrefsMapLatitude = "mapLatitude"
     private val sharedPrefsMapLongitude = "mapLongitude"
     private val sharedPrefsMapZoomLevel = "MapZoomLevel"
@@ -127,8 +125,33 @@ class MapFragment : BaseFragment() {
         loadSharedPrefsToViewModel()
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true);
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_map, container, false)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.menu_map, menu);
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                showToast("Settings")
+                true
+            }
+            R.id.download_maps -> {
+                NavHostFragment.findNavController(this).navigate(R.id.suggestedMapsFragment)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -161,7 +184,6 @@ class MapFragment : BaseFragment() {
     private fun loadSharedPrefsToViewModel() {
         sharedPrefs.let { sp ->
             viewModel.let { vm ->
-                vm.isFirstRun = sp.get(sharedPrefsIsFirstRun, vm.isFirstRun)
                 vm.mapLatitude = sp.get(sharedPrefsMapLatitude, vm.mapLatitude)
                 vm.mapLongitude = sp.get(sharedPrefsMapLongitude, vm.mapLongitude)
                 vm.mapZoomLevel = sp.get(sharedPrefsMapZoomLevel, vm.mapZoomLevel)
@@ -172,7 +194,6 @@ class MapFragment : BaseFragment() {
 
     private fun saveSharedPrefsFromViewModel() {
         sharedPrefs.put(
-            sharedPrefsIsFirstRun to false,
             sharedPrefsMapLatitude to viewModel.mapLatitude,
             sharedPrefsMapLongitude to viewModel.mapLongitude,
             sharedPrefsMapZoomLevel to viewModel.mapZoomLevel,
@@ -207,7 +228,7 @@ class MapFragment : BaseFragment() {
 //        // TODO: REMOVE
 //        NavHostFragment.findNavController(this).navigate(
 //                R.id.downloadTaxaFragment, createBundle() )
-
+        defaultSharedPrefs.put(sharedPrefsIsFirstRunKey to false)
         initMap()
         viewModel.initGpsSubscribe()
         setClickListeners()
