@@ -193,7 +193,7 @@ class SuggestedMapsFragment : BaseFragment() {
     }
 
     private fun navigateToNext() {
-        val navController = activity.findNavController(R.id.fragment)
+        val navController = NavHostFragment.findNavController(this)
         if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true)) {
             navController.popBackStack()
             navController.navigate(R.id.mapFragment)

@@ -8,7 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
@@ -67,13 +67,13 @@ class NewPlantPhotoFragment : BaseFragment() {
                         Lg.d("New photo received")
     //                    plantPhoto.setImageBitmap(getScaledBitmap())
 
-                        val navController = activity.findNavController(R.id.fragment)
+                        val navController = NavHostFragment.findNavController(this)
                         navController.navigate(R.id.searchPlantNameFragment, createBundle())
                     }
                     Activity.RESULT_CANCELED -> { // "X" in GUI or back button pressed
                         Lg.d("onActivityResult: RESULT_CANCELED")
                         deletePhotoIfExists()
-                        val navController = activity.findNavController(R.id.fragment)
+                        val navController = NavHostFragment.findNavController(this)
                         navController.popBackStack(R.id.newPlantTypeFragment, false)
                     }
                     else -> Lg.d("onActivityResult: Unrecognized code")

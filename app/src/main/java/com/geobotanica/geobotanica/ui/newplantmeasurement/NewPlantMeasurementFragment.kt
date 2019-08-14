@@ -9,7 +9,7 @@ import android.widget.CompoundButton
 import android.widget.RadioGroup
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.ui.BaseFragment
@@ -98,7 +98,7 @@ class NewPlantMeasurementFragment : BaseFragment() {
         if (measurementsSwitch.isChecked)
             saveViewModelState()
 
-        val navController = activity.findNavController(R.id.fragment)
+        val navController = NavHostFragment.findNavController(this)
         navController.navigate(R.id.newPlantConfirmFragment, createBundle())
     }
 

@@ -44,7 +44,6 @@ import org.mapsforge.map.rendertheme.InternalRenderTheme
 import org.mapsforge.map.scalebar.MapScaleBar
 import javax.inject.Inject
 
-// TODO: Use NavHostFragment.findNavController(this).navigate(R.id.xxx) everywhere
 // TODO: PlantNameFragment: require at least one name
 // TODO: Check behaviour in PlantConfirmFragment if toolbar back is pressed (looks like it ignores back button override)
     // NEED activity.toolbar.setNavigationOnClickListener

@@ -23,7 +23,6 @@ import org.mapsforge.map.util.MapViewProjection
 import org.mapsforge.map.view.InputListener
 
 
-
 @Suppress("DEPRECATION")
 class PlantMarker(
         private val plantMarkerData: PlantMarkerData,

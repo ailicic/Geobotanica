@@ -10,7 +10,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isEmpty
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
@@ -202,7 +202,7 @@ class NewPlantNameFragment : BaseFragment() {
 
     private fun navigateToNext() {
         animateTextJob.cancel()
-        val navController = activity.findNavController(R.id.fragment)
+        val navController = NavHostFragment.findNavController(this)
 
         if (viewModel.isPlantTypeKnown())
             navController.navigate(R.id.newPlantMeasurementFragment, createBundle())

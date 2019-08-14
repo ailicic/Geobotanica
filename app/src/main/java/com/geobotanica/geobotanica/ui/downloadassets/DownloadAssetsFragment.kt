@@ -14,7 +14,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.network.NetworkValidator
 import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
@@ -138,7 +138,7 @@ class DownloadAssetsFragment : BaseFragment() {
     }
 
     private fun navigateToNext() {
-        val navController = activity.findNavController(R.id.fragment)
+        val navController = NavHostFragment.findNavController(this)
         navController.popBackStack()
         navController.navigate(R.id.suggestedMapsFragment, createBundle())
     }

@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
@@ -64,7 +64,7 @@ class NewPlantTypeFragment : BaseFragment() {
     }
 
     private fun navigateToNext() {
-        val navController = activity.findNavController(R.id.fragment)
+        val navController = NavHostFragment.findNavController(this)
         navController.navigate(R.id.newPlantMeasurementFragment, createBundle())
     }
 

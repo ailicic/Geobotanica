@@ -11,7 +11,7 @@ import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.PlantPhoto
@@ -27,7 +27,9 @@ import com.geobotanica.geobotanica.util.getFromBundle
 import com.geobotanica.geobotanica.util.getNullableFromBundle
 import kotlinx.android.synthetic.main.compound_gps.view.*
 import kotlinx.android.synthetic.main.fragment_new_plant_confirm.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
@@ -126,7 +128,7 @@ class NewPlantConfirmFragment : BaseFragment() {
                     }
                     activity.currentLocation = null
                     showToast(getString(R.string.plant_discarded))
-                    val navController = activity.findNavController(R.id.fragment)
+                    val navController = NavHostFragment.findNavController(this@NewPlantConfirmFragment)
                     navController.popBackStack(R.id.mapFragment, false)
                 }
                 setNegativeButton(getString(R.string.no)) { dialog, _ -> dialog.dismiss() }
@@ -218,7 +220,7 @@ class NewPlantConfirmFragment : BaseFragment() {
             viewModel.savePlantComposite()
             showToast("Plant saved") // TODO: Make snackbar (maybe?)
 
-            val navController = activity.findNavController(R.id.fragment)
+            val navController = NavHostFragment.findNavController(this@NewPlantConfirmFragment)
             navController.popBackStack(R.id.mapFragment, false)
             activity.currentLocation = null
         }

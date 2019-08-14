@@ -6,7 +6,7 @@ import android.view.*
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.*
@@ -160,7 +160,7 @@ class SearchPlantNameFragment : BaseFragment() {
     }
 
     private fun navigateToNext() {
-        val navController = activity.findNavController(R.id.fragment)
+        val navController = NavHostFragment.findNavController(this)
         navController.navigate(R.id.newPlantNameFragment, createBundle())
     }
 

@@ -93,7 +93,7 @@ class BrowseMapsFragment : BaseFragment() {
     }
 
     private fun navigateUp() {
-        val navController = activity.findNavController(R.id.fragment)
+        val navController = NavHostFragment.findNavController(this)
         navController.navigateUp()
     }
 
