@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.core.os.bundleOf
-import androidx.core.view.isEmpty
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
@@ -211,7 +210,7 @@ class NewPlantNameFragment : BaseFragment() {
     }
 
     private fun areNamesValid(): Boolean {
-        if (commonNameTextInput.isEmpty() && scientificNameTextInput.isEmpty()) {
+        if (commonNameTextInput.isTextEmpty() && scientificNameTextInput.isTextEmpty()) {
             showSnackbar("Provide a plant name")
             return false
         }

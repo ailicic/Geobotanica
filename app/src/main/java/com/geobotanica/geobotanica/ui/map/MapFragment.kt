@@ -44,15 +44,14 @@ import org.mapsforge.map.rendertheme.InternalRenderTheme
 import org.mapsforge.map.scalebar.MapScaleBar
 import javax.inject.Inject
 
-// TODO: PlantNameFragment: require at least one name
 // TODO: Check behaviour in PlantConfirmFragment if toolbar back is pressed (looks like it ignores back button override)
     // NEED activity.toolbar.setNavigationOnClickListener
-// TODO: Store only relative path/url in PlantPhoto
 // TODO: Need to revisit back button override in SuggestedMaps/BrowseMaps. How to reset toolbar listener?
+// TODO: Store only relative path/url in PlantPhoto
 // TODO: Fix MapViewModelTests
+// TODO: Correct fragment navigation animations
 // TODO: Force location markers to be drawn on top of plant markers (sometimes incorrect after delete plant)
 // -> Required to remove all markers to get order right? (currently diffing the plant markers)
-// TODO: Correct fragment navigation animations
 
 // LONG TERM
 // TODO: Add photoType + editPhoto buttons in PlantDetails image (like confirm frag)
