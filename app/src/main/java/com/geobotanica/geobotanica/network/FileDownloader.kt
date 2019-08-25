@@ -245,7 +245,7 @@ class FileDownloader @Inject constructor (
                                         ASSET_LOCAL_PATH to storageHelper.getLocalPath(asset),
                                         ASSET_FILENAME to asset.filename))
                                 .build()
-                        val workManager = WorkManager.getInstance()
+                        val workManager = WorkManager.getInstance(mainActivity)
                         registerDecompressionObserver(asset.filenameGzip)
                         storageHelper.mkdirs(asset)
                         asset.status = DECOMPRESSING
@@ -291,7 +291,7 @@ class FileDownloader @Inject constructor (
 
     private suspend fun registerDecompressionObserver(workRequestTag: String) {
         withContext(Dispatchers.Main) {
-            val workManager = WorkManager.getInstance()
+            val workManager = WorkManager.getInstance(mainActivity)
             workManager.getWorkInfosByTagLiveData(workRequestTag)
                     .observe(mainActivity, decompressionWorkerObserver)
         }

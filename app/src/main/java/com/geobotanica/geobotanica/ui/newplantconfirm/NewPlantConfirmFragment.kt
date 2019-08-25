@@ -25,6 +25,7 @@ import com.geobotanica.geobotanica.ui.viewpager.PlantPhotoAdapter
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.getFromBundle
 import com.geobotanica.geobotanica.util.getNullableFromBundle
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.compound_gps.view.*
 import kotlinx.android.synthetic.main.fragment_new_plant_confirm.*
 import kotlinx.coroutines.Dispatchers
@@ -86,6 +87,11 @@ class NewPlantConfirmFragment : BaseFragment() {
         bindClickListeners()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        activity.toolbar.setNavigationOnClickListener(null)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == requestTakePhoto) {
             when (resultCode) {
@@ -116,25 +122,28 @@ class NewPlantConfirmFragment : BaseFragment() {
     }
 
     private fun addOnBackPressedCallback() {
-        requireActivity().onBackPressedDispatcher.addCallback(this) {
-            AlertDialog.Builder(activity).apply {
-                setTitle(getString(R.string.discard_new_plant))
-                setMessage(getString(R.string.discard_new_plant_confirm))
-                setPositiveButton(getString(R.string.yes)) { _, _ ->
-                    viewModel.photos.forEach {
-                        val photoUri = it.photoUri
-                        Lg.d("Deleting old photo: $photoUri")
-                        Lg.d("Delete photo result = ${File(photoUri).delete()}")
-                    }
-                    activity.currentLocation = null
-                    showToast(getString(R.string.plant_discarded))
-                    val navController = NavHostFragment.findNavController(this@NewPlantConfirmFragment)
-                    navController.popBackStack(R.id.mapFragment, false)
+        activity.toolbar.setNavigationOnClickListener { onClickBackButton() }
+        requireActivity().onBackPressedDispatcher.addCallback(this) { onClickBackButton() }
+    }
+
+    private fun onClickBackButton() {
+        AlertDialog.Builder(activity).apply {
+            setTitle(getString(R.string.discard_new_plant))
+            setMessage(getString(R.string.discard_new_plant_confirm))
+            setPositiveButton(getString(R.string.yes)) { _, _ ->
+                viewModel.photos.forEach {
+                    val photoUri = it.photoUri
+                    Lg.d("Deleting old photo: $photoUri")
+                    Lg.d("Delete photo result = ${File(photoUri).delete()}")
                 }
-                setNegativeButton(getString(R.string.no)) { dialog, _ -> dialog.dismiss() }
-                create()
-            }.show()
-        }
+                activity.currentLocation = null
+                showToast(getString(R.string.plant_discarded))
+                val navController = NavHostFragment.findNavController(this@NewPlantConfirmFragment)
+                navController.popBackStack(R.id.mapFragment, false)
+            }
+            setNegativeButton(getString(R.string.no)) { dialog, _ -> dialog.dismiss() }
+            create()
+        }.show()
     }
 
     private fun initPlantTypeButton() {

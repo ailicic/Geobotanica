@@ -44,9 +44,6 @@ import org.mapsforge.map.rendertheme.InternalRenderTheme
 import org.mapsforge.map.scalebar.MapScaleBar
 import javax.inject.Inject
 
-// TODO: Check behaviour in PlantConfirmFragment if toolbar back is pressed (looks like it ignores back button override)
-    // NEED activity.toolbar.setNavigationOnClickListener
-// TODO: Need to revisit back button override in SuggestedMaps/BrowseMaps. How to reset toolbar listener?
 // TODO: Store only relative path/url in PlantPhoto
 // TODO: Fix MapViewModelTests
 // TODO: Correct fragment navigation animations
@@ -223,14 +220,16 @@ class MapFragment : BaseFragment() {
     }
 
     private fun init() = lifecycleScope.launch {
-//        // TODO: REMOVE
-//        NavHostFragment.findNavController(this).navigate(
-//                R.id.downloadTaxaFragment, createBundle() )
         defaultSharedPrefs.put(sharedPrefsIsFirstRunKey to false)
+
         initMap()
         viewModel.initGpsSubscribe()
         setClickListeners()
         bindViewModel()
+
+//        // TODO: REMOVE
+//        NavHostFragment.findNavController(this@MapFragment).navigate(
+//                R.id.newPlantMeasurementFragment, createBundle() )
     }
 
     private suspend fun initMap() {
@@ -251,7 +250,7 @@ class MapFragment : BaseFragment() {
 
         tileRendererLayer = object : TileRendererLayer(
                 tileCache, multiMapDataStore,
-                this.mapView.model.mapViewPosition,
+                mapView.model.mapViewPosition,
                 false, false, true,
                 AndroidGraphicFactory.INSTANCE)
         {
