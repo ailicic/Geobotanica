@@ -13,6 +13,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.PlantPhoto
 import com.geobotanica.geobotanica.databinding.FragmentNewPlantConfirmBinding
@@ -39,6 +40,8 @@ import javax.inject.Inject
 class NewPlantConfirmFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantConfirmViewModel>
     private lateinit var viewModel: NewPlantConfirmViewModel
+
+    @Inject lateinit var storageHelper: StorageHelper
 
     private lateinit var photoAdapter: PlantPhotoAdapter
 
@@ -191,7 +194,7 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     private fun onRetakePhoto() {
         isPhotoRetake = true
-        val photoFile = createPhotoFile()
+        val photoFile = storageHelper.createPhotoFile(viewModel.userId)
         newPhotoUri = photoFile.absolutePath
         startPhotoIntent(photoFile)
     }
@@ -199,7 +202,7 @@ class NewPlantConfirmFragment : BaseFragment() {
     private fun onAddPhoto(photoType: PlantPhoto.Type) {
         isPhotoRetake = false
         newPhotoType = photoType
-        val photoFile = createPhotoFile()
+        val photoFile = storageHelper.createPhotoFile(viewModel.userId)
         newPhotoUri = photoFile.absolutePath
         startPhotoIntent(photoFile)
     }

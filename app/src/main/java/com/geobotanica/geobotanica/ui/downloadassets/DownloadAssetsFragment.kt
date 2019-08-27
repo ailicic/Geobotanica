@@ -140,7 +140,7 @@ class DownloadAssetsFragment : BaseFragment() {
     private fun navigateToNext() {
         val navController = NavHostFragment.findNavController(this)
         navController.popBackStack()
-        navController.navigate(R.id.suggestedMapsFragment, createBundle())
+        navController.navigate(R.id.localMapsFragment, createBundle())
     }
 
     private fun createBundle(): Bundle =

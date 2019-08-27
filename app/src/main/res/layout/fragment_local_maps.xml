@@ -6,7 +6,7 @@
         <import type="android.view.View"/>
         <variable
             name="viewModel"
-            type="com.geobotanica.geobotanica.ui.downloadmaps.SuggestedMapsViewModel" />
+            type="com.geobotanica.geobotanica.ui.downloadmaps.LocalMapsViewModel" />
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

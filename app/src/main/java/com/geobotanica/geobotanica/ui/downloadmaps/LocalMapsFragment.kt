@@ -11,11 +11,10 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.databinding.FragmentSuggestedMapsBinding
+import com.geobotanica.geobotanica.databinding.FragmentLocalMapsBinding
 import com.geobotanica.geobotanica.network.NetworkValidator
 import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
 import com.geobotanica.geobotanica.network.Resource
@@ -28,16 +27,16 @@ import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.get
 import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_suggested_maps.*
+import kotlinx.android.synthetic.main.fragment_local_maps.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-class SuggestedMapsFragment : BaseFragment() {
-    @Inject lateinit var viewModelFactory: ViewModelFactory<SuggestedMapsViewModel>
+class LocalMapsFragment : BaseFragment() {
+    @Inject lateinit var viewModelFactory: ViewModelFactory<LocalMapsViewModel>
     @Inject lateinit var networkValidator: NetworkValidator
 
-    private lateinit var viewModel: SuggestedMapsViewModel
+    private lateinit var viewModel: LocalMapsViewModel
 
     private val mapListAdapter = MapListAdapter(::onClickDownload, ::onClickCancel, ::onClickDelete)
 
@@ -51,8 +50,8 @@ class SuggestedMapsFragment : BaseFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val binding = DataBindingUtil.inflate<FragmentSuggestedMapsBinding>(
-                layoutInflater, R.layout.fragment_suggested_maps, container, false).also {
+        val binding = DataBindingUtil.inflate<FragmentLocalMapsBinding>(
+                layoutInflater, R.layout.fragment_local_maps, container, false).also {
             it.viewModel = viewModel
             it.lifecycleOwner = viewLifecycleOwner
         }
@@ -65,6 +64,8 @@ class SuggestedMapsFragment : BaseFragment() {
         initRecyclerView()
         bindClickListeners()
         bindViewModel()
+        if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true))
+            viewModel.getMapsFromExtStorage()
     }
 
     override fun onDestroy() {
@@ -81,7 +82,7 @@ class SuggestedMapsFragment : BaseFragment() {
     }
 
     private fun exitAppWithWarning() {
-        Lg.d("SuggestedMapsFragment: exitAppWithWarning()")
+        Lg.d("LocalMapsFragment: exitAppWithWarning()")
         val isPermitted = defaultSharedPrefs.get(sharedPrefsExitOnBackInDownloadMaps, false)
         if (isPermitted)
             activity.finish()
@@ -108,16 +109,16 @@ class SuggestedMapsFragment : BaseFragment() {
     }
 
     private fun bindViewModel() {
-        viewModel.suggestedMaps.observe(viewLifecycleOwner, onSuggestedMaps)
+        viewModel.localMaps.observe(viewLifecycleOwner, onLocalMaps)
     }
 
     private fun rebindViewModel() {
-        viewModel.suggestedMaps.removeObserver(onSuggestedMaps)
+        viewModel.localMaps.removeObserver(onLocalMaps)
         bindViewModel()
     }
 
-    private val onSuggestedMaps = Observer<Resource<List<OnlineMapListItem>>> { mapListItems ->
-//        Lg.v("SuggestedMapsFragment: onSuggestedMaps: $mapListItems")
+    private val onLocalMaps = Observer<Resource<List<OnlineMapListItem>>> { mapListItems ->
+//        Lg.v("LocalMapsFragment: onLocalMaps: $mapListItems")
         when (mapListItems.status) {
             LOADING -> {
                 searchingOnlineMapsText.isVisible = true

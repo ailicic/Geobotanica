@@ -60,7 +60,7 @@ class PlantDetailFragment : BaseFragment() {
         plantPhoto.doOnPreDraw {
             viewModel.mainPhoto.observe(viewLifecycleOwner, Observer { mainPhoto ->
                 mainPhoto?.let { photo ->
-                    plantPhoto.setScaledBitmap(photo.fileName)
+                    plantPhoto.setScaledBitmap(viewModel.getPhotoUri(photo))
                 }
             })
         }

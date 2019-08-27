@@ -106,7 +106,7 @@ class OkHttpFileDownloader@Inject constructor(
 //    private fun getFileSink(onlineFile: OnlineFile): BufferedSink {
 //        val dir = File(storageHelper.getLocalPath(onlineFile))
 //        dir.mkdirs()
-//        val file = File(dir.absolutePath, onlineFile.fileName)
+//        val file = File(dir.absolutePath, onlineFile.filename)
 //        if (!file.exists())
 //            file.createNewFile()
 //        return file.sink().buffer()

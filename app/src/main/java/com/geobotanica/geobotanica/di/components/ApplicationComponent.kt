@@ -7,7 +7,7 @@ import com.geobotanica.geobotanica.ui.MainActivity
 import com.geobotanica.geobotanica.ui.compoundview.GpsCompoundView
 import com.geobotanica.geobotanica.ui.downloadassets.DownloadAssetsFragment
 import com.geobotanica.geobotanica.ui.downloadmaps.BrowseMapsFragment
-import com.geobotanica.geobotanica.ui.downloadmaps.SuggestedMapsFragment
+import com.geobotanica.geobotanica.ui.downloadmaps.LocalMapsFragment
 import com.geobotanica.geobotanica.ui.main.MainFragment
 import com.geobotanica.geobotanica.ui.map.MapFragment
 import com.geobotanica.geobotanica.ui.newplantconfirm.NewPlantConfirmFragment
@@ -28,7 +28,7 @@ interface ApplicationComponent {
 
     fun inject(mainFragment: MainFragment)
     fun inject(downloadAssetsFragment: DownloadAssetsFragment)
-    fun inject(suggestedMapsFragment: SuggestedMapsFragment)
+    fun inject(localMapsFragment: LocalMapsFragment)
     fun inject(browseMapsFragment: BrowseMapsFragment)
 
     fun inject(mapFragment: MapFragment)

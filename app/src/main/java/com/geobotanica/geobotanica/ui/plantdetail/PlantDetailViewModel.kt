@@ -2,6 +2,7 @@ package com.geobotanica.geobotanica.ui.plantdetail
 
 import androidx.lifecycle.*
 import androidx.room.withTransaction
+import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.data.repo.*
@@ -18,7 +19,8 @@ class PlantDetailViewModel @Inject constructor(
         private val plantRepo: PlantRepo,
         private val plantLocationRepo: PlantLocationRepo,
         private val plantPhotoRepo: PlantPhotoRepo,
-        private val plantMeasurementRepo: PlantMeasurementRepo
+        private val plantMeasurementRepo: PlantMeasurementRepo,
+        private val storageHelper: StorageHelper
 ) : ViewModel() {
     var plantId = 0L    // Field injection of dynamic parameter.
         set(value) {
@@ -52,7 +54,7 @@ class PlantDetailViewModel @Inject constructor(
 
         location = plantLocationRepo.getLastPlantLocation(plantId).map { it.location }
 
-        plantPhotos = plantPhotoRepo.getAllPhotosOfPlant(plantId)
+        plantPhotos = plantPhotoRepo.getAllPhotosOfPlantLiveData(plantId)
 
         mainPhoto = plantPhotoRepo.getMainPhotoOfPlant(plantId)
 
@@ -81,10 +83,13 @@ class PlantDetailViewModel @Inject constructor(
         }
     }
 
-    private fun deletePlantPhotoFiles() {
-        plantPhotos.value?.forEach { plantPhoto ->
-            val fileName = plantPhoto.fileName
-            Lg.d("Deleting photo: $fileName (Result=${File(fileName).delete()})")
+    private suspend fun deletePlantPhotoFiles() {
+        plantPhotoRepo.getAllPhotosOfPlant(plantId).forEach { plantPhoto ->
+            val photoUri = getPhotoUri(plantPhoto)
+            Lg.d("Deleting photo: $photoUri (Result=${File(photoUri).delete()})")
         }
     }
+
+    fun getPhotoUri(plantPhoto: PlantPhoto): String =
+            storageHelper.photoUriFrom(plantPhoto.filename, plant.value!!.userId)
 }

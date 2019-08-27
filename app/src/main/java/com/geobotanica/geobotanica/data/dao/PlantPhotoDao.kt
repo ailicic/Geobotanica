@@ -11,7 +11,10 @@ interface PlantPhotoDao : BaseDao<PlantPhoto> {
     fun get(id: Long): LiveData<PlantPhoto>
 
     @Query("SELECT * FROM plantPhotos WHERE plantId = :plantId ORDER BY timestamp DESC") // TODO: Check ordering
-    fun getAllPhotosOfPlant(plantId: Long): LiveData<List<PlantPhoto>>
+    fun getAllPhotosOfPlantLiveData(plantId: Long): LiveData<List<PlantPhoto>>
+
+    @Query("SELECT * FROM plantPhotos WHERE plantId = :plantId ORDER BY timestamp DESC") // TODO: Check ordering
+    suspend fun getAllPhotosOfPlant(plantId: Long): List<PlantPhoto>
 
     @Query("SELECT * FROM plantPhotos WHERE plantId = :plantId AND type = :type ORDER BY timestamp DESC LIMIT 1")
     fun getMainPhotoOfPlant(plantId: Long, type: PlantPhoto.Type): LiveData<PlantPhoto>

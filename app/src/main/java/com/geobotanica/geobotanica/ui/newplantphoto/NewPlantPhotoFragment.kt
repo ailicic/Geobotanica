@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.navigation.fragment.NavHostFragment
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -22,6 +23,8 @@ import javax.inject.Inject
 class NewPlantPhotoFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantPhotoViewModel>
     private lateinit var viewModel: NewPlantPhotoViewModel
+
+    @Inject lateinit var storageHelper: StorageHelper
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -41,7 +44,7 @@ class NewPlantPhotoFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         deletePhotoIfExists()
-        val photoFile = createPhotoFile()
+        val photoFile = storageHelper.createPhotoFile(viewModel.userId)
         viewModel.photoUri = photoFile.absolutePath
         startPhotoIntent(photoFile)
     }

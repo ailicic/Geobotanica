@@ -32,7 +32,7 @@ class MainViewModel @Inject constructor (
         {
             R.id.downloadAssetsFragment
         } else if (mapRepo.getInitiatedDownloads().isEmpty()) {
-            R.id.suggestedMapsFragment
+            R.id.localMapsFragment
         } else
             R.id.mapFragment
     }

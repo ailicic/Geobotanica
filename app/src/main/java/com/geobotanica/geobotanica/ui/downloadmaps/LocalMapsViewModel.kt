@@ -5,6 +5,7 @@ import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data.repo.GeolocationRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.network.FileDownloader
+import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.DOWNLOADED
 import com.geobotanica.geobotanica.network.Resource
 import com.geobotanica.geobotanica.network.ResourceStatus.*
 import com.geobotanica.geobotanica.util.Lg
@@ -16,7 +17,7 @@ import javax.inject.Singleton
 
 
 @Singleton
-class SuggestedMapsViewModel @Inject constructor(
+class LocalMapsViewModel @Inject constructor(
         private val storageHelper: StorageHelper,
         private val fileDownloader: FileDownloader,
         private val mapRepo: MapRepo,
@@ -27,7 +28,7 @@ class SuggestedMapsViewModel @Inject constructor(
             .getInitiatedDownloadsLiveData()
             .map { it.isNotEmpty() }
 
-    val suggestedMaps: LiveData<Resource<List<OnlineMapListItem>>> =
+    val localMaps: LiveData<Resource<List<OnlineMapListItem>>> =
             geolocationRepo.get().switchMap { geolocation ->
                 when (geolocation.status) {
                     LOADING -> {
@@ -48,6 +49,20 @@ class SuggestedMapsViewModel @Inject constructor(
                     }
                 }
             }
+
+    fun getMapsFromExtStorage() = viewModelScope.launch(Dispatchers.IO) {
+        File(storageHelper.getExtStorageRootDir()).listFiles().forEach { file ->
+            if (file.extension == "map") {
+                Lg.d("Found map on external storage: ${file.name}")
+                file.copyTo(File(storageHelper.getMapsPath(), file.name))
+                mapRepo.getByFilename(file.name)?.let { map ->
+                    map.status = DOWNLOADED
+                    mapRepo.update(map)
+                    Lg.d("Imported map from external storage: ${file.name}")
+                }
+            }
+        }
+    }
 
     fun downloadMap(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
         val onlineMap = mapRepo.get(onlineMapId)

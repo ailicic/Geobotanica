@@ -38,6 +38,9 @@ interface OnlineMapDao : BaseDao<OnlineMap> {
     @Query("SELECT * FROM maps WHERE status = :decompressing")
     suspend fun getDecompressing(decompressing: Long = DECOMPRESSING): List<OnlineMap>
 
+    @Query("SELECT * FROM maps WHERE url LIKE '%' || :filename")
+    suspend fun getByFilename(filename: String): OnlineMap?
+
     @Query("SELECT * FROM maps WHERE status = :downloadId")
     suspend fun getByDownloadId(downloadId: Long): OnlineMap?
 

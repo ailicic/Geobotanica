@@ -44,9 +44,9 @@ import org.mapsforge.map.rendertheme.InternalRenderTheme
 import org.mapsforge.map.scalebar.MapScaleBar
 import javax.inject.Inject
 
-// TODO: Store only relative path/url in PlantPhoto
-// TODO: Fix MapViewModelTests
 // TODO: Correct fragment navigation animations
+// TODO: Fix MapViewModelTests
+
 // TODO: Force location markers to be drawn on top of plant markers (sometimes incorrect after delete plant)
 // -> Required to remove all markers to get order right? (currently diffing the plant markers)
 
@@ -141,7 +141,7 @@ class MapFragment : BaseFragment() {
                 true
             }
             R.id.download_maps -> {
-                NavHostFragment.findNavController(this).navigate(R.id.suggestedMapsFragment)
+                NavHostFragment.findNavController(this).navigate(R.id.localMapsFragment)
                 true
             }
             else -> super.onOptionsItemSelected(item)

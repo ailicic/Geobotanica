@@ -26,7 +26,7 @@ data class PlantPhoto(
     val userId: Long,
     val plantId: Long,
     val type: Type,
-    val fileName: String,
+    val filename: String,
     val timestamp: OffsetDateTime = OffsetDateTime.now()
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0
