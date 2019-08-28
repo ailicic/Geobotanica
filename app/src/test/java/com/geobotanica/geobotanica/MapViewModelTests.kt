@@ -2,8 +2,11 @@ package com.geobotanica.geobotanica
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.*
+import com.geobotanica.geobotanica.data.repo.AssetRepo
+import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.ui.map.MapViewModel
 import com.geobotanica.geobotanica.ui.map.PlantMarkerData
@@ -21,6 +24,10 @@ class MapViewModelTests : Spek({
     describeWithLiveData("MapViewModel") {
         val plantCompositesLiveData = MutableLiveData<List<PlantComposite>>()
 
+        val storageHelper = mockk<StorageHelper>()
+        val mapRepo = mockk<MapRepo>()
+        val assetRepo = mockk<AssetRepo>()
+
         val plantRepo = mockk<PlantRepo>()
         every { plantRepo.getAllPlantComposites() } returns plantCompositesLiveData
 
@@ -28,7 +35,7 @@ class MapViewModelTests : Spek({
         every { locationService.unsubscribe(any()) } returns Unit
         every { locationService.subscribe(any(), any(), any()) } returns Unit
 
-        val mapViewModel = MapViewModel(plantRepo, locationService)
+        val mapViewModel = MapViewModel(storageHelper, mapRepo, assetRepo, plantRepo, locationService)
 
         val showSnackbarObserver = mockk<Observer<Unit>>(relaxed = true)
         mapViewModel.showGpsRequiredSnackbar.observeForever(showSnackbarObserver)
@@ -84,7 +91,7 @@ class MapViewModelTests : Spek({
 
         describeWithLiveData("PlantComposites LiveData") {
             val plantComposite = PlantComposite()
-            val plant = Plant(1L, Plant.Type.TREE, "common", "latin", OffsetDateTime.MAX)
+            val plant = Plant(1L, Plant.Type.TREE, "common", "latin", 1L, 1L, OffsetDateTime.MAX)
             plant.id = 1L
             plantComposite.plant = plant
             plantComposite.plantLocations = listOf(
@@ -110,10 +117,9 @@ class MapViewModelTests : Spek({
 
                 it("Should extract to PlantMarkerData list") {
                     slot.captured shouldEqual listOf(PlantMarkerData(
-                        1L, "common", "latin",
+                        1L, Plant.Type.TREE,"common", "latin",
                         1.0, 2.0, "photoPath",
-                        OffsetDateTime.MAX.toString().substringBefore('T'),
-                        mapViewModel.getPlantMarkerIconFromType(Plant.Type.TREE)
+                        OffsetDateTime.MAX.toString().substringBefore('T')
                     ))
                 }
             }

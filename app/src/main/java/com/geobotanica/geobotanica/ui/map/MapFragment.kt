@@ -45,7 +45,6 @@ import org.mapsforge.map.scalebar.MapScaleBar
 import javax.inject.Inject
 
 // TODO: Correct fragment navigation animations
-// TODO: Fix MapViewModelTests
 
 // TODO: Force location markers to be drawn on top of plant markers (sometimes incorrect after delete plant)
 // -> Required to remove all markers to get order right? (currently diffing the plant markers)
