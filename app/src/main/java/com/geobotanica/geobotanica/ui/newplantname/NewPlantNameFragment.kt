@@ -9,7 +9,6 @@ import android.widget.EditText
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
@@ -94,6 +93,7 @@ class NewPlantNameFragment : BaseFragment() {
     private fun loadPlantNames() {
         with (viewModel) {
             loadNamesJob = lifecycleScope.launch {
+                delay(resources.getInteger(R.integer.fragmentAnimTime).toLong())
                 loadNamesFromIds()
 
                 val suggestedNamesChannel: ReceiveChannel<List<SearchResult>>? =
@@ -201,12 +201,10 @@ class NewPlantNameFragment : BaseFragment() {
 
     private fun navigateToNext() {
         animateTextJob.cancel()
-        val navController = NavHostFragment.findNavController(this)
-
         if (viewModel.isPlantTypeKnown())
-            navController.navigate(R.id.newPlantMeasurementFragment, createBundle())
+            navigateTo(R.id.action_newPlantName_to_newPlantMeasurement, createBundle())
         else
-            navController.navigate(R.id.newPlantTypeFragment, createBundle())
+            navigateTo(R.id.action_newPlantName_to_newPlantType, createBundle())
     }
 
     private fun areNamesValid(): Boolean {

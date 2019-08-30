@@ -119,9 +119,10 @@ class PlantMarker(
     }
 
     private fun showPlantDetails() {
+        mapView.mapScaleBar.isVisible = false // Prevents crash on fragment anim
         Lg.d("Opening plant detail: id=${plantMarkerData.plantId}")
         val bundle = bundleOf("plantId" to plantMarkerData.plantId)
         val navController = activity.findNavController(R.id.fragment)
-        navController.navigate(R.id.plantDetailFragment, bundle)
+        navController.navigate(R.id.action_map_to_plantDetail, bundle)
     }
 }

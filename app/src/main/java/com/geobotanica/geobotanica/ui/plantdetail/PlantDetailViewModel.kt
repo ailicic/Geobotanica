@@ -22,6 +22,8 @@ class PlantDetailViewModel @Inject constructor(
         private val plantMeasurementRepo: PlantMeasurementRepo,
         private val storageHelper: StorageHelper
 ) : ViewModel() {
+    var isPlantMarkedForDeletion = false
+
     var plantId = 0L    // Field injection of dynamic parameter.
         set(value) {
             field = value
@@ -47,6 +49,16 @@ class PlantDetailViewModel @Inject constructor(
     lateinit var measuredByUser: LiveData<String>
     lateinit var locationText: LiveData<String>
     lateinit var createdDateText: LiveData<String>
+
+    fun onDestroyFragment() {
+        if (isPlantMarkedForDeletion) {
+            deletePlant()
+            isPlantMarkedForDeletion = false
+        }
+    }
+
+    fun getPhotoUri(plantPhoto: PlantPhoto): String =
+            storageHelper.photoUriFrom(plantPhoto.filename, plant.value!!.userId)
 
     private fun init() {
         plant = plantRepo.get(plantId)
@@ -75,7 +87,7 @@ class PlantDetailViewModel @Inject constructor(
         createdDateText = plant.map { it.timestamp.toSimpleDate() }
     }
 
-    fun deletePlant() = viewModelScope.launch(Dispatchers.IO) {
+    private fun deletePlant() = viewModelScope.launch(Dispatchers.IO) {
         deletePlantPhotoFiles()
         database.withTransaction {
             Lg.d("Deleting plant: ${plant.value!!}")
@@ -89,7 +101,4 @@ class PlantDetailViewModel @Inject constructor(
             Lg.d("Deleting photo: $photoUri (Result=${File(photoUri).delete()})")
         }
     }
-
-    fun getPhotoUri(plantPhoto: PlantPhoto): String =
-            storageHelper.photoUriFrom(plantPhoto.filename, plant.value!!.userId)
 }

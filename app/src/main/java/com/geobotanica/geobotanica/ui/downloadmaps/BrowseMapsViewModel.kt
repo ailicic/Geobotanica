@@ -19,8 +19,6 @@ class BrowseMapsViewModel @Inject constructor(
         private val fileDownloader: FileDownloader,
         private val mapRepo: MapRepo
 ): ViewModel() {
-    var userId = 0L
-
     val showFab: LiveData<Boolean> = mapRepo.getInitiatedDownloadsLiveData().map { mapList ->
         mapList.isNotEmpty()
     }
@@ -75,16 +73,13 @@ class BrowseMapsViewModel @Inject constructor(
             maps: List<OnlineMap>?
     ): List<OnlineMapListItem> {
 
-        val latestMaps = maps
-        val latestFolders = folders
-
 //        Lg.d("combineMapListItems(): latestMaps=$latestMaps; latestFolders=$latestFolders")
-        if (latestMaps == null || latestFolders == null)
+        if (maps == null || folders == null)
             return emptyList()
 
         return mutableListOf<OnlineMapListItem>().apply {
-            addAll(latestFolders.map { it.toListItem() })
-            addAll(latestMaps.map { it.toListItem() })
+            addAll(folders.map { it.toListItem() })
+            addAll(maps.map { it.toListItem() })
         }
     }
 }

@@ -13,7 +13,6 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.NavHostFragment
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.Location
@@ -44,10 +43,11 @@ import org.mapsforge.map.rendertheme.InternalRenderTheme
 import org.mapsforge.map.scalebar.MapScaleBar
 import javax.inject.Inject
 
-// TODO: Correct fragment navigation animations
-
 // TODO: Force location markers to be drawn on top of plant markers (sometimes incorrect after delete plant)
 // -> Required to remove all markers to get order right? (currently diffing the plant markers)
+
+// TODO: Fix fragment anim not showing if popUpTo non-null
+
 
 // LONG TERM
 // TODO: Add photoType + editPhoto buttons in PlantDetails image (like confirm frag)
@@ -140,12 +140,12 @@ class MapFragment : BaseFragment() {
                 true
             }
             R.id.download_maps -> {
-                NavHostFragment.findNavController(this).navigate(R.id.localMapsFragment)
+                mapView.mapScaleBar.isVisible = false // Prevents crash on fragment anim
+                navigateTo(R.id.action_map_to_localMaps)
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -225,10 +225,6 @@ class MapFragment : BaseFragment() {
         viewModel.initGpsSubscribe()
         setClickListeners()
         bindViewModel()
-
-//        // TODO: REMOVE
-//        NavHostFragment.findNavController(this@MapFragment).navigate(
-//                R.id.newPlantMeasurementFragment, createBundle() )
     }
 
     private suspend fun initMap() {
@@ -360,14 +356,13 @@ class MapFragment : BaseFragment() {
     }
 
     private val onNavigateToNewPlant = Observer<Unit> {
-        NavHostFragment.findNavController(this).navigate(
-                R.id.newPlantPhotoFragment,
-                bundleOf("userId" to viewModel.userId) )
+        mapView.mapScaleBar.isVisible = false // Prevents crash on fragment anim
+        navigateTo(R.id.action_map_to_newPlantPhoto, bundleOf("userId" to viewModel.userId) )
     }
 
 //     TODO: REMOVE (Temp for NewPlantConfirmFragment)
 //    private val onNavigateToNewPlant = Observer<Unit> {
-//        NavHostFragment.findNavController(this).navigate(R.id.newPlantConfirmFragment, createBundle() )
+//        navigateTo(R.id.newPlantConfirmFragment, createBundle() )
 //    }
 
     // TODO: REMOVE

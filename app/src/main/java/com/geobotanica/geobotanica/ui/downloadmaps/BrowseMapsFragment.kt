@@ -6,13 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.databinding.FragmentBrowseMapsBinding
@@ -24,10 +20,8 @@ import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.dialog.WarningDialog
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.get
-import com.geobotanica.geobotanica.util.getFromBundle
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_browse_maps.*
-import kotlinx.coroutines.*
 import javax.inject.Inject
 
 
@@ -44,10 +38,7 @@ class BrowseMapsFragment : BaseFragment() {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
-        viewModel = getViewModel(viewModelFactory) {
-            userId = getFromBundle(userIdKey)
-            Lg.d("Fragment args: userId=$userId")
-        }
+        viewModel = getViewModel(viewModelFactory)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -71,13 +62,12 @@ class BrowseMapsFragment : BaseFragment() {
         activity.toolbar.setNavigationOnClickListener(null)
     }
 
-    // TODO: Need to deregister after navigation?
     private fun addOnBackPressedCallback() {
         activity.toolbar.setNavigationOnClickListener { onClickBackButton() }
         requireActivity().onBackPressedDispatcher.addCallback(this) { onClickBackButton() }
     }
 
-    private fun onClickBackButton() = lifecycleScope.launch {
+    private fun onClickBackButton() {
         if (parentMapFolderIds.isNotEmpty())
             browseParentFolder()
         else
@@ -90,11 +80,6 @@ class BrowseMapsFragment : BaseFragment() {
             viewModel.browseMapFolder(null)
         else
             viewModel.browseMapFolder(parentMapFolderIds.last())
-    }
-
-    private fun navigateUp() {
-        val navController = NavHostFragment.findNavController(this)
-        navController.navigateUp()
     }
 
     private fun bindClickListeners() {
@@ -147,15 +132,9 @@ class BrowseMapsFragment : BaseFragment() {
     }
 
     private fun navigateToNext() {
-        val navController = NavHostFragment.findNavController(this)
-
-        if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true)) {
-            navController.popBackStack()
-            navController.navigate(R.id.mapFragment, createBundle())
-        } else
-            navController.navigateUp()
+        if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true))
+            navigateTo(R.id.action_browseMaps_to_map, popUpTo = R.id.browseMapsFragment)
+        else
+            popUpTo(R.id.mapFragment)
     }
-
-    private fun createBundle(): Bundle =
-        bundleOf(userIdKey to viewModel.userId)
 }

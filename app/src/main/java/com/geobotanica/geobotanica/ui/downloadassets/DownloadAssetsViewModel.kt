@@ -25,8 +25,6 @@ class DownloadAssetsViewModel @Inject constructor(
         private val fileDownloader: FileDownloader,
         private val assetRepo: AssetRepo
 ): ViewModel() {
-    var userId = 0L
-
     val showStorageSnackbar = SingleLiveEvent<OnlineAsset>()
 
     val navigateToNext: LiveData<Boolean> = assetRepo.getAllLiveData().map { assets ->

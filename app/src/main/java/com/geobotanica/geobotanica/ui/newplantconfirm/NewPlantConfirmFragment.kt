@@ -141,8 +141,9 @@ class NewPlantConfirmFragment : BaseFragment() {
                 }
                 activity.currentLocation = null
                 showToast(getString(R.string.plant_discarded))
-                val navController = NavHostFragment.findNavController(this@NewPlantConfirmFragment)
-                navController.popBackStack(R.id.mapFragment, false)
+
+//                navigateTo(R.id.action_newPlantConfirm_to_mapFragment, popUpTo = R.id.mapFragment)
+                popUpTo(R.id.mapFragment)
             }
             setNegativeButton(getString(R.string.no)) { dialog, _ -> dialog.dismiss() }
             create()

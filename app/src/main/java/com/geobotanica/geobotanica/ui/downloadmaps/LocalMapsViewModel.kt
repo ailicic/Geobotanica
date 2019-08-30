@@ -6,6 +6,7 @@ import com.geobotanica.geobotanica.data.repo.GeolocationRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.network.FileDownloader
 import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.DOWNLOADED
+import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOWNLOADED
 import com.geobotanica.geobotanica.network.Resource
 import com.geobotanica.geobotanica.network.ResourceStatus.*
 import com.geobotanica.geobotanica.util.Lg
@@ -53,12 +54,14 @@ class LocalMapsViewModel @Inject constructor(
     fun getMapsFromExtStorage() = viewModelScope.launch(Dispatchers.IO) {
         File(storageHelper.getExtStorageRootDir()).listFiles().forEach { file ->
             if (file.extension == "map") {
-                Lg.d("Found map on external storage: ${file.name}")
-                file.copyTo(File(storageHelper.getMapsPath(), file.name))
                 mapRepo.getByFilename(file.name)?.let { map ->
-                    map.status = DOWNLOADED
-                    mapRepo.update(map)
-                    Lg.d("Imported map from external storage: ${file.name}")
+                    if (map.status == NOT_DOWNLOADED) {
+                        Lg.d("Importing map from external storage: ${file.name}")
+                        file.copyTo(File(storageHelper.getMapsPath(), file.name))
+                        map.status = DOWNLOADED
+                        mapRepo.update(map)
+                        Lg.d("Imported map from external storage: ${file.name}")
+                    }
                 }
             }
         }

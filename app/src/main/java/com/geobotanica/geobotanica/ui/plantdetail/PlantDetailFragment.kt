@@ -9,7 +9,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.view.doOnPreDraw
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
-import androidx.navigation.fragment.NavHostFragment
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.databinding.FragmentPlantDetailBinding
 import com.geobotanica.geobotanica.ui.BaseFragment
@@ -56,6 +55,11 @@ class PlantDetailFragment : BaseFragment() {
         bindClickListeners()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewModel.onDestroyFragment()
+    }
+
     private fun setPlantPhoto() {
         plantPhoto.doOnPreDraw {
             viewModel.mainPhoto.observe(viewLifecycleOwner, Observer { mainPhoto ->
@@ -77,11 +81,9 @@ class PlantDetailFragment : BaseFragment() {
             setTitle(getString(R.string.delete_plant))
             setMessage(getString(R.string.delete_plant_confirm))
             setPositiveButton(getString(R.string.yes)) { _, _ ->
-                viewModel.deletePlant()
+                viewModel.isPlantMarkedForDeletion = true
                 showToast(getString(R.string.plant_deleted))
-
-                val navController = NavHostFragment.findNavController(this@PlantDetailFragment)
-                navController.popBackStack()
+                navigateUp()
             }
             setNegativeButton(getString(R.string.no)) { dialog, _ -> dialog.dismiss() }
             create()

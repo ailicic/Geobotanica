@@ -11,7 +11,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.databinding.FragmentLocalMapsBinding
@@ -64,8 +63,7 @@ class LocalMapsFragment : BaseFragment() {
         initRecyclerView()
         bindClickListeners()
         bindViewModel()
-        if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true))
-            viewModel.getMapsFromExtStorage()
+        viewModel.getMapsFromExtStorage()
     }
 
     override fun onDestroy() {
@@ -73,7 +71,6 @@ class LocalMapsFragment : BaseFragment() {
         activity.toolbar.setNavigationOnClickListener(null)
     }
 
-    // TODO: Need to deregister before navigation?
     private fun addOnBackPressedCallback() {
         if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true)) {
             activity.toolbar.setNavigationOnClickListener { exitAppWithWarning() }
@@ -183,23 +180,12 @@ class LocalMapsFragment : BaseFragment() {
         }.show(requireFragmentManager(), null)
     }
 
-    private fun browseMaps() {
-        val navController = NavHostFragment.findNavController(this)
-
-        if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true))
-            navController.popBackStack()
-        else
-            navController.popBackStack(R.id.mapFragment, false)
-        navController.navigate(R.id.browseMapsFragment)
-    }
+    private fun browseMaps() = navigateTo(R.id.action_localMaps_to_browseMaps)
 
     private fun navigateToNext() {
-        val navController = NavHostFragment.findNavController(this)
-        if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true)) {
-            navController.popBackStack()
-            navController.navigate(R.id.mapFragment)
-        } else
-            navController.navigateUp()
+        if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true))
+            navigateTo(R.id.action_localMaps_to_map, popUpTo = R.id.localMapsFragment)
+        else
+            navigateUp()
     }
-
 }

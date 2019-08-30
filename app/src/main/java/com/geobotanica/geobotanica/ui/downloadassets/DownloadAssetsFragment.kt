@@ -10,11 +10,11 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.NavOptions
+import androidx.navigation.fragment.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.network.NetworkValidator
 import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
@@ -23,7 +23,6 @@ import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.dialog.WarningDialog
 import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.getFromBundle
 import kotlinx.android.synthetic.main.fragment_download_assets.*
 import kotlinx.coroutines.launch
 import java.io.File
@@ -39,10 +38,7 @@ class DownloadAssetsFragment : BaseFragment() {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
-        viewModel = getViewModel(viewModelFactory) {
-            userId = getFromBundle(userIdKey)
-            Lg.d("Fragment args: userId=$userId")
-        }
+        viewModel = getViewModel(viewModelFactory)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -88,6 +84,7 @@ class DownloadAssetsFragment : BaseFragment() {
         viewModel.navigateToNext.observe(viewLifecycleOwner, Observer {
             if (it) {
                 Lg.d("DownloadAssetsFragment: Map data imported and asset downloads initialized -> navigateToNext()")
+                progressBar.isVisible = false
                 navigateToNext()
             }
         })
@@ -137,12 +134,6 @@ class DownloadAssetsFragment : BaseFragment() {
         viewModel.downloadAssets()
     }
 
-    private fun navigateToNext() {
-        val navController = NavHostFragment.findNavController(this)
-        navController.popBackStack()
-        navController.navigate(R.id.localMapsFragment, createBundle())
-    }
-
-    private fun createBundle(): Bundle =
-        bundleOf(userIdKey to viewModel.userId)
+    private fun navigateToNext() =
+        navigateTo(R.id.action_downloadAssets_to_localMaps, popUpTo = R.id.downloadAssetsFragment)
 }

@@ -19,13 +19,13 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.PermissionChecker.PERMISSION_GRANTED
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavOptions
+import androidx.navigation.fragment.findNavController
 import com.geobotanica.geobotanica.util.Lg
 import com.google.android.material.snackbar.Snackbar
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.*
 import javax.inject.Inject
 
 // NavBundle keys
@@ -74,6 +74,20 @@ abstract class BaseFragment : Fragment() {
         WRITE_EXTERNAL_STORAGE -> 2
         else -> 0
     }
+
+    protected fun navigateTo(destination: Int, bundle: Bundle? = null, popUpTo: Int? = null) {
+        popUpTo?.let {
+            val navOptions = NavOptions.Builder().run {
+                setPopUpTo(it, true)
+                build()
+            }
+            findNavController().navigate(destination, bundle, navOptions)
+        } ?: findNavController().navigate(destination, bundle)
+    }
+
+    protected fun navigateUp() = findNavController().navigateUp()
+
+    protected fun popUpTo(destination: Int) = findNavController().popBackStack(destination, false)
 
     protected fun showToast(stringResId: Int) = showToast(getString(stringResId))
 
