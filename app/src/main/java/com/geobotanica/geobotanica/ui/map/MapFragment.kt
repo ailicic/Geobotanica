@@ -4,7 +4,6 @@ import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.*
 import androidx.core.os.bundleOf
@@ -14,26 +13,23 @@ import androidx.lifecycle.lifecycleScope
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.Location
-import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.network.FileDownloader
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.util.*
+import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_FIX
 import com.geobotanica.geobotanica.util.IdDiffer.computeDiffs
+import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.get
+import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.mapsforge.core.graphics.Color
-import org.mapsforge.core.graphics.Style
-import org.mapsforge.core.model.LatLong
-import org.mapsforge.map.android.graphics.AndroidGraphicFactory
-import org.mapsforge.map.layer.overlay.Circle
 import javax.inject.Inject
 
 // TODO: Force location markers to be drawn on top of plant markers (sometimes incorrect after delete plant)
-// -> Required to remove all markers to get order right? (currently diffing the plant markers)
+// -> Re-adding location markers seems to be ineffective -> Ask on Github?
 
 // TODO: Fix fragment anim not showing if popUpTo non-null
 
@@ -246,19 +242,6 @@ class MapFragment : BaseFragment() {
         viewModel.plantMarkerData.observe(viewLifecycleOwner, onPlantMarkers)
     }
 
-    private fun forceLocationMarkerOnTop() {
-        locationPrecisionCircle?.let {
-            mapView.layerManager.layers.remove(it, false)
-            locationPrecisionCircle = null
-            createLocationPrecisionCircle()
-        }
-        locationMarker?.let {
-            mapView.layerManager.layers.remove(it, false)
-            locationMarker = null
-            createLocationMarker()
-        }
-    }
-
     @Suppress("DEPRECATION")
     private fun setClickListeners() {
         gpsFab.setOnClickListener { viewModel.onClickGpsFab() }
@@ -301,21 +284,21 @@ class MapFragment : BaseFragment() {
 //    }
 
     // TODO: REMOVE
-    private fun createBundle(): Bundle {
-        return bundleOf(
-                userIdKey to viewModel.userId,
-                plantTypeKey to Plant.Type.TREE.flag,
-                photoUriKey to fileFromDrawable(R.drawable.photo_type_complete, "photo_type_complete"),
-                commonNameKey to "Common",
-                scientificNameKey to "Latin",
-                heightMeasurementKey to Measurement(1.0f, Units.M),
-                diameterMeasurementKey to Measurement(2.0f, Units.IN),
-                trunkDiameterMeasurementKey to Measurement(3.5f, Units.FT)
-        ).apply {
-            putSerializable(locationKey, Location(
-                49.477, -119.592, 1.0, 3.0f, 10, 20))
-        }
-    }
+//    private fun createBundle(): Bundle {
+//        return bundleOf(
+//                userIdKey to viewModel.userId,
+//                plantTypeKey to Plant.Type.TREE.flag,
+//                photoUriKey to fileFromDrawable(R.drawable.photo_type_complete, "photo_type_complete"),
+//                commonNameKey to "Common",
+//                scientificNameKey to "Latin",
+//                heightMeasurementKey to Measurement(1.0f, Units.M),
+//                diameterMeasurementKey to Measurement(2.0f, Units.IN),
+//                trunkDiameterMeasurementKey to Measurement(3.5f, Units.FT)
+//        ).apply {
+//            putSerializable(locationKey, Location(
+//                49.477, -119.592, 1.0, 3.0f, 10, 20))
+//        }
+//    }
 
     private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkersData ->
         Lg.d("onPlantMarkers: $newPlantMarkersData")
@@ -324,7 +307,6 @@ class MapFragment : BaseFragment() {
         val plantMarkerDiffs = computeDiffs(
                 currentPlantMarkers.map { it.plantId }, newPlantMarkersData.map { it.plantId }
         )
-
 
 //        mapView.layerManager.layers.removeAll { // CowArray -> UnsupportedOperationException!!
 //            it is PlantMarker && plantMarkerDiffs.removeIds.contains(it.plantId)
@@ -342,7 +324,7 @@ class MapFragment : BaseFragment() {
                 .map { PlantMarker(it, activity, mapView) },
             false)
 
-        forceLocationMarkerOnTop()
+//        forceLocationMarkerOnTop()
         mapView.layerManager.redrawLayers()
         // TODO: Consider using a custom InfoWindow
     }
@@ -353,10 +335,10 @@ class MapFragment : BaseFragment() {
         Lg.v("MapFragment: onLocation() = $it")
         if (it.latitude != null && it.longitude != null) { // OK in VM
             if (it.isRecent()) { // OK in VM
-                gpsFab.setImageDrawable(resources.getDrawable(R.drawable.gps_fix)) // Could be LiveData
+                gpsFab.setImageResource(GPS_FIX.drawable) // Could be LiveData
                 updateLocationPrecision(it) // Could be LiveData
-                if (isLocationOffScreen(it)) // Problem: Check requires map
-                    centerMapOnLocation(it) // Could be LiveData
+                if (mapView.isLocationOffScreen(it)) // Problem: Check requires map
+                    mapView.centerMapOnLocation(it) // Could be LiveData
                 viewModel.setStaleGpsLocationTimer() // OK in VM
             }
             updateLocationMarker(it) // Could be LiveData
@@ -367,63 +349,33 @@ class MapFragment : BaseFragment() {
 
     private fun updateLocationPrecision(location: Location) {
         if (locationPrecisionCircle == null)
-            createLocationPrecisionCircle()
-        locationPrecisionCircle?.setLatLong(location.toLatLong())
-        locationPrecisionCircle?.radius = location.precision!!
-    }
-
-    private fun createLocationPrecisionCircle() {
-        locationPrecisionCircle = LocationCircle()
-        mapView.layerManager.layers.add(locationPrecisionCircle)
+            locationPrecisionCircle = LocationCircle(mapView)
+        locationPrecisionCircle?.updateLocation(location)
     }
 
     private fun updateLocationMarker(location: Location) {
-        if (locationMarker == null)
             createLocationMarker()
-        locationMarker?.latLong = location.toLatLong()
+        locationMarker?.updateLocation(location)
     }
 
-    @Suppress("DEPRECATION")
     private fun createLocationMarker() {
-        locationMarker = LocationMarker(resources.getDrawable(R.drawable.person))
-        mapView.layerManager.layers.add(locationMarker)
-    }
-
-    private fun isLocationOffScreen(location: Location): Boolean =
-        ! mapView.boundingBox.contains(location.toLatLong())
-
-    private fun centerMapOnLocation(location: Location, animate: Boolean = true) {
-        if (animate)
-            mapView.model.mapViewPosition.animateTo(location.toLatLong())
-        else
-            mapView.setCenter(location.toLatLong())
-    }
-
-    // TODO: Move these classes out
-    class LocationCircle : Circle(LatLong(0.0, 0.0), 0f,
-            AndroidGraphicFactory.INSTANCE.createPaint().apply {
-                setStyle(Style.FILL)
-                color = AndroidGraphicFactory.INSTANCE.createColor(64, 0, 0, 0)
-            },
-            AndroidGraphicFactory.INSTANCE.createPaint().apply {
-                setStyle(Style.STROKE)
-                color = AndroidGraphicFactory.INSTANCE.createColor(Color.BLACK)
-                strokeWidth = 2f
-            }, true
-    )
-
-    // TODO: Remove toast dep (expose SingleLiveDataEvent?)
-    inner class LocationMarker(
-            drawable: Drawable
-    ) : GbMarker(
-            drawable,
-            onPress = { showToast("You are here") },
-            onLongPress = { showToast("Long tap") }
-    ) {
-
-        override fun toString(): String {
-            return latLong.toString()
-        }
+        locationMarker = LocationMarker(resources.getDrawable(R.drawable.person), mapView)
+        locationMarker?.showLocationMarkerToast?.observe(viewLifecycleOwner, Observer {
+            showToast(R.string.you_are_here)
+        })
     }
 }
 
+
+//    private fun forceLocationMarkerOnTop() {
+//        locationPrecisionCircle?.let {
+//            mapView.layerManager.layers.remove(it, false)
+//            locationPrecisionCircle = null
+//            createLocationPrecisionCircle()
+//        }
+//        locationMarker?.let {
+//            mapView.layerManager.layers.remove(it, false)
+//            locationMarker = null
+//            createLocationMarker()
+//        }
+//    }

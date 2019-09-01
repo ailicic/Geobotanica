@@ -27,7 +27,7 @@ import org.mapsforge.map.view.InputListener
 class PlantMarker(
         private val plantMarkerData: PlantMarkerData,
         private val activity: AppCompatActivity,
-        private val mapView: MapView
+        private val mapView: GbMapView
 ) : GbMarker(
         activity.resources.getDrawable(when (plantMarkerData.plantType!!) {
             // TODO: Use drawable array + enum ordinal instead?
@@ -64,13 +64,19 @@ class PlantMarker(
     init {
         latLong = LatLong(plantMarkerData.latitude!!, plantMarkerData.longitude!!)
 
-        onPress = { markerBubble?.run { hideMarkerBubble() } ?: showMarkerBubble() }
+        onPress = {
+            if (markerBubble == null) {
+                mapView.hideAnyMarkerInfoBubble()
+                showInfoBubble()
+            } else
+                hideInfoBubble()
+        }
         onLongPress = { showPlantDetails() }
     }
 
     override fun toString(): String = plantMarkerData.toString()
 
-    fun hideMarkerBubble() {
+    fun hideInfoBubble() {
         markerBubble?.run {
             mapView.removeView(markerBubble)
             markerBubble = null
@@ -78,7 +84,7 @@ class PlantMarker(
         }
     }
 
-    private fun showMarkerBubble() {
+    private fun showInfoBubble() {
         val plantTypeDrawables = activity.resources.obtainTypedArray(R.array.plant_type_drawable_array)
         val plantTypeIconResId = plantTypeDrawables.getResourceId(plantMarkerData.plantType!!.ordinal, -1)
         plantTypeDrawables.recycle()
@@ -89,7 +95,7 @@ class PlantMarker(
             plantTypeIcon.setImageResource(plantTypeIconResId)
             plantMarkerData.commonName?.let { commonNameText.text = it; commonNameText.isVisible = true }
             plantMarkerData.scientificName?.let { scientificNameText.text = it; scientificNameText.isVisible = true }
-            setOnClickListener { hideMarkerBubble() }
+            setOnClickListener { hideInfoBubble() }
         }
         mapView.addView(markerBubble, getBubbleLayoutParams())
         registerZoomListener()

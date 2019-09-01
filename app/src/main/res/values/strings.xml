@@ -114,4 +114,5 @@
     <string name="geolocation_error">Geolocation error</string>
     <string name="download_local_maps">Download Local Maps</string>
     <string name="wait_for_plant_name_database_to_download">Wait for plant name database to download</string>
+    <string name="you_are_here">You are here</string>
 </resources>

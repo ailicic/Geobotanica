@@ -3,6 +3,7 @@ package com.geobotanica.geobotanica.ui.map
 import android.content.Context
 import android.util.AttributeSet
 import android.view.Gravity
+import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
 import org.mapsforge.core.model.LatLong
@@ -54,13 +55,10 @@ class GbMapView @JvmOverloads constructor(
         {
             override fun onTap(tapLatLong: LatLong?, layerXY: Point?, tapXY: Point?): Boolean {
                 Lg.d("onTap")
-                layerManager.layers.forEach { layer ->
-                    if (layer is PlantMarker && layer.isShowingMarkerBubble) {
-                        layer.hideMarkerBubble()
-                        return true
-                    }
-                }
-                return super.onTap(tapLatLong, layerXY, tapXY)
+                if (hideAnyMarkerInfoBubble())
+                    return true
+                else
+                    return super.onTap(tapLatLong, layerXY, tapXY)
             }
         }
         layerManager.layers.add(tileRendererLayer)
@@ -93,5 +91,24 @@ class GbMapView @JvmOverloads constructor(
         tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.DEFAULT)
         layerManager.layers.add(tileRendererLayer)
         reloadMarkers.call()
+    }
+
+    fun isLocationOffScreen(location: Location): Boolean = ! boundingBox.contains(location.toLatLong())
+
+    fun centerMapOnLocation(location: Location, animate: Boolean = true) {
+        if (animate)
+            model.mapViewPosition.animateTo(location.toLatLong())
+        else
+            setCenter(location.toLatLong())
+    }
+
+    fun hideAnyMarkerInfoBubble(): Boolean {
+        layerManager.layers.forEach { layer ->
+            if (layer is PlantMarker && layer.isShowingMarkerBubble) {
+                layer.hideInfoBubble()
+                return true
+            }
+        }
+        return false
     }
 }
