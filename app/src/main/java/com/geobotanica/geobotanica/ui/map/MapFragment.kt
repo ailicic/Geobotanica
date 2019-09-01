@@ -7,8 +7,6 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.*
-import android.view.Gravity.BOTTOM
-import android.view.Gravity.CENTER_HORIZONTAL
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
@@ -30,17 +28,8 @@ import kotlinx.coroutines.launch
 import org.mapsforge.core.graphics.Color
 import org.mapsforge.core.graphics.Style
 import org.mapsforge.core.model.LatLong
-import org.mapsforge.core.model.Point
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
-import org.mapsforge.map.android.util.AndroidUtil
-import org.mapsforge.map.datastore.MultiMapDataStore
-import org.mapsforge.map.layer.cache.TileCache
-import org.mapsforge.map.layer.labels.LabelLayer
 import org.mapsforge.map.layer.overlay.Circle
-import org.mapsforge.map.layer.renderer.TileRendererLayer
-import org.mapsforge.map.reader.MapFile
-import org.mapsforge.map.rendertheme.InternalRenderTheme
-import org.mapsforge.map.scalebar.MapScaleBar
 import javax.inject.Inject
 
 // TODO: Force location markers to be drawn on top of plant markers (sometimes incorrect after delete plant)
@@ -51,6 +40,9 @@ import javax.inject.Inject
 
 // LONG TERM
 // TODO: Add photoType + editPhoto buttons in PlantDetails image (like confirm frag)
+// TODO: Check Google Developer samples for best practices
+    // - fragment bundle -> viewModel save/restore
+    // - Where to launch coroutines? Can launch in vm even if result to be returned to fragment?
 // TODO: Use Okio everywhere
 // TODO: Check that coroutine result is handled properly in dialog where user taps outside to close (no result given to getStatus)
 // TODO: Check for memory leaks. Is coroutine holding on to Warning Dialog?
@@ -93,10 +85,6 @@ class MapFragment : BaseFragment() {
 
     private lateinit var viewModel: MapViewModel
 
-    private lateinit var tileRendererLayer: TileRendererLayer
-    private lateinit var tileCache: TileCache
-    private val loadedMaps = mutableListOf<String>()
-
     private var locationMarker: LocationMarker? = null
     private var locationPrecisionCircle: LocationCircle? = null
 
@@ -121,7 +109,7 @@ class MapFragment : BaseFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true);
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -130,7 +118,7 @@ class MapFragment : BaseFragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.menu_map, menu);
+        inflater.inflate(R.menu.menu_map, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -218,7 +206,7 @@ class MapFragment : BaseFragment() {
         }
     }
 
-    private fun init() = lifecycleScope.launch {
+    private fun init() {
         defaultSharedPrefs.put(sharedPrefsIsFirstRunKey to false)
 
         initMap()
@@ -227,43 +215,10 @@ class MapFragment : BaseFragment() {
         bindViewModel()
     }
 
-    private suspend fun initMap() {
-        mapView.isClickable = true
-        mapView.mapScaleBar.isVisible = true
-        mapView.mapScaleBar.scaleBarPosition = MapScaleBar.ScaleBarPosition.TOP_LEFT
-        mapView.setBuiltInZoomControls(true)
-        mapView.setCenter(LatLong(viewModel.mapLatitude, viewModel.mapLongitude))
-        mapView.setZoomLevel(viewModel.mapZoomLevel.toByte())
-        mapView.mapZoomControls.zoomControlsGravity = BOTTOM or CENTER_HORIZONTAL
-
-
-        tileCache = AndroidUtil.createTileCache(context, "mapcache",
-                mapView.model.displayModel.tileSize, 1f, mapView.model.frameBufferModel.overdrawFactor, true)
-        Lg.v("tileCache: capacity = ${tileCache.capacity}, capacityFirstLevel = ${tileCache.capacityFirstLevel}")
-
-        val multiMapDataStore = createMultiMapDataStore()
-
-        tileRendererLayer = object : TileRendererLayer(
-                tileCache, multiMapDataStore,
-                mapView.model.mapViewPosition,
-                false, false, true,
-                AndroidGraphicFactory.INSTANCE)
-        {
-            override fun onTap(tapLatLong: LatLong?, layerXY: Point?, tapXY: Point?): Boolean {
-                Lg.d("onTap")
-                mapView.layerManager.layers.forEach { layer ->
-                    if (layer is PlantMarker && layer.isShowingMarkerBubble) {
-                        layer.hideMarkerBubble()
-                        return true
-                    }
-                }
-                return super.onTap(tapLatLong, layerXY, tapXY)
-            }
+    private fun initMap() = lifecycleScope.launch {
+        with(viewModel) {
+            mapView.init(getDownloadedMapFileList(), mapLatitude, mapLongitude, mapZoomLevel)
         }
-        mapView.layerManager.layers.add(tileRendererLayer)
-
-        val labelLayer = LabelLayer(AndroidGraphicFactory.INSTANCE, tileRendererLayer.labelStore)
-        mapView.layerManager.layers.add(labelLayer)
 
         coordinatorLayout.isVisible = true // TODO: Remove this after LoginScreen implemented
         locationPrecisionCircle = null
@@ -273,37 +228,17 @@ class MapFragment : BaseFragment() {
 //            viewModel.getLastLocation()?.let { centerMapOnLocation(it, false) } // TODO: CHECK IF THIS SHOULD STAY (never worked)
 
         registerMapDownloadObserver()
+        mapView.reloadMarkers.observe(viewLifecycleOwner, Observer { reloadMarkers() })
     }
 
     private fun registerMapDownloadObserver() {
         activity.downloadComplete.observe(viewLifecycleOwner, Observer { downloadId ->
-            if (fileDownloader.isMap(downloadId) && ! loadedMaps.contains(fileDownloader.filenameFrom(downloadId)))
-                reloadMaps()
+            if (fileDownloader.isMap(downloadId) && ! mapView.isMapLoaded(fileDownloader.filenameFrom(downloadId))) {
+                lifecycleScope.launch {
+                    mapView.reloadMaps(viewModel.getDownloadedMapFileList())
+                }
+            }
         })
-    }
-
-    private suspend fun createMultiMapDataStore(): MultiMapDataStore {
-        val multiMapDataStore = MultiMapDataStore(MultiMapDataStore.DataPolicy.RETURN_ALL)
-
-        loadedMaps.clear()
-        viewModel.getDownloadedMapFileList().forEach { mapFile ->
-            Lg.d("Loading downloaded map: ${mapFile.name}")
-            loadedMaps.add(mapFile.name)
-            multiMapDataStore.addMapDataStore(MapFile(mapFile), false, false)
-        }
-        return multiMapDataStore
-    }
-
-    private fun reloadMaps() = lifecycleScope.launch {
-        Lg.d("MapFragment: reloadMaps()")
-        mapView.layerManager.layers.clear()
-        tileRendererLayer.onDestroy()
-        tileCache.purge() // Delete all cache files. If omitted, existing cache will override new maps.
-        tileRendererLayer = TileRendererLayer(tileCache, createMultiMapDataStore(),
-                mapView.model.mapViewPosition, AndroidGraphicFactory.INSTANCE)
-        tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.DEFAULT)
-        mapView.layerManager.layers.add(tileRendererLayer)
-        reloadMarkers()
     }
 
     private fun reloadMarkers() {

@@ -22,16 +22,6 @@ import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
-data class PlantMarkerData(
-        val plantId: Long,
-        val plantType: Plant.Type? = null,
-        val commonName: String? = null,
-        val scientificName: String? = null,
-        val latitude: Double? = null,
-        val longitude: Double? = null,
-        val photoPath: String? = null,
-        val dateCreated: String? = null
-)
 
 @Singleton
 class MapViewModel @Inject constructor(
@@ -69,7 +59,6 @@ class MapViewModel @Inject constructor(
     private var staleGpsTimer: Timer? = null
     private val staleGpsTimeout = 120_000L // ms
 
-    // TODO: Use drawable array + enum ordinal for this
     enum class GpsFabDrawable(val drawable: Int) {
         GPS_OFF(R.drawable.gps_off),
         GPS_NO_FIX(R.drawable.gps_no_fix),
@@ -126,6 +115,15 @@ class MapViewModel @Inject constructor(
         staleGpsTimer?.run { cancel(); staleGpsTimer = null }
     }
 
+    fun setStaleGpsLocationTimer() {
+        staleGpsTimer?.cancel()
+        staleGpsTimer = Timer().schedule(staleGpsTimeout) {
+            Lg.d("staleGpsTimer finished.")
+            staleGpsTimer = null
+            _gpsFabIcon.value = GPS_NO_FIX.drawable
+        }
+    }
+
     private fun subscribeGps() {
         if (!isGpsSubscribed()) {
             _gpsFabIcon.value = GPS_NO_FIX.drawable
@@ -137,15 +135,6 @@ class MapViewModel @Inject constructor(
 
     private fun onLocation(location: Location) {
         _currentLocation.value = location
-    }
-
-    fun setStaleGpsLocationTimer() {
-        staleGpsTimer?.cancel()
-        staleGpsTimer = Timer().schedule(staleGpsTimeout) {
-            Lg.d("staleGpsTimer finished.")
-            staleGpsTimer = null
-            _gpsFabIcon.value = GPS_NO_FIX.drawable
-        }
     }
 
 //    private fun getLastLocation(): Location? = locationService.getLastLocation()
@@ -169,3 +158,14 @@ class MapViewModel @Inject constructor(
         )
     }
 }
+
+data class PlantMarkerData(
+        val plantId: Long,
+        val plantType: Plant.Type? = null,
+        val commonName: String? = null,
+        val scientificName: String? = null,
+        val latitude: Double? = null,
+        val longitude: Double? = null,
+        val photoPath: String? = null,
+        val dateCreated: String? = null
+)
