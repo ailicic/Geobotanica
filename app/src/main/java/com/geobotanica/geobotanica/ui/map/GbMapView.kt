@@ -6,6 +6,7 @@ import android.view.Gravity
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
+import kotlinx.android.synthetic.main.fragment_map.view.*
 import org.mapsforge.core.model.LatLong
 import org.mapsforge.core.model.Point
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
@@ -41,30 +42,33 @@ class GbMapView @JvmOverloads constructor(
         setZoomLevel(zoomLevel.toByte())
         mapZoomControls.zoomControlsGravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
 
+
         tileCache = AndroidUtil.createTileCache(context, "mapcache",
                 model.displayModel.tileSize, 1f, model.frameBufferModel.overdrawFactor, true)
         Lg.v("tileCache: capacity = ${tileCache.capacity}, capacityFirstLevel = ${tileCache.capacityFirstLevel}")
 
-        val multiMapDataStore = createMultiMapDataStore(mapFiles)
+        tileRendererLayer = createTileRenderLayer(mapFiles)
+        layerManager.layers.add(tileRendererLayer)
 
-        tileRendererLayer = object : TileRendererLayer(
-                tileCache, multiMapDataStore,
+        val labelLayer = LabelLayer(AndroidGraphicFactory.INSTANCE, tileRendererLayer.labelStore)
+        layerManager.layers.add(labelLayer)
+    }
+
+    private fun createTileRenderLayer(mapFiles: List<File>): TileRendererLayer {
+        return object : TileRendererLayer(
+                tileCache, createMultiMapDataStore(mapFiles),
                 model.mapViewPosition,
                 false, false, true,
                 AndroidGraphicFactory.INSTANCE)
         {
             override fun onTap(tapLatLong: LatLong?, layerXY: Point?, tapXY: Point?): Boolean {
-                Lg.d("onTap")
-                if (hideAnyMarkerInfoBubble())
-                    return true
+                Lg.d("onTap (zoomLevel = ${ mapView.model.mapViewPosition.zoomLevel })")
+                return if (hideAnyMarkerInfoBubble())
+                    true
                 else
-                    return super.onTap(tapLatLong, layerXY, tapXY)
+                    super.onTap(tapLatLong, layerXY, tapXY)
             }
-        }
-        layerManager.layers.add(tileRendererLayer)
-
-        val labelLayer = LabelLayer(AndroidGraphicFactory.INSTANCE, tileRendererLayer.labelStore)
-        layerManager.layers.add(labelLayer)
+        }.apply { setXmlRenderTheme(InternalRenderTheme.DEFAULT) }
     }
 
     private fun createMultiMapDataStore(mapFiles: List<File>): MultiMapDataStore {
@@ -83,12 +87,10 @@ class GbMapView @JvmOverloads constructor(
 
     fun reloadMaps(mapFiles: List<File>) {
         Lg.d("MapFragment: reloadMaps()")
-        layerManager.layers.clear()
         tileRendererLayer.onDestroy()
         tileCache.purge() // Delete all cache files. If omitted, existing cache will override new maps.
-        tileRendererLayer = TileRendererLayer(tileCache, createMultiMapDataStore(mapFiles),
-                model.mapViewPosition, AndroidGraphicFactory.INSTANCE)
-        tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.DEFAULT)
+        tileRendererLayer = createTileRenderLayer(mapFiles)
+        layerManager.layers.clear()
         layerManager.layers.add(tileRendererLayer)
         reloadMarkers.call()
     }

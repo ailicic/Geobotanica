@@ -19,8 +19,8 @@ import com.geobotanica.geobotanica.util.setScaledBitmap
 import kotlinx.android.synthetic.main.fragment_plant_detail.*
 import javax.inject.Inject
 
-// TODO: Double check how measurements are handled here. Integrate changes to Measurement and MeasurementEditView
 // TODO: Show plant type as icon (not shown anywhere yet)
+// TODO: Double check how measurements are handled here. Integrate changes to Measurement and MeasurementEditView
 
 class PlantDetailFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<PlantDetailViewModel>

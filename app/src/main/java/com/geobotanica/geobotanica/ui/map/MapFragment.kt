@@ -33,26 +33,26 @@ import javax.inject.Inject
 
 // TODO: Fix fragment anim not showing if popUpTo non-null
 
+// TODO: Use Dispatchers.Default for JSON deserialization
 
 // LONG TERM
 // TODO: Add photoType + editPhoto buttons in PlantDetails image (like confirm frag)
-// TODO: Check Google Developer samples for best practices
-    // - fragment bundle -> viewModel save/restore
-    // - Where to launch coroutines? Can launch in vm even if result to be returned to fragment?
-// TODO: Use Okio everywhere
 // TODO: Check that coroutine result is handled properly in dialog where user taps outside to close (no result given to getStatus)
+// TODO: Check Google Developer samples for best practices
+// - fragment bundle -> viewModel save/restore
+// - Where to launch coroutines? Can launch in vm even if result to be returned to fragment?
+// TODO: Use Okio everywhere
 // TODO: Check for memory leaks. Is coroutine holding on to Warning Dialog?
 // TODO: Login screen
 // https://developer.android.com/training/id-auth/identify.html
 // https://developer.android.com/training/id-auth/custom_auth
 // TODO: Group nearby markers into clusters
 // TODO: Use MediaStore to store photos. They should apppear in Gallery as an album.
-// TODO: Make custom camera screen so Espresso can be used for UI testing (New CameraX API)
+// TODO: Use Koin for DI to simplify testing?
 // TODO: Use interfaces instead of concrete classes for injected dependencies where appropriate
+// TODO: Make custom camera screen so Espresso can be used for UI testing (New CameraX API)
 // TODO: Implement dark theme
 // TODO: Try using object detection for assisted plant measurements
-// TODO: Show warning dialog to user on zooming out far. Rendering vector maps at low zoom is slow but is only required once for caching.
-
 // LONG TERM NIT PICK
 // TODO: Get rid of warning on using null as root layout in inflate calls in onCreateDialog()
 // TODO: Learn how to use only the keyboard
@@ -204,7 +204,6 @@ class MapFragment : BaseFragment() {
 
     private fun init() {
         defaultSharedPrefs.put(sharedPrefsIsFirstRunKey to false)
-
         initMap()
         viewModel.initGpsSubscribe()
         setClickListeners()
