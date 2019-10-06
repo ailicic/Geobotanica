@@ -28,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+// TODO: Fix missing photo in plant marker bubble
 // TODO: Force location markers to be drawn on top of plant markers (sometimes incorrect after delete plant)
 // -> Re-adding location markers seems to be ineffective -> Ask on Github?
 
@@ -202,7 +203,7 @@ class MapFragment : BaseFragment() {
         }
     }
 
-    private fun init() {
+    private fun init() = lifecycleScope.launch {
         defaultSharedPrefs.put(sharedPrefsIsFirstRunKey to false)
         initMap()
         viewModel.initGpsSubscribe()
@@ -210,7 +211,7 @@ class MapFragment : BaseFragment() {
         bindViewModel()
     }
 
-    private fun initMap() = lifecycleScope.launch {
+    private suspend fun initMap() {
         with(viewModel) {
             mapView.init(getDownloadedMapFileList(), mapLatitude, mapLongitude, mapZoomLevel)
         }
@@ -237,6 +238,7 @@ class MapFragment : BaseFragment() {
     }
 
     private fun reloadMarkers() {
+        Lg.d("reloadMarkers()")
         viewModel.plantMarkerData.removeObserver(onPlantMarkers)
         viewModel.plantMarkerData.observe(viewLifecycleOwner, onPlantMarkers)
     }
@@ -316,16 +318,19 @@ class MapFragment : BaseFragment() {
         }.forEach {
             mapView.layerManager.layers.remove(it, false)
         }
-
+        
         mapView.layerManager.layers.addAll(
             newPlantMarkersData
                 .filter { plantMarkerDiffs.insertIds.contains(it.plantId) }
                 .map { PlantMarker(it, activity, mapView) },
             false)
 
+        mapView.layerManager.layers.forEachIndexed { index, layer ->
+            Lg.d("layer $index = $layer")
+        }
+
 //        forceLocationMarkerOnTop()
-        mapView.layerManager.redrawLayers()
-        // TODO: Consider using a custom InfoWindow
+//        mapView.layerManager.redrawLayers()
     }
 
     // TODO: See if logic here can be pushed to VM

@@ -8,6 +8,7 @@ import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.data.repo.*
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -51,6 +52,7 @@ class PlantDetailViewModel @Inject constructor(
     lateinit var createdDateText: LiveData<String>
 
     fun onDestroyFragment() {
+        Lg.d("PlantDetailViewModel: onDestroyFragment()")
         if (isPlantMarkedForDeletion) {
             deletePlant()
             isPlantMarkedForDeletion = false
@@ -87,11 +89,12 @@ class PlantDetailViewModel @Inject constructor(
         createdDateText = plant.map { it.timestamp.toSimpleDate() }
     }
 
-    private fun deletePlant() = viewModelScope.launch(Dispatchers.IO) {
+//    private fun deletePlant() = viewModelScope.launch(Dispatchers.IO) { // WARNING RACE CONDITION: viewModel is cleared on exit (!?) and might cancel this coroutine
+    private fun deletePlant() = GlobalScope.launch(Dispatchers.IO) {
         deletePlantPhotoFiles()
         database.withTransaction {
-            Lg.d("Deleting plant: ${plant.value!!}")
-            plantRepo.delete(plant.value!!)
+            val result = plantRepo.delete(plant.value!!)
+            Lg.d("Deleting plant: ${plant.value!!} (Result=$result)")
         }
     }
 
@@ -100,5 +103,10 @@ class PlantDetailViewModel @Inject constructor(
             val photoUri = getPhotoUri(plantPhoto)
             Lg.d("Deleting photo: $photoUri (Result=${File(photoUri).delete()})")
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Lg.d("PlantDetailViewModel: onCleared()")
     }
 }
