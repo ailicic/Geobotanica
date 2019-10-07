@@ -144,28 +144,30 @@ class MapViewModel @Inject constructor(
 
     private fun extractPlantMarkerData(plantComposite: PlantComposite): PlantMarkerData {
         val plant = plantComposite.plant
-        val photoPath = plantComposite.plantPhotos.first().filename
+        val photoFilename = plantComposite.plantPhotos.first().filename
         val location = plantComposite.plantLocations.first().location
         return PlantMarkerData(
+            plant.userId,
             plant.id,
             plantComposite.plant.type,
             plant.commonName,
             plant.scientificName,
             location.latitude,
             location.longitude,
-            photoPath,
+            photoFilename,
             plant.timestamp.toString().substringBefore('T')
         )
     }
 }
 
 data class PlantMarkerData(
+        val userId: Long,
         val plantId: Long,
         val plantType: Plant.Type? = null,
         val commonName: String? = null,
         val scientificName: String? = null,
         val latitude: Double? = null,
         val longitude: Double? = null,
-        val photoPath: String? = null,
+        val photoFilename: String? = null,
         val dateCreated: String? = null
 )

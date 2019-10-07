@@ -10,6 +10,7 @@ import com.geobotanica.geobotanica.ui.downloadmaps.BrowseMapsFragment
 import com.geobotanica.geobotanica.ui.downloadmaps.LocalMapsFragment
 import com.geobotanica.geobotanica.ui.main.MainFragment
 import com.geobotanica.geobotanica.ui.map.MapFragment
+import com.geobotanica.geobotanica.ui.map.PlantMarker
 import com.geobotanica.geobotanica.ui.newplantconfirm.NewPlantConfirmFragment
 import com.geobotanica.geobotanica.ui.newplantmeasurement.NewPlantMeasurementFragment
 import com.geobotanica.geobotanica.ui.newplantname.NewPlantNameFragment
@@ -40,6 +41,7 @@ interface ApplicationComponent {
     fun inject(newPlantConfirmFragment: NewPlantConfirmFragment)
     fun inject(plantDetailFragment: PlantDetailFragment)
 
+    fun inject(plantMarker: PlantMarker)
 
     fun inject(gpsCompoundView: GpsCompoundView)
 }

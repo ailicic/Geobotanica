@@ -3,13 +3,14 @@ package com.geobotanica.geobotanica.ui.map
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data.entity.Plant.Type.*
+import com.geobotanica.geobotanica.ui.MainActivity
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.setScaledBitmap
 import kotlinx.android.synthetic.main.marker_bubble.view.*
@@ -21,12 +22,13 @@ import org.mapsforge.core.model.LatLong
 import org.mapsforge.map.android.view.MapView
 import org.mapsforge.map.util.MapViewProjection
 import org.mapsforge.map.view.InputListener
+import javax.inject.Inject
 
 
 @Suppress("DEPRECATION")
 class PlantMarker(
         private val plantMarkerData: PlantMarkerData,
-        private val activity: AppCompatActivity,
+        private val activity: MainActivity,
         private val mapView: GbMapView
 ) : GbMarker(
         activity.resources.getDrawable(when (plantMarkerData.plantType!!) {
@@ -39,6 +41,8 @@ class PlantMarker(
             FUNGUS -> R.drawable.marker_yellow // TODO: Use different color
         })
 ) {
+    @Inject lateinit var storageHelper: StorageHelper
+
     val plantId: Long = plantMarkerData.plantId
 
     private var markerBubble: View? = null
@@ -62,6 +66,7 @@ class PlantMarker(
     }
 
     init {
+        activity.applicationComponent.inject(this)
         latLong = LatLong(plantMarkerData.latitude!!, plantMarkerData.longitude!!)
 
         onPress = {
@@ -89,9 +94,10 @@ class PlantMarker(
         val plantTypeIconResId = plantTypeDrawables.getResourceId(plantMarkerData.plantType!!.ordinal, -1)
         plantTypeDrawables.recycle()
 
-
-        markerBubble = LayoutInflater.from(activity).inflate(R.layout.marker_bubble, null).apply {
-            plantPhoto.doOnPreDraw { plantPhoto.setScaledBitmap(plantMarkerData.photoPath!!) }
+        val photoPath = storageHelper.photoUriFrom(plantMarkerData.photoFilename!!, plantMarkerData.userId)
+        Lg.d("photoPath = $photoPath")
+        markerBubble = LayoutInflater.from(activity).inflate(R.layout.marker_bubble, mapView, false).apply {
+            plantPhoto.doOnPreDraw { plantPhoto.setScaledBitmap(photoPath) }
             plantTypeIcon.setImageResource(plantTypeIconResId)
             plantMarkerData.commonName?.let { commonNameText.text = it; commonNameText.isVisible = true }
             plantMarkerData.scientificName?.let { scientificNameText.text = it; scientificNameText.isVisible = true }

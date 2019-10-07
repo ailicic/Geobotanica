@@ -99,7 +99,7 @@ class MapViewModelTests : Spek({
                             10, 20, OffsetDateTime.MAX))
             )
             plantComposite.plantPhotos = listOf(
-                    PlantPhoto(1L, 1L, PlantPhoto.Type.COMPLETE,"photoPath", OffsetDateTime.MAX)
+                    PlantPhoto(1L, 1L, PlantPhoto.Type.COMPLETE,"photoFilename", OffsetDateTime.MAX)
             )
             plantComposite.plantMeasurements = listOf(
                     PlantMeasurement(1L, 1L, PlantMeasurement.Type.HEIGHT,5.0f, OffsetDateTime.MAX),
@@ -118,7 +118,7 @@ class MapViewModelTests : Spek({
                 it("Should extract to PlantMarkerData list") {
                     slot.captured shouldEqual listOf(PlantMarkerData(
                         1L, Plant.Type.TREE,"common", "latin",
-                        1.0, 2.0, "photoPath",
+                        1.0, 2.0, "photoFilename",
                         OffsetDateTime.MAX.toString().substringBefore('T')
                     ))
                 }

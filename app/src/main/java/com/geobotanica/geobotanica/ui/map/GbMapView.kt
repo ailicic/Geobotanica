@@ -19,6 +19,7 @@ import org.mapsforge.map.layer.renderer.TileRendererLayer
 import org.mapsforge.map.reader.MapFile
 import org.mapsforge.map.rendertheme.InternalRenderTheme
 import org.mapsforge.map.scalebar.MapScaleBar
+import org.mapsforge.map.view.InputListener
 import java.io.File
 
 
@@ -52,6 +53,8 @@ class GbMapView @JvmOverloads constructor(
 
         val labelLayer = LabelLayer(AndroidGraphicFactory.INSTANCE, tileRendererLayer.labelStore)
         layerManager.layers.add(labelLayer)
+
+        registerZoomListener()
     }
 
     private fun createTileRenderLayer(mapFiles: List<File>): TileRendererLayer {
@@ -62,7 +65,7 @@ class GbMapView @JvmOverloads constructor(
                 AndroidGraphicFactory.INSTANCE)
         {
             override fun onTap(tapLatLong: LatLong?, layerXY: Point?, tapXY: Point?): Boolean {
-                Lg.d("onTap (zoomLevel = ${ mapView.model.mapViewPosition.zoomLevel })")
+                Lg.d("onTap")
                 return if (hideAnyMarkerInfoBubble())
                     true
                 else
@@ -81,6 +84,16 @@ class GbMapView @JvmOverloads constructor(
             multiMapDataStore.addMapDataStore(MapFile(mapFile), false, false)
         }
         return multiMapDataStore
+    }
+
+    private fun registerZoomListener() {
+        addInputListener(object : InputListener {
+            override fun onZoomEvent() {
+                Lg.d("New zoom level = ${mapView.model.mapViewPosition.zoomLevel}")
+            }
+
+            override fun onMoveEvent() { }
+        })
     }
 
     fun isMapLoaded(filename: String) = loadedMaps.contains(filename)
