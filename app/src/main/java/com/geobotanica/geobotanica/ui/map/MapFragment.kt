@@ -28,9 +28,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Force location markers to be drawn on top of plant markers (sometimes incorrect after delete plant)
-// -> Re-adding location markers seems to be ineffective -> Ask on Github?
-
 // TODO: Fix fragment anim not showing if popUpTo non-null
 
 // TODO: Use Dispatchers.Default for JSON deserialization
@@ -144,6 +141,11 @@ class MapFragment : BaseFragment() {
             init()
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.initGpsSubscribe()
+    }
+
     override fun onStop() {
         super.onStop()
 
@@ -205,7 +207,6 @@ class MapFragment : BaseFragment() {
     private fun init() = lifecycleScope.launch {
         defaultSharedPrefs.put(sharedPrefsIsFirstRunKey to false)
         initMap()
-        viewModel.initGpsSubscribe()
         setClickListeners()
         bindViewModel()
     }
@@ -324,12 +325,8 @@ class MapFragment : BaseFragment() {
                 .map { PlantMarker(it, activity, mapView) },
             false)
 
-        mapView.layerManager.layers.forEachIndexed { index, layer ->
-            Lg.d("layer $index = $layer")
-        }
-
-//        forceLocationMarkerOnTop()
-//        mapView.layerManager.redrawLayers()
+        forceLocationMarkerOnTop()
+        mapView.layerManager.redrawLayers()
     }
 
     // TODO: See if logic here can be pushed to VM
@@ -351,13 +348,15 @@ class MapFragment : BaseFragment() {
     }
 
     private fun updateLocationPrecision(location: Location) {
-        if (locationPrecisionCircle == null)
+        if (locationPrecisionCircle == null) {
             locationPrecisionCircle = LocationCircle(mapView)
+            forceLocationMarkerOnTop()
+        }
         locationPrecisionCircle?.updateLocation(location)
     }
 
     private fun updateLocationMarker(location: Location) {
-            createLocationMarker()
+        locationMarker ?: createLocationMarker()
         locationMarker?.updateLocation(location)
     }
 
@@ -367,18 +366,16 @@ class MapFragment : BaseFragment() {
             showToast(R.string.you_are_here)
         })
     }
+
+    private fun forceLocationMarkerOnTop() {
+        locationPrecisionCircle?.let {
+            mapView.layerManager.layers.remove(it, false)
+            mapView.layerManager.layers.add(it, false)
+        }
+        locationMarker?.let {
+            mapView.layerManager.layers.remove(it, false)
+            mapView.layerManager.layers.add(it, false)
+        }
+    }
 }
 
-
-//    private fun forceLocationMarkerOnTop() {
-//        locationPrecisionCircle?.let {
-//            mapView.layerManager.layers.remove(it, false)
-//            locationPrecisionCircle = null
-//            createLocationPrecisionCircle()
-//        }
-//        locationMarker?.let {
-//            mapView.layerManager.layers.remove(it, false)
-//            locationMarker = null
-//            createLocationMarker()
-//        }
-//    }

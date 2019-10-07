@@ -32,7 +32,7 @@ class StorageHelper @Inject constructor(val appContext: Context) {
     fun getPicturesDir() = appContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath
     //  /storage/emulated/0/Android/data/com.geobotanica/files/Pictures/
 
-    fun getUserPhotosDir() = "${getPicturesDir()}/"
+    fun getUserPhotosDir() = "${getPicturesDir()}"
     //  /storage/emulated/0/Android/data/com.geobotanica/files/Pictures/
 
     fun createPhotoFile(): File {

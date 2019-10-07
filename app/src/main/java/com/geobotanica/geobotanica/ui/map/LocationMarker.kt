@@ -22,8 +22,4 @@ class LocationMarker(
     fun updateLocation(location: Location) {
         latLong = location.toLatLong()
     }
-
-    override fun toString(): String {
-        return latLong.toString()
-    }
 }
