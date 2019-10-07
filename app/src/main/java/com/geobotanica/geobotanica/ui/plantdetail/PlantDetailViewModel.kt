@@ -59,8 +59,7 @@ class PlantDetailViewModel @Inject constructor(
         }
     }
 
-    fun getPhotoUri(plantPhoto: PlantPhoto): String =
-            storageHelper.photoUriFrom(plantPhoto.filename, plant.value!!.userId)
+    fun getPhotoUri(plantPhoto: PlantPhoto): String = storageHelper.photoUriFrom(plantPhoto.filename)
 
     private fun init() {
         plant = plantRepo.get(plantId)

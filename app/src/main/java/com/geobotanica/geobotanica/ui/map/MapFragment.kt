@@ -28,7 +28,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Fix missing photo in plant marker bubble
 // TODO: Force location markers to be drawn on top of plant markers (sometimes incorrect after delete plant)
 // -> Re-adding location markers seems to be ineffective -> Ask on Github?
 
@@ -363,7 +362,7 @@ class MapFragment : BaseFragment() {
     }
 
     private fun createLocationMarker() {
-        locationMarker = LocationMarker(resources.getDrawable(R.drawable.person), mapView)
+        locationMarker = LocationMarker(resources.getDrawable(R.drawable.person, null), mapView)
         locationMarker?.showLocationMarkerToast?.observe(viewLifecycleOwner, Observer {
             showToast(R.string.you_are_here)
         })

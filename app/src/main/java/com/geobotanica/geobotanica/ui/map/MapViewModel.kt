@@ -147,7 +147,6 @@ class MapViewModel @Inject constructor(
         val photoFilename = plantComposite.plantPhotos.first().filename
         val location = plantComposite.plantLocations.first().location
         return PlantMarkerData(
-            plant.userId,
             plant.id,
             plantComposite.plant.type,
             plant.commonName,
@@ -161,7 +160,6 @@ class MapViewModel @Inject constructor(
 }
 
 data class PlantMarkerData(
-        val userId: Long,
         val plantId: Long,
         val plantType: Plant.Type? = null,
         val commonName: String? = null,

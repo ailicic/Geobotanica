@@ -44,7 +44,7 @@ class NewPlantPhotoFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         deletePhotoIfExists()
-        val photoFile = storageHelper.createPhotoFile(viewModel.userId)
+        val photoFile = storageHelper.createPhotoFile()
         viewModel.photoUri = photoFile.absolutePath
         startPhotoIntent(photoFile)
     }

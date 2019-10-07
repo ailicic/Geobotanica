@@ -94,7 +94,7 @@ class PlantMarker(
         val plantTypeIconResId = plantTypeDrawables.getResourceId(plantMarkerData.plantType!!.ordinal, -1)
         plantTypeDrawables.recycle()
 
-        val photoPath = storageHelper.photoUriFrom(plantMarkerData.photoFilename!!, plantMarkerData.userId)
+        val photoPath = storageHelper.photoUriFrom(plantMarkerData.photoFilename!!)
         Lg.d("photoPath = $photoPath")
         markerBubble = LayoutInflater.from(activity).inflate(R.layout.marker_bubble, mapView, false).apply {
             plantPhoto.doOnPreDraw { plantPhoto.setScaledBitmap(photoPath) }

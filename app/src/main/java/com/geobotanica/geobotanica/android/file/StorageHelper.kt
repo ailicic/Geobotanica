@@ -32,12 +32,12 @@ class StorageHelper @Inject constructor(val appContext: Context) {
     fun getPicturesDir() = appContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath
     //  /storage/emulated/0/Android/data/com.geobotanica/files/Pictures/
 
-    fun getUserPhotosDir(userId: Long) = "${getPicturesDir()}/$userId"
-    //  /storage/emulated/0/Android/data/com.geobotanica/files/Pictures/userId
+    fun getUserPhotosDir() = "${getPicturesDir()}/"
+    //  /storage/emulated/0/Android/data/com.geobotanica/files/Pictures/
 
-    fun createPhotoFile(userId: Long): File {
+    fun createPhotoFile(): File {
         val filename: String = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())
-        val photosDir = File(getUserPhotosDir(userId))
+        val photosDir = File(getUserPhotosDir())
         photosDir.mkdirs()
         Lg.d("StorageHelper.createPhotoFile(): $photosDir/$filename.jpg")
         return File.createTempFile(filename, ".jpg", photosDir)
@@ -60,5 +60,5 @@ class StorageHelper @Inject constructor(val appContext: Context) {
         return file.exists() && file.length() == asset.decompressedSize
     }
 
-    fun photoUriFrom(filename: String, userId: Long): String = "${getUserPhotosDir(userId)}/$filename"
+    fun photoUriFrom(filename: String): String = "${getUserPhotosDir()}/$filename"
 }

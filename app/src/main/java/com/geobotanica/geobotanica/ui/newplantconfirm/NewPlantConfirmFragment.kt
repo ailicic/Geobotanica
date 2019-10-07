@@ -195,7 +195,7 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     private fun onRetakePhoto() {
         isPhotoRetake = true
-        val photoFile = storageHelper.createPhotoFile(viewModel.userId)
+        val photoFile = storageHelper.createPhotoFile()
         newPhotoUri = photoFile.absolutePath
         startPhotoIntent(photoFile)
     }
@@ -203,7 +203,7 @@ class NewPlantConfirmFragment : BaseFragment() {
     private fun onAddPhoto(photoType: PlantPhoto.Type) {
         isPhotoRetake = false
         newPhotoType = photoType
-        val photoFile = storageHelper.createPhotoFile(viewModel.userId)
+        val photoFile = storageHelper.createPhotoFile()
         newPhotoUri = photoFile.absolutePath
         startPhotoIntent(photoFile)
     }
