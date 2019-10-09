@@ -32,7 +32,7 @@
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"  />
+            app:popExitAnim="@anim/slide_out_right" />
         <action
             android:id="@+id/action_localMaps_to_map"
             app:destination="@id/mapFragment"
@@ -64,7 +64,7 @@
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"  />
+            app:popExitAnim="@anim/slide_out_right" />
         <action
             android:id="@+id/action_map_to_newPlantPhoto"
             app:destination="@id/newPlantPhotoFragment"
@@ -76,7 +76,9 @@
             android:id="@+id/action_map_to_plantDetail"
             app:destination="@id/plantDetailFragment"
             app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left" />
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/plantDetailFragment"
@@ -86,7 +88,9 @@
             android:id="@+id/action_plantDetail_to_map"
             app:destination="@id/mapFragment"
             app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left" />
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/newPlantPhotoFragment"
@@ -96,7 +100,9 @@
             android:id="@+id/action_newPlantPhoto_to_searchPlantName"
             app:destination="@id/searchPlantNameFragment"
             app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"/>
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/searchPlantNameFragment"
@@ -106,7 +112,9 @@
             android:id="@+id/action_searchPlantName_to_newPlantName"
             app:destination="@id/newPlantNameFragment"
             app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left" />
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/newPlantNameFragment"
@@ -116,12 +124,16 @@
             android:id="@+id/action_newPlantName_to_newPlantType"
             app:destination="@id/newPlantTypeFragment"
             app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left" />
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
         <action
             android:id="@+id/action_newPlantName_to_newPlantMeasurement"
             app:destination="@id/newPlantMeasurementFragment"
             app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left" />
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/newPlantTypeFragment"
@@ -131,7 +143,9 @@
             android:id="@+id/action_newPlantType_to_newPlantMeasurement"
             app:destination="@id/newPlantMeasurementFragment"
             app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left" />
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/newPlantMeasurementFragment"
@@ -141,7 +155,9 @@
             android:id="@+id/action_newPlantMeasurement_to_newPlantConfirm"
             app:destination="@id/newPlantConfirmFragment"
             app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left" />
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/newPlantConfirmFragment"

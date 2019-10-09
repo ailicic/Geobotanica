@@ -28,8 +28,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Fix fragment anim not showing if popUpTo non-null
-
 // TODO: Use Dispatchers.Default for JSON deserialization
 
 // LONG TERM
