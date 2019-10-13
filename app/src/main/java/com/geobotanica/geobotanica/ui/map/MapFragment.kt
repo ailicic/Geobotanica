@@ -28,8 +28,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Use Dispatchers.Default for JSON deserialization
-
 // LONG TERM
 // TODO: Add photoType + editPhoto buttons in PlantDetails image (like confirm frag)
 // TODO: Check that coroutine result is handled properly in dialog where user taps outside to close (no result given to getStatus)

@@ -340,7 +340,7 @@ class FileDownloader @Inject constructor (
     }
 
 
-    private suspend fun deserializeMapFolderList(mapFoldersAsset: OnlineAsset) {
+    private suspend fun deserializeMapFolderList(mapFoldersAsset: OnlineAsset) = withContext(Dispatchers.IO) {
         val mapFolderListFile = File(storageHelper.getLocalPath(mapFoldersAsset), mapFoldersAsset.filename)
         try {
             val time = measureTimeMillis {
@@ -361,7 +361,7 @@ class FileDownloader @Inject constructor (
         }
     }
 
-    private suspend fun deserializeMapList(mapListAsset: OnlineAsset) {
+    private suspend fun deserializeMapList(mapListAsset: OnlineAsset) = withContext(Dispatchers.IO) {
         Lg.d("Deserializing asset: ${mapListAsset.filename}")
         val mapListFile = File(storageHelper.getLocalPath(mapListAsset), mapListAsset.filename)
         try {
