@@ -54,7 +54,7 @@ class NewPlantNameViewModel @Inject constructor (
         }
     }
 
-    fun getPlantTypes() = viewModelScope.launch {
+    suspend fun getPlantTypes() = withContext(Dispatchers.IO) {
         taxonId?.let {
             plantTypes = taxonRepo.getTypes(it)
         } ?: vernacularId?.let {

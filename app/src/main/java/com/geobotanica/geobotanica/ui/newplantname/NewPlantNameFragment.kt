@@ -191,12 +191,14 @@ class NewPlantNameFragment : BaseFragment() {
 
     @Suppress("UNUSED_PARAMETER")
     private fun onClickFab(view: View) {
-        Lg.d("NewPlantFragment: onClickFab()")
+        lifecycleScope.launch {
+            Lg.d("NewPlantFragment: onClickFab()")
 
-       if (!areNamesValid())
-            return
-        saveViewModelState()
-        navigateToNext()
+            if (!areNamesValid())
+                return@launch
+            saveViewModelState()
+            navigateToNext()
+        }
     }
 
     private fun navigateToNext() {
@@ -215,7 +217,7 @@ class NewPlantNameFragment : BaseFragment() {
         return true
     }
 
-    private fun saveViewModelState() {
+    private suspend fun saveViewModelState() {
         val commonNameText = commonNameEditText.toTrimmedString()
         val scientificNameText = scientificNameEditText.toTrimmedString()
         Lg.d("commonNameText=$commonNameText, scientificNameText=$scientificNameText")
