@@ -29,7 +29,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 // LONG TERM
-// TODO: Add photoType + editPhoto buttons in PlantDetails image (like confirm frag)
+// TODO: Show photo timestamp in viewPager
+// TODO: Force at least one complete photo to be present (expected by plant marker info bubble)
+// TODO: Consider allowing plant name searching when editing name (likely going to be messy)
+// TODO: MAYBE Handle nullifying taxon/vernacular id if plant name is modified in PlantDetailFragment (related to above)
+// TODO: Detect changes to plantMarkers (need deep comparison for type, name or photo changes)
 // TODO: Check that coroutine result is handled properly in dialog where user taps outside to close (no result given to getStatus)
 // TODO: Check Google Developer samples for best practices
 // - fragment bundle -> viewModel save/restore
@@ -46,6 +50,7 @@ import javax.inject.Inject
 // TODO: Make custom camera screen so Espresso can be used for UI testing (New CameraX API)
 // TODO: Implement dark theme
 // TODO: Try using object detection for assisted plant measurements
+// TODO: Allow user to select default units in preferences
 // LONG TERM NIT PICK
 // TODO: Get rid of warning on using null as root layout in inflate calls in onCreateDialog()
 // TODO: Learn how to use only the keyboard
@@ -63,9 +68,6 @@ import javax.inject.Inject
 // https://medium.com/google-developers/viewmodels-persistence-onsaveinstancestate-restoring-ui-state-and-loaders-fc7cc4a6c090
 // TODO: Expose Location events as LiveData in LocationService
 // TODO: Consider allowing app to be installed on external storage
-
-// DEFERRED
-// TODO: Show PlantType icon in map bubble (and PlantDetail?)
 
 
 class MapFragment : BaseFragment() {
@@ -318,11 +320,18 @@ class MapFragment : BaseFragment() {
         mapView.layerManager.layers.addAll(
             newPlantMarkersData
                 .filter { plantMarkerDiffs.insertIds.contains(it.plantId) }
-                .map { PlantMarker(it, activity, mapView) },
+                .map { PlantMarker(it, activity, mapView, ::onPlantMarkerLongPress) },
             false)
 
         forceLocationMarkerOnTop()
         mapView.layerManager.redrawLayers()
+    }
+
+    private fun onPlantMarkerLongPress(plantId: Long) {
+        Lg.d("Opening plant detail: id=plantId")
+        mapView.mapScaleBar.isVisible = false // Prevents crash on fragment anim
+        val bundle = bundleOf(plantIdKey to plantId, userIdKey to viewModel.userId)
+        navigateTo(R.id.action_map_to_plantDetail, bundle)
     }
 
     // TODO: See if logic here can be pushed to VM

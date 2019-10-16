@@ -22,7 +22,7 @@ class MeasurementTests : Spek ({
         ).forEach { (fromMeasurement, toMeasurement) ->
 
             context("Convert $fromMeasurement to ${toMeasurement.units}") {
-                val result = fromMeasurement.convert(toMeasurement.units)
+                val result = fromMeasurement.convertTo(toMeasurement.units)
 
                 it("Should be $toMeasurement") {
                     result shouldEqual toMeasurement

@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.geobotanica.geobotanica.R
@@ -26,10 +27,12 @@ class PlantPhotoAdapter(
         private val onDeletePhoto: () -> Unit,
         private val onRetakePhoto: () -> Unit,
         private val onAddPhoto: (photoType: PlantPhoto.Type) -> Unit,
-        private val plantType: LiveData<Plant.Type>
+        private val plantType: LiveData<Plant.Type>,
+        private val lifecycleOwner: LifecycleOwner,
+        private val onNewPhotoType: (PlantPhoto.Type) -> Unit = { }
 ) : RecyclerView.Adapter<PlantPhotoAdapter.ViewHolder>() {
 
-    lateinit var items: List<PhotoData>
+    var items: List<PhotoData> = mutableListOf()
     private lateinit var currentViewHolder: ViewHolder
 
     private var isPhotoMenuVisible = false
@@ -57,9 +60,9 @@ class PlantPhotoAdapter(
 
             plantPhoto.setOnClickListener { onClickPhoto() }
 
-            changePhotoTypeButton.init(item.photoType, plantType)
-            changePhotoTypeButton.onNewPhotoType = {
-                items[position].photoType = it
+            changePhotoTypeButton.init(item.photoType, plantType, lifecycleOwner) { photoType ->
+                items[position].photoType = photoType
+                onNewPhotoType(photoType)
             }
 
             deletePhotoButton.onDeletePhoto = {
@@ -103,7 +106,7 @@ class PlantPhotoAdapter(
 
     inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val plantPhoto: ImageView = view.plantPhoto
-        val photoMenuButton: FloatingActionButton = view.photoMenuButton
+        val photoMenuButton: FloatingActionButton = view.overflowButton
         val changePhotoTypeButton: PhotoTypeButton = view.changePhotoTypeButton
         val deletePhotoButton: DeletePhotoButton = view.deletePhotoButton
         val retakePhotoButton: RetakePhotoButton = view.retakePhotoButton
@@ -114,7 +117,8 @@ class PlantPhotoAdapter(
 
 data class PhotoData(
         var photoType: PlantPhoto.Type,
-        var photoUri: String
+        var photoUri: String,
+        var id: Long = 0L
 //        val user: String,
 //        val timestamp: String
 )

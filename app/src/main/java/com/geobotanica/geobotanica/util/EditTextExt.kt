@@ -7,6 +7,7 @@ import android.widget.EditText
 fun EditText.toTrimmedString() = text.toString().trim()
 fun EditText.isEmpty() = text.isEmpty()
 fun EditText.isNotEmpty() = text.isNotEmpty()
+fun EditText.nullIfBlank() = if (text.isBlank()) null else toTrimmedString()
 
 inline fun EditText.onTextChanged(crossinline block: (String) -> Unit) {
     addTextChangedListener(object : TextWatcher {

@@ -4,10 +4,7 @@ import androidx.lifecycle.*
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.LocationService
-import com.geobotanica.geobotanica.data.entity.Location
-import com.geobotanica.geobotanica.data.entity.OnlineAssetId
-import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.data.entity.PlantComposite
+import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.data.repo.AssetRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
@@ -144,8 +141,14 @@ class MapViewModel @Inject constructor(
 
     private fun extractPlantMarkerData(plantComposite: PlantComposite): PlantMarkerData {
         val plant = plantComposite.plant
-        val photoFilename = plantComposite.plantPhotos.first().filename
-        val location = plantComposite.plantLocations.first().location
+        val photoFilename = plantComposite.plantPhotos
+                .filter { it.type == PlantPhoto.Type.COMPLETE }
+                .maxBy { it.timestamp }
+                ?.filename
+        val location = plantComposite.plantLocations
+                .maxBy { it.location.timestamp }
+                ?.location!!
+
         return PlantMarkerData(
             plant.id,
             plantComposite.plant.type,

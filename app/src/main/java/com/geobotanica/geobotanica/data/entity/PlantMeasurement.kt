@@ -34,16 +34,12 @@ data class PlantMeasurement(
     enum class Type {
         HEIGHT,
         DIAMETER,
-        TRUNK_DIAMETER,
-        FLOWER,
-        FRUIT;
+        TRUNK_DIAMETER;
 
         override fun toString() = when (this) {
             HEIGHT -> "Height"
             DIAMETER -> "Diameter"
             TRUNK_DIAMETER -> "Trunk diameter"
-            FLOWER -> "Flower"
-            FRUIT -> "Fruit"
         }
     }
 }

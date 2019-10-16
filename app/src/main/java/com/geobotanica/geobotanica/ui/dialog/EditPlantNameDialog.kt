@@ -10,14 +10,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.util.isNotEmpty
+import com.geobotanica.geobotanica.util.nullIfBlank
 import com.geobotanica.geobotanica.util.onTextChanged
-import com.geobotanica.geobotanica.util.toTrimmedString
 import kotlinx.android.synthetic.main.dialog_plant_name.*
 
 class EditPlantNameDialog(
         private val commonName: String,
         private val scientificName: String,
-        private val onNewPlantName: (commonName: String, scientificName: String) -> Unit
+        private val onNewPlantName: (commonName: String?, scientificName: String?) -> Unit
 ) : DialogFragment() {
 
     private lateinit var dialog: AlertDialog
@@ -58,8 +58,9 @@ class EditPlantNameDialog(
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun onClickApply(dialog: DialogInterface, which: Int) =
-        onNewPlantName(commonNameEditText.toTrimmedString(), scientificNameEditText.toTrimmedString())
+    private fun onClickApply(dialog: DialogInterface, which: Int) {
+        onNewPlantName(commonNameEditText.nullIfBlank(), scientificNameEditText.nullIfBlank())
+    }
 
     @Suppress("UNUSED_PARAMETER")
     private fun onCommonEditTextChanged(editText: String) {

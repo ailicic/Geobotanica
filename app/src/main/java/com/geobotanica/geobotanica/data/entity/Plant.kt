@@ -12,7 +12,7 @@ import org.threeten.bp.OffsetDateTime
     ],
     indices = [ Index(value = ["userId"]) ]
 )
-data class  Plant(
+data class Plant(
     val userId: Long = 0L,
     val type: Type,
     val commonName: String? = null,

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.room.withTransaction
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.*
+import com.geobotanica.geobotanica.data.entity.PlantMeasurement.Type.*
 import com.geobotanica.geobotanica.data.repo.PlantLocationRepo
 import com.geobotanica.geobotanica.data.repo.PlantMeasurementRepo
 import com.geobotanica.geobotanica.data.repo.PlantPhotoRepo
@@ -31,7 +32,7 @@ class NewPlantConfirmViewModel @Inject constructor (
 
     var userId = 0L
 
-    val plantType = MutableLiveData<Plant.Type>() // Observed by PhotoAdapter. Updated by PlantTypeButton.
+    val plantType = MutableLiveData<Plant.Type>()
     val commonName = MutableLiveData<String>() // Used for xml data-binding
     val scientificName = MutableLiveData<String>() // Used for xml data-binding
     var taxonId: Long? = null
@@ -42,13 +43,21 @@ class NewPlantConfirmViewModel @Inject constructor (
     var location: Location? = null
     val photos = mutableListOf<PhotoData>()
 
-    fun onNewPlantName(newCommonName: String, newScientificName: String) {
+    init {
+        plantType.observeForever {
+            if (it != Plant.Type.TREE && trunkDiameter.value != null) {
+                trunkDiameter.value = null
+            }
+        }
+    }
+
+    fun onNewPlantName(newCommonName: String?, newScientificName: String?) {
         nullPlantIdsIfInvalid(newCommonName, newScientificName)
         commonName.value = newCommonName
         scientificName.value = newScientificName
     }
 
-    private fun nullPlantIdsIfInvalid(newCommonName: String, newScientificName: String) {
+    private fun nullPlantIdsIfInvalid(newCommonName: String?, newScientificName: String?) {
         vernacularId?.let {
             if (newCommonName != commonName.value)
                 vernacularId = null
@@ -59,7 +68,7 @@ class NewPlantConfirmViewModel @Inject constructor (
         }
     }
 
-    fun onNewMeasurements(height: Measurement?, diameter: Measurement?, trunkDiameter: Measurement?) {
+    fun onMeasurementsUpdated(height: Measurement?, diameter: Measurement?, trunkDiameter: Measurement?) {
         this.height.value = height
         this.diameter.value = diameter
         this.trunkDiameter.value = trunkDiameter
@@ -91,17 +100,17 @@ class NewPlantConfirmViewModel @Inject constructor (
 
     private suspend fun savePlantMeasurements(plant: Plant) {
         height.value?.let {
-            val heightMeasurement = PlantMeasurement(userId, plant.id, PlantMeasurement.Type.HEIGHT, it.toCm())
+            val heightMeasurement = PlantMeasurement(userId, plant.id, HEIGHT, it.toCm())
             heightMeasurement.id = plantMeasurementRepo.insert(heightMeasurement)
             Lg.d("Saved: $heightMeasurement (id=${heightMeasurement.id})")
         }
         diameter.value?.let {
-            val diameterMeasurement = PlantMeasurement(userId, plant.id, PlantMeasurement.Type.DIAMETER, it.toCm())
+            val diameterMeasurement = PlantMeasurement(userId, plant.id, DIAMETER, it.toCm())
             diameterMeasurement.id = plantMeasurementRepo.insert(diameterMeasurement)
             Lg.d("Saved: $diameterMeasurement (id=${diameterMeasurement.id})")
         }
         trunkDiameter.value?.let {
-            val trunkDiameterMeasurement = PlantMeasurement(userId, plant.id, PlantMeasurement.Type.TRUNK_DIAMETER, it.toCm())
+            val trunkDiameterMeasurement = PlantMeasurement(userId, plant.id, TRUNK_DIAMETER, it.toCm())
             trunkDiameterMeasurement.id = plantMeasurementRepo.insert(trunkDiameterMeasurement)
             Lg.d("Saved: $trunkDiameterMeasurement (id=${trunkDiameterMeasurement.id})")
         }

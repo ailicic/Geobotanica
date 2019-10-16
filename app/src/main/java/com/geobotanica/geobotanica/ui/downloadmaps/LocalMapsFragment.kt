@@ -186,6 +186,6 @@ class LocalMapsFragment : BaseFragment() {
         if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true))
             navigateTo(R.id.action_localMaps_to_map, popUpTo = R.id.localMapsFragment)
         else
-            navigateUp()
+            navigateBack()
     }
 }

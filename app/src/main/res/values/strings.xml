@@ -30,8 +30,9 @@
     <string name="change_photo_type">Change Photo Type</string>
     <string name="select_photo_action">Select Photo Action</string>
     <string name="edit_plant_name">Edit Plant Name</string>
-    <string name="provide_plant_measurements">Provide plant peasurements</string>
+    <string name="provide_plant_measurements">Provide plant measurements</string>
     <string name="edit_plant_measurements">Edit Plant Measurements</string>
+    <string name="add_plant_measurements">Add Plant Measurements</string>
     <string name="starred">Starred</string>
     <string name="history">History</string>
     <string name="suggested_common">Suggested common names:</string>
@@ -41,11 +42,14 @@
     <string name="manual">Manual</string>
     <!--https://docs.oracle.com/javase/1.5.0/docs/api/java/util/Formatter.html-->
     <string name="precision">± %1$.1f m</string>
-    <string name="satellites">%1$d/%2$d</string>
-    <string name="plant_measurement">%1$s: %2$.1f cm</string>
+    <string name="satelliteCount">%1$d/%2$d</string>
     <string name="plant_measurements">Plant Measurements</string>
-    <string name="location">Location precision: ± %1$.1f m (%2$d/%3$d satellites)</string>
-    <string name="measured_by">Measured by %1$s</string>
+    <string name="height_measurement">Height: %1$s</string>
+    <string name="diameter_measurement">Diameter: %1$s</string>
+    <string name="trunk_diameter_measurement">Trunk diameter: %1$s</string>
+    <string name="location">Location precision: ± %1$.1f</string>
+    <string name="satellites">(%1$d/%2$d satellites)</string>
+    <string name="last_measured_by">Last measured by %1$s</string>
     <string name="created_by">Created by %1$s on %2$s</string>
     <string name="modified_by">Modified by %1$s on %2$s</string>
     <string name="button_gps">Hold position</string>

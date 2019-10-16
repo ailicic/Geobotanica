@@ -3,10 +3,8 @@ package com.geobotanica.geobotanica.ui.map
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
-import androidx.core.os.bundleOf
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
-import androidx.navigation.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data.entity.Plant.Type.*
@@ -29,7 +27,8 @@ import javax.inject.Inject
 class PlantMarker(
         private val plantMarkerData: PlantMarkerData,
         private val activity: MainActivity,
-        private val mapView: GbMapView
+        private val mapView: GbMapView,
+        private val onPlantMarkerLongPress: (Long) -> Unit
 ) : GbMarker(
         activity.resources.getDrawable(when (plantMarkerData.plantType!!) {
             // TODO: Use drawable array + enum ordinal instead?
@@ -76,7 +75,7 @@ class PlantMarker(
             } else
                 hideInfoBubble()
         }
-        onLongPress = { showPlantDetails() }
+        onLongPress = { onPlantMarkerLongPress(plantId) }
     }
 
     override fun toString(): String = plantMarkerData.toString()
@@ -128,13 +127,5 @@ class PlantMarker(
         val screenHeight = displayMetrics.heightPixels.toDouble()
 
         return markerHeight * latitudeSpan / screenHeight * 1.2
-    }
-
-    private fun showPlantDetails() {
-        mapView.mapScaleBar.isVisible = false // Prevents crash on fragment anim
-        Lg.d("Opening plant detail: id=${plantMarkerData.plantId}")
-        val bundle = bundleOf("plantId" to plantMarkerData.plantId)
-        val navController = activity.findNavController(R.id.fragment)
-        navController.navigate(R.id.action_map_to_plantDetail, bundle)
     }
 }

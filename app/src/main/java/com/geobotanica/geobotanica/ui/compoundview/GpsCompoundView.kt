@@ -94,6 +94,6 @@ class GpsCompoundView @JvmOverloads constructor(
     }
 
     private fun setSatellitesText(satellitesInUse: Int, satellitesVisible: Int) {
-        satellitesText.text = context.resources.getString(R.string.satellites, satellitesInUse, satellitesVisible)
+        satellitesText.text = context.resources.getString(R.string.satelliteCount, satellitesInUse, satellitesVisible)
     }
 }

@@ -85,7 +85,7 @@ abstract class BaseFragment : Fragment() {
         } ?: findNavController().navigate(destination, bundle)
     }
 
-    protected fun navigateUp() = findNavController().navigateUp()
+    protected fun navigateBack() = findNavController().popBackStack()
 
     protected fun popUpTo(destination: Int) = findNavController().popBackStack(destination, false)
 

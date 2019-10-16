@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
-import androidx.navigation.fragment.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.ui.BaseFragment
@@ -74,7 +73,7 @@ class NewPlantPhotoFragment : BaseFragment() {
                     Activity.RESULT_CANCELED -> { // "X" in GUI or back button pressed
                         Lg.d("onActivityResult: RESULT_CANCELED")
                         deletePhotoIfExists()
-                        navigateUp()
+                        navigateBack()
                     }
                     else -> Lg.d("onActivityResult: Unrecognized code")
                 }

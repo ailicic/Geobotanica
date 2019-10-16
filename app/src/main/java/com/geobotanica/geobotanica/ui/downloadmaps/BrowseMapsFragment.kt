@@ -71,7 +71,7 @@ class BrowseMapsFragment : BaseFragment() {
         if (parentMapFolderIds.isNotEmpty())
             browseParentFolder()
         else
-            navigateUp()
+            navigateBack()
     }
 
     private fun browseParentFolder() {

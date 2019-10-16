@@ -21,6 +21,7 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.dialog.EditPlantNameDialog
+import com.geobotanica.geobotanica.ui.dialog.InputMeasurementsDialog
 import com.geobotanica.geobotanica.ui.viewpager.PhotoData
 import com.geobotanica.geobotanica.ui.viewpager.PlantPhotoAdapter
 import com.geobotanica.geobotanica.util.Lg
@@ -86,7 +87,6 @@ class NewPlantConfirmFragment : BaseFragment() {
         addOnBackPressedCallback()
         initPlantTypeButton()
         initPhotoViewPager()
-        initMeasurements()
         bindClickListeners()
     }
 
@@ -136,13 +136,10 @@ class NewPlantConfirmFragment : BaseFragment() {
             setPositiveButton(getString(R.string.yes)) { _, _ ->
                 viewModel.photos.forEach {
                     val photoUri = it.photoUri
-                    Lg.d("Deleting old photo: $photoUri")
-                    Lg.d("Delete photo result = ${File(photoUri).delete()}")
+                    Lg.d("Deleting old photo (result = ${File(photoUri).delete()}): $photoUri")
                 }
                 activity.currentLocation = null
                 showToast(getString(R.string.plant_discarded))
-
-//                navigateTo(R.id.action_newPlantConfirm_to_mapFragment, popUpTo = R.id.mapFragment)
                 popUpTo(R.id.mapFragment)
             }
             setNegativeButton(getString(R.string.no)) { dialog, _ -> dialog.dismiss() }
@@ -163,18 +160,10 @@ class NewPlantConfirmFragment : BaseFragment() {
                 ::onDeletePhoto,
                 ::onRetakePhoto,
                 ::onAddPhoto,
-                viewModel.plantType)
+                viewModel.plantType,
+                this)
         photoAdapter.items = viewModel.photos
         plantPhotoPager.adapter = photoAdapter
-    }
-
-    private fun initMeasurements() {
-        viewModel.let { vm ->
-            measurementsCompoundView.run {
-                onNewMeasurementsCallback = vm::onNewMeasurements
-                init(vm.height.value, vm.diameter.value, vm.trunkDiameter.value, vm.plantType)
-            }
-        }
     }
 
     private fun onClickPhoto() {
@@ -210,6 +199,7 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     private fun bindClickListeners() {
         editPlantNameButton.setOnClickListener(::onClickEditNames)
+        editMeasurementsButton.setOnClickListener(::onClickEditMeasurements)
         fab.setOnClickListener(::onFabClicked)
     }
 
@@ -223,7 +213,19 @@ class NewPlantConfirmFragment : BaseFragment() {
         }.show(requireFragmentManager(),"tag")
     }
 
-    @Suppress("UNUSED_PARAMETER")
+    private fun onClickEditMeasurements(view: View) {
+        with(viewModel) {
+            InputMeasurementsDialog(
+                    R.string.edit_plant_measurements,
+                    plantType.value!!,
+                    height.value,
+                    diameter.value,
+                    trunkDiameter.value,
+                    ::onMeasurementsUpdated
+            ).show(requireFragmentManager(), "tag")
+        }
+    }
+
     private fun onFabClicked(view: View) {
         lifecycleScope.launch {
             if (!isLocationValid())

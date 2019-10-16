@@ -17,22 +17,14 @@ enum class Units {
 
 data class Measurement(val value: Float, val units: Units = Units.CM) : Serializable {
 
-//    constructor(value: Float, units: Int) : this(value, Units.values()[units])
-
     override fun toString(): String {
         return if (units == Units.FT)
             "%.0f ft %.1f in".format(getFeetWithoutInches(), getInchesWithoutFeet())
-//            "%.0f' %.1f\"".format(getFeetWithoutInches(), getInchesWithoutFeet())
         else
             "%.1f $units".format(value)
     }
 
-    // TODO: Use string resources here (need context)
-    fun toHeightString() = "Height: ${toString()}"
-    fun toDiameterString() = "Diameter: ${toString()}"
-    fun toTrunkDiameterString() = "Trunk diameter: ${toString()}"
-
-    fun convert(toUnits: Units): Measurement {
+    fun convertTo(toUnits: Units): Measurement {
         val cm = toCm()
         return Measurement( when (toUnits) {
             Units.CM -> cm
