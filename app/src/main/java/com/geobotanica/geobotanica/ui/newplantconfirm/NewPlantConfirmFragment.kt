@@ -56,8 +56,7 @@ class NewPlantConfirmFragment : BaseFragment() {
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
-            photos.clear()
-            photos.add(PhotoData(PlantPhoto.Type.COMPLETE, getFromBundle(photoUriKey)))
+            photoUri = getFromBundle(photoUriKey)
             plantType.value = Plant.Type.fromFlag(getFromBundle(plantTypeKey))
             commonName.value = getNullableFromBundle(commonNameKey)
             scientificName.value = getNullableFromBundle(scientificNameKey)
@@ -68,7 +67,7 @@ class NewPlantConfirmFragment : BaseFragment() {
             trunkDiameter.value = getNullableFromBundle(trunkDiameterMeasurementKey)
             Lg.d("Fragment args: userId=$userId, photoType=${plantType.value}, " +
                     "commonName=${commonName.value}, scientificName=${scientificName.value}, " +
-                    "vernId=$vernacularId, taxonId=$taxonId, photos=$photos, " +
+                    "vernId=$vernacularId, taxonId=$taxonId, photos=$photoData, " +
                     "height=${height.value}, diameter=${diameter.value}, trunkDiameter=${trunkDiameter.value}")
         }
     }
@@ -84,10 +83,12 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        addOnBackPressedCallback()
-        initPlantTypeButton()
-        initPhotoViewPager()
-        bindClickListeners()
+        lifecycleScope.launch {
+            addOnBackPressedCallback()
+            initPlantTypeButton()
+            initPhotoViewPager()
+            bindClickListeners()
+        }
     }
 
     override fun onDestroy() {
@@ -102,16 +103,16 @@ class NewPlantConfirmFragment : BaseFragment() {
                     val photoIndex = plantPhotoPager.currentItem
                     Lg.d("onActivityResult: RESULT_OK (New photo received)")
                     if (isPhotoRetake) {
-                        val oldPhotoUri = viewModel.photos[photoIndex].photoUri
+                        val oldPhotoUri = viewModel.photoData[photoIndex].photoUri
                         Lg.d("Deleting old photo: $oldPhotoUri (Result = ${File(oldPhotoUri).delete()})")
-                        viewModel.photos[photoIndex].photoUri = newPhotoUri
+                        viewModel.photoData[photoIndex].photoUri = newPhotoUri
                         photoAdapter.notifyDataSetChanged()
                     } else {
-                        viewModel.photos.add(PhotoData(newPhotoType, newPhotoUri))
-                        photoAdapter.notifyDataSetChanged()
                         lifecycleScope.launch(Dispatchers.Main) {
+                            viewModel.photoData.add(PhotoData(newPhotoType, newPhotoUri, viewModel.getUserNickname()))
+                            photoAdapter.notifyDataSetChanged()
                             delay(300)
-                            plantPhotoPager.setCurrentItem(viewModel.photos.size, true)
+                            plantPhotoPager.setCurrentItem(viewModel.photoData.size, true)
                         }
                     }
                 }
@@ -134,7 +135,7 @@ class NewPlantConfirmFragment : BaseFragment() {
             setTitle(getString(R.string.discard_new_plant))
             setMessage(getString(R.string.discard_new_plant_confirm))
             setPositiveButton(getString(R.string.yes)) { _, _ ->
-                viewModel.photos.forEach {
+                viewModel.photoData.forEach {
                     val photoUri = it.photoUri
                     Lg.d("Deleting old photo (result = ${File(photoUri).delete()}): $photoUri")
                 }
@@ -154,7 +155,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         }
     }
 
-    private fun initPhotoViewPager() {
+    private suspend fun initPhotoViewPager() {
         photoAdapter = PlantPhotoAdapter(
                 ::onClickPhoto,
                 ::onDeletePhoto,
@@ -162,7 +163,8 @@ class NewPlantConfirmFragment : BaseFragment() {
                 ::onAddPhoto,
                 viewModel.plantType,
                 this)
-        photoAdapter.items = viewModel.photos
+        viewModel.initPhotoData()
+        photoAdapter.items = viewModel.photoData
         plantPhotoPager.adapter = photoAdapter
     }
 
@@ -172,11 +174,11 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     private fun onDeletePhoto() {
         val photoIndex = plantPhotoPager.currentItem
-        val photoUri = viewModel.photos[photoIndex].photoUri
+        val photoUri = viewModel.photoData[photoIndex].photoUri
         Lg.d("Deleting old photo: $photoUri (Result = ${File(photoUri).delete()})")
         lifecycleScope.launch(Dispatchers.Main) {
             delay(300)
-            viewModel.photos.removeAt(photoIndex)
+            viewModel.photoData.removeAt(photoIndex)
             photoAdapter.notifyItemRemoved(photoIndex)
             showToast(getString(R.string.photo_deleted))
         }

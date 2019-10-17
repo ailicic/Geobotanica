@@ -6,10 +6,7 @@ import androidx.room.withTransaction
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.data.entity.PlantMeasurement.Type.*
-import com.geobotanica.geobotanica.data.repo.PlantLocationRepo
-import com.geobotanica.geobotanica.data.repo.PlantMeasurementRepo
-import com.geobotanica.geobotanica.data.repo.PlantPhotoRepo
-import com.geobotanica.geobotanica.data.repo.PlantRepo
+import com.geobotanica.geobotanica.data.repo.*
 import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
 import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.USED
@@ -22,6 +19,7 @@ import javax.inject.Singleton
 @Singleton
 class NewPlantConfirmViewModel @Inject constructor (
         private val database: GbDatabase,
+        private val userRepo: UserRepo,
         private val plantRepo: PlantRepo,
         private val plantLocationRepo: PlantLocationRepo,
         private val plantPhotoRepo: PlantPhotoRepo,
@@ -41,7 +39,8 @@ class NewPlantConfirmViewModel @Inject constructor (
     var diameter = MutableLiveData<Measurement>() // Used for xml data-binding
     var trunkDiameter = MutableLiveData<Measurement>() // Used for xml data-binding
     var location: Location? = null
-    val photos = mutableListOf<PhotoData>()
+    var photoUri: String = ""
+    val photoData = mutableListOf<PhotoData>()
 
     init {
         plantType.observeForever {
@@ -50,6 +49,13 @@ class NewPlantConfirmViewModel @Inject constructor (
             }
         }
     }
+
+    suspend fun initPhotoData() {
+        photoData.clear()
+        photoData.add(PhotoData(PlantPhoto.Type.COMPLETE, photoUri, getUserNickname()))
+    }
+
+    suspend fun getUserNickname(): String = userRepo.get(userId).nickname
 
     fun onNewPlantName(newCommonName: String?, newScientificName: String?) {
         nullPlantIdsIfInvalid(newCommonName, newScientificName)
@@ -90,7 +96,7 @@ class NewPlantConfirmViewModel @Inject constructor (
     }
 
     private suspend fun savePlantPhotos(plant: Plant) {
-        photos.forEach { (photoType, photoUri) ->
+        photoData.forEach { (photoType, photoUri) ->
             val photoFilename = photoUri.substringAfterLast('/')
             val photo = PlantPhoto(userId, plant.id, photoType, photoFilename)
             photo.id = plantPhotoRepo.insert(photo)

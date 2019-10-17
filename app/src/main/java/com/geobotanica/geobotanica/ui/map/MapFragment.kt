@@ -29,7 +29,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 // LONG TERM
-// TODO: Show photo timestamp in viewPager
 // TODO: Force at least one complete photo to be present (expected by plant marker info bubble)
 // TODO: Consider allowing plant name searching when editing name (likely going to be messy)
 // TODO: MAYBE Handle nullifying taxon/vernacular id if plant name is modified in PlantDetailFragment (related to above)

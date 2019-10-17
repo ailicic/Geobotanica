@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.PlantPhoto
+import com.geobotanica.geobotanica.data.entity.toSimpleDate
 import com.geobotanica.geobotanica.ui.compoundview.AddPhotoButton
 import com.geobotanica.geobotanica.ui.compoundview.DeletePhotoButton
 import com.geobotanica.geobotanica.ui.compoundview.PhotoTypeButton
@@ -20,6 +22,7 @@ import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.setScaledBitmap
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.android.synthetic.main.compound_plant_photo.view.*
+import org.threeten.bp.OffsetDateTime
 
 
 class PlantPhotoAdapter(
@@ -83,7 +86,8 @@ class PlantPhotoAdapter(
 
             photoMenuButton.setOnClickListener { isPhotoMenuVisible = true }
 
-//        userTimestampText.text = "Photo taken by ${item.user} on ${item.timestamp}"
+            val resources = holder.view.context.resources
+            userTimestampText.text = resources.getString(R.string.taken_by, item.userNickname, item.timestamp)
         }
         updatePhotoMenuButtons()
     }
@@ -111,14 +115,14 @@ class PlantPhotoAdapter(
         val deletePhotoButton: DeletePhotoButton = view.deletePhotoButton
         val retakePhotoButton: RetakePhotoButton = view.retakePhotoButton
         val addPhotoButton: AddPhotoButton = view.addPhotoButton
-//        val userTimestampText: TextView = view.userTimestampText
+        val userTimestampText: TextView = view.userTimestampText
     }
 }
 
 data class PhotoData(
         var photoType: PlantPhoto.Type,
         var photoUri: String,
+        val userNickname: String,
+        val timestamp: String = OffsetDateTime.now().toSimpleDate(),
         var id: Long = 0L
-//        val user: String,
-//        val timestamp: String
 )

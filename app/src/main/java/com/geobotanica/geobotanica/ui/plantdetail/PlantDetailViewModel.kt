@@ -18,8 +18,6 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 
-// TODO: Need to use current userId for new entries. Need to pass to detail from map via bundle.
-
 class PlantDetailViewModel @Inject constructor(
         private val database: GbDatabase,
         private val userRepo: UserRepo,
@@ -71,15 +69,27 @@ class PlantDetailViewModel @Inject constructor(
 
     private fun init() {
         plant = plantRepo.get(plantId)
-        createdByUser = plant.switchMap { userRepo.get(it.userId) }
+        createdByUser = plant.switchMap { userRepo.getLiveData(it.userId) }
 
         plantType = plant.map { it.type }
 
         location = plantLocationRepo.getLastPlantLocation(plantId).map { it.location }
 
         photos = plantPhotoRepo.getAllPhotosOfPlantLiveData(plantId)
-        photoData = photos.map { photoList ->
-            photoList.map { PhotoData(it.type, storageHelper.photoUriFrom(it.filename), it.id) }
+
+        photoData = liveData {
+            val userNickname = userRepo.get(userId).nickname
+            val photoData = photos.map { photoList ->
+                photoList.map {
+                    PhotoData(
+                        it.type,
+                        storageHelper.photoUriFrom(it.filename),
+                        userNickname,
+                        it.timestamp.toSimpleDate()
+                    )
+                }
+            }
+            emitSource(photoData)
         }
 
         height = plantMeasurementRepo.getLastHeightOfPlant(plantId).map {
@@ -106,27 +116,10 @@ class PlantDetailViewModel @Inject constructor(
         lastMeasuredByUser = plantMeasurementRepo.getAllMeasurementsOfPlant(plantId).switchMap { measurements ->
             val lastMeasurement = measurements.maxBy { it.timestamp }
             lastMeasurement?.let { plantMeasurement ->
-                userRepo.get(plantMeasurement.userId).map { it.nickname }
+                userRepo.getLiveData(plantMeasurement.userId).map { it.nickname }
             } ?: MutableLiveData<String>().apply { value = "" }
         }
         createdDateText = plant.map { it.timestamp.toSimpleDate() }
-    }
-
-//    private fun deletePlant() = viewModelScope.launch(Dispatchers.IO) {
-//    WARNING RACE CONDITION: viewModel is cleared on exit and might cancel this coroutine before it completes -> Use GlobalScope
-    private fun deletePlant() = GlobalScope.launch(Dispatchers.IO) {
-        deleteAllPlantPhotoFiles()
-        database.withTransaction {
-            val result = plantRepo.delete(plant.value!!)
-            Lg.d("Deleting plant: ${plant.value!!} (Result=$result)")
-        }
-    }
-
-    private suspend fun deleteAllPlantPhotoFiles() {
-        plantPhotoRepo.getAllPhotosOfPlant(plantId).forEach { plantPhoto ->
-            val photoUri = storageHelper.photoUriFrom(plantPhoto.filename)
-            Lg.d("Deleting photo: $photoUri (Result=${File(photoUri).delete()})")
-        }
     }
 
     override fun onCleared() {
@@ -200,6 +193,23 @@ class PlantDetailViewModel @Inject constructor(
                     Lg.d("Saved: $trunkDiameterMeasurement (id=${trunkDiameterMeasurement.id})")
                 }
             }
+        }
+    }
+
+//    private fun deletePlant() = viewModelScope.launch(Dispatchers.IO) {
+//    WARNING RACE CONDITION: viewModel is cleared on exit and might cancel this coroutine before it completes -> Use GlobalScope
+    private fun deletePlant() = GlobalScope.launch(Dispatchers.IO) {
+        deleteAllPlantPhotoFiles()
+        database.withTransaction {
+            val result = plantRepo.delete(plant.value!!)
+            Lg.d("Deleting plant: ${plant.value!!} (Result=$result)")
+        }
+    }
+
+    private suspend fun deleteAllPlantPhotoFiles() {
+        plantPhotoRepo.getAllPhotosOfPlant(plantId).forEach { plantPhoto ->
+            val photoUri = storageHelper.photoUriFrom(plantPhoto.filename)
+            Lg.d("Deleting photo: $photoUri (Result=${File(photoUri).delete()})")
         }
     }
  }

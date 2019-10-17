@@ -10,13 +10,9 @@ class UserRepo @Inject constructor(private val userDao: UserDao) {
 
     suspend fun insert(user: User): Long = userDao.insert(user)
 
-    fun get(id: Long): LiveData<User> = userDao.get(id)
+    suspend fun get(id: Long): User = userDao.get(id)
+
+    fun getLiveData(id: Long): LiveData<User> = userDao.getLiveData(id)
 
     fun getAll(): LiveData<List<User>> = userDao.getAll()
-
-//    fun getByNickname(nickname: String): LiveData<User> = userDao.getByNickname(nickname)
-
-//    fun contains(nickname: String): Boolean {
-//        return !userDao.getByNickname(nickname).isEmpty()
-//    }
 }

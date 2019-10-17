@@ -119,4 +119,5 @@
     <string name="download_local_maps">Download Local Maps</string>
     <string name="wait_for_plant_name_database_to_download">Wait for plant name database to download</string>
     <string name="you_are_here">You are here</string>
+    <string name="taken_by">Taken by %1$s on %2$s</string>
 </resources>
