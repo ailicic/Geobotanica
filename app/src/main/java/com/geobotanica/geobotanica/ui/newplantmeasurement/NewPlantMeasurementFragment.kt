@@ -14,10 +14,7 @@ import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.getFromBundle
-import com.geobotanica.geobotanica.util.getNullableFromBundle
-import com.geobotanica.geobotanica.util.putValue
+import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_new_plant_measurement.*
 import javax.inject.Inject
 
@@ -50,8 +47,13 @@ class NewPlantMeasurementFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        measurementsEditView.init(viewModel.plantType)
+        initMeasurementsEditView()
         bindClickListeners()
+    }
+
+    private fun initMeasurementsEditView() {
+        measurementsEditView.init(viewModel.plantType)
+        measurementsEditView.setUnits(Units.M, Units.M)
     }
 
     private fun bindClickListeners() {

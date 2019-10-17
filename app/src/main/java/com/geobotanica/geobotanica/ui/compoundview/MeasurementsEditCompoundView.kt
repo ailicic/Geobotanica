@@ -7,6 +7,7 @@ import androidx.core.view.isVisible
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.util.Measurement
+import com.geobotanica.geobotanica.util.Units
 import kotlinx.android.synthetic.main.compound_edit_measurement.view.*
 import kotlinx.android.synthetic.main.compound_edit_measurements.view.*
 
@@ -51,6 +52,12 @@ class MeasurementsEditCompoundView @JvmOverloads constructor(
         heightEditView.measurement = height
         diameterEditView.measurement = diameter
         trunkDiameterEditView.measurement = trunkDiameter
+    }
+
+    fun setUnits(heightUnits: Units? = null, diameterUnits: Units? = null, trunkDiameterUnits: Units? = null) {
+        heightUnits?.let { heightEditView.units = it }
+        diameterUnits?.let { diameterEditView.units = it }
+        trunkDiameterUnits?.let { trunkDiameterEditView.units = it }
     }
 
     private fun setMeasurementNameText() { // Instead of defining custom attribute for text.

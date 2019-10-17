@@ -11,6 +11,7 @@ import androidx.fragment.app.DialogFragment
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.util.Measurement
+import com.geobotanica.geobotanica.util.Units
 import kotlinx.android.synthetic.main.compound_edit_measurements.view.*
 import kotlinx.android.synthetic.main.dialog_measurements.*
 
@@ -52,6 +53,14 @@ class InputMeasurementsDialog(
     override fun onStart() {
         super.onStart()
         updateApplyButtonVisiblity()
+        useDefaultUnitsIfEmpty()
+    }
+
+    private fun useDefaultUnitsIfEmpty() {
+        measurementsEditView.setUnits(
+            if (height == null) Units.M else null,
+            if (diameter == null) Units.M else null
+        )
     }
 
     private fun bindListeners() {

@@ -49,12 +49,16 @@ class MeasurementEditCompoundView @JvmOverloads constructor(
 
         }
 
-    val units: Units
+    var units: Units
         get() = Units.values()[measurementUnitSpinner.selectedItemId.toInt()]
+        set(value) {
+            measurementUnitSpinner.setSelection(value.ordinal)
+        }
 
     init {
         inflate(getContext(), R.layout.compound_edit_measurement,this)
         bindListeners()
+
     }
 
     private fun bindListeners() {
