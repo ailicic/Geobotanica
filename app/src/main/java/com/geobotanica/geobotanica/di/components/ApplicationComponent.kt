@@ -10,7 +10,7 @@ import com.geobotanica.geobotanica.ui.downloadmaps.BrowseMapsFragment
 import com.geobotanica.geobotanica.ui.downloadmaps.LocalMapsFragment
 import com.geobotanica.geobotanica.ui.main.MainFragment
 import com.geobotanica.geobotanica.ui.map.MapFragment
-import com.geobotanica.geobotanica.ui.map.PlantMarker
+import com.geobotanica.geobotanica.ui.map.marker.PlantMarker
 import com.geobotanica.geobotanica.ui.newplantconfirm.NewPlantConfirmFragment
 import com.geobotanica.geobotanica.ui.newplantmeasurement.NewPlantMeasurementFragment
 import com.geobotanica.geobotanica.ui.newplantname.NewPlantNameFragment

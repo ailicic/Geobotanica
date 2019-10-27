@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.Gravity
 import com.geobotanica.geobotanica.data.entity.Location
+import com.geobotanica.geobotanica.ui.map.marker.PlantMarker
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
 import kotlinx.android.synthetic.main.fragment_map.view.*

@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui.map
+package com.geobotanica.geobotanica.ui.map.marker
 
 import android.graphics.drawable.Drawable
 import org.mapsforge.core.model.LatLong

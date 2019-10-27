@@ -19,7 +19,9 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_FIX
-import com.geobotanica.geobotanica.util.IdDiffer.computeDiffs
+import com.geobotanica.geobotanica.ui.map.marker.LocationCircle
+import com.geobotanica.geobotanica.ui.map.marker.LocationMarker
+import com.geobotanica.geobotanica.ui.map.marker.PlantMarker
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.get
 import com.geobotanica.geobotanica.util.put
@@ -29,14 +31,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 // LONG TERM
-// TODO: Detect changes to plantMarkers (need deep comparison for type, name or photo changes)
-    // Affects marker bubble photo (stale if modified)
+// TODO: Check that coroutine result is handled properly in dialog where user taps outside to close (no result given to getStatus)
 // TODO: Consider allowing plant name searching when editing name (likely going to be messy)
 // TODO: MAYBE Handle nullifying taxon/vernacular id if plant name is modified in PlantDetailFragment (related to above)
-// TODO: Check that coroutine result is handled properly in dialog where user taps outside to close (no result given to getStatus)
-// TODO: Check Google Developer samples for best practices
-// - fragment bundle -> viewModel save/restore
-// - Where to launch coroutines? Can launch in vm even if result to be returned to fragment?
 // TODO: Use Okio everywhere
 // TODO: Check for memory leaks. Is coroutine holding on to Warning Dialog?
 // TODO: Login screen
@@ -302,25 +299,21 @@ class MapFragment : BaseFragment() {
         Lg.d("onPlantMarkers: $newPlantMarkersData")
 
         val currentPlantMarkers = mapView.layerManager.layers.filterIsInstance<PlantMarker>()
-        val plantMarkerDiffs = computeDiffs(
-                currentPlantMarkers.map { it.plantId }, newPlantMarkersData.map { it.plantId }
+
+        val plantMarkerDiffs = viewModel.getPlantMarkerDiffs(
+                currentPlantMarkers.map { it.plantMarkerData },
+                newPlantMarkersData
         )
 
-//        mapView.layerManager.layers.removeAll { // CowArray -> UnsupportedOperationException!!
-//            it is PlantMarker && plantMarkerDiffs.removeIds.contains(it.plantId)
-//        }
+        val removeIds = plantMarkerDiffs.toRemove.map { it.plantId }
+        currentPlantMarkers
+                .filter { removeIds.contains(it.plantId) }
+                .forEach { mapView.layerManager.layers.remove(it, false) } // Note: removeAll fails due to COW array internal to layers
 
-        mapView.layerManager.layers.filter {
-            it is PlantMarker && plantMarkerDiffs.removeIds.contains(it.plantId)
-        }.forEach {
-            mapView.layerManager.layers.remove(it, false)
-        }
-        
         mapView.layerManager.layers.addAll(
-            newPlantMarkersData
-                .filter { plantMarkerDiffs.insertIds.contains(it.plantId) }
-                .map { PlantMarker(it, activity, mapView, ::onPlantMarkerLongPress) },
-            false)
+                plantMarkerDiffs.toInsert.map { PlantMarker(it, activity, mapView, ::onPlantMarkerLongPress) },
+                false
+        )
 
         forceLocationMarkerOnTop()
         mapView.layerManager.redrawLayers()

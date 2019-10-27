@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica.ui.map
+package com.geobotanica.geobotanica.ui.map.marker
 
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
@@ -9,6 +9,8 @@ import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data.entity.Plant.Type.*
 import com.geobotanica.geobotanica.ui.MainActivity
+import com.geobotanica.geobotanica.ui.map.GbMapView
+import com.geobotanica.geobotanica.ui.map.PlantMarkerData
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.setScaledBitmap
 import kotlinx.android.synthetic.main.marker_bubble.view.*
@@ -22,10 +24,9 @@ import org.mapsforge.map.util.MapViewProjection
 import org.mapsforge.map.view.InputListener
 import javax.inject.Inject
 
-
 @Suppress("DEPRECATION")
 class PlantMarker(
-        private val plantMarkerData: PlantMarkerData,
+        val plantMarkerData: PlantMarkerData,
         private val activity: MainActivity,
         private val mapView: GbMapView,
         private val onPlantMarkerLongPress: (Long) -> Unit

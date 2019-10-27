@@ -165,6 +165,43 @@ class MapViewModel @Inject constructor(
             plant.timestamp.toString().substringBefore('T')
         )
     }
+
+    fun getPlantMarkerDiffs(currentData: List<PlantMarkerData>, newData: List<PlantMarkerData>): PlantMarkerDiffs {
+        if (currentData.isEmpty()) { // Trivial case. Add all ids
+            Lg.d("PlantMarkerDiffer: insert into empty: ${newData.count()} ids")
+            return PlantMarkerDiffs(toInsert = newData)
+        } else { // Compute diffs and apply
+            val currentIds = currentData.map { it.plantId }
+            val newIds = newData.map { it.plantId }
+
+            val idsToRemove = currentIds subtract newIds
+            val idsToInsert = newIds subtract currentIds
+
+
+            val idsToUpdate = mutableListOf<Long>()
+            val idsForDeepComparison = currentIds intersect newIds
+            idsForDeepComparison.forEach { id ->
+                val current = currentData.first { it.plantId == id }
+                val new = newData.first { it.plantId == id }
+                if (current != new)
+                    idsToUpdate.add(id)
+            }
+
+            val idsNotChanged = idsForDeepComparison subtract idsToUpdate
+
+            Lg.d("PlantMarkerDiffer: " +
+                    "remove ${idsToRemove.count()}, " +
+                    "insert ${idsToInsert.count()}, " +
+                    "update ${idsToUpdate.count()}, " +
+                    "keep ${idsNotChanged.count()}")
+
+            val toRemove = currentData.filter { idsToRemove.contains(it.plantId) || idsToUpdate.contains(it.plantId) }
+            val toInsert = newData.filter { idsToInsert.contains(it.plantId) || idsToUpdate.contains(it.plantId) }
+
+            return PlantMarkerDiffs(toRemove, toInsert)
+        }
+    }
+
 }
 
 data class PlantMarkerData(
@@ -176,4 +213,9 @@ data class PlantMarkerData(
         val longitude: Double? = null,
         val photoFilename: String? = null,
         val dateCreated: String? = null
+)
+
+data class PlantMarkerDiffs (
+        val toRemove: List<PlantMarkerData> = emptyList(),
+        val toInsert: List<PlantMarkerData> = emptyList()
 )
