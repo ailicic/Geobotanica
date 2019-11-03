@@ -6,7 +6,7 @@ import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
-class MeasurementTests : Spek ({
+class MeasurementTest : Spek ({
 
     describe("Unit conversions") {
         listOf(

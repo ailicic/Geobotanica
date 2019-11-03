@@ -1,4 +1,4 @@
-package com.geobotanica.geobotanica
+package com.geobotanica.geobotanica.viewmodel
 
 import androidx.lifecycle.Observer
 import com.geobotanica.geobotanica.android.location.LocationService
@@ -9,7 +9,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.spekframework.spek2.Spek
 
-class MapViewModelTests : Spek({
+class MapViewModelTest : Spek({
 
     val showSnackbarObserver by memoized { mockk<Observer<Unit>>(relaxed = true) }
     val locationService by memoized { mockk<LocationService>(relaxed = true) }
@@ -75,6 +75,7 @@ class MapViewModelTests : Spek({
                     verify { locationService.unsubscribe(mapViewModel) }
                 }
             }
+
             context("When GPS not subscribed") {
                 beforeEachTest { every { locationService.isGpsSubscribed(any()) } returns false }
 

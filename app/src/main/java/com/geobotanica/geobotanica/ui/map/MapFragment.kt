@@ -33,7 +33,7 @@ import javax.inject.Inject
 
 // TESTING
 // TODO: Fix diffing tests
-// TODO: Plant Composite test has lost value. Prob better to test only location and photo sorting. The rest is trivial.
+// TODO: Consider using LiveData in Location Service (+get rid of non-intuitive "minTime" -> at least rename to "publish interval" or something)
 
 // LONG TERM
 // TODO: Use Okio everywhere

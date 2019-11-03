@@ -5,7 +5,7 @@ import org.amshove.kluent.shouldEqual
 //import org.spekframework.spek2.style.specification.describe
 //
 //
-//object DiffingTests : Spek({
+//object DiffingTest : Spek({
 //    describe("Diffing id lists") {
 //
 //        data class IdDiffTest(val currentIds: List<Long>, val newIds: List<Long>, val diffs: Diffs)

@@ -15,7 +15,7 @@ data class PlantMarkerData(
 ) {
 
     constructor(plantComposite: PlantComposite): this(
-            0L,
+            plantComposite.plant.id,
             plantComposite.plant.type,
             plantComposite.plant.commonName,
             plantComposite.plant.scientificName,
