@@ -1,126 +1,86 @@
 package com.geobotanica.geobotanica
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.LocationService
-import com.geobotanica.geobotanica.data.entity.*
-import com.geobotanica.geobotanica.data.repo.AssetRepo
-import com.geobotanica.geobotanica.data.repo.MapRepo
-import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.ui.map.MapViewModel
-import com.geobotanica.geobotanica.ui.map.PlantMarkerData
 import com.geobotanica.geobotanica.util.SpekLiveData.describeWithLiveData
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
-import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
-import org.threeten.bp.OffsetDateTime
 
 class MapViewModelTests : Spek({
 
-    describeWithLiveData("MapViewModel") {
-        val plantCompositesLiveData = MutableLiveData<List<PlantComposite>>()
-
-        val storageHelper = mockk<StorageHelper>()
-        val mapRepo = mockk<MapRepo>()
-        val assetRepo = mockk<AssetRepo>()
-
-        val plantRepo = mockk<PlantRepo>()
-        every { plantRepo.getAllPlantComposites() } returns plantCompositesLiveData
-
-        val locationService = mockk<LocationService>()
-        every { locationService.unsubscribe(any()) } returns Unit
-        every { locationService.subscribe(any(), any(), any()) } returns Unit
-
-        val mapViewModel = MapViewModel(storageHelper, mapRepo, assetRepo, plantRepo, locationService)
-
-        val showSnackbarObserver = mockk<Observer<Unit>>(relaxed = true)
-        mapViewModel.showGpsRequiredSnackbar.observeForever(showSnackbarObserver)
-
-        context("GPS init subscribe while GPS disabled") {
-            every { locationService.isGpsEnabled() } returns false
-            mapViewModel.initGpsSubscribe()
-
-            it("Should trigger GPS required snackbar") {
-                verify { showSnackbarObserver.onChanged(any()) }
-            }
+    val showSnackbarObserver by memoized { mockk<Observer<Unit>>(relaxed = true) }
+    val locationService by memoized { mockk<LocationService>(relaxed = true) }
+    val mapViewModel by memoized {
+        MapViewModel(mockk(), mockk(), mockk(), mockk(), locationService).apply {
+            showGpsRequiredSnackbar.observeForever(showSnackbarObserver)
         }
-        context("GPS init subscribe while GPS enabled") {
-            every { locationService.isGpsSubscribed(any()) } returns false
-            every { locationService.isGpsEnabled() } returns true
-            mapViewModel.initGpsSubscribe()
+    }
 
-            it("Should subscribe GPS") {
-                verify { locationService.subscribe(mapViewModel, any(), any()) }
-            }
-        }
+    describeWithLiveData("GPS Initialization") {
 
-        context("onClickGpsFab() while GPS disabled") {
-            every { locationService.isGpsEnabled() } returns false
+        context("When GPS enabled") {
+            beforeEachTest { every { locationService.isGpsEnabled() } returns true }
 
-            mapViewModel.onClickGpsFab()
+            context("When not subscribed to GPS") {
+                beforeEachTest { every { locationService.isGpsSubscribed(any()) } returns false }
 
-            it("Should trigger GPS required snackbar") {
-                verify { showSnackbarObserver.onChanged(any()) }
-            }
-
-        }
-        context("onClickGpsFab() while GPS enabled") {
-            every { locationService.isGpsEnabled() } returns true
-
-            context("If GPS already subscribed") {
-                every { locationService.isGpsSubscribed(any()) } returns true
-                mapViewModel.onClickGpsFab()
-
-                it("Should unsubscribe GPS") {
-                    verify { locationService.unsubscribe(mapViewModel) }
-                }
-            }
-            context("If GPS not subscribed") {
-                every { locationService.isGpsSubscribed(any()) } returns false
-                mapViewModel.onClickGpsFab()
-
-                it("Should subscribe GPS") {
+                it("Should subscribe to GPS") {
+                    mapViewModel.initGpsSubscribe()
                     verify { locationService.subscribe(mapViewModel, any(), any()) }
                 }
             }
+
+            context("When already subscribed to GPS") {
+                beforeEachTest { every { locationService.isGpsSubscribed(mapViewModel) } returns true }
+
+                it("Should not subscribe to GPS") {
+                    mapViewModel.initGpsSubscribe()
+                    verify(exactly = 0) { locationService.subscribe(mapViewModel, any(), any()) }
+                }
+            }
         }
 
-        describeWithLiveData("PlantComposites LiveData") {
-            val plantComposite = PlantComposite()
-            val plant = Plant(1L, Plant.Type.TREE, "common", "latin", 1L, 1L, OffsetDateTime.MAX)
-            plant.id = 1L
-            plantComposite.plant = plant
-            plantComposite.plantLocations = listOf(
-                    PlantLocation(1L, Location(1.0, 2.0, 3.0,1.0f,
-                            10, 20, OffsetDateTime.MAX))
-            )
-            plantComposite.plantPhotos = listOf(
-                    PlantPhoto(1L, 1L, PlantPhoto.Type.COMPLETE,"photoFilename", OffsetDateTime.MAX)
-            )
-            plantComposite.plantMeasurements = listOf(
-                    PlantMeasurement(1L, 1L, PlantMeasurement.Type.HEIGHT,5.0f, OffsetDateTime.MAX),
-                    PlantMeasurement(1L, 1L, PlantMeasurement.Type.DIAMETER,0.5f, OffsetDateTime.MAX)
-            )
+        context("When GPS disabled") {
+            beforeEachTest { every { locationService.isGpsEnabled() } returns false }
 
-            plantCompositesLiveData.value = listOf(plantComposite)
+            it("Should trigger GPS required snackbar") {
+                mapViewModel.initGpsSubscribe()
+                verify { showSnackbarObserver.onChanged(any()) }
+            }
+        }
+    }
 
-            context("Capture LiveData") {
-                val plantMarkerDataObserver = mockk<Observer< List<PlantMarkerData>> >()
-                val slot = slot< List<PlantMarkerData> >()
-                every { plantMarkerDataObserver.onChanged(capture(slot)) } returns Unit
+    describeWithLiveData("GPS FAB Click") {
 
-                mapViewModel.plantMarkerData.observeForever(plantMarkerDataObserver)
+        context("When GPS disabled") {
+            beforeEachTest { every { locationService.isGpsEnabled() } returns false }
 
-                it("Should extract to PlantMarkerData list") {
-                    slot.captured shouldEqual listOf(PlantMarkerData(
-                        1L, Plant.Type.TREE,"common", "latin",
-                        1.0, 2.0, "photoFilename",
-                        OffsetDateTime.MAX.toString().substringBefore('T')
-                    ))
+            it("Should trigger GPS required snackbar") {
+                mapViewModel.onClickGpsFab()
+                verify { showSnackbarObserver.onChanged(any()) }
+            }
+        }
+
+        context("When GPS enabled") {
+            beforeEachTest { every { locationService.isGpsEnabled() } returns true }
+
+            context("When GPS already subscribed") {
+                beforeEachTest { every { locationService.isGpsSubscribed(any()) } returns true }
+
+                it("Should unsubscribe GPS") {
+                    mapViewModel.onClickGpsFab()
+                    verify { locationService.unsubscribe(mapViewModel) }
+                }
+            }
+            context("When GPS not subscribed") {
+                beforeEachTest { every { locationService.isGpsSubscribed(any()) } returns false }
+
+                it("Should subscribe GPS") {
+                    mapViewModel.onClickGpsFab()
+                    verify { locationService.subscribe(mapViewModel, any(), any()) }
                 }
             }
         }

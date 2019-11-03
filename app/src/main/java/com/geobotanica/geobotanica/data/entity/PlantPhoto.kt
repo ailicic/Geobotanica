@@ -64,6 +64,12 @@ data class PlantPhoto(
 
 }
 
+fun List<PlantPhoto>.selectMain(): PlantPhoto {
+    return sortedByDescending { it.timestamp }.run {
+        firstOrNull { it.type == PlantPhoto.Type.COMPLETE } ?: first()
+    }
+}
+
 object PhotoTypeConverter {
     @TypeConverter @JvmStatic
     fun toPhotoType(ordinal: Int): PlantPhoto.Type = PlantPhoto.Type.values()[ordinal]

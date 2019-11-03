@@ -10,7 +10,6 @@ import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data.entity.Plant.Type.*
 import com.geobotanica.geobotanica.ui.MainActivity
 import com.geobotanica.geobotanica.ui.map.GbMapView
-import com.geobotanica.geobotanica.ui.map.PlantMarkerData
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.setScaledBitmap
 import kotlinx.android.synthetic.main.marker_bubble.view.*

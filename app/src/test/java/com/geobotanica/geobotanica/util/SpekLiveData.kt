@@ -13,18 +13,19 @@ object SpekLiveData {
      */
     fun GroupBody.describeWithLiveData(text: String, block: Suite.() -> Unit) {
         describe(text) {
-            setLiveDataDelegate()
+            beforeEachTest { setLiveDataDelegate() }
             block()
-            unsetLiveDataDelegate()
+            afterEachTest { unsetLiveDataDelegate() }
         }
     }
-    fun Suite.describeWithLiveData(text: String, block: Suite.() -> Unit) {
-        describe(text) {
-            setLiveDataDelegate()
-            block()
-            unsetLiveDataDelegate()
-        }
-    }
+
+//    fun Suite.describeWithLiveData(text: String, block: Suite.() -> Unit) {
+//        describe(text) {
+//            beforeEachTest { setLiveDataDelegate() }
+//            block()
+//            afterEachTest { unsetLiveDataDelegate() }
+//        }
+//    }
 
     private fun setLiveDataDelegate() {
         ArchTaskExecutor.getInstance().setDelegate(object : TaskExecutor() {

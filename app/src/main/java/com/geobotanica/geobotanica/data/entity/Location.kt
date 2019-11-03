@@ -31,7 +31,6 @@ data class Location(
     fun toLatLong() = LatLong(latitude!!, longitude!!)
 }
 
-
 @Entity(tableName = "plant_locations",
     foreignKeys = [
         (ForeignKey(
@@ -45,9 +44,12 @@ data class Location(
         (Index(value = ["plantId"]))
     ]
 )
+
 data class PlantLocation(
     val plantId: Long,
     @Embedded val location: Location
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0L
 }
+
+fun List<PlantLocation>.mostRecent(): Location = this.maxBy { it.location.timestamp }?.location!!

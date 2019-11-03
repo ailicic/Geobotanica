@@ -6,14 +6,13 @@ import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.OnlineAssetId
-import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.PlantComposite
-import com.geobotanica.geobotanica.data.entity.PlantPhoto.Type.COMPLETE
 import com.geobotanica.geobotanica.data.repo.AssetRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_NO_FIX
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_OFF
+import com.geobotanica.geobotanica.ui.map.marker.PlantMarkerData
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
 import com.geobotanica.geobotanica.util.schedule
@@ -78,8 +77,7 @@ class MapViewModel @Inject constructor(
     }
 
     fun initGpsSubscribe() {
-        val isGpsEnabled = isGpsEnabled()
-        if (!isGpsEnabled)
+        if (!isGpsEnabled())
             showGpsRequiredSnackbar.call()
         else if (wasGpsSubscribed)
             subscribeGps()
@@ -141,30 +139,8 @@ class MapViewModel @Inject constructor(
 //    private fun getLastLocation(): Location? = locationService.getLastLocation()
 
     private fun extractPlantMarkerDataList(plantComposites: List<PlantComposite>): List<PlantMarkerData> =
-            plantComposites.map { extractPlantMarkerData(it) }
+            plantComposites.map { PlantMarkerData(it) }
 
-    private fun extractPlantMarkerData(plantComposite: PlantComposite): PlantMarkerData {
-        val plant = plantComposite.plant
-
-        val photoFilename = plantComposite.plantPhotos.sortedByDescending { it.timestamp }.run {
-            firstOrNull { it.type == COMPLETE }?.filename ?: first().filename
-        }
-
-        val location = plantComposite.plantLocations
-                .maxBy { it.location.timestamp }
-                ?.location!!
-
-        return PlantMarkerData(
-            plant.id,
-            plantComposite.plant.type,
-            plant.commonName,
-            plant.scientificName,
-            location.latitude,
-            location.longitude,
-            photoFilename,
-            plant.timestamp.toString().substringBefore('T')
-        )
-    }
 
     fun getPlantMarkerDiffs(currentData: List<PlantMarkerData>, newData: List<PlantMarkerData>): PlantMarkerDiffs {
         if (currentData.isEmpty()) { // Trivial case. Add all ids
@@ -201,19 +177,7 @@ class MapViewModel @Inject constructor(
             return PlantMarkerDiffs(toRemove, toInsert)
         }
     }
-
 }
-
-data class PlantMarkerData(
-        val plantId: Long,
-        val plantType: Plant.Type? = null,
-        val commonName: String? = null,
-        val scientificName: String? = null,
-        val latitude: Double? = null,
-        val longitude: Double? = null,
-        val photoFilename: String? = null,
-        val dateCreated: String? = null
-)
 
 data class PlantMarkerDiffs (
         val toRemove: List<PlantMarkerData> = emptyList(),
