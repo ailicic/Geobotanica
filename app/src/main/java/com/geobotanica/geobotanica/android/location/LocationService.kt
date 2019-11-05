@@ -15,7 +15,6 @@ import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.isEmulator
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.math.max
 
 typealias LocationCallback = (Location) -> Unit
 

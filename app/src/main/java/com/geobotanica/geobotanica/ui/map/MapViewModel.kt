@@ -6,13 +6,13 @@ import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.OnlineAssetId
-import com.geobotanica.geobotanica.data.entity.PlantComposite
 import com.geobotanica.geobotanica.data.repo.AssetRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_NO_FIX
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_OFF
 import com.geobotanica.geobotanica.ui.map.marker.PlantMarkerData
+import com.geobotanica.geobotanica.ui.map.marker.PlanterMarkerDiffer
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
 import com.geobotanica.geobotanica.util.schedule
@@ -29,12 +29,15 @@ class MapViewModel @Inject constructor(
     private val mapRepo: MapRepo,
     private val assetRepo: AssetRepo,
     private val plantRepo: PlantRepo,
+    private val plantMarkerDiffer: PlanterMarkerDiffer,
     private val locationService: LocationService
 ): ViewModel() {
     var userId = 0L    // Field injected dynamic parameter
 
     val plantMarkerData: LiveData< List<PlantMarkerData> > by lazy {
-        plantRepo.getAllPlantComposites().map { extractPlantMarkerDataList(it) }
+        plantRepo.getAllPlantComposites().map { plantCompositeList ->
+            plantCompositeList.map { plantComposite -> PlantMarkerData(plantComposite) }
+        }
     }
 
     private val _currentLocation = MutableLiveData<Location>()
@@ -123,6 +126,9 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    fun getPlantMarkerDiffs(currentData: List<PlantMarkerData>, newData: List<PlantMarkerData>) =
+        plantMarkerDiffer.getDiffs(currentData, newData)
+
     private fun subscribeGps() {
         if (!isGpsSubscribed()) {
             _gpsFabIcon.value = GPS_NO_FIX.drawable
@@ -137,49 +143,4 @@ class MapViewModel @Inject constructor(
     }
 
 //    private fun getLastLocation(): Location? = locationService.getLastLocation()
-
-    private fun extractPlantMarkerDataList(plantComposites: List<PlantComposite>): List<PlantMarkerData> =
-            plantComposites.map { PlantMarkerData(it) }
-
-
-    fun getPlantMarkerDiffs(currentData: List<PlantMarkerData>, newData: List<PlantMarkerData>): PlantMarkerDiffs {
-        if (currentData.isEmpty()) { // Trivial case. Add all ids
-            Lg.d("PlantMarkerDiffer: insert into empty: ${newData.count()} ids")
-            return PlantMarkerDiffs(toInsert = newData)
-        } else { // Compute diffs and apply
-            val currentIds = currentData.map { it.plantId }
-            val newIds = newData.map { it.plantId }
-
-            val idsToRemove = currentIds subtract newIds
-            val idsToInsert = newIds subtract currentIds
-
-
-            val idsToUpdate = mutableListOf<Long>()
-            val idsForDeepComparison = currentIds intersect newIds
-            idsForDeepComparison.forEach { id ->
-                val current = currentData.first { it.plantId == id }
-                val new = newData.first { it.plantId == id }
-                if (current != new)
-                    idsToUpdate.add(id)
-            }
-
-            val idsNotChanged = idsForDeepComparison subtract idsToUpdate
-
-            Lg.d("PlantMarkerDiffer: " +
-                    "remove ${idsToRemove.count()}, " +
-                    "insert ${idsToInsert.count()}, " +
-                    "update ${idsToUpdate.count()}, " +
-                    "keep ${idsNotChanged.count()}")
-
-            val toRemove = currentData.filter { idsToRemove.contains(it.plantId) || idsToUpdate.contains(it.plantId) }
-            val toInsert = newData.filter { idsToInsert.contains(it.plantId) || idsToUpdate.contains(it.plantId) }
-
-            return PlantMarkerDiffs(toRemove, toInsert)
-        }
-    }
 }
-
-data class PlantMarkerDiffs (
-        val toRemove: List<PlantMarkerData> = emptyList(),
-        val toInsert: List<PlantMarkerData> = emptyList()
-)

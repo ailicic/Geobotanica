@@ -14,7 +14,7 @@ class MapViewModelTest : Spek({
     val showSnackbarObserver by memoized { mockk<Observer<Unit>>(relaxed = true) }
     val locationService by memoized { mockk<LocationService>(relaxed = true) }
     val mapViewModel by memoized {
-        MapViewModel(mockk(), mockk(), mockk(), mockk(), locationService).apply {
+        MapViewModel(mockk(), mockk(), mockk(), mockk(), mockk(), locationService).apply {
             showGpsRequiredSnackbar.observeForever(showSnackbarObserver)
         }
     }
@@ -22,10 +22,10 @@ class MapViewModelTest : Spek({
     describeWithLiveData("GPS Initialization") {
 
         context("When GPS enabled") {
-            beforeEachTest { every { locationService.isGpsEnabled() } returns true }
+            beforeGroup { every { locationService.isGpsEnabled() } returns true }
 
             context("When not subscribed to GPS") {
-                beforeEachTest { every { locationService.isGpsSubscribed(any()) } returns false }
+                beforeEachTest { every { locationService.isGpsSubscribed(mapViewModel) } returns false }
 
                 it("Should subscribe to GPS") {
                     mapViewModel.initGpsSubscribe()
@@ -68,7 +68,7 @@ class MapViewModelTest : Spek({
             beforeEachTest { every { locationService.isGpsEnabled() } returns true }
 
             context("When GPS already subscribed") {
-                beforeEachTest { every { locationService.isGpsSubscribed(any()) } returns true }
+                beforeEachTest { every { locationService.isGpsSubscribed(mapViewModel) } returns true }
 
                 it("Should unsubscribe GPS") {
                     mapViewModel.onClickGpsFab()
@@ -77,7 +77,7 @@ class MapViewModelTest : Spek({
             }
 
             context("When GPS not subscribed") {
-                beforeEachTest { every { locationService.isGpsSubscribed(any()) } returns false }
+                beforeEachTest { every { locationService.isGpsSubscribed(mapViewModel) } returns false }
 
                 it("Should subscribe GPS") {
                     mapViewModel.onClickGpsFab()

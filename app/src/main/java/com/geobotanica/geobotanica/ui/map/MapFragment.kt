@@ -32,7 +32,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 // TESTING
-// TODO: Fix diffing tests
 // TODO: Consider using LiveData in Location Service (+get rid of non-intuitive "minTime" -> at least rename to "publish interval" or something)
 
 // LONG TERM
@@ -297,14 +296,14 @@ class MapFragment : BaseFragment() {
 //        }
 //    }
 
-    private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkersData ->
-        Lg.d("onPlantMarkers: $newPlantMarkersData")
+    private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkerData ->
+        Lg.d("onPlantMarkers: $newPlantMarkerData")
 
         val currentPlantMarkers = mapView.layerManager.layers.filterIsInstance<PlantMarker>()
 
         val plantMarkerDiffs = viewModel.getPlantMarkerDiffs(
                 currentPlantMarkers.map { it.plantMarkerData },
-                newPlantMarkersData
+                newPlantMarkerData
         )
 
         val removeIds = plantMarkerDiffs.toRemove.map { it.plantId }
