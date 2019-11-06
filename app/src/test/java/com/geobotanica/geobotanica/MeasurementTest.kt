@@ -21,7 +21,7 @@ class MeasurementTest : Spek ({
                 Measurement(10F, Units.IN) to Measurement(25.4F, Units.CM)
         ).forEach { (fromMeasurement, toMeasurement) ->
 
-            context("Convert $fromMeasurement to ${toMeasurement.units}") {
+            context("$fromMeasurement to ${toMeasurement.units}") {
                 val result = fromMeasurement.convertTo(toMeasurement.units)
 
                 it("Should be $toMeasurement") {

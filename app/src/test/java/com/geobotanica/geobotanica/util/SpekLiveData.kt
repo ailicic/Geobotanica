@@ -2,30 +2,17 @@ package com.geobotanica.geobotanica.util
 
 import androidx.arch.core.executor.ArchTaskExecutor
 import androidx.arch.core.executor.TaskExecutor
-import org.spekframework.spek2.dsl.GroupBody
-import org.spekframework.spek2.style.specification.Suite
-import org.spekframework.spek2.style.specification.describe
+import org.spekframework.spek2.dsl.Root
 
 object SpekLiveData {
-    /**
-     * A wrapper method for Spek's describe() which manages the ArchTaskExecutor delegation when
-     * testing with LiveData. This avoids the "getMainLooper in android.os.Looper not mocked" error.
-     */
-    fun GroupBody.describeWithLiveData(text: String, block: Suite.() -> Unit) {
-        describe(text) {
-            beforeEachTest { setLiveDataDelegate() }
-            block()
-            afterEachTest { unsetLiveDataDelegate() }
-        }
-    }
 
-//    fun Suite.describeWithLiveData(text: String, block: Suite.() -> Unit) {
-//        describe(text) {
-//            beforeEachTest { setLiveDataDelegate() }
-//            block()
-//            afterEachTest { unsetLiveDataDelegate() }
-//        }
-//    }
+    /**
+     * This avoids the "getMainLooper in android.os.Looper not mocked" error when using LiveData in Spek.
+     */
+    fun Root.allowLiveData() {
+        setLiveDataDelegate()
+        afterGroup { unsetLiveDataDelegate() }
+    }
 
     private fun setLiveDataDelegate() {
         ArchTaskExecutor.getInstance().setDelegate(object : TaskExecutor() {
