@@ -109,15 +109,6 @@ class GbMapView @JvmOverloads constructor(
         reloadMarkers.call()
     }
 
-    fun isLocationOffScreen(location: Location): Boolean = ! boundingBox.contains(location.toLatLong())
-
-    fun centerMapOnLocation(location: Location, animate: Boolean = true) {
-        if (animate)
-            model.mapViewPosition.animateTo(location.toLatLong())
-        else
-            setCenter(location.toLatLong())
-    }
-
     fun hideAnyMarkerInfoBubble(): Boolean {
         layerManager.layers.forEach { layer ->
             if (layer is PlantMarker && layer.isShowingMarkerBubble) {
@@ -127,4 +118,15 @@ class GbMapView @JvmOverloads constructor(
         }
         return false
     }
+
+    fun ensureLocationWithinMapBounds(location: Location, animate: Boolean = true) {
+        if (isLocationOffScreen(location)) {
+            if (animate)
+                model.mapViewPosition.animateTo(location.toLatLong())
+            else
+                setCenter(location.toLatLong())
+        }
+    }
+
+    private fun isLocationOffScreen(location: Location): Boolean = ! boundingBox.contains(location.toLatLong())
 }

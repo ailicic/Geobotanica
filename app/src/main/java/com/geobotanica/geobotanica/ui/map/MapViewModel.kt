@@ -10,8 +10,7 @@ import com.geobotanica.geobotanica.data.entity.OnlineAssetId
 import com.geobotanica.geobotanica.data.repo.AssetRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
-import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_NO_FIX
-import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_OFF
+import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.*
 import com.geobotanica.geobotanica.ui.map.marker.PlantMarkerData
 import com.geobotanica.geobotanica.ui.map.marker.PlanterMarkerDiffer
 import com.geobotanica.geobotanica.util.Lg
@@ -41,15 +40,20 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private val _currentLocation = MutableLiveData<Location>()
-    val currentLocation: LiveData<Location> = _currentLocation
-
     private val _gpsFabIcon = MutableLiveData<Int>()
     val gpsFabIcon: LiveData<Int> = _gpsFabIcon
+
+    private val _updateLocationPrecisionMarker = MutableLiveData<Location>()
+    val updateLocationPrecisionMarker: LiveData<Location> = _updateLocationPrecisionMarker
+
+    private val _updateLocationMarker = MutableLiveData<Location>()
+    val updateLocationMarker: LiveData<Location> = _updateLocationMarker
 
     val showGpsRequiredSnackbar = SingleLiveEvent<Unit>()
     val showPlantNamesMissingSnackbar = SingleLiveEvent<Unit>()
     val navigateToNewPlant = SingleLiveEvent<Unit>()
+    val ensureMapBoundsIncludeLocation = SingleLiveEvent<Location>()
+    val redrawMapLayers = SingleLiveEvent<Unit>()
 
     private val defaultMapZoomLevel = 16
     private val defaultMapLatitude = 49.477
@@ -67,6 +71,19 @@ class MapViewModel @Inject constructor(
         GPS_OFF(R.drawable.gps_off),
         GPS_NO_FIX(R.drawable.gps_no_fix),
         GPS_FIX(R.drawable.gps_fix)
+    }
+
+    override fun onLocation(location: Location) {
+        if (location.latitude != null && location.longitude != null) {
+            if (location.isRecent()) {
+                _gpsFabIcon.value = GPS_FIX.drawable
+                _updateLocationPrecisionMarker.value = location
+                ensureMapBoundsIncludeLocation.value = location
+                setStaleGpsLocationTimer()
+            }
+            _updateLocationMarker.value = location
+            redrawMapLayers.call()
+        }
     }
 
     suspend fun getDownloadedMapFileList(): List<File> {
@@ -118,21 +135,9 @@ class MapViewModel @Inject constructor(
         staleGpsTimer?.run { cancel(); staleGpsTimer = null }
     }
 
-    fun setStaleGpsLocationTimer() {
-        staleGpsTimer?.cancel()
-        staleGpsTimer = Timer().schedule(staleGpsTimeout) {
-            Lg.d("staleGpsTimer finished.")
-            staleGpsTimer = null
-            _gpsFabIcon.value = GPS_NO_FIX.drawable
-        }
-    }
-
     fun getPlantMarkerDiffs(currentData: List<PlantMarkerData>, newData: List<PlantMarkerData>) =
         plantMarkerDiffer.getDiffs(currentData, newData)
 
-    override fun onLocation(location: Location) {
-        _currentLocation.value = location
-    }
 
     private fun subscribeGps() {
         if (!isGpsSubscribed()) {
@@ -142,6 +147,15 @@ class MapViewModel @Inject constructor(
     }
 
     private fun isGpsEnabled(): Boolean = locationService.isGpsEnabled()
+
+    private fun setStaleGpsLocationTimer() {
+        staleGpsTimer?.cancel()
+        staleGpsTimer = Timer().schedule(staleGpsTimeout) {
+            Lg.d("staleGpsTimer finished.")
+            staleGpsTimer = null
+            _gpsFabIcon.value = GPS_NO_FIX.drawable
+        }
+    }
 
 //    private fun getLastLocation(): Location? = locationService.getLastLocation()
 }

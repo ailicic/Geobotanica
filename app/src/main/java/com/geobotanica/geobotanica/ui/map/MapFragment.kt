@@ -18,7 +18,6 @@ import com.geobotanica.geobotanica.network.FileDownloader
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
-import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_FIX
 import com.geobotanica.geobotanica.ui.map.marker.LocationCircle
 import com.geobotanica.geobotanica.ui.map.marker.LocationMarker
 import com.geobotanica.geobotanica.ui.map.marker.PlantMarker
@@ -31,12 +30,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TESTING
 
+// TODO: Add more tests
+// TODO: Use "appContext.theme" where ever drawable calls demand it (rather than suppressing deprecated)
+    // - Remove "@Suppress" annotations whereever possible
+// TODO: Login screen (no authentication, just select user with any pw)
+// TODO: Request all permissions in separate screen before map (prob after login/splash screen for ux)
 
 // LONG TERM
 // TODO: Use Okio everywhere
-// TODO: Login screen
 // https://developer.android.com/training/id-auth/identify.html
 // https://developer.android.com/training/id-auth/custom_auth
 // TODO: Group nearby markers into clusters
@@ -89,7 +91,7 @@ class MapFragment : BaseFragment() {
             GbDatabase.getInstance(appContext).userDao().insert(User(1, "Guest")) // TODO: Move to Login Screen
         }
         viewModel = getViewModel(viewModelFactory) {
-            userId = 1L // TODO: Retrieve userId from LoginFragment Navigation bundle (or shared prefs)
+            userId = 1L // TODO: Retrieve userId from LoginFragment Navigation bundle
         }
         loadSharedPrefsToViewModel()
     }
@@ -206,19 +208,18 @@ class MapFragment : BaseFragment() {
     }
 
     private suspend fun initMap() {
-        with(viewModel) {
-            mapView.init(getDownloadedMapFileList(), mapLatitude, mapLongitude, mapZoomLevel)
-        }
-
         coordinatorLayout.isVisible = true // TODO: Remove this after LoginScreen implemented
         locationPrecisionCircle = null
         locationMarker = null
 
-//        if (viewModel.isFirstRun)
-//            viewModel.getLastLocation()?.let { centerMapOnLocation(it, false) } // TODO: CHECK IF THIS SHOULD STAY (never worked)
-
+        with(viewModel) {
+            mapView.init(getDownloadedMapFileList(), mapLatitude, mapLongitude, mapZoomLevel)
+        }
         registerMapDownloadObserver()
         mapView.reloadMarkers.observe(viewLifecycleOwner, Observer { reloadMarkers() })
+
+//        if (viewModel.isFirstRun)
+//            viewModel.getLastLocation()?.let { ensureLocationWithinMapBounds(it, false) } // TODO: CHECK IF THIS SHOULD STAY (never worked)
     }
 
     private fun registerMapDownloadObserver() {
@@ -237,7 +238,6 @@ class MapFragment : BaseFragment() {
         viewModel.plantMarkerData.observe(viewLifecycleOwner, onPlantMarkers)
     }
 
-    @Suppress("DEPRECATION")
     private fun setClickListeners() {
         gpsFab.setOnClickListener { viewModel.onClickGpsFab() }
         fab.setOnClickListener { viewModel.onClickNewPlantFab() }
@@ -245,18 +245,19 @@ class MapFragment : BaseFragment() {
 
     private fun bindViewModel() {
         with(viewModel) {
-            gpsFabIcon.observe(viewLifecycleOwner,
-                Observer { @Suppress("DEPRECATION")
-                    gpsFab.setImageDrawable(resources.getDrawable(it))
-                }
-            )
+            gpsFabIcon.observe(viewLifecycleOwner, onGpsFabIcon)
             showGpsRequiredSnackbar.observe(viewLifecycleOwner, onGpsRequiredSnackbar)
             showPlantNamesMissingSnackbar.observe(viewLifecycleOwner, onPlantNamesMissingSnackbar)
+            updateLocationPrecisionMarker.observe(viewLifecycleOwner, onUpdateLocationPrecision)
+            updateLocationMarker.observe(viewLifecycleOwner, onUpdateLocationMarker)
+            ensureMapBoundsIncludeLocation.observe(viewLifecycleOwner, onEnsureMapBoundsIncludeLocation)
+            redrawMapLayers.observe(viewLifecycleOwner, onRedrawMapLayers)
             navigateToNewPlant.observe(viewLifecycleOwner, onNavigateToNewPlant)
             plantMarkerData.observe(viewLifecycleOwner, onPlantMarkers)
-            currentLocation.observe(viewLifecycleOwner, onLocation)
         }
     }
+
+    private val onGpsFabIcon = Observer<Int> { gpsFab.setImageDrawable(resources.getDrawable(it, appContext.theme)) }
 
     private val onGpsRequiredSnackbar = Observer<Unit> {
         showSnackbar(R.string.gps_must_be_enabled, R.string.enable) {
@@ -264,36 +265,29 @@ class MapFragment : BaseFragment() {
         }
     }
 
-    private val onPlantNamesMissingSnackbar = Observer<Unit> {
-        showSnackbar(R.string.wait_for_plant_name_database_to_download)
+    private val onPlantNamesMissingSnackbar = Observer<Unit> { showSnackbar(R.string.wait_for_plant_name_database_to_download) }
+
+    private val onUpdateLocationPrecision = Observer<Location> { location ->
+        if (locationPrecisionCircle == null) {
+            locationPrecisionCircle = LocationCircle(mapView)
+            forceLocationMarkerOnTop()
+        }
+        locationPrecisionCircle?.updateLocation(location)
     }
+
+    private val onUpdateLocationMarker = Observer<Location> { location ->
+        locationMarker ?: createLocationMarker()
+        locationMarker?.updateLocation(location)
+    }
+
+    private val onEnsureMapBoundsIncludeLocation = Observer<Location> { mapView.ensureLocationWithinMapBounds(it) }
+
+    private val onRedrawMapLayers = Observer<Unit> { mapView.layerManager.redrawLayers() }
 
     private val onNavigateToNewPlant = Observer<Unit> {
         mapView.mapScaleBar.isVisible = false // Prevents crash on fragment anim
         navigateTo(R.id.action_map_to_newPlantPhoto, bundleOf("userId" to viewModel.userId) )
     }
-
-//     TODO: REMOVE (Temp for NewPlantConfirmFragment)
-//    private val onNavigateToNewPlant = Observer<Unit> {
-//        navigateTo(R.id.newPlantConfirmFragment, createBundle() )
-//    }
-
-    // TODO: REMOVE
-//    private fun createBundle(): Bundle {
-//        return bundleOf(
-//                userIdKey to viewModel.userId,
-//                plantTypeKey to Plant.Type.TREE.flag,
-//                photoUriKey to fileFromDrawable(R.drawable.photo_type_complete, "photo_type_complete"),
-//                commonNameKey to "Common",
-//                scientificNameKey to "Latin",
-//                heightMeasurementKey to Measurement(1.0f, Units.M),
-//                diameterMeasurementKey to Measurement(2.0f, Units.IN),
-//                trunkDiameterMeasurementKey to Measurement(3.5f, Units.FT)
-//        ).apply {
-//            putSerializable(locationKey, Location(
-//                49.477, -119.592, 1.0, 3.0f, 10, 20))
-//        }
-//    }
 
     private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkerData ->
         Lg.d("onPlantMarkers: $newPlantMarkerData")
@@ -326,36 +320,6 @@ class MapFragment : BaseFragment() {
         navigateTo(R.id.action_map_to_plantDetail, bundle)
     }
 
-    // TODO: See if logic here can be pushed to VM
-    @Suppress("DEPRECATION")
-    private val onLocation = Observer<Location> {
-        Lg.v("MapFragment: onLocation() = $it")
-        if (it.latitude != null && it.longitude != null) { // OK in VM
-            if (it.isRecent()) { // OK in VM
-                gpsFab.setImageResource(GPS_FIX.drawable) // Could be LiveData
-                updateLocationPrecision(it) // Could be LiveData
-                if (mapView.isLocationOffScreen(it)) // Problem: Check requires map
-                    mapView.centerMapOnLocation(it) // Could be LiveData
-                viewModel.setStaleGpsLocationTimer() // OK in VM
-            }
-            updateLocationMarker(it) // Could be LiveData
-            mapView.layerManager.redrawLayers()
-        }
-        // TODO: Update satellitesInUse
-    }
-
-    private fun updateLocationPrecision(location: Location) {
-        if (locationPrecisionCircle == null) {
-            locationPrecisionCircle = LocationCircle(mapView)
-            forceLocationMarkerOnTop()
-        }
-        locationPrecisionCircle?.updateLocation(location)
-    }
-
-    private fun updateLocationMarker(location: Location) {
-        locationMarker ?: createLocationMarker()
-        locationMarker?.updateLocation(location)
-    }
 
     private fun createLocationMarker() {
         locationMarker = LocationMarker(resources.getDrawable(R.drawable.person, null), mapView)
