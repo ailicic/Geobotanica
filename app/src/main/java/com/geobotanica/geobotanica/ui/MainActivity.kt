@@ -12,7 +12,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI.setupActionBarWithNavController
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data.entity.Location
+import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.di.components.ApplicationComponent
 import com.geobotanica.geobotanica.di.components.DaggerApplicationComponent
 import com.geobotanica.geobotanica.di.modules.ApplicationModule

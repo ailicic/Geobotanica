@@ -1,7 +1,7 @@
 package com.geobotanica.geobotanica.ui.map.marker
 
 import android.graphics.drawable.Drawable
-import com.geobotanica.geobotanica.data.entity.Location
+import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.ui.map.GbMapView
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent

@@ -3,6 +3,7 @@ package com.geobotanica.geobotanica.ui.plantdetail
 import androidx.lifecycle.*
 import androidx.room.withTransaction
 import com.geobotanica.geobotanica.android.file.StorageHelper
+import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.data.entity.PlantMeasurement.Type.*

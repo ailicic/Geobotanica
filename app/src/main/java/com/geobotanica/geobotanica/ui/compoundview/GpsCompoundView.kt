@@ -6,8 +6,9 @@ import android.view.View
 import android.widget.CompoundButton
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.android.location.LocationService
-import com.geobotanica.geobotanica.data.entity.Location
+import com.geobotanica.geobotanica.android.location.LocationSubscriber
 import com.geobotanica.geobotanica.ui.MainActivity
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.android.synthetic.main.compound_gps.view.*
@@ -22,7 +23,7 @@ class GpsCompoundView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr) {
+) : ConstraintLayout(context, attrs, defStyleAttr), LocationSubscriber {
 
     @Inject lateinit var locationService: LocationService
 
@@ -42,7 +43,7 @@ class GpsCompoundView @JvmOverloads constructor(
         if (activity.currentLocation != null)
             importLocationData(activity.currentLocation!!)
         else
-            locationService.subscribe(this, ::onLocation)
+            locationService.subscribe(this)
         gpsSwitch.setOnCheckedChangeListener(::onToggleHoldPosition)
     }
 
@@ -53,19 +54,10 @@ class GpsCompoundView @JvmOverloads constructor(
         locationService.unsubscribe(this)
     }
 
-    private fun importLocationData(location: Location) {
-        currentLocation = location
-        gpsSwitch.isChecked = true
-        precisionText.text = context.resources.getString(R.string.precision, location.precision)
-        setSatellitesText(location.satellitesInUse ?: 0, location.satellitesVisible)
-        holdText.visibility = View.VISIBLE
-        gpsSwitch.visibility = View.VISIBLE
-    }
-
-    private fun onLocation(location: Location) {
+    override fun onLocation(location: Location) {
         currentLocation = location
         location.run {
-//            Lg.v("onLocation(): $this")
+            //            Lg.v("onLocation(): $this")
             precision?.let {
                 precisionText.text = context.resources.getString(R.string.precision, precision)
                 holdText.visibility = View.VISIBLE
@@ -73,6 +65,15 @@ class GpsCompoundView @JvmOverloads constructor(
             }
             satellitesInUse?.let { setSatellitesText(satellitesInUse, satellitesVisible) }
         }
+    }
+
+    private fun importLocationData(location: Location) {
+        currentLocation = location
+        gpsSwitch.isChecked = true
+        precisionText.text = context.resources.getString(R.string.precision, location.precision)
+        setSatellitesText(location.satellitesInUse ?: 0, location.satellitesVisible)
+        holdText.visibility = View.VISIBLE
+        gpsSwitch.visibility = View.VISIBLE
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -89,7 +90,7 @@ class GpsCompoundView @JvmOverloads constructor(
         }
         else {
             activity.currentLocation = null
-            locationService.subscribe(this, ::onLocation)
+            locationService.subscribe(this)
         }
     }
 

@@ -1,6 +1,6 @@
 package com.geobotanica.geobotanica.ui.map.marker
 
-import com.geobotanica.geobotanica.data.entity.Location
+import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.ui.map.GbMapView
 import org.mapsforge.core.graphics.Color
 import org.mapsforge.core.graphics.Style

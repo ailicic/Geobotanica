@@ -3,6 +3,7 @@ package com.geobotanica.geobotanica.ui.newplantconfirm
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.room.withTransaction
+import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.data.entity.PlantMeasurement.Type.*

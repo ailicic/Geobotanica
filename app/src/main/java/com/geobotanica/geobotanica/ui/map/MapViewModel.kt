@@ -3,8 +3,9 @@ package com.geobotanica.geobotanica.ui.map
 import androidx.lifecycle.*
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.file.StorageHelper
+import com.geobotanica.geobotanica.android.location.Location
+import com.geobotanica.geobotanica.android.location.LocationSubscriber
 import com.geobotanica.geobotanica.android.location.LocationService
-import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.OnlineAssetId
 import com.geobotanica.geobotanica.data.repo.AssetRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
@@ -31,7 +32,7 @@ class MapViewModel @Inject constructor(
     private val plantRepo: PlantRepo,
     private val plantMarkerDiffer: PlanterMarkerDiffer,
     private val locationService: LocationService
-): ViewModel() {
+): ViewModel(), LocationSubscriber {
     var userId = 0L    // Field injected dynamic parameter
 
     val plantMarkerData: LiveData< List<PlantMarkerData> > by lazy {
@@ -129,18 +130,18 @@ class MapViewModel @Inject constructor(
     fun getPlantMarkerDiffs(currentData: List<PlantMarkerData>, newData: List<PlantMarkerData>) =
         plantMarkerDiffer.getDiffs(currentData, newData)
 
+    override fun onLocation(location: Location) {
+        _currentLocation.value = location
+    }
+
     private fun subscribeGps() {
         if (!isGpsSubscribed()) {
             _gpsFabIcon.value = GPS_NO_FIX.drawable
-            locationService.subscribe(this, ::onLocation, 5000)
+            locationService.subscribe(this, 5000)
         }
     }
 
     private fun isGpsEnabled(): Boolean = locationService.isGpsEnabled()
-
-    private fun onLocation(location: Location) {
-        _currentLocation.value = location
-    }
 
 //    private fun getLastLocation(): Location? = locationService.getLastLocation()
 }

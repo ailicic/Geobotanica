@@ -10,18 +10,19 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RequiresApi
-import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.isEmulator
 import javax.inject.Inject
 import javax.inject.Singleton
 
-typealias LocationCallback = (Location) -> Unit
+interface LocationSubscriber {
+    fun onLocation(location: Location)
+}
 
 @Singleton
 class LocationService @Inject constructor (private val locationManager: LocationManager) {
-    private val observers = mutableMapOf<Any, LocationCallback>()
-    private var currentGpsMinTime = 0L
+    private val subscribers = mutableListOf<LocationSubscriber>()
+    private var currentInterval = 0L
     private var gnssStatusCallback:GnssStatusCallback? = null
     private val gpsLocationListener:GpsLocationListener = GpsLocationListener()
     private val gpsStatusListener = GpsStatusListener()
@@ -37,40 +38,38 @@ class LocationService @Inject constructor (private val locationManager: Location
     }
 
     fun isGpsEnabled(): Boolean = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-    fun isGpsSubscribed(observer: Any): Boolean = observers.contains(observer)
+    fun isGpsSubscribed(observer: Any): Boolean = subscribers.contains(observer)
 
-    fun subscribe(observer: Any, callback: LocationCallback, minTime: Long = 0) {
-        if (observers.isEmpty() || isMinTimeChanged(minTime)) {
-            registerGpsUpdates(minTime)
-            currentGpsMinTime = minTime
+    fun subscribe(subscriber: LocationSubscriber, interval: Long = 0) {
+        if (subscribers.isEmpty() || interval != currentInterval) {
+            registerGpsUpdates(interval)
+            currentInterval = interval
         }
-        val isAdded = observers.put(observer, callback) == null
-        Lg.v("LocationService: subscribe(): isAdded=$isAdded, observers=${observers.count()}, minTime=$minTime, observer=$observer callback=$callback")
+        val isSubscribed = subscribers.add(subscriber)
+        Lg.v("LocationService: subscribe(): isSubscribed=$isSubscribed, subscribers=${subscribers.count()}, interval=$interval, subscriber=$subscriber")
     }
 
-    private fun isMinTimeChanged(minTime: Long): Boolean = observers.isNotEmpty() && minTime != currentGpsMinTime
-
     fun unsubscribe(observer: Any) {
-        val isRemoved = observers.remove(observer) != null
-        if(observers.isEmpty()) {
+        val isRemoved = subscribers.remove(observer)
+        if(subscribers.isEmpty()) {
             unregisterGpsUpdates()
             hasFirstFix = false
         }
-        Lg.v("LocationService: unsubscribe(): isRemoved=$isRemoved, observers=${observers.count()}, observer=$observer\"")
+        Lg.v("LocationService: unsubscribe(): isRemoved=$isRemoved, subscribers=${subscribers.count()}, observer=$observer\"")
     }
 
-    private fun notify(location: Location) {
-        observers.forEach { it.value(location) }
+    private fun publish(location: Location) {
+        subscribers.forEach { it.onLocation(location) }
     }
 
     private fun onLocation(location: Location) {
         if (isEmulator()) {
-            notify(location)
+            publish(location)
             return
         }
         location.latitude?.let { hasFirstFix = true }
         if (!hasFirstFix) {
-            notify(location) // Send out satellite data
+            publish(location) // Send out satellite data
         } else { // Send out merged lat/long + sat data events only if received within 100 ms
             if (tempLocation == null) {
                 tempLocation = location
@@ -80,8 +79,8 @@ class LocationService @Inject constructor (private val locationManager: Location
                     // Discard tempLocation, wait for next event
                     tempLocation = location
                     msSinceLastEvent = System.currentTimeMillis()
-                } else { // Events arrived within 100 ms of eachother. Merge them and notify()
-                    notify(location.mergeWith(tempLocation!!)) // Already handled null above
+                } else { // Events arrived within 100 ms of eachother. Merge them and publish()
+                    publish(location.mergeWith(tempLocation!!)) // Already handled null above
                     tempLocation = null
                 }
             }
@@ -90,9 +89,9 @@ class LocationService @Inject constructor (private val locationManager: Location
     }
 
     @SuppressLint("MissingPermission")
-    private fun registerGpsUpdates(minTime: Long = 0) {
+    private fun registerGpsUpdates(interval: Long = 0) {
 //        Lg.d("LocationService: registerGpsUpdates()")
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, 0f, gpsLocationListener)
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, interval, 0f, gpsLocationListener)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             locationManager.registerGnssStatusCallback(gnssStatusCallback)
@@ -202,25 +201,25 @@ class LocationService @Inject constructor (private val locationManager: Location
         }
     }
 
-    @SuppressLint("MissingPermission")
-    fun getLastLocation(): Location? { // USELESS: Always returns null
-        val extractLocation: (android.location.Location) -> Location = {
-            Location(
-                    latitude = it.latitude,
-                    longitude = it.longitude,
-                    altitude = it.altitude,
-                    satellitesVisible = 0
-            )
-        }
-        locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)?.let {
-            Lg.d("getLastLocation(GPS_PROVIDER): $it")
-            return extractLocation(it)
-        }
-        locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)?.let {
-            Lg.d("getLastLocation(NETWORK_PROVIDER): $it")
-            return extractLocation(it)
-        }
-        Lg.d("getLastLocation(): None available")
-        return null
-    }
+//    @SuppressLint("MissingPermission")
+//    fun getLastLocation(): Location? { // USELESS: Always returns null
+//        val extractLocation: (android.location.Location) -> Location = {
+//            Location(
+//                    latitude = it.latitude,
+//                    longitude = it.longitude,
+//                    altitude = it.altitude,
+//                    satellitesVisible = 0
+//            )
+//        }
+//        locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)?.let {
+//            Lg.d("getLastLocation(GPS_PROVIDER): $it")
+//            return extractLocation(it)
+//        }
+//        locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)?.let {
+//            Lg.d("getLastLocation(NETWORK_PROVIDER): $it")
+//            return extractLocation(it)
+//        }
+//        Lg.d("getLastLocation(): None available")
+//        return null
+//    }
 }

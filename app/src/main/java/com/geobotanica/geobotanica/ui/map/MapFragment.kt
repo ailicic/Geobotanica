@@ -11,8 +11,8 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.data.GbDatabase
-import com.geobotanica.geobotanica.data.entity.Location
 import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.network.FileDownloader
 import com.geobotanica.geobotanica.ui.BaseFragment
@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 // TESTING
-// TODO: Consider using LiveData in Location Service (+get rid of non-intuitive "minTime" -> at least rename to "publish interval" or something)
+
 
 // LONG TERM
 // TODO: Use Okio everywhere
@@ -63,7 +63,6 @@ import javax.inject.Inject
 // TODO: Fix screen rotation crashes and consider landscape layouts
 // TODO: Figure out how to resume app state after onStop, then process death (e.g. home or switch app, then kill app)
 // https://medium.com/google-developers/viewmodels-persistence-onsaveinstancestate-restoring-ui-state-and-loaders-fc7cc4a6c090
-// TODO: Expose Location events as LiveData in LocationService
 // TODO: Consider allowing app to be installed on external storage
 
 
