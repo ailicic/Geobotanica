@@ -31,7 +31,10 @@ class DecompressionWorker(val appContext: Context, workerParams: WorkerParameter
                 val gzipSourceFile = File(assetDownloadPath, assetFilenameGzip)
                 val gzipSource = gzipSourceFile.source().gzip().buffer()
 
-                val unGzipSink = File(assetLocalPath, assetFilename).sink().buffer()
+                val unGzipFile = File(assetLocalPath, assetFilename)
+                if (unGzipFile.exists())
+                    unGzipFile.delete()
+                val unGzipSink = unGzipFile.sink().buffer()
 
                 while (!gzipSource.exhausted()) {
                     gzipSource.read(unGzipSink.buffer, 32768)

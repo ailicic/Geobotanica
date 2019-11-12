@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
+// TODO: Reduce font size of Yes/No in Exit App
 // TODO: Add more tests
 // TODO: Use "appContext.theme" where ever drawable calls demand it (rather than suppressing deprecated)
     // - Remove "@Suppress" annotations whereever possible

@@ -1,9 +1,10 @@
 package com.geobotanica.geobotanica.data_taxa.util
 
 import com.geobotanica.geobotanica.data_taxa.DEFAULT_RESULT_LIMIT
+import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag
+import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag.*
 import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
 import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.*
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -226,12 +227,5 @@ class PlantNameSearchService @Inject constructor (
                 return SearchFilterOptions(filterFlags)
             }
         }
-    }
-
-    enum class PlantNameTag(val flag: Int) {
-        COMMON(     0b0000_0001),
-        SCIENTIFIC( 0b0000_0010),
-        STARRED(    0b0000_0100),
-        USED(       0b0000_1000);
     }
 }

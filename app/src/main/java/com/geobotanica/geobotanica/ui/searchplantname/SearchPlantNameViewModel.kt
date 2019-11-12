@@ -2,10 +2,10 @@ package com.geobotanica.geobotanica.ui.searchplantname
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag.*
 import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
 import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.*
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchFilterOptions
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
 import com.geobotanica.geobotanica.util.Lg

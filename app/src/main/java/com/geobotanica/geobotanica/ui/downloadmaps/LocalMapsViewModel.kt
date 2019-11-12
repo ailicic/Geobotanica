@@ -57,7 +57,7 @@ class LocalMapsViewModel @Inject constructor(
                 mapRepo.getByFilename(file.name)?.let { map ->
                     if (map.status == NOT_DOWNLOADED) {
                         Lg.d("Importing map from external storage: ${file.name}")
-                        file.copyTo(File(storageHelper.getMapsPath(), file.name))
+                        file.copyTo(File(storageHelper.getMapsPath(), file.name), overwrite = true)
                         map.status = DOWNLOADED
                         mapRepo.update(map)
                         Lg.d("Imported map from external storage: ${file.name}")
@@ -75,7 +75,7 @@ class LocalMapsViewModel @Inject constructor(
     fun cancelDownload(downloadId: Long) = viewModelScope.launch(Dispatchers.IO) {
         val result = fileDownloader.cancelDownload(downloadId)
         mapRepo.getByDownloadId(downloadId)?.let { onlineMap ->
-            onlineMap.status = FileDownloader.NOT_DOWNLOADED
+            onlineMap.status = NOT_DOWNLOADED
             mapRepo.update(onlineMap)
             Lg.i("Cancelled map download: ${onlineMap.filename} (Result=$result)")
         }
@@ -85,7 +85,7 @@ class LocalMapsViewModel @Inject constructor(
         val onlineMap = mapRepo.get(onlineMapId)
         val mapFile = File(storageHelper.getMapsPath(), onlineMap.filename)
         val result = mapFile.delete()
-        onlineMap.status = FileDownloader.NOT_DOWNLOADED
+        onlineMap.status = NOT_DOWNLOADED
         mapRepo.update(onlineMap)
         Lg.i("Deleted map: ${onlineMap.filename} (Result=$result)")
     }

@@ -11,7 +11,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.*
+import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag.*
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
 import kotlinx.android.synthetic.main.plant_name_list_item.view.*
 

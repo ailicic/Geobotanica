@@ -5,12 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.room.withTransaction
 import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.data.GbDatabase
-import com.geobotanica.geobotanica.data.entity.*
+import com.geobotanica.geobotanica.data.entity.Plant
+import com.geobotanica.geobotanica.data.entity.PlantLocation
+import com.geobotanica.geobotanica.data.entity.PlantMeasurement
 import com.geobotanica.geobotanica.data.entity.PlantMeasurement.Type.*
+import com.geobotanica.geobotanica.data.entity.PlantPhoto
 import com.geobotanica.geobotanica.data.repo.*
+import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag.USED
 import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
 import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.USED
 import com.geobotanica.geobotanica.ui.viewpager.PhotoData
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.Measurement

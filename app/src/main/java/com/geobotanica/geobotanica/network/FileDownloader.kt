@@ -87,7 +87,7 @@ class FileDownloader @Inject constructor (
         val assetFileGzip = File(storageHelper.getExtStorageRootDir(), asset.filenameGzip)
         if (assetFileGzip.exists()) {
             Lg.d("Found asset on external storage: ${asset.filenameGzip}")
-            assetFileGzip.copyTo(File(storageHelper.getDownloadPath(), asset.filenameGzip))
+            assetFileGzip.copyTo(File(storageHelper.getDownloadPath(), asset.filenameGzip), overwrite = true)
             return true
         } else
             return false

@@ -5,12 +5,11 @@ import com.geobotanica.geobotanica.data_taxa.DEFAULT_RESULT_LIMIT
 import com.geobotanica.geobotanica.data_taxa.dao.TagDao
 import com.geobotanica.geobotanica.data_taxa.dao.TaxonDao
 import com.geobotanica.geobotanica.data_taxa.dao.TypeDao
+import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag
+import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag.*
 import com.geobotanica.geobotanica.data_taxa.entity.Tag
 import com.geobotanica.geobotanica.data_taxa.entity.Taxon
 import com.geobotanica.geobotanica.data_taxa.entity.TaxonType
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.STARRED
-import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.PlantNameTag.USED
 import javax.inject.Inject
 
 

@@ -41,6 +41,7 @@ data class  OnlineMap(
 
     val printName: String
         get() = filename
+            .replacePrefix("us-", "US ")
             .removeSuffix(".map")
             .removeSuffix(">") // Present if filename is too long on scraped Mapsforge website
             .replace('-', ' ')
