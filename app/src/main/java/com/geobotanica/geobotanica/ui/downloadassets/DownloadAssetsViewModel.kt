@@ -102,7 +102,7 @@ val onlineAssetList = listOf(
     ),
     OnlineAsset(
         "Plant name database",
-        "http://people.okanagan.bc.ca/ailicic/Markers/taxa.db.gz",
+        "http://people.okanagan.bc.ca/ailicic/Maps/taxa.db.gz",
         "databases",
         true,
         29_038_255,

@@ -62,7 +62,7 @@ class MapViewModel @Inject constructor(
     var mapZoomLevel: Int = defaultMapZoomLevel
     var mapLatitude: Double = defaultMapLatitude
     var mapLongitude: Double = defaultMapLongitude
-    var wasGpsSubscribed = true
+    var wasGpsSubscribed = false
 
     private var staleGpsTimer: Timer? = null
     private val staleGpsTimeout = 120_000L // ms

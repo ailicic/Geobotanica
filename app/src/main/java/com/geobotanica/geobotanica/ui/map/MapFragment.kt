@@ -31,7 +31,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-// TODO: Reduce font size of Yes/No in Exit App
 // TODO: Add more tests
 // TODO: Use "appContext.theme" where ever drawable calls demand it (rather than suppressing deprecated)
     // - Remove "@Suppress" annotations whereever possible
@@ -203,6 +202,8 @@ class MapFragment : BaseFragment() {
 
     private fun init() = lifecycleScope.launch {
         defaultSharedPrefs.put(sharedPrefsIsFirstRunKey to false)
+        viewModel.wasGpsSubscribed = true // Enable GPS by default (GPS permission available now)
+        viewModel.initGpsSubscribe()
         initMap()
         setClickListeners()
         bindViewModel()
