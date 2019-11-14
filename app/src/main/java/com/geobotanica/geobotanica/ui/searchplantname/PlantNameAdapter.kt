@@ -1,5 +1,6 @@
 package com.geobotanica.geobotanica.ui.searchplantname
 
+import android.content.Context
 import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
@@ -17,9 +18,11 @@ import kotlinx.android.synthetic.main.plant_name_list_item.view.*
 
 
 class PlantNameAdapter(
+        var isSelectable: Boolean = false,
         private val onClick: (Int, SearchResult) -> Unit,
         private val onClickStar: (SearchResult) -> Unit,
-        var isSelectable: Boolean = false
+        private val context: Context
+
 ) : RecyclerView.Adapter<PlantNameAdapter.ViewHolder>() {
 
     var items: List<SearchResult> = emptyList()
@@ -31,7 +34,6 @@ class PlantNameAdapter(
         return ViewHolder(view)
     }
 
-    @Suppress("DEPRECATION")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
         
@@ -45,8 +47,11 @@ class PlantNameAdapter(
             item.hasTag(SCIENTIFIC) -> R.drawable.scientific_name
             else -> throw IllegalArgumentException("Must specify either COMMON or SCIENTIFIC tag") // TODO: Handle this differently
         }
-        holder.plantNameIcon.setImageDrawable(resources.getDrawable(plantNameIcon))
+        holder.plantNameIcon.setImageDrawable(resources.getDrawable(plantNameIcon, context.theme))
+
+        @Suppress("DEPRECATION")
         if (plantNameIcon == R.drawable.common_name)
+//            holder.plantNameIcon.setColorFilter(resources.getColor(R.color.colorBrown, context.theme)) // Requires min API 23
             holder.plantNameIcon.setColorFilter(resources.getColor(R.color.colorBrown))
 
         holder.plantTypeIcon.isVisible = false
@@ -71,11 +76,12 @@ class PlantNameAdapter(
 
         holder.historyIcon.isVisible = item.hasTag(USED)
 
-        val star = resources.getDrawable(R.drawable.ic_star)
-        val starBorder = resources.getDrawable(R.drawable.ic_star_border)
+        val star = resources.getDrawable(R.drawable.ic_star, context.theme)
+        val starBorder = resources.getDrawable(R.drawable.ic_star_border, context.theme)
         val starIcon = if (item.hasTag(STARRED)) star else starBorder
         holder.starredIcon.setImageDrawable(starIcon)
 
+        @Suppress("DEPRECATION")
         if (isSelectable && position == selectedIndex)
             holder.constraintLayout.setBackgroundColor(resources.getColor(R.color.colorLightGrey))
         else

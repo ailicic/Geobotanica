@@ -32,8 +32,6 @@ import javax.inject.Inject
 
 
 // TODO: Add more tests
-// TODO: Use "appContext.theme" where ever drawable calls demand it (rather than suppressing deprecated)
-    // - Remove "@Suppress" annotations whereever possible
 // TODO: Login screen (no authentication, just select user with any pw)
 // TODO: Request all permissions in separate screen before map (prob after login/splash screen for ux)
 
@@ -51,7 +49,6 @@ import javax.inject.Inject
 // TODO: MAYBE Handle nullifying taxon/vernacular id if plant name is modified in PlantDetailFragment (related to above)
 
 // LONG TERM NIT PICK
-// TODO: Get rid of warning on using null as root layout in inflate calls in onCreateDialog()
 // TODO: Learn how to use only the keyboard
 // TODO: Check that no hard-coded strings are used -> resources.getString(R.string.trunk_diameter)
 // TODO: Use code reformatter:

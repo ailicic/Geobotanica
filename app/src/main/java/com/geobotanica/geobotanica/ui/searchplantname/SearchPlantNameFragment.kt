@@ -95,7 +95,7 @@ class SearchPlantNameFragment : BaseFragment() {
     @ExperimentalCoroutinesApi
     private fun initRecyclerView() {
         recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-        plantNameAdapter = PlantNameAdapter(::onClickItem, ::onClickStar, true)
+        plantNameAdapter = PlantNameAdapter(true, ::onClickItem, ::onClickStar, appContext)
         recyclerView.adapter = plantNameAdapter
         updateSearchResults()
     }

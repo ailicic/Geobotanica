@@ -23,24 +23,27 @@ import org.mapsforge.map.util.MapViewProjection
 import org.mapsforge.map.view.InputListener
 import javax.inject.Inject
 
-@Suppress("DEPRECATION")
 class PlantMarker(
         val plantMarkerData: PlantMarkerData,
         private val activity: MainActivity,
         private val mapView: GbMapView,
         private val onPlantMarkerLongPress: (Long) -> Unit
 ) : GbMarker(
-        activity.resources.getDrawable(when (plantMarkerData.plantType!!) {
-            // TODO: Use drawable array + enum ordinal instead?
-            TREE -> R.drawable.marker_purple
-            SHRUB -> R.drawable.marker_blue
-            HERB -> R.drawable.marker_green
-            GRASS -> R.drawable.marker_light_green
-            VINE -> R.drawable.marker_yellow
-            FUNGUS -> R.drawable.marker_yellow // TODO: Use different color
-        })
+        activity.resources.getDrawable(
+                when (plantMarkerData.plantType!!) {
+                    // TODO: Use drawable array + enum ordinal instead?
+                    TREE -> R.drawable.marker_purple
+                    SHRUB -> R.drawable.marker_blue
+                    HERB -> R.drawable.marker_green
+                    GRASS -> R.drawable.marker_light_green
+                    VINE -> R.drawable.marker_yellow
+                    FUNGUS -> R.drawable.marker_yellow // TODO: Use different color
+                },
+                activity.theme
+        )
 ) {
-    @Inject lateinit var storageHelper: StorageHelper
+    @Inject
+    lateinit var storageHelper: StorageHelper
 
     val plantId: Long = plantMarkerData.plantId
 
@@ -52,16 +55,19 @@ class PlantMarker(
         override fun onZoomEvent() {
             markerBubble?.run {
                 Lg.d("PlantMarker: onZoomEvent()")
-                GlobalScope.launch(Dispatchers.Main) { // Hack to ensure call to getBubbleLatitudeOffset() occurs AFTER marker bitmap is resized.
+                GlobalScope.launch(Dispatchers.Main) {
+                    // Hack to ensure call to getBubbleLatitudeOffset() occurs AFTER marker bitmap is resized.
                     delay(200)
-                    while (mapView.model.mapViewPosition.animationInProgress()) { delay(50); Lg.v("PlantMarker: Waiting 50 ms for animation to finish...") }
+                    while (mapView.model.mapViewPosition.animationInProgress()) {
+                        delay(50); Lg.v("PlantMarker: Waiting 50 ms for animation to finish...")
+                    }
                     delay(50)
                     layoutParams = getBubbleLayoutParams()
                 }
             }
         }
 
-        override fun onMoveEvent() { }
+        override fun onMoveEvent() {}
     }
 
     init {

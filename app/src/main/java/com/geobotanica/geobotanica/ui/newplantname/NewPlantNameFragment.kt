@@ -83,7 +83,7 @@ class NewPlantNameFragment : BaseFragment() {
 
     private fun initRecyclerView() {
         recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-        plantNamesAdapter = PlantNameAdapter(::onClickItem, ::onClickStar, true)
+        plantNamesAdapter = PlantNameAdapter(true, ::onClickItem, ::onClickStar, appContext)
         viewModel.lastSelectedIndex?. let { plantNamesAdapter.selectedIndex = it }
         recyclerView.adapter = plantNamesAdapter
     }

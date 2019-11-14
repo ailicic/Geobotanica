@@ -1,5 +1,6 @@
 package com.geobotanica.geobotanica.ui.dialog
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -20,8 +21,8 @@ class ItemListDialog<T: Enum<T>> (
 
     private lateinit var customView: View // Required for kotlinx synthetic bindings
 
+    @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-
         customView = LayoutInflater.from(context).inflate(R.layout.dialog_item_list, null)
         return activity?.let {
             AlertDialog.Builder(it).run {

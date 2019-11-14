@@ -1,7 +1,6 @@
 package com.geobotanica.geobotanica.ui.downloadassets
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,8 +12,6 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavOptions
-import androidx.navigation.fragment.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.network.NetworkValidator
 import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
@@ -103,7 +100,6 @@ class DownloadAssetsFragment : BaseFragment() {
         })
     }
 
-    @SuppressLint("UsableSpace")
     private suspend fun initUi() {
         worldMapText.text = viewModel.getWorldMapText()
         plantNameDbText.text = viewModel.getPlantNameDbText()

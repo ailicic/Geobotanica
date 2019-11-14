@@ -22,7 +22,6 @@ class ListItemAdapter<T: Enum<T>>(
         return ViewHolder(view)
     }
 
-    @Suppress("DEPRECATION")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
 

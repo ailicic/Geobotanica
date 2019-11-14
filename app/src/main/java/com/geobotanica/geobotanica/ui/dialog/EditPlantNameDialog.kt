@@ -1,5 +1,6 @@
 package com.geobotanica.geobotanica.ui.dialog
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
@@ -23,6 +24,7 @@ class EditPlantNameDialog(
     private lateinit var dialog: AlertDialog
     private lateinit var customView: View // Required for kotlinx synthetic bindings
 
+    @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         customView = LayoutInflater.from(context).inflate(R.layout.dialog_plant_name, null)
 
