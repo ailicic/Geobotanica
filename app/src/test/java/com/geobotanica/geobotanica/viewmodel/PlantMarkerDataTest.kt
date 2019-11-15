@@ -1,5 +1,6 @@
 package com.geobotanica.geobotanica.viewmodel
 
+import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.data.entity.*
 import com.geobotanica.geobotanica.ui.map.marker.PlantMarkerData
 import org.amshove.kluent.shouldEqual

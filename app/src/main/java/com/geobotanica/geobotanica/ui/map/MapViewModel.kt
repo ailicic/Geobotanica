@@ -52,7 +52,7 @@ class MapViewModel @Inject constructor(
     val showGpsRequiredSnackbar = SingleLiveEvent<Unit>()
     val showPlantNamesMissingSnackbar = SingleLiveEvent<Unit>()
     val navigateToNewPlant = SingleLiveEvent<Unit>()
-    val ensureMapBoundsIncludeLocation = SingleLiveEvent<Location>()
+    val centerMap = SingleLiveEvent<Location>()
     val redrawMapLayers = SingleLiveEvent<Unit>()
 
     private val defaultMapZoomLevel = 16
@@ -78,7 +78,7 @@ class MapViewModel @Inject constructor(
             if (location.isRecent()) {
                 _gpsFabIcon.value = GPS_FIX.drawable
                 _updateLocationPrecisionMarker.value = location
-                ensureMapBoundsIncludeLocation.value = location
+                centerMap.value = location
                 setStaleGpsLocationTimer()
             }
             _updateLocationMarker.value = location

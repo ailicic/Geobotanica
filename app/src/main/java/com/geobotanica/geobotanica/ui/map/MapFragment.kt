@@ -32,6 +32,7 @@ import javax.inject.Inject
 
 
 // TODO: Add more tests
+// TODO: Setup CI (Bitrise)
 // TODO: Login screen (no authentication, just select user with any pw)
 // TODO: Request all permissions in separate screen before map (prob after login/splash screen for ux)
 
@@ -218,7 +219,7 @@ class MapFragment : BaseFragment() {
         mapView.reloadMarkers.observe(viewLifecycleOwner, Observer { reloadMarkers() })
 
 //        if (viewModel.isFirstRun)
-//            viewModel.getLastLocation()?.let { ensureLocationWithinMapBounds(it, false) } // TODO: CHECK IF THIS SHOULD STAY (never worked)
+//            viewModel.getLastLocation()?.let { centerMap(it, false) } // TODO: CHECK IF THIS SHOULD STAY (never worked)
     }
 
     private fun registerMapDownloadObserver() {
@@ -249,7 +250,7 @@ class MapFragment : BaseFragment() {
             showPlantNamesMissingSnackbar.observe(viewLifecycleOwner, onPlantNamesMissingSnackbar)
             updateLocationPrecisionMarker.observe(viewLifecycleOwner, onUpdateLocationPrecision)
             updateLocationMarker.observe(viewLifecycleOwner, onUpdateLocationMarker)
-            ensureMapBoundsIncludeLocation.observe(viewLifecycleOwner, onEnsureMapBoundsIncludeLocation)
+            centerMap.observe(viewLifecycleOwner, onEnsureMapBoundsIncludeLocation)
             redrawMapLayers.observe(viewLifecycleOwner, onRedrawMapLayers)
             navigateToNewPlant.observe(viewLifecycleOwner, onNavigateToNewPlant)
             plantMarkerData.observe(viewLifecycleOwner, onPlantMarkers)
@@ -279,7 +280,7 @@ class MapFragment : BaseFragment() {
         locationMarker?.updateLocation(location)
     }
 
-    private val onEnsureMapBoundsIncludeLocation = Observer<Location> { mapView.ensureLocationWithinMapBounds(it) }
+    private val onEnsureMapBoundsIncludeLocation = Observer<Location> { mapView.centerMap(it) }
 
     private val onRedrawMapLayers = Observer<Unit> { mapView.layerManager.redrawLayers() }
 

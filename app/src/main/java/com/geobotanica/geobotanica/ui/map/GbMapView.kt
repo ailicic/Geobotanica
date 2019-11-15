@@ -119,7 +119,7 @@ class GbMapView @JvmOverloads constructor(
         return false
     }
 
-    fun ensureLocationWithinMapBounds(location: Location, animate: Boolean = true) {
+    fun centerMap(location: Location, animate: Boolean = true) {
         if (isLocationOffScreen(location)) {
             if (animate)
                 model.mapViewPosition.animateTo(location.toLatLong())
