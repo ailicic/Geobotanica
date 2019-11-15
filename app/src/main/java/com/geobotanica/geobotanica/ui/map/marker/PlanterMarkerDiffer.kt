@@ -20,9 +20,9 @@ class PlanterMarkerDiffer @Inject constructor() {
             val idsToUpdate = mutableListOf<Long>()
             val idsForDeepComparison = currentIds intersect newIds
             idsForDeepComparison.forEach { id ->
-                val current = current.first { it.plantId == id }
-                val new = new.first { it.plantId == id }
-                if (current != new)
+                val currentId = current.first { it.plantId == id }
+                val newId = new.first { it.plantId == id }
+                if (currentId != newId)
                     idsToUpdate.add(id)
             }
 
