@@ -19,7 +19,7 @@ import kotlinx.android.synthetic.main.plant_name_list_item.view.*
 
 class PlantNameAdapter(
         var isSelectable: Boolean = false,
-        private val onClick: (Int, SearchResult) -> Unit,
+        private val onClickItem: (Int, SearchResult) -> Unit,
         private val onClickStar: (SearchResult) -> Unit,
         private val context: Context
 
@@ -93,7 +93,7 @@ class PlantNameAdapter(
                 selectedIndex = position
                 notifyItemChanged(selectedIndex)
             }
-            onClick(position, item)
+            onClickItem(position, item)
         }
 
         holder.starredIcon.setOnClickListener {

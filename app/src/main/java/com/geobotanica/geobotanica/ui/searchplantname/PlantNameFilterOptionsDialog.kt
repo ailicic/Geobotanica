@@ -1,5 +1,6 @@
 package com.geobotanica.geobotanica.ui.searchplantname
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -20,6 +21,7 @@ class PlantNameFilterOptionsDialog : DialogFragment() {
     private lateinit var customView: View // Required for kotlinx synthetic bindings
     lateinit var onApplyFilters: (filterOptions: SearchFilterOptions) -> Unit
 
+    @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
         customView = LayoutInflater.from(context).inflate(R.layout.dialog_plant_name_filter, null)
@@ -48,10 +50,10 @@ class PlantNameFilterOptionsDialog : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // TODO: Prevent zero (default) from being passed as null below
         val filterOptions = SearchFilterOptions(
                 arguments?.getValue<Int>(plantNameFilterOptionsKey)
-                ?: defaultFilterFlags)
+                ?: defaultFilterFlags
+        )
         commonCheckbox.isChecked = ! filterOptions.hasFilter(COMMON)
         scientificCheckbox.isChecked = ! filterOptions.hasFilter(SCIENTIFIC)
         starredCheckbox.isChecked = ! filterOptions.hasFilter(STARRED)

@@ -5,10 +5,9 @@ import android.os.Bundle
 import android.view.*
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag.*
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchFilterOptions
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
 import com.geobotanica.geobotanica.data_taxa.util.defaultFilterFlags
@@ -16,19 +15,22 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.plantNameFilterOptionsKey
+import com.geobotanica.geobotanica.ui.searchplantname.ViewAction.*
+import com.geobotanica.geobotanica.ui.searchplantname.ViewEvent.*
 import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_search_plant_name.*
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import javax.inject.Inject
 
+// TODO: Remove these annotations
+@ObsoleteCoroutinesApi
+@ExperimentalCoroutinesApi
 class SearchPlantNameFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<SearchPlantNameViewModel>
     private lateinit var viewModel: SearchPlantNameViewModel
 
     private lateinit var plantNameAdapter: PlantNameAdapter
-
-    private var searchJob: Job? = null
 
     private val sharedPrefsFilterFlags = "filterFlags"
 
@@ -39,8 +41,6 @@ class SearchPlantNameFragment : BaseFragment() {
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
             photoUri = getFromBundle(photoUriKey)
-
-            searchFilterOptions = SearchFilterOptions(sharedPrefs.get(sharedPrefsFilterFlags, defaultFilterFlags))
             Lg.d("Fragment args: userId=$userId, photoUri=$photoUri")
         }
     }
@@ -54,12 +54,9 @@ class SearchPlantNameFragment : BaseFragment() {
     @ObsoleteCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.taxonId = null
-        viewModel.vernacularId = null
-        viewModel.searchText = ""
 
-        initRecyclerView()
-        bindListeners()
+        bindViewModel()
+        viewModel.onEvent(ViewCreated)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -67,95 +64,73 @@ class SearchPlantNameFragment : BaseFragment() {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    @ObsoleteCoroutinesApi
-    @ExperimentalCoroutinesApi
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_filter -> {
             PlantNameFilterOptionsDialog().apply {
                 arguments = bundleOf(
-                        plantNameFilterOptionsKey to viewModel.searchFilterOptions.filterFlags)
+                        plantNameFilterOptionsKey to viewModel.viewState.value?.searchFilterOptions?.filterFlags)
                 onApplyFilters = { filterOptions: SearchFilterOptions ->
-                    sharedPrefs.put(sharedPrefsFilterFlags to filterOptions.filterFlags)
-                    viewModel.searchFilterOptions = filterOptions
-                    updateSearchResults()
+                    viewModel.onEvent(SearchFilterSelected(filterOptions))
                 }
-
             }.show(this.fragmentManager!!,"tag")
             true
         }
         else -> super.onOptionsItemSelected(item)
     }
 
-    override fun onStop() {
-        super.onStop()
-        searchJob?.cancel()
-    }
-
-    @ObsoleteCoroutinesApi
-    @ExperimentalCoroutinesApi
-    private fun initRecyclerView() {
-        recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-        plantNameAdapter = PlantNameAdapter(true, ::onClickItem, ::onClickStar, appContext)
-        recyclerView.adapter = plantNameAdapter
-        updateSearchResults()
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    private fun onClickItem(index: Int, result: SearchResult) {
-        if (result.hasTag(COMMON))
-            viewModel.vernacularId = result.id
-        else if (result.hasTag(SCIENTIFIC))
-            viewModel.taxonId = result.id
-        if (result.hasTag(STARRED))
-            viewModel.updateStarredTimestamp(result)
-        navigateToNext()
-    }
-
-    private fun onClickStar(result: SearchResult) { viewModel.updateIsStarred(result) }
-
-    @ObsoleteCoroutinesApi
-    @ExperimentalCoroutinesApi
-    private fun bindListeners() {
-        searchEditText.onTextChanged(::onSearchEditTextChanged)
-        clearButton.setOnClickListener { searchEditText.text.clear() }
-        downloadButton.setOnClickListener(::onSkipPressed)
-    }
-
-    @ObsoleteCoroutinesApi
-    @ExperimentalCoroutinesApi
-    private fun onSearchEditTextChanged(editText: String) {
-        if (viewModel.searchText == editText)
-            return
-        searchJob?.cancel()
-        viewModel.searchText = editText
-        updateSearchResults()
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    private fun onSkipPressed(view: View) {
-        Lg.d("NewPlantFragment: onSkipPressed()")
-        navigateToNext()
+    private fun render(viewState: ViewState) {
+        noResultsText.isVisible = viewState.isNoResultsTextVisible
+        loadingSpinner.isVisible = viewState.isLoadingSpinnerVisible
     }
 
     @ExperimentalCoroutinesApi
     @ObsoleteCoroutinesApi
-    private fun updateSearchResults() {
-        noResultsText.isVisible = false
-        searchJob = lifecycleScope.launch {
-            delay(300)
-            progressBar.isVisible = true
-            viewModel.searchPlantName(viewModel.searchText).consumeEach {
-                plantNameAdapter.items = it
+    private fun perform(action: ViewAction) {
+        when (action) {
+            is InitView -> {
+                Lg.d("InitView")
+                initRecyclerView()
+                loadSharedPrefs()
+                bindListeners()
+            }
+            is UpdateSharedPrefs -> sharedPrefs.put(sharedPrefsFilterFlags to action.searchFilterOptions.filterFlags)
+            is UpdateSearchResults -> {
+                Lg.d("UpdateResults")
+                plantNameAdapter.items = action.searchResults
                 plantNameAdapter.notifyDataSetChanged()
             }
+            is ClearSearchText -> searchEditText.setText("")
+            is NavigateToNext -> navigateToNext()
         }
-        searchJob?.invokeOnCompletion { completionError ->
-            if (completionError != null) // Coroutine did not complete
-                return@invokeOnCompletion
-            progressBar.isVisible = false
-            if (recyclerView.adapter?.itemCount == 0)
-                noResultsText.isVisible = true
-        }
+    }
+
+    private fun initRecyclerView() {
+        recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+        plantNameAdapter = PlantNameAdapter(
+                isSelectable = true,
+                onClickItem = { _, result: SearchResult -> viewModel.onEvent(ResultClicked(result)) },
+                onClickStar = { result: SearchResult -> viewModel.onEvent(StarClicked(result)) },
+                context= appContext
+        )
+        recyclerView.adapter = plantNameAdapter
+    }
+
+    private fun loadSharedPrefs() {
+        val searchFilterOptions = SearchFilterOptions(sharedPrefs.get(sharedPrefsFilterFlags, defaultFilterFlags))
+        viewModel.onEvent(SearchFilterSelected(searchFilterOptions))
+    }
+
+    @ObsoleteCoroutinesApi
+    @ExperimentalCoroutinesApi
+    private fun bindViewModel() {
+        viewModel.viewState.observe(this) { render(it) }
+        viewModel.viewAction.observe(this) { perform(it) }
+    }
+
+    private fun bindListeners() {
+        searchEditText.onTextChanged { editText -> viewModel.onEvent(SearchEditTextChanged(editText)) }
+        clearButton.setOnClickListener { viewModel.onEvent(ClearSearchClicked) }
+        skipButton.setOnClickListener { viewModel.onEvent(SkipClicked) }
     }
 
     private fun navigateToNext() = navigateTo(R.id.action_searchPlantName_to_newPlantName, createBundle())
