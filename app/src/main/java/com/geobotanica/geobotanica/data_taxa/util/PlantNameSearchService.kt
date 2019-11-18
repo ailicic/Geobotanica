@@ -8,10 +8,10 @@ import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.measureTimeMillis
@@ -69,12 +69,12 @@ class PlantNameSearchService @Inject constructor (
         PlantNameSearch(fun0 = taxonRepo::fromVernacularId, tagList = listOf(SCIENTIFIC))
     )
 
-    @ExperimentalCoroutinesApi
+    @Suppress("EXPERIMENTAL_API_USAGE") // For flowOn(Dispatchers.Default)
     fun search(
         searchText: String,
         filterOptions: SearchFilterOptions = SearchFilterOptions(),
         isSuggestionsSearch: Boolean = false // If true, Taxon/Vernacular id is passed in searchText
-    ): ReceiveChannel<List<SearchResult>> = produce {
+    ): Flow<List<SearchResult>> = flow {
         val words = searchText.split(' ').filter { it.isNotBlank() }
         val wordCount = words.size
         Lg.d("Search words: $words")
@@ -96,7 +96,7 @@ class PlantNameSearchService @Inject constructor (
                 aggregateResultIds.addAll(results)
                 aggregateResults.addAll(uniqueIds.map { mapIdToSearchResult(it, search) })
 
-                send(aggregateResults
+                emit(aggregateResults
                     .map {
                         if (mergeTagsOnIds.contains(it.id)) {
                             it.mergeTags(search.tags)
@@ -110,16 +110,13 @@ class PlantNameSearchService @Inject constructor (
             }
             Lg.d("${search.functionName}: ${aggregateResults.size} hits ($time ms)")
         }
-        close()
-    }
+    }.flowOn(Dispatchers.Default)
 
-    @ExperimentalCoroutinesApi
-    fun searchSuggestedCommonNames(taxonId: Long): ReceiveChannel<List<SearchResult>> =
+    fun searchSuggestedCommonNames(taxonId: Long): Flow<List<SearchResult>> =
         search(taxonId.toString(), SearchFilterOptions(SCIENTIFIC.flag), true)
 
 
-    @ExperimentalCoroutinesApi
-    fun searchSuggestedScientificNames(vernacularId: Long): ReceiveChannel<List<SearchResult>> =
+    fun searchSuggestedScientificNames(vernacularId: Long): Flow<List<SearchResult>> =
         search(vernacularId.toString(), SearchFilterOptions(COMMON.flag), true)
 
     private fun getLimit(filteredResults: List<SearchResult>) =
@@ -136,6 +133,7 @@ class PlantNameSearchService @Inject constructor (
     }
 
     // TODO: Why is fun0/fun1/fun2 not detected as suspending?
+    @Suppress("RedundantSuspendModifier")
     private suspend fun getSearchResults(
             words: List<String>,
             search: PlantNameSearch,

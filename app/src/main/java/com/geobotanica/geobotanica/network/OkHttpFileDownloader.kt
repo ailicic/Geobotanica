@@ -31,7 +31,6 @@ class OkHttpFileDownloader@Inject constructor(
 }
 
 //    @Suppress("RemoveExplicitTypeArguments")
-//    @ExperimentalCoroutinesApi
 //    suspend fun get(onlineFile: OnlineFile, scope: CoroutineScope) = scope.produce<DownloadStatus>(coroutineContext) {
 //        if (!storageHelper.isStorageAvailable(onlineFile)) {
 //            send(DownloadStatus(error = NO_STORAGE))
@@ -41,7 +40,6 @@ class OkHttpFileDownloader@Inject constructor(
 //            download(onlineFile, channel)
 //    }
 //
-//    @ExperimentalCoroutinesApi
 //    private suspend fun download(onlineFile: OnlineFile, channel: SendChannel<DownloadStatus>) {
 //        Lg.i("FileDownloader: Starting download...")
 //

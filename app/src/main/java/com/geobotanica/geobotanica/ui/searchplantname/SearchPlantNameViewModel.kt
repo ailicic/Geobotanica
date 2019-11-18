@@ -13,8 +13,10 @@ import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchR
 import com.geobotanica.geobotanica.ui.searchplantname.ViewAction.*
 import com.geobotanica.geobotanica.ui.searchplantname.ViewEvent.*
 import com.geobotanica.geobotanica.util.SingleLiveEvent
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -42,8 +44,6 @@ class SearchPlantNameViewModel @Inject constructor (
         searchJob?.cancel()
     }
 
-    @ObsoleteCoroutinesApi
-    @ExperimentalCoroutinesApi
     fun onEvent(event: ViewEvent) {
         when (event) {
             is ViewCreated -> {
@@ -90,14 +90,12 @@ class SearchPlantNameViewModel @Inject constructor (
         }
     }
 
-    @ExperimentalCoroutinesApi
-    @ObsoleteCoroutinesApi
     private fun updateSearchResults() {
         updateViewState(isNoResultsTextVisible = false)
         searchJob = viewModelScope.launch {
             delay(300)
             updateViewState(isLoadingSpinnerVisible = true)
-            plantNameSearchService.search(_viewState.value!!.searchEditText, _viewState.value!!.searchFilterOptions).consumeEach {
+            plantNameSearchService.search(_viewState.value!!.searchEditText, _viewState.value!!.searchFilterOptions).collect {
                 triggerViewAction(UpdateSearchResults(it))
             }
         }

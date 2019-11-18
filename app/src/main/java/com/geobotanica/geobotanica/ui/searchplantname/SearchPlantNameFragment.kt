@@ -19,13 +19,9 @@ import com.geobotanica.geobotanica.ui.searchplantname.ViewAction.*
 import com.geobotanica.geobotanica.ui.searchplantname.ViewEvent.*
 import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_search_plant_name.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import javax.inject.Inject
 
-// TODO: Remove these annotations
-@ObsoleteCoroutinesApi
-@ExperimentalCoroutinesApi
+
 class SearchPlantNameFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<SearchPlantNameViewModel>
     private lateinit var viewModel: SearchPlantNameViewModel
@@ -50,8 +46,6 @@ class SearchPlantNameFragment : BaseFragment() {
         return inflater.inflate(R.layout.fragment_search_plant_name, container, false)
     }
 
-    @ExperimentalCoroutinesApi
-    @ObsoleteCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -83,8 +77,6 @@ class SearchPlantNameFragment : BaseFragment() {
         loadingSpinner.isVisible = viewState.isLoadingSpinnerVisible
     }
 
-    @ExperimentalCoroutinesApi
-    @ObsoleteCoroutinesApi
     private fun perform(action: ViewAction) {
         when (action) {
             is InitView -> {
@@ -120,8 +112,6 @@ class SearchPlantNameFragment : BaseFragment() {
         viewModel.onEvent(SearchFilterSelected(searchFilterOptions))
     }
 
-    @ObsoleteCoroutinesApi
-    @ExperimentalCoroutinesApi
     private fun bindViewModel() {
         viewModel.viewState.observe(this) { render(it) }
         viewModel.viewAction.observe(this) { perform(it) }

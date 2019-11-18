@@ -19,8 +19,8 @@ import com.geobotanica.geobotanica.ui.searchplantname.PlantNameAdapter
 import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_new_plant_name.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
 
 
@@ -61,8 +61,6 @@ class NewPlantNameFragment : BaseFragment() {
         return inflater.inflate(R.layout.fragment_new_plant_name, container, false)
     }
 
-    @ObsoleteCoroutinesApi
-    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -88,22 +86,20 @@ class NewPlantNameFragment : BaseFragment() {
         recyclerView.adapter = plantNamesAdapter
     }
 
-    @ObsoleteCoroutinesApi
-    @ExperimentalCoroutinesApi
     private fun loadPlantNames() {
         with (viewModel) {
             loadNamesJob = lifecycleScope.launch {
                 delay(resources.getInteger(R.integer.fragmentAnimTime).toLong())
                 loadNamesFromIds()
 
-                val suggestedNamesChannel: ReceiveChannel<List<SearchResult>>? =
+                val suggestedNamesChannel: Flow<List<SearchResult>>? =
                         when {
                             vernacularId != null -> searchSuggestedScientificNames(vernacularId!!)
                             taxonId != null -> searchSuggestedCommonNames(taxonId!!)
                             else -> null
                         }
 
-                suggestedNamesChannel?.consumeEach { results ->
+                suggestedNamesChannel?.collect { results ->
                     plantNamesAdapter.items = results
                     plantNamesAdapter.notifyDataSetChanged()
                 }

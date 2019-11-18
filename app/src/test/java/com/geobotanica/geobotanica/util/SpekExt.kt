@@ -2,10 +2,7 @@ package com.geobotanica.geobotanica.util
 
 import androidx.arch.core.executor.ArchTaskExecutor
 import androidx.arch.core.executor.TaskExecutor
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.*
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
@@ -13,6 +10,8 @@ import kotlinx.coroutines.test.setMain
 import org.spekframework.spek2.dsl.LifecycleAware
 import org.spekframework.spek2.dsl.Root
 import org.spekframework.spek2.style.specification.Suite
+import java.lang.Runnable
+import java.util.concurrent.Executors
 
 object SpekExt {
 
@@ -35,11 +34,11 @@ object SpekExt {
     private fun unsetLiveDataDelegate() = ArchTaskExecutor.getInstance().setDelegate(null)
 
 
-    @ExperimentalCoroutinesApi
-    @ObsoleteCoroutinesApi
+    @Suppress("EXPERIMENTAL_API_USAGE")
     fun Suite.allowCoroutines() {
-        val mainThreadSurrogate = newSingleThreadContext("UI thread")
-        Dispatchers.setMain(newSingleThreadContext("UI"))
+//        val mainThreadSurrogate = newSingleThreadContext("UI thread") // DON'T USE THIS -> OBSOLETE
+        val mainThreadSurrogate =  Executors.newSingleThreadExecutor().asCoroutineDispatcher() // Alternate
+        Dispatchers.setMain(mainThreadSurrogate)
 
         afterGroup {
             Dispatchers.resetMain()
@@ -47,7 +46,7 @@ object SpekExt {
         }
     }
 
-    @ExperimentalCoroutinesApi
+    @Suppress("EXPERIMENTAL_API_USAGE")
     fun LifecycleAware.beforeEachBlockingTest(block: suspend TestCoroutineScope.() -> Unit) {
         beforeEachTest {
             runBlockingTest {

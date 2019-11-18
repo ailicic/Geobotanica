@@ -15,13 +15,9 @@ import com.geobotanica.geobotanica.util.SpekExt.allowCoroutines
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
 import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
 import io.mockk.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
-@ObsoleteCoroutinesApi
-@ExperimentalCoroutinesApi
 class MapViewModelTest : Spek({
     allowLiveData()
 

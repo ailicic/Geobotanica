@@ -1,5 +1,6 @@
 package com.geobotanica.geobotanica.ui.newplantname
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geobotanica.geobotanica.data.entity.Plant
@@ -9,8 +10,7 @@ import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -35,6 +35,7 @@ class NewPlantNameViewModel @Inject constructor (
     var lastSelectedId: Long? = null
     var lastSelectedName: String = ""
 
+    @SuppressLint("DefaultLocale")
     suspend fun loadNamesFromIds() = withContext(Dispatchers.IO) {
         commonName = null
         scientificName = null
@@ -42,12 +43,10 @@ class NewPlantNameViewModel @Inject constructor (
         taxonId?.let { scientificName = taxonRepo.get(it)?.scientific?.capitalize() }
     }
 
-    @ExperimentalCoroutinesApi
-    fun searchSuggestedCommonNames(taxonId: Long): ReceiveChannel<List<SearchResult>> =
+    fun searchSuggestedCommonNames(taxonId: Long): Flow<List<SearchResult>> =
         plantNameSearchService.searchSuggestedCommonNames(taxonId)
 
-    @ExperimentalCoroutinesApi
-    fun searchSuggestedScientificNames(vernacularId: Long): ReceiveChannel<List<SearchResult>> =
+    fun searchSuggestedScientificNames(vernacularId: Long): Flow<List<SearchResult>> =
         plantNameSearchService.searchSuggestedScientificNames(vernacularId)
 
     fun updateIsStarred(result: SearchResult) = viewModelScope.launch {
