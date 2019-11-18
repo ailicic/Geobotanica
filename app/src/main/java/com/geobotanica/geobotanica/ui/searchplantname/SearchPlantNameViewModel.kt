@@ -95,7 +95,9 @@ class SearchPlantNameViewModel @Inject constructor (
         searchJob = viewModelScope.launch {
             delay(300)
             updateViewState(isLoadingSpinnerVisible = true)
-            plantNameSearchService.search(_viewState.value!!.searchEditText, _viewState.value!!.searchFilterOptions).collect {
+            val searchEditText = viewState.value!!.searchEditText
+            val searchFilterOptions = viewState.value!!.searchFilterOptions
+            plantNameSearchService.search(searchEditText, searchFilterOptions).collect {
                 triggerViewAction(UpdateSearchResults(it))
             }
         }
