@@ -1,6 +1,7 @@
 package com.geobotanica.geobotanica.ui.searchplantname
 
 import android.content.Context
+import android.graphics.ColorFilter
 import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
@@ -39,8 +40,11 @@ class PlantNameAdapter(
         
         val resources = holder.view.context.resources
         holder.plantName.text = item.plantName
+
+        var typeface = Typeface.NORMAL
         if (item.hasTag(SCIENTIFIC))
-            holder.plantName.setTypeface(null, Typeface.ITALIC)
+            typeface = Typeface.ITALIC
+        holder.plantName.setTypeface(null, typeface)
 
         val plantNameIcon = when {
             item.hasTag(COMMON) -> R.drawable.common_name
@@ -49,6 +53,7 @@ class PlantNameAdapter(
         }
         holder.plantNameIcon.setImageDrawable(resources.getDrawable(plantNameIcon, context.theme))
 
+        holder.plantNameIcon.clearColorFilter()
         @Suppress("DEPRECATION")
         if (plantNameIcon == R.drawable.common_name)
 //            holder.plantNameIcon.setColorFilter(resources.getColor(R.color.colorBrown, context.theme)) // Requires min API 23

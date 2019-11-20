@@ -31,9 +31,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-// TODO: Fix common names being italicized in SearchPlantNameFragment (Test: "ts")
-// TODO: Fix tint on icons in SearchPlantNameFragment (Test: "tc")
-    // -> PROB RELATED TO RECYCLERVIEW RE-USING VIEWS -> RESET TO DEFAULTS
 // TODO: PlantDetailFragment: Show edit location button without overflow button if no measurements are present
 // TODO: Add more tests (PlantNameSearchService could use some)
 // TODO: Login screen (no authentication, just select user with any pw)
