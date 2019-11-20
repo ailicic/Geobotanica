@@ -287,7 +287,13 @@ class MapFragment : BaseFragment() {
 
     private val onNavigateToNewPlant = Observer<Unit> {
         mapView.mapScaleBar.isVisible = false // Prevents crash on fragment anim
-        navigateTo(R.id.action_map_to_newPlantPhoto, bundleOf("userId" to viewModel.userId) )
+        navigateTo(
+                R.id.action_map_to_newPlantPhoto,
+                bundleOf(
+                        userIdKey to viewModel.userId,
+                        newPlantSessionIdKey to System.currentTimeMillis()
+                )
+        )
     }
 
     private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkerData ->

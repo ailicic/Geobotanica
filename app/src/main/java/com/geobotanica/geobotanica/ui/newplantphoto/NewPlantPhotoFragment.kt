@@ -31,6 +31,7 @@ class NewPlantPhotoFragment : BaseFragment() {
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
+            currentSessionId = getFromBundle(newPlantSessionIdKey)
             Lg.d("Fragment args: userId=$userId")
         }
     }
@@ -42,7 +43,7 @@ class NewPlantPhotoFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        deletePhotoIfExists()
+        viewModel.deleteLastPhoto()
         val photoFile = storageHelper.createPhotoFile()
         viewModel.photoUri = photoFile.absolutePath
         startPhotoIntent(photoFile)
@@ -51,14 +52,6 @@ class NewPlantPhotoFragment : BaseFragment() {
     override fun onDestroy() {
         super.onDestroy()
         activity.currentLocation = null // Delete since exiting New Plant flow
-    }
-
-    private fun deletePhotoIfExists() {
-        if (viewModel.photoUri.isNotEmpty()) {
-            Lg.d("Deleting old photo: ${viewModel.photoUri}")
-            Lg.d("Delete photo result = ${File(viewModel.photoUri).delete()}")
-            viewModel.photoUri = ""
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -72,7 +65,7 @@ class NewPlantPhotoFragment : BaseFragment() {
                     }
                     Activity.RESULT_CANCELED -> { // "X" in GUI or back button pressed
                         Lg.d("onActivityResult: RESULT_CANCELED")
-                        deletePhotoIfExists()
+                        viewModel.deleteLastPhoto()
                         navigateBack()
                     }
                     else -> Lg.d("onActivityResult: Unrecognized code")

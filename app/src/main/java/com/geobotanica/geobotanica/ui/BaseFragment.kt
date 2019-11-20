@@ -43,6 +43,7 @@ abstract class BaseFragment : Fragment() {
 
     // NavBundle keys
     protected val userIdKey = "userId"
+    protected val newPlantSessionIdKey = "newPlantSessionId"
     protected val plantIdKey = "plantId"
     protected val plantTypeKey = "photoType"
     protected val taxonIdKey = "taxonId"
