@@ -12,6 +12,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.isActive
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.measureTimeMillis
@@ -84,6 +85,8 @@ class PlantNameSearchService @Inject constructor (
         val searchSequence = getSearchSequence(wordCount, isSuggestionsSearch)
 
         searchSequence.filter { filterOptions.shouldNotFilter(it) }.forEach forEachSearch@ { search ->
+            if (!isActive)
+                return@flow
             if (aggregateResults.size >= DEFAULT_RESULT_LIMIT)
                 return@forEachSearch
 

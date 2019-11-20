@@ -16,7 +16,7 @@ object BaseFragmentExt {
         viewModelFactory: ViewModelFactory<T>,
         inject: T.() -> Unit = { }
     ): T {
-        return ViewModelProviders.of(this, viewModelFactory)
+        return ViewModelProviders.of(activity, viewModelFactory)
             .get(T::class.java)
             .apply { inject() }
     }

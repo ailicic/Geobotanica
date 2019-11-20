@@ -53,6 +53,12 @@ class SearchPlantNameFragment : BaseFragment() {
         viewModel.onEvent(ViewCreated)
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        viewModel.onEvent(OnStart(searchEditText.toTrimmedString()))
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.new_plant_name, menu)
         super.onCreateOptionsMenu(menu, inflater)
@@ -77,18 +83,16 @@ class SearchPlantNameFragment : BaseFragment() {
         loadingSpinner.isVisible = viewState.isLoadingSpinnerVisible
     }
 
-    private fun perform(action: ViewAction) {
-        when (action) {
+    private fun perform(viewAction: ViewAction) {
+        when (viewAction) {
             is InitView -> {
-                Lg.d("InitView")
                 initRecyclerView()
                 loadSharedPrefs()
                 bindListeners()
             }
-            is UpdateSharedPrefs -> sharedPrefs.put(sharedPrefsFilterFlags to action.searchFilterOptions.filterFlags)
+            is UpdateSharedPrefs -> sharedPrefs.put(sharedPrefsFilterFlags to viewAction.searchFilterOptions.filterFlags)
             is UpdateSearchResults -> {
-                Lg.d("UpdateResults")
-                plantNameAdapter.items = action.searchResults
+                plantNameAdapter.items = viewAction.searchResults
                 plantNameAdapter.notifyDataSetChanged()
             }
             is ClearSearchText -> searchEditText.setText("")

@@ -39,11 +39,6 @@ class SearchPlantNameViewModel @Inject constructor (
 
     private var searchJob: Job? = null
 
-    override fun onCleared() {
-        super.onCleared()
-        searchJob?.cancel()
-    }
-
     fun onEvent(event: ViewEvent) {
         when (event) {
             is ViewCreated -> {
@@ -51,6 +46,11 @@ class SearchPlantNameViewModel @Inject constructor (
                 vernacularId = null
                 triggerViewAction(InitView)
                 _viewState.value = ViewState()
+            }
+            is OnStart -> {
+                val searchEditText = event.searchEditText
+                updateViewState(searchEditText = searchEditText)
+                updateSearchResults()
             }
             is SearchFilterSelected -> {
                 val searchFilterOptions = event.searchFilterOptions
@@ -74,10 +74,9 @@ class SearchPlantNameViewModel @Inject constructor (
             }
             is StarClicked -> updateIsStarred(event.searchResult)
             is SearchEditTextChanged -> {
-                val editText = event.editText
+                val editText = event.searchEditText
                 if (viewState.value?.searchEditText == editText)
                     return
-                searchJob?.cancel()
                 updateViewState(searchEditText = editText)
                 updateSearchResults()
             }
@@ -92,6 +91,7 @@ class SearchPlantNameViewModel @Inject constructor (
 
     private fun updateSearchResults() {
         updateViewState(isNoResultsTextVisible = false)
+        searchJob?.cancel()
         searchJob = viewModelScope.launch {
             delay(300)
             updateViewState(isLoadingSpinnerVisible = true)
@@ -147,10 +147,11 @@ class SearchPlantNameViewModel @Inject constructor (
 
 sealed class ViewEvent {
     object ViewCreated : ViewEvent()
+    data class OnStart(val searchEditText: String) : ViewEvent()
     data class SearchFilterSelected(val searchFilterOptions: SearchFilterOptions) : ViewEvent()
     data class ResultClicked(val searchResult: SearchResult) : ViewEvent()
     data class StarClicked(val searchResult: SearchResult) : ViewEvent()
-    data class SearchEditTextChanged(val editText: String) : ViewEvent()
+    data class SearchEditTextChanged(val searchEditText: String) : ViewEvent()
     object ClearSearchClicked : ViewEvent()
     object SkipClicked : ViewEvent()
 }
