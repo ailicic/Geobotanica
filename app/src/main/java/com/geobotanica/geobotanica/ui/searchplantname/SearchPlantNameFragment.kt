@@ -60,7 +60,7 @@ class SearchPlantNameFragment : BaseFragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.new_plant_name, menu)
+        inflater.inflate(R.menu.menu_new_plant_name, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 

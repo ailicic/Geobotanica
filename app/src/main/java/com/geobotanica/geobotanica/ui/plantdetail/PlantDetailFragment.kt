@@ -4,9 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
@@ -49,6 +47,11 @@ class PlantDetailFragment : BaseFragment() {
         activity.applicationComponent.inject(this)
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         viewModel = getViewModel(viewModelFactory) {
             plantId = getFromBundle(plantIdKey)
@@ -72,6 +75,21 @@ class PlantDetailFragment : BaseFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         viewModel.onDestroyFragment()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.menu_plant_detail, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_add_measurement-> {
+                onClickAddMeasurements(null)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -175,7 +193,7 @@ class PlantDetailFragment : BaseFragment() {
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun onClickAddMeasurements(view: View) {
+    private fun onClickAddMeasurements(view: View?) {
         with(viewModel) {
             InputMeasurementsDialog(
                     R.string.add_plant_measurements,

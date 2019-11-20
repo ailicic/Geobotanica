@@ -31,7 +31,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-// TODO: PlantDetailFragment: Show edit location button without overflow button if no measurements are present
 // TODO: Add more tests (PlantNameSearchService could use some)
 // TODO: Login screen (no authentication, just select user with any pw)
 // TODO: Request all permissions in separate screen before map (prob after login/splash screen for ux)

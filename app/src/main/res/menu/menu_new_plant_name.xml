@@ -2,6 +2,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_filter"
+        android:orderInCategory="1"
         android:icon="@drawable/ic_filter_list"
         android:title="@string/action_settings"
         app:showAsAction="ifRoom" />
