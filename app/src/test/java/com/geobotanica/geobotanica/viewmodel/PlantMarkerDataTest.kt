@@ -8,7 +8,7 @@ import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import org.threeten.bp.OffsetDateTime
 
-class PlantMarkerDataTest : Spek({
+object PlantMarkerDataTest : Spek({
     describe("Converted from PlantMarkerComposite") {
 
         val plantComposite = PlantComposite().apply {

@@ -32,7 +32,7 @@ class SearchPlantNameViewModel @Inject constructor (
     var vernacularId: Long? = null
 
     private val _viewState = MutableLiveData<ViewState>()
-    val viewState: LiveData<ViewState> = _viewState
+    val viewState: LiveData<ViewState> = _viewState.apply { value = ViewState() }
 
     private val _viewAction = SingleLiveEvent<ViewAction>()
     val viewAction: LiveData<ViewAction> = _viewAction
@@ -59,7 +59,6 @@ class SearchPlantNameViewModel @Inject constructor (
                     updateViewState(searchFilterOptions = searchFilterOptions)
                     updateSearchResults()
                 }
-
             }
             is ResultClicked -> {
                 val result = event.searchResult

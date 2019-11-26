@@ -2,7 +2,8 @@ package com.geobotanica.geobotanica.util
 
 import androidx.arch.core.executor.ArchTaskExecutor
 import androidx.arch.core.executor.TaskExecutor
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
@@ -10,7 +11,6 @@ import kotlinx.coroutines.test.setMain
 import org.spekframework.spek2.dsl.LifecycleAware
 import org.spekframework.spek2.dsl.Root
 import org.spekframework.spek2.style.specification.Suite
-import java.lang.Runnable
 import java.util.concurrent.Executors
 
 object SpekExt {
@@ -20,7 +20,7 @@ object SpekExt {
      */
     fun Root.allowLiveData() {
         setLiveDataDelegate()
-        afterGroup { unsetLiveDataDelegate() }
+//        afterGroup { unsetLiveDataDelegate() }
     }
 
     private fun setLiveDataDelegate() {
@@ -37,8 +37,11 @@ object SpekExt {
     @Suppress("EXPERIMENTAL_API_USAGE")
     fun Suite.allowCoroutines() {
 //        val mainThreadSurrogate = newSingleThreadContext("UI thread") // DON'T USE THIS -> OBSOLETE
-        val mainThreadSurrogate =  Executors.newSingleThreadExecutor().asCoroutineDispatcher() // Alternate
-        Dispatchers.setMain(mainThreadSurrogate)
+        val mainThreadSurrogate = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+
+        beforeGroup {
+            Dispatchers.setMain(mainThreadSurrogate)
+        }
 
         afterGroup {
             Dispatchers.resetMain()

@@ -18,7 +18,7 @@ import io.mockk.*
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
-class MapViewModelTest : Spek({
+object MapViewModelTest : Spek({
     allowLiveData()
 
     val gpsRequiredSnackbarObserver = mockk<Observer<Unit>>(relaxed = true)
@@ -33,16 +33,18 @@ class MapViewModelTest : Spek({
     val assetRepo = mockk<AssetRepo>()
     val locationService = mockk<LocationService>(relaxed = true)
 
-    val mapViewModel = MapViewModel(mockk(), mockk(), assetRepo, mockk(), mockk(), locationService).apply {
-        wasGpsSubscribed = true
-        showGpsRequiredSnackbar.observeForever(gpsRequiredSnackbarObserver)
-        showPlantNamesMissingSnackbar.observeForever(plantNamesMissingSnackbarObserver)
-        gpsFabIcon.observeForever(gpsFabIconObserver)
-        updateLocationPrecisionMarker.observeForever(locationPrecisionMarkerObserver)
-        updateLocationMarker.observeForever(locationMarkerObserver)
-        centerMap.observeForever(centerMapObserver)
-        redrawMapLayers.observeForever(redrawMapLayersObserver)
-        navigateToNewPlant.observeForever(navigateToNewPlantObserver)
+    val mapViewModel by memoized {
+        MapViewModel(mockk(), mockk(), assetRepo, mockk(), mockk(), locationService).apply {
+            wasGpsSubscribed = true
+            showGpsRequiredSnackbar.observeForever(gpsRequiredSnackbarObserver)
+            showPlantNamesMissingSnackbar.observeForever(plantNamesMissingSnackbarObserver)
+            gpsFabIcon.observeForever(gpsFabIconObserver)
+            updateLocationPrecisionMarker.observeForever(locationPrecisionMarkerObserver)
+            updateLocationMarker.observeForever(locationMarkerObserver)
+            centerMap.observeForever(centerMapObserver)
+            redrawMapLayers.observeForever(redrawMapLayersObserver)
+            navigateToNewPlant.observeForever(navigateToNewPlantObserver)
+        }
     }
 
 
