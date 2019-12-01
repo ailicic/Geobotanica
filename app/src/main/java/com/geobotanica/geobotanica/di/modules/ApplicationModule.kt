@@ -6,6 +6,8 @@ import android.content.SharedPreferences
 import android.location.LocationManager
 import android.preference.PreferenceManager
 import com.geobotanica.geobotanica.ui.MainActivity
+import com.geobotanica.geobotanica.util.DefaultDispatchers
+import com.geobotanica.geobotanica.util.GbDispatchers
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
@@ -29,6 +31,8 @@ class ApplicationModule(private val appContext: Context, private val activity: M
 
     @Provides @Singleton fun provideOkHttpClient(): OkHttpClient = OkHttpClient()
     @Provides @Singleton fun provideMoshi(): Moshi = Moshi.Builder().build()
+
+    @Provides @Singleton fun provideDispatchers(): GbDispatchers = DefaultDispatchers()
 
 //     Not required due to constructor injection:
 //    @Provides @Singleton fun provideLocationService(locationManager: LocationManager) = LocationService(locationManager)

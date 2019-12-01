@@ -11,15 +11,16 @@ import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOW
 import com.geobotanica.geobotanica.ui.map.MapViewModel
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_FIX
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_OFF
-import com.geobotanica.geobotanica.util.SpekExt.allowCoroutines
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
 import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
+import com.geobotanica.geobotanica.util.SpekExt.setupTestDispatchers
 import io.mockk.*
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
 object MapViewModelTest : Spek({
     allowLiveData()
+    setupTestDispatchers()
 
     val gpsRequiredSnackbarObserver = mockk<Observer<Unit>>(relaxed = true)
     val plantNamesMissingSnackbarObserver = mockk<Observer<Unit>>(relaxed = true)
@@ -198,7 +199,6 @@ object MapViewModelTest : Spek({
     }
 
     describe("New Plant FAB Click") {
-        allowCoroutines()
 
         context("When GPS disabled") {
             beforeEachBlockingTest {

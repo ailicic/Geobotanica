@@ -12,16 +12,16 @@ import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchF
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
 import com.geobotanica.geobotanica.ui.searchplantname.ViewAction.*
 import com.geobotanica.geobotanica.ui.searchplantname.ViewEvent.*
+import com.geobotanica.geobotanica.util.GbDispatchers
 import com.geobotanica.geobotanica.util.SingleLiveEvent
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class SearchPlantNameViewModel @Inject constructor (
+    private val dispatchers: GbDispatchers,
     private val taxonRepo: TaxonRepo,
     private val vernacularRepo: VernacularRepo,
     private val plantNameSearchService: PlantNameSearchService
@@ -91,7 +91,7 @@ class SearchPlantNameViewModel @Inject constructor (
     private fun updateSearchResults() {
         updateViewState(isNoResultsTextVisible = false)
         searchJob?.cancel()
-        searchJob = viewModelScope.launch {
+        searchJob = viewModelScope.launch(dispatchers.main) {
             delay(300)
             updateViewState(isLoadingSpinnerVisible = true)
             val searchEditText = viewState.value!!.searchEditText
@@ -110,14 +110,14 @@ class SearchPlantNameViewModel @Inject constructor (
         }
     }
 
-    private fun updateIsStarred(result: SearchResult) = viewModelScope.launch {
+    private fun updateIsStarred(result: SearchResult) = viewModelScope.launch(dispatchers.io) {
         when {
             result.hasTag(COMMON) -> vernacularRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
             result.hasTag(SCIENTIFIC) -> taxonRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
         }
     }
 
-    private fun updateStarredTimestamp(result: SearchResult) = viewModelScope.launch {
+    private fun updateStarredTimestamp(result: SearchResult) = viewModelScope.launch(dispatchers.io) {
         when {
             result.hasTag(COMMON) -> vernacularRepo.updateTagTimestamp(result.id, STARRED)
             result.hasTag(SCIENTIFIC) -> taxonRepo.updateTagTimestamp(result.id, STARRED)

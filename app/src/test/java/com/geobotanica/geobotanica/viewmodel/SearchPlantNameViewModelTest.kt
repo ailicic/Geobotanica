@@ -11,19 +11,18 @@ import com.geobotanica.geobotanica.ui.searchplantname.ViewAction
 import com.geobotanica.geobotanica.ui.searchplantname.ViewAction.*
 import com.geobotanica.geobotanica.ui.searchplantname.ViewEvent.*
 import com.geobotanica.geobotanica.ui.searchplantname.ViewState
-import com.geobotanica.geobotanica.util.SpekExt.allowCoroutines
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
 import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
+import com.geobotanica.geobotanica.util.SpekExt.setupTestDispatchers
 import io.mockk.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
-@ExperimentalCoroutinesApi
 object SearchPlantNameViewModelTest : Spek({
     allowLiveData()
+    val testDispatchers = setupTestDispatchers()
 
     val viewStateObserver = mockk<Observer<ViewState>>(relaxed = true)
     val viewActionObserver = mockk<Observer<ViewAction>>(relaxed = true)
@@ -33,7 +32,7 @@ object SearchPlantNameViewModelTest : Spek({
     val plantNameSearchService = mockk<PlantNameSearchService>()
 
     val searchPlantNameViewModel by memoized {
-        SearchPlantNameViewModel(taxonRepo, vernacularRepo, plantNameSearchService).apply {
+        SearchPlantNameViewModel(testDispatchers, taxonRepo, vernacularRepo, plantNameSearchService).apply {
             viewState.observeForever(viewStateObserver)
             viewAction.observeForever(viewActionObserver)
         }
@@ -63,17 +62,14 @@ object SearchPlantNameViewModelTest : Spek({
     }
 
     describe("OnStart Event") {
-        allowCoroutines()
 
         val searchResults = listOf(
                         SearchResult(1L, 2, 4, "name"),
                         SearchResult(8L, 16, 32, "name"))
 
-        beforeEachBlockingTest {
+        beforeEachBlockingTest(testDispatchers) {
             every { plantNameSearchService.search("string") } returns flowOf(searchResults)
             searchPlantNameViewModel.onEvent(OnStart("string"))
-//            advanceTimeBy(300) // Fails
-            Thread.sleep(300) // TODO: Get rid of this
         }
 
         it("Should emit correct ViewStates/ViewActions") {
@@ -87,7 +83,6 @@ object SearchPlantNameViewModelTest : Spek({
     }
 
     describe("SearchFilterSelected Event") {
-        allowCoroutines()
         val searchFilterOptions = PlantNameSearchService.SearchFilterOptions.fromBooleans(
                 isCommonFiltered = true,
                 isScientificFiltered = false,
@@ -95,11 +90,9 @@ object SearchPlantNameViewModelTest : Spek({
                 isUsedFiltered = false)
         val searchResults: List<SearchResult> = emptyList()
 
-        beforeEachBlockingTest {
+        beforeEachBlockingTest(testDispatchers) {
             every { plantNameSearchService.search(any(), any()) } returns flowOf(searchResults)
             searchPlantNameViewModel.onEvent(SearchFilterSelected(searchFilterOptions))
-//            advanceTimeBy(300) // Fails
-            Thread.sleep(300) // TODO: Get rid of this
         }
 
         it("Should emit correct ViewStates/ViewActions") {
@@ -139,7 +132,6 @@ object SearchPlantNameViewModelTest : Spek({
         }
 
         context("When result has STARRED tag") {
-            allowCoroutines()
             beforeEachTest { searchResult.toggleTag(STARRED) }
 
             context("When result has COMMON tag") {
@@ -173,7 +165,6 @@ object SearchPlantNameViewModelTest : Spek({
     }
 
     describe("StarClicked Event") {
-        allowCoroutines()
         val searchResult by memoized {
             SearchResult(1L, 0, 0, "name").apply { toggleTag(STARRED) }
         }
@@ -202,12 +193,9 @@ object SearchPlantNameViewModelTest : Spek({
     }
 
     describe("SearchEditTextChanged Event") {
-        allowCoroutines()
 
-        beforeEachBlockingTest {
+        beforeEachBlockingTest(testDispatchers) {
             searchPlantNameViewModel.onEvent(SearchEditTextChanged("string"))
-//            advanceTimeBy(300) // Fails
-            Thread.sleep(300) // TODO: Get rid of this
         }
 
         it("Should emit correct ViewStates/ViewActions") {

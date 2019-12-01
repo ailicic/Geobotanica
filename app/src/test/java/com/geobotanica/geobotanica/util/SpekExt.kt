@@ -3,15 +3,10 @@ package com.geobotanica.geobotanica.util
 import androidx.arch.core.executor.ArchTaskExecutor
 import androidx.arch.core.executor.TaskExecutor
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.*
 import org.spekframework.spek2.dsl.LifecycleAware
 import org.spekframework.spek2.dsl.Root
-import org.spekframework.spek2.style.specification.Suite
-import java.util.concurrent.Executors
 
 object SpekExt {
 
@@ -33,28 +28,39 @@ object SpekExt {
 
     private fun unsetLiveDataDelegate() = ArchTaskExecutor.getInstance().setDelegate(null)
 
-
     @Suppress("EXPERIMENTAL_API_USAGE")
-    fun Suite.allowCoroutines() {
-//        val mainThreadSurrogate = newSingleThreadContext("UI thread") // DON'T USE THIS -> OBSOLETE
-        val mainThreadSurrogate = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    fun Root.setupTestDispatchers(): TestDispatchers {
+        val testDispatchers = TestDispatchers() // IMPORTANT: Pass this into runBlockingTest() if test launches a coroutine with delay() to auto-advance
 
         beforeGroup {
-            Dispatchers.setMain(mainThreadSurrogate)
+            Dispatchers.setMain(testDispatchers.main)
         }
 
         afterGroup {
             Dispatchers.resetMain()
-            mainThreadSurrogate.close()
+            testDispatchers.main.cleanupTestCoroutines()
         }
+        return testDispatchers
     }
 
     @Suppress("EXPERIMENTAL_API_USAGE")
-    fun LifecycleAware.beforeEachBlockingTest(block: suspend TestCoroutineScope.() -> Unit) {
+    fun LifecycleAware.beforeEachBlockingTest(
+            testDispatchers: TestDispatchers = TestDispatchers(),
+            block: suspend TestCoroutineScope.() -> Unit
+    ) {
         beforeEachTest {
-            runBlockingTest {
+            testDispatchers.main.runBlockingTest {
                 block()
             }
         }
+    }
+
+    class TestDispatchers : GbDispatchers {
+        @ExperimentalCoroutinesApi private val testCoroutineDispatcher = TestCoroutineDispatcher()
+
+        @ExperimentalCoroutinesApi override val main = testCoroutineDispatcher
+        @ExperimentalCoroutinesApi override val default = testCoroutineDispatcher
+        @ExperimentalCoroutinesApi override val io = testCoroutineDispatcher
+        @ExperimentalCoroutinesApi override val unconfined = testCoroutineDispatcher
     }
 }

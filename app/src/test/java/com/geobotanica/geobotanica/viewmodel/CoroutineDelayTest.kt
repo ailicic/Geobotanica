@@ -1,28 +1,34 @@
 package com.geobotanica.geobotanica.viewmodel
 
+import com.geobotanica.geobotanica.util.GbDispatchers
+import com.geobotanica.geobotanica.util.SpekExt.setupTestDispatchers
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runBlockingTest
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import org.spekframework.spek2.style.specification.xdescribe
 
 @ExperimentalCoroutinesApi
 object CoroutineDelayTest : Spek({
+    val testDispatchers = setupTestDispatchers()
 
     val dependency = mockk<SomeDependency>(relaxed = true)
-    val foo by memoized { SomeClass(dependency) }
+    val foo by memoized { SomeClass(testDispatchers, dependency) }
 
     beforeEachTest {
         clearMocks(dependency, answers = false)
     }
 
-    xdescribe("SomeClass") {
+    describe("SomeClass") {
+
         context("suspendFun without delay") {
             beforeEachTest {
-                runBlockingTest { foo.suspendFun(false) }
+                testDispatchers.main.runBlockingTest { foo.suspendFun(false) }
             }
 
             it("Should call") {
@@ -32,7 +38,7 @@ object CoroutineDelayTest : Spek({
 
         context("suspendFun with delay") {
             beforeEachTest {
-                runBlockingTest { foo.suspendFun(true) }
+                testDispatchers.main.runBlockingTest { foo.suspendFun(true) }
             }
 
             it("Should call") {
@@ -42,7 +48,7 @@ object CoroutineDelayTest : Spek({
 
         context("launchFun without delay") {
             beforeEachTest {
-                runBlockingTest { foo.launchFun(false) }
+                testDispatchers.main.runBlockingTest { foo.launchFun(false) }
             }
 
             it("Should call") {
@@ -56,7 +62,7 @@ object CoroutineDelayTest : Spek({
                 beforeEachTest {
                     println("beforeEachTest thread = ${Thread.currentThread().name}")
 
-                    runBlockingTest {
+                    testDispatchers.main.runBlockingTest {
                         println("runBlockingTest thread = ${Thread.currentThread().name}")
                         foo.launchFun(true)
                         advanceTimeBy(200)
@@ -71,8 +77,10 @@ object CoroutineDelayTest : Spek({
 
             context("Test with Thread.sleep()") {
                 beforeEachTest {
-                    foo.launchFun(true)
-                    Thread.sleep(200)
+                    testDispatchers.main.runBlockingTest {
+                        foo.launchFun(true)
+                        Thread.sleep(200)
+                    }
                 }
 
                 it("Should call") {
@@ -83,7 +91,7 @@ object CoroutineDelayTest : Spek({
     }
 })
 
-class SomeClass(val dependency: SomeDependency) {
+class SomeClass(private val dispatchers: GbDispatchers, val dependency: SomeDependency) {
 
     suspend fun suspendFun(withDelay: Boolean) {
         if (withDelay)
@@ -91,7 +99,7 @@ class SomeClass(val dependency: SomeDependency) {
         dependency.call()
     }
 
-    fun launchFun(withDelay: Boolean) = GlobalScope.launch {
+    fun launchFun(withDelay: Boolean) = GlobalScope.launch(dispatchers.main) {
         if (withDelay)
             delay(100)
         dependency.call()
