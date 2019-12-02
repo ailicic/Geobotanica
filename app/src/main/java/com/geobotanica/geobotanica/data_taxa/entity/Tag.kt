@@ -39,5 +39,5 @@ enum class PlantNameTag(val flag: Int) {
     COMMON(     0b0000_0001),
     SCIENTIFIC( 0b0000_0010),
     STARRED(    0b0000_0100),
-    USED(       0b0000_1000);
+    USED(       0b0000_1000)
 }

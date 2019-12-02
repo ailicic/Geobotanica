@@ -25,7 +25,7 @@ data class Taxon(
     @PrimaryKey(autoGenerate = true) var id: Long = 0L
 
     val scientific: String
-        get() = "$generic $epithet"
+        get() = if(epithet != null) "$generic $epithet" else "$generic"
 
     enum class Kingdom {
         PLANTS, FUNGI;

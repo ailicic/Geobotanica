@@ -92,6 +92,7 @@ class SearchPlantNameFragment : BaseFragment() {
             }
             is UpdateSharedPrefs -> sharedPrefs.put(sharedPrefsFilterFlags to viewAction.searchFilterOptions.filterFlags)
             is UpdateSearchResults -> {
+                plantNameAdapter.showStars = viewAction.showStars
                 plantNameAdapter.items = viewAction.searchResults
                 plantNameAdapter.notifyDataSetChanged()
             }
@@ -103,7 +104,6 @@ class SearchPlantNameFragment : BaseFragment() {
     private fun initRecyclerView() {
         recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
         plantNameAdapter = PlantNameAdapter(
-                isSelectable = true,
                 onClickItem = { _, result: SearchResult -> viewModel.onEvent(ResultClicked(result)) },
                 onClickStar = { result: SearchResult -> viewModel.onEvent(StarClicked(result)) },
                 context= appContext

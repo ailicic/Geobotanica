@@ -75,7 +75,7 @@ class PlantNameSearchService @Inject constructor(
         val wordCount = words.size
         Lg.d("Search words: $words")
 
-        val aggregateResultIds = mutableListOf<Long>()
+        val aggregateResultIds = mutableSetOf<Long>()
         val aggregateResults = mutableListOf<SearchResult>()
         val searchSequence = getSearchSequence(wordCount, isSuggestionsSearch)
 
@@ -94,16 +94,19 @@ class PlantNameSearchService @Inject constructor(
 
                 aggregateResultIds.addAll(results)
 
-                @Suppress("ConvertCallChainIntoSequence")
                 val newResults = uniqueIds
                         .map { mapIdToSearchResult(it, search) }
                         .filter { filterOptions.shouldNotFilter(it) }
                         .distinctBy { it.plantName }
-                        .map { if (mergeTagsOnIds.contains(it.id)) it.mergeTags(search.tags) else it }
-                        .sortedByDescending { it.tagCount() }
 
-                aggregateResults.addAll(newResults)
-                emit(aggregateResults)
+                with(aggregateResults) {
+                    forEachIndexed { index, it ->
+                        if (mergeTagsOnIds.contains(it.id))
+                            aggregateResults[index] = it.mergeTags(search.tags)
+                    }
+                    addAll(newResults)
+                    emit(this.sortedByDescending { it.tagCount() })
+                }
             }
             Lg.d("${search.functionName}: ${aggregateResults.size} hits ($time ms)")
         }
@@ -184,6 +187,7 @@ class PlantNameSearchService @Inject constructor(
         fun hasTag(tag: PlantNameTag): Boolean = tags and tag.flag != 0
         fun toggleTag(tag: PlantNameTag) { tags = tags xor tag.flag }
         fun mergeTags(newTags: Int): SearchResult = apply { tags = tags or newTags }
+        fun withoutTag(tag: PlantNameTag): SearchResult = copy(tags = tags and tag.flag.inv())
         fun tagCount(): Int {
             var temp = tags
             var count = 0
@@ -198,7 +202,7 @@ class PlantNameSearchService @Inject constructor(
 
     data class SearchFilterOptions(val filterFlags: Int = defaultFilterFlags) {
         fun hasFilter(filterOption: PlantNameTag) = filterOption.flag and filterFlags != 0
-        fun shouldNotFilter(search: PlantNameSearch) = (search.tags and (COMMON.flag or SCIENTIFIC.flag)) and filterFlags == 0
+        fun shouldNotFilter(search: PlantNameSearch) = search.tags and filterFlags == 0
         fun shouldNotFilter(searchResult: SearchResult) = searchResult.tags and filterFlags == 0
 
         companion object {

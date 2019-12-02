@@ -1,7 +1,6 @@
 package com.geobotanica.geobotanica.ui.searchplantname
 
 import android.content.Context
-import android.graphics.ColorFilter
 import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
@@ -19,15 +18,16 @@ import kotlinx.android.synthetic.main.plant_name_list_item.view.*
 
 
 class PlantNameAdapter(
-        var isSelectable: Boolean = false,
         private val onClickItem: (Int, SearchResult) -> Unit,
         private val onClickStar: (SearchResult) -> Unit,
         private val context: Context
-
 ) : RecyclerView.Adapter<PlantNameAdapter.ViewHolder>() {
 
     var items: List<SearchResult> = emptyList()
     var selectedIndex:Int = RecyclerView.NO_POSITION
+
+    var showStars: Boolean = true
+    var isSelectable: Boolean = true
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -80,11 +80,21 @@ class PlantNameAdapter(
         }
 
         holder.historyIcon.isVisible = item.hasTag(USED)
+        holder.starredIcon.isVisible = showStars
 
-        val star = resources.getDrawable(R.drawable.ic_star, context.theme)
-        val starBorder = resources.getDrawable(R.drawable.ic_star_border, context.theme)
-        val starIcon = if (item.hasTag(STARRED)) star else starBorder
-        holder.starredIcon.setImageDrawable(starIcon)
+        if (showStars) {
+            val star = resources.getDrawable(R.drawable.ic_star, context.theme)
+            val starBorder = resources.getDrawable(R.drawable.ic_star_border, context.theme)
+            val starIcon = if (item.hasTag(STARRED)) star else starBorder
+            holder.starredIcon.setImageDrawable(starIcon)
+
+            holder.starredIcon.setOnClickListener {
+                item.toggleTag(STARRED)
+                val drawable = if (item.hasTag(STARRED)) star else starBorder
+                holder.starredIcon.setImageDrawable(drawable)
+                onClickStar(item)
+            }
+        }
 
         @Suppress("DEPRECATION")
         if (isSelectable && position == selectedIndex)
@@ -99,13 +109,6 @@ class PlantNameAdapter(
                 notifyItemChanged(selectedIndex)
             }
             onClickItem(position, item)
-        }
-
-        holder.starredIcon.setOnClickListener {
-            item.toggleTag(STARRED)
-            val drawable = if (item.hasTag(STARRED)) star else starBorder
-            holder.starredIcon.setImageDrawable(drawable)
-            onClickStar(item)
         }
     }
 

@@ -44,8 +44,8 @@ class SearchPlantNameViewModel @Inject constructor (
             is ViewCreated -> {
                 taxonId = null
                 vernacularId = null
-                triggerViewAction(InitView)
                 _viewState.value = ViewState()
+                triggerViewAction(InitView)
             }
             is OnStart -> {
                 val searchEditText = event.searchEditText
@@ -96,8 +96,9 @@ class SearchPlantNameViewModel @Inject constructor (
             updateViewState(isLoadingSpinnerVisible = true)
             val searchEditText = viewState.value!!.searchEditText
             val searchFilterOptions = viewState.value!!.searchFilterOptions
+            val showStars = ! searchFilterOptions.hasFilter(STARRED)
             plantNameSearchService.search(searchEditText, searchFilterOptions).collect {
-                triggerViewAction(UpdateSearchResults(it))
+                triggerViewAction(UpdateSearchResults(it, showStars))
             }
         }
         searchJob?.invokeOnCompletion { completionError ->
@@ -158,7 +159,7 @@ sealed class ViewEvent {
 
 sealed class ViewAction {
     object InitView : ViewAction()
-    data class UpdateSearchResults(val searchResults: List<SearchResult>) : ViewAction()
+    data class UpdateSearchResults(val searchResults: List<SearchResult>, val showStars: Boolean = true) : ViewAction()
     object ClearSearchText : ViewAction()
     data class UpdateSharedPrefs(val searchFilterOptions: SearchFilterOptions) : ViewAction()
     object NavigateToNext : ViewAction()
