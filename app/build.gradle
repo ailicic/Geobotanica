@@ -35,8 +35,8 @@ android {
         sourceCompatibility = "8"
     }
 
-    kotlinOptions { // TODO: Added to fix WorkManager compile issues. Remove in future?
-        jvmTarget = "1.8"
+    kotlinOptions {
+        jvmTarget = "1.8" // Required to prevent compilation issues with WorkManager
     }
 
     testOptions {
@@ -56,8 +56,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation "androidx.activity:activity-ktx:1.1.0-rc02"
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta3'
-    implementation "androidx.recyclerview:recyclerview:1.0.0"
-    implementation "androidx.viewpager2:viewpager2:1.0.0-rc01"
+    implementation "androidx.recyclerview:recyclerview:1.1.0"
+    implementation "androidx.viewpager2:viewpager2:1.0.0"
     implementation 'com.google.android.material:material:1.0.0'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
@@ -97,7 +97,7 @@ dependencies {
     implementation "com.caverock:androidsvg:1.3"
 
     // Room
-    def room_version = "2.2.1"
+    def room_version = "2.2.2"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version" // Suspendable DAO queries
@@ -107,7 +107,6 @@ dependencies {
     def lifecycle_version = "2.1.0"
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version" // ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.2.0-rc02" // liveData { } coroutine builder
-//    testImplementation "androidx.arch.core:core-testing:$lifecycle_version" // Test helpers for LiveData
 
     // KTX
     implementation "androidx.core:core-ktx:1.1.0"

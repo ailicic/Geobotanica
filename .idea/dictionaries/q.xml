@@ -3,11 +3,13 @@
     <words>
       <w>bitflags</w>
       <w>coroutine</w>
+      <w>coroutines</w>
       <w>deduplicator</w>
       <w>geobotanica</w>
       <w>geolocations</w>
       <w>geolocator</w>
       <w>infraspecific</w>
+      <w>kluent</w>
       <w>moshi</w>
       <w>okio</w>
       <w>snackbar</w>
