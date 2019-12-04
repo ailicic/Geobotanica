@@ -15,7 +15,7 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.plantNameFilterOptionsKey
-import com.geobotanica.geobotanica.ui.searchplantname.ViewAction.*
+import com.geobotanica.geobotanica.ui.searchplantname.ViewEffect.*
 import com.geobotanica.geobotanica.ui.searchplantname.ViewEvent.*
 import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_search_plant_name.*
@@ -79,21 +79,23 @@ class SearchPlantNameFragment : BaseFragment() {
     }
 
     private fun render(viewState: ViewState) {
+        Lg.v("render()")
         noResultsText.isVisible = viewState.isNoResultsTextVisible
         loadingSpinner.isVisible = viewState.isLoadingSpinnerVisible
     }
 
-    private fun perform(viewAction: ViewAction) {
-        when (viewAction) {
+    private fun execute(viewEffect: ViewEffect) {
+        Lg.v("execute()")
+        return when (viewEffect) {
             is InitView -> {
                 initRecyclerView()
                 loadSharedPrefs()
                 bindListeners()
             }
-            is UpdateSharedPrefs -> sharedPrefs.put(sharedPrefsFilterFlags to viewAction.searchFilterOptions.filterFlags)
+            is UpdateSharedPrefs -> sharedPrefs.put(sharedPrefsFilterFlags to viewEffect.searchFilterOptions.filterFlags)
             is UpdateSearchResults -> {
-                plantNameAdapter.showStars = viewAction.showStars
-                plantNameAdapter.items = viewAction.searchResults
+                plantNameAdapter.showStars = viewEffect.showStars
+                plantNameAdapter.items = viewEffect.searchResults
                 plantNameAdapter.notifyDataSetChanged()
             }
             is ClearSearchText -> searchEditText.setText("")
@@ -117,8 +119,8 @@ class SearchPlantNameFragment : BaseFragment() {
     }
 
     private fun bindViewModel() {
-        viewModel.viewState.observe(this) { render(it) }
-        viewModel.viewAction.observe(this) { perform(it) }
+        viewModel.viewState.observe(viewLifecycleOwner) { render(it) }
+        viewModel.viewEffect.observe(viewLifecycleOwner) { execute(it) }
     }
 
     private fun bindListeners() {

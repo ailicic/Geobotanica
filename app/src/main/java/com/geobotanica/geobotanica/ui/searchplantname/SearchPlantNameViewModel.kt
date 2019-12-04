@@ -10,9 +10,10 @@ import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchFilterOptions
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
-import com.geobotanica.geobotanica.ui.searchplantname.ViewAction.*
+import com.geobotanica.geobotanica.ui.searchplantname.ViewEffect.*
 import com.geobotanica.geobotanica.ui.searchplantname.ViewEvent.*
 import com.geobotanica.geobotanica.util.GbDispatchers
+import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
@@ -31,61 +32,65 @@ class SearchPlantNameViewModel @Inject constructor (
     var taxonId: Long? = null
     var vernacularId: Long? = null
 
-    private val _viewState = MutableLiveData<ViewState>()
-    val viewState: LiveData<ViewState> = _viewState.apply { value = ViewState() }
+    private val _viewState = MutableLiveData<ViewState>().apply { value = ViewState() }
+    val viewState: LiveData<ViewState> = _viewState
 
-    private val _viewAction = SingleLiveEvent<ViewAction>()
-    val viewAction: LiveData<ViewAction> = _viewAction
+    private val _viewEffect = SingleLiveEvent<ViewEffect>()
+    val viewEffect: LiveData<ViewEffect> = _viewEffect
 
     private var searchJob: Job? = null
 
-    fun onEvent(event: ViewEvent) {
-        when (event) {
-            is ViewCreated -> {
-                taxonId = null
-                vernacularId = null
-                _viewState.value = ViewState()
-                triggerViewAction(InitView)
-            }
-            is OnStart -> {
-                val searchEditText = event.searchEditText
-                updateViewState(searchEditText = searchEditText)
+    fun onEvent(event: ViewEvent) = when (event) {
+        is ViewCreated -> {
+            Lg.v("onEvent(ViewCreated)")
+            taxonId = null
+            vernacularId = null
+            _viewState.value = ViewState()
+            triggerViewEffect(InitView)
+        }
+        is OnStart -> {
+            Lg.v("onEvent(OnStart)")
+            val searchEditText = event.searchEditText
+            updateViewState(searchEditText = searchEditText)
+            updateSearchResults()
+        }
+        is SearchFilterSelected -> {
+            Lg.v("onEvent(SearchFilterSelected)")
+            val searchFilterOptions = event.searchFilterOptions
+            if (searchFilterOptions.filterFlags != viewState.value?.searchFilterOptions?.filterFlags) {
+                triggerViewEffect(UpdateSharedPrefs(searchFilterOptions))
+                updateViewState(searchFilterOptions = searchFilterOptions)
                 updateSearchResults()
             }
-            is SearchFilterSelected -> {
-                val searchFilterOptions = event.searchFilterOptions
-                if (searchFilterOptions.filterFlags != viewState.value?.searchFilterOptions?.filterFlags) {
-                    triggerViewAction(UpdateSharedPrefs(searchFilterOptions))
-                    updateViewState(searchFilterOptions = searchFilterOptions)
-                    updateSearchResults()
-                }
-            }
-            is ResultClicked -> {
-                val result = event.searchResult
-                if (result.hasTag(COMMON))
-                    vernacularId = result.id
-                else if (result.hasTag(SCIENTIFIC))
-                    taxonId = result.id
-                if (result.hasTag(STARRED))
-                    updateStarredTimestamp(result)
-                triggerViewAction(NavigateToNext)
-
-            }
-            is StarClicked -> updateIsStarred(event.searchResult)
-            is SearchEditTextChanged -> {
-                val editText = event.searchEditText
-                if (viewState.value?.searchEditText == editText)
-                    return
+            Unit
+        }
+        is ResultClicked -> {
+            Lg.v("onEvent(ResultClicked)")
+            val result = event.searchResult
+            if (result.hasTag(COMMON))
+                vernacularId = result.id
+            else if (result.hasTag(SCIENTIFIC))
+                taxonId = result.id
+            if (result.hasTag(STARRED))
+                updateStarredTimestamp(result)
+            triggerViewEffect(NavigateToNext)
+        }
+        is StarClicked -> { updateIsStarred(event.searchResult); Unit }
+        is SearchEditTextChanged -> {
+            Lg.v("onEvent(SearchEditTextChanged)")
+            val editText = event.searchEditText
+            if (viewState.value?.searchEditText != editText) {
                 updateViewState(searchEditText = editText)
                 updateSearchResults()
             }
-            is ClearSearchClicked -> {
-                taxonId = null
-                vernacularId = null
-                triggerViewAction(ClearSearchText)
-            }
-            is SkipClicked -> triggerViewAction(NavigateToNext)
+            Unit
         }
+        is ClearSearchClicked -> {
+            taxonId = null
+            vernacularId = null
+            triggerViewEffect(ClearSearchText)
+        }
+        is SkipClicked -> triggerViewEffect(NavigateToNext)
     }
 
     private fun updateSearchResults() {
@@ -98,7 +103,7 @@ class SearchPlantNameViewModel @Inject constructor (
             val searchFilterOptions = viewState.value!!.searchFilterOptions
             val showStars = ! searchFilterOptions.hasFilter(STARRED)
             plantNameSearchService.search(searchEditText, searchFilterOptions).collect {
-                triggerViewAction(UpdateSearchResults(it, showStars))
+                triggerViewEffect(UpdateSearchResults(it, showStars))
             }
         }
         searchJob?.invokeOnCompletion { completionError ->
@@ -126,24 +131,33 @@ class SearchPlantNameViewModel @Inject constructor (
     }
 
     private fun updateViewState(
-            isNoResultsTextVisible: Boolean? = null,
-            isLoadingSpinnerVisible: Boolean? = null,
-            searchFilterOptions: SearchFilterOptions? = null,
-            searchEditText: String? = null,
-            searchResults: List<SearchResult>? = null
+            isNoResultsTextVisible: Boolean = viewState.value?.isNoResultsTextVisible ?: false,
+            isLoadingSpinnerVisible: Boolean = viewState.value?.isLoadingSpinnerVisible ?: false,
+            searchFilterOptions: SearchFilterOptions = viewState.value?.searchFilterOptions ?: SearchFilterOptions(),
+            searchEditText: String = viewState.value?.searchEditText ?: "",
+            searchResults: List<SearchResult> = viewState.value?.searchResults ?: emptyList()
     ) {
-        isNoResultsTextVisible?.let { _viewState.value = viewState.value?.copy(isNoResultsTextVisible = isNoResultsTextVisible) }
-        isLoadingSpinnerVisible?.let { _viewState.value = viewState.value?.copy(isLoadingSpinnerVisible = isLoadingSpinnerVisible) }
-        searchFilterOptions?.let { _viewState.value = viewState.value?.copy(searchFilterOptions = searchFilterOptions) }
-        searchEditText?.let { _viewState.value = viewState.value?.copy(searchEditText = searchEditText) }
-        searchResults?.let { _viewState.value = viewState.value?.copy(searchResults = searchResults) }
+        _viewState.value = viewState.value?.copy(
+                isNoResultsTextVisible = isNoResultsTextVisible,
+                isLoadingSpinnerVisible = isLoadingSpinnerVisible,
+                searchFilterOptions = searchFilterOptions,
+                searchEditText = searchEditText,
+                searchResults = searchResults
+        )
     }
 
-    private fun triggerViewAction(viewAction: ViewAction) {
-        _viewAction.value = viewAction
+    private fun triggerViewEffect(viewEffect: ViewEffect) {
+        _viewEffect.value = viewEffect
     }
 }
 
+data class ViewState(
+        val isNoResultsTextVisible: Boolean = false,
+        val isLoadingSpinnerVisible: Boolean = false,
+        val searchFilterOptions: SearchFilterOptions = SearchFilterOptions(), // Not used in render()
+        val searchEditText: String = "", // Not used in render()
+        val searchResults: List<SearchResult> = emptyList() // Not used in render()
+)
 
 sealed class ViewEvent {
     object ViewCreated : ViewEvent()
@@ -157,18 +171,10 @@ sealed class ViewEvent {
 }
 
 
-sealed class ViewAction {
-    object InitView : ViewAction()
-    data class UpdateSearchResults(val searchResults: List<SearchResult>, val showStars: Boolean = true) : ViewAction()
-    object ClearSearchText : ViewAction()
-    data class UpdateSharedPrefs(val searchFilterOptions: SearchFilterOptions) : ViewAction()
-    object NavigateToNext : ViewAction()
+sealed class ViewEffect {
+    object InitView : ViewEffect()
+    data class UpdateSearchResults(val searchResults: List<SearchResult>, val showStars: Boolean = true) : ViewEffect()
+    object ClearSearchText : ViewEffect()
+    data class UpdateSharedPrefs(val searchFilterOptions: SearchFilterOptions) : ViewEffect()
+    object NavigateToNext : ViewEffect()
 }
-
-data class ViewState(
-        val isNoResultsTextVisible: Boolean = false,
-        val isLoadingSpinnerVisible: Boolean = false,
-        val searchFilterOptions: SearchFilterOptions = SearchFilterOptions(), // Not used in render()
-        val searchEditText: String = "", // Not used in render()
-        val searchResults: List<SearchResult> = emptyList() // Not used in render()
-)

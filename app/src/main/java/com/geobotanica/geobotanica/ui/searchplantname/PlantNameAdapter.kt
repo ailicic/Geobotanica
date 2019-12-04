@@ -24,10 +24,11 @@ class PlantNameAdapter(
 ) : RecyclerView.Adapter<PlantNameAdapter.ViewHolder>() {
 
     var items: List<SearchResult> = emptyList()
-    var selectedIndex:Int = RecyclerView.NO_POSITION
+
+    var lastSelectedIndex:Int = RecyclerView.NO_POSITION
+    var isLastSelectedShown: Boolean = true // If true, last selected item will have darker background
 
     var showStars: Boolean = true
-    var isSelectable: Boolean = true
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -97,19 +98,12 @@ class PlantNameAdapter(
         }
 
         @Suppress("DEPRECATION")
-        if (isSelectable && position == selectedIndex)
+        if (isLastSelectedShown && position == lastSelectedIndex)
             holder.constraintLayout.setBackgroundColor(resources.getColor(R.color.colorLightGrey))
         else
             holder.constraintLayout.setBackgroundColor(resources.getColor(R.color.colorWhite))
 
-        holder.view.setOnClickListener {
-            if (isSelectable) {
-                notifyItemChanged(selectedIndex)
-                selectedIndex = position
-                notifyItemChanged(selectedIndex)
-            }
-            onClickItem(position, item)
-        }
+        holder.view.setOnClickListener { onClickItem(position, item) }
     }
 
     override fun getItemCount(): Int = items.size

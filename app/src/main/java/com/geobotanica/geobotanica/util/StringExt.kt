@@ -1,5 +1,9 @@
 package com.geobotanica.geobotanica.util
 
+import android.annotation.SuppressLint
+import java.util.*
+
+@SuppressLint("DefaultLocale")
 fun String.capitalizeWords(): String = split(" ").joinToString(" ") { it.capitalize() }
 
 fun String.replacePrefix(oldPrefix: String, newPrefix: String): String {
@@ -9,4 +13,6 @@ fun String.replacePrefix(oldPrefix: String, newPrefix: String): String {
         this
 }
 
-fun String?.formatAsMapFilename() = this?.toLowerCase()?.replace(' ', '-')
+fun String?.nullIfBlank(): String? = if (isNullOrBlank()) null else this
+
+fun String?.formatAsMapFilename() = this?.toLowerCase(Locale.US)?.replace(' ', '-')

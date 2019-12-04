@@ -260,3 +260,4 @@ class TaxonBag {
     private fun getByName(name: String) = taxa.first { it.generic == name.capitalize() }
 }
 
+fun SearchResult.withoutTag(tag: PlantNameTag): SearchResult = copy(tags = tags and tag.flag.inv())

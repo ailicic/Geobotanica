@@ -187,7 +187,6 @@ class PlantNameSearchService @Inject constructor(
         fun hasTag(tag: PlantNameTag): Boolean = tags and tag.flag != 0
         fun toggleTag(tag: PlantNameTag) { tags = tags xor tag.flag }
         fun mergeTags(newTags: Int): SearchResult = apply { tags = tags or newTags }
-        fun withoutTag(tag: PlantNameTag): SearchResult = copy(tags = tags and tag.flag.inv())
         fun tagCount(): Int {
             var temp = tags
             var count = 0

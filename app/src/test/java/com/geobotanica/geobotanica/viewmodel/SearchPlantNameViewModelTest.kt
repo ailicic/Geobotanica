@@ -7,8 +7,8 @@ import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
 import com.geobotanica.geobotanica.ui.searchplantname.SearchPlantNameViewModel
-import com.geobotanica.geobotanica.ui.searchplantname.ViewAction
-import com.geobotanica.geobotanica.ui.searchplantname.ViewAction.*
+import com.geobotanica.geobotanica.ui.searchplantname.ViewEffect
+import com.geobotanica.geobotanica.ui.searchplantname.ViewEffect.*
 import com.geobotanica.geobotanica.ui.searchplantname.ViewEvent.*
 import com.geobotanica.geobotanica.ui.searchplantname.ViewState
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
@@ -25,7 +25,7 @@ object SearchPlantNameViewModelTest : Spek({
     val testDispatchers = setupTestDispatchers()
 
     val viewStateObserver = mockk<Observer<ViewState>>(relaxed = true)
-    val viewActionObserver = mockk<Observer<ViewAction>>(relaxed = true)
+    val viewActionObserver = mockk<Observer<ViewEffect>>(relaxed = true)
 
     val taxonRepo = mockk<TaxonRepo>(relaxed = true)
     val vernacularRepo = mockk<VernacularRepo>(relaxed = true)
@@ -34,7 +34,7 @@ object SearchPlantNameViewModelTest : Spek({
     val searchPlantNameViewModel by memoized {
         SearchPlantNameViewModel(testDispatchers, taxonRepo, vernacularRepo, plantNameSearchService).apply {
             viewState.observeForever(viewStateObserver)
-            viewAction.observeForever(viewActionObserver)
+            viewEffect.observeForever(viewActionObserver)
         }
     }
 
