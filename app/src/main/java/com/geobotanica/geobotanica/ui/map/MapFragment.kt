@@ -31,7 +31,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-// TODO: Fix crash on nav back during text anim in SearchPlantName
 // TODO: Add more tests (PlantNameSearchService could use some)
 // TODO: Login screen (no authentication, just select user with any pw)
 // TODO: Request all permissions in separate screen before map (prob after login/splash screen for ux)

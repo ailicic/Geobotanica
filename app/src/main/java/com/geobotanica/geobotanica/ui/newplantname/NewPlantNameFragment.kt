@@ -18,12 +18,15 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.*
-import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.NavViewEffect.*
+import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.NavViewEffect.NavigateToNewPlantMeasurement
+import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.NavViewEffect.NavigateToNewPlantType
 import com.geobotanica.geobotanica.ui.newplantname.ViewEvent.*
 import com.geobotanica.geobotanica.ui.searchplantname.PlantNameAdapter
 import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_new_plant_name.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -151,12 +154,12 @@ class NewPlantNameFragment : BaseFragment() {
         unbindTextListeners()
         animateTextJob = lifecycleScope.launch {
             for (i in 1..string.length) {
+                delay(30)
                 editText.setText(string.substring(0, i))
                 editText.setSelection(i)
-                delay(30)
             }
         }
-        animateTextJob?.invokeOnCompletion { bindTextListeners() }
+        animateTextJob?.invokeOnSuccess { bindTextListeners() }
     }
 
     private fun onClickStar(result: SearchResult) = viewModel.onEvent(StarClicked(result))

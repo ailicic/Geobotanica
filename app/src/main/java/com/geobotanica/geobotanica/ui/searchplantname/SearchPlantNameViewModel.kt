@@ -15,6 +15,7 @@ import com.geobotanica.geobotanica.ui.searchplantname.ViewEvent.*
 import com.geobotanica.geobotanica.util.GbDispatchers
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
+import com.geobotanica.geobotanica.util.invokeOnSuccess
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
@@ -106,9 +107,7 @@ class SearchPlantNameViewModel @Inject constructor (
                 triggerViewEffect(UpdateSearchResults(it, showStars))
             }
         }
-        searchJob?.invokeOnCompletion { completionError ->
-            if (completionError != null) // Coroutine did not complete
-                return@invokeOnCompletion
+        searchJob?.invokeOnSuccess {
             updateViewState(isLoadingSpinnerVisible = false)
 
             if(viewState.value!!.searchResults.isEmpty())
