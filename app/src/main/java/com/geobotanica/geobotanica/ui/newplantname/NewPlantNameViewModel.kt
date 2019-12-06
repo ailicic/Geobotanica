@@ -14,10 +14,11 @@ import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
 import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.*
+import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.NavViewEffect.*
 import com.geobotanica.geobotanica.ui.newplantname.ViewEvent.*
+import com.geobotanica.geobotanica.util.GbDispatchers
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -28,17 +29,12 @@ import javax.inject.Singleton
 
 @Singleton
 class NewPlantNameViewModel @Inject constructor (
+        private val dispatchers: GbDispatchers,
         private val appContext: Context,
         private val taxonRepo: TaxonRepo,
         private val vernacularRepo: VernacularRepo,
         private val plantNameSearchService: PlantNameSearchService
 ): ViewModel() {
-    var userId = 0L
-    var photoUri: String = ""
-
-    var taxonId: Long? = null
-    var vernacularId: Long? = null
-    var plantTypes: Int? = null
 
     private val _viewState = MutableLiveData<ViewState>().apply { value = ViewState() }
     val viewState: LiveData<ViewState> = _viewState
@@ -46,29 +42,38 @@ class NewPlantNameViewModel @Inject constructor (
     private val _viewEffect = SingleLiveEvent<ViewEffect>()
     val viewEffect: LiveData<ViewEffect> = _viewEffect
 
+    // Bundle data
+    private var userId = 0L
+    private var photoUri: String = ""
+    private var taxonId: Long? = null
+    private var vernacularId: Long? = null
 
     fun onEvent(event: ViewEvent) = when (event) {
         is ViewCreated -> {
             Lg.v("onEvent(ViewCreated)")
 
-            vernacularId = event.vernacularId
+            userId = event.userId
+            photoUri = event.photoUri
             taxonId = event.taxonId
+            vernacularId = event.vernacularId
+            Lg.d("Fragment args: userId=$userId, vernId=$vernacularId, taxonId=$taxonId, photoUri=$photoUri")
+
             when {
-                vernacularId != null -> {
-                    updateViewState(
-                            isCommonNameEditable = false,
-                            isScientificNameEditable = true,
-                            scientificName = "",
-                            suggestedText = appContext.resources.getString(R.string.suggested_scientific),
-                            lastClickedResultIndex = null
-                    )
-                }
                 taxonId != null -> {
                     updateViewState(
                             isCommonNameEditable = true,
                             isScientificNameEditable = false,
                             commonName = "",
                             suggestedText = appContext.resources.getString(R.string.suggested_common),
+                            lastClickedResultIndex = null
+                    )
+                }
+                vernacularId != null -> {
+                    updateViewState(
+                            isCommonNameEditable = false,
+                            isScientificNameEditable = true,
+                            scientificName = "",
+                            suggestedText = appContext.resources.getString(R.string.suggested_scientific),
                             lastClickedResultIndex = null
                     )
                 }
@@ -80,20 +85,18 @@ class NewPlantNameViewModel @Inject constructor (
         is CommonEditTextChanged -> {
             Lg.v("onEvent(CommonEditTextChanged)")
             val editText = event.editText
-            val isLastClickedShown = editText == viewState.value?.lastClickedResult?.plantName ?: true
-            updateViewState(commonName = editText, isLastClickedShown = isLastClickedShown)
-            viewState.value?.lastClickedResult?.let {
-                vernacularId = if (editText == it.plantName) it.id else null
-            } ?: Unit
+            val lastClickedResult = viewState.value?.lastClickedResult
+            val isTextSame = editText == lastClickedResult?.plantName ?: true
+            updateViewState(commonName = editText, isLastClickedShown = isTextSame)
+            vernacularId = if (isTextSame) lastClickedResult?.id else null
         }
         is ScientificEditTextChanged -> {
             Lg.v("onEvent(ScientificEditTextChanged)")
             val editText = event.editText
-            val isLastClickedShown = editText == viewState.value?.lastClickedResult?.plantName ?: true
-            updateViewState(scientificName = editText, isLastClickedShown = isLastClickedShown)
-            viewState.value?.lastClickedResult?.let {
-                taxonId = if (editText == it.plantName) it.id else null
-            } ?: Unit
+            val lastClickedResult = viewState.value?.lastClickedResult
+            val isTextSame = editText == lastClickedResult?.plantName ?: true
+            updateViewState(scientificName = editText, isLastClickedShown = isTextSame)
+            taxonId = if (isTextSame) lastClickedResult?.id else null
         }
         is StarClicked -> { updateIsStarred(event.searchResult); Unit }
         is ResultClicked -> {
@@ -125,15 +128,15 @@ class NewPlantNameViewModel @Inject constructor (
         }
         is FabClicked -> {
             Lg.v("onEvent(FabClicked)")
-            if (event.commonNameEditText.isBlank() && event.scientificNameEditText.isBlank()) {
+            if (viewState.value!!.commonName.isBlank() && viewState.value!!.scientificName.isBlank()) {
                 triggerViewEffect(ShowPlantNameSnackbar)
             } else {
-                viewModelScope.launch {
-                    getPlantTypes()
-                    if (! isPlantTypeKnown())
-                        triggerViewEffect(NavigateToNewPlantType)
+                viewModelScope.launch(dispatchers.main) {
+                    val plantTypeFlags = getPlantTypes()
+                    if (! isSinglePlantType(plantTypeFlags))
+                        triggerViewEffect(NavigateToNewPlantType(userId, photoUri, taxonId, vernacularId, plantTypeFlags))
                     else
-                        triggerViewEffect(NavigateToNewPlantMeasurement)
+                        triggerViewEffect(NavigateToNewPlantMeasurement(userId, photoUri, taxonId, vernacularId, plantTypeFlags))
                 }
             }; Unit
         }
@@ -141,45 +144,43 @@ class NewPlantNameViewModel @Inject constructor (
 
     @SuppressLint("DefaultLocale")
     private fun loadPlantNames() {
-        viewModelScope.launch {
-            vernacularId?.let {
-                val commonName = vernacularRepo.get(it)?.vernacular?.capitalize() ?: ""
-                plantNameSearchService.searchSuggestedScientificNames(it).collect { results ->
-                    updateViewState(commonName = commonName, scientificName = "", searchResults = results)
-                }
-            }
+        viewModelScope.launch(dispatchers.main) {
             taxonId?.let {
                 val scientificName = taxonRepo.get(it)?.scientific?.capitalize() ?: ""
                 plantNameSearchService.searchSuggestedCommonNames(it).collect { results ->
                     updateViewState(commonName = "", scientificName = scientificName, searchResults = results)
                 }
             }
+            vernacularId?.let {
+                val commonName = vernacularRepo.get(it)?.vernacular?.capitalize() ?: ""
+                plantNameSearchService.searchSuggestedScientificNames(it).collect { results ->
+                    updateViewState(commonName = commonName, scientificName = "", searchResults = results)
+                }
+            }
             delay(appContext.resources.getInteger(R.integer.fragmentAnimTime).toLong())
         }.invokeOnCompletion { completionError ->
             if (completionError != null) // Coroutine did not complete
                 return@invokeOnCompletion
-            vernacularId?.let { triggerViewEffect(ShowCommonNameAnimation(viewState.value?.commonName!!)) }
             taxonId?.let { triggerViewEffect(ShowScientificNameAnimation(viewState.value?.scientificName!!)) }
+            vernacularId?.let { triggerViewEffect(ShowCommonNameAnimation(viewState.value?.commonName!!)) }
         }
     }
 
-    private fun updateIsStarred(result: SearchResult) = viewModelScope.launch {
+    private fun updateIsStarred(result: SearchResult) = viewModelScope.launch(dispatchers.main) {
         when {
-            result.hasTag(COMMON) -> vernacularRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
             result.hasTag(SCIENTIFIC) -> taxonRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
+            result.hasTag(COMMON) -> vernacularRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
         }
     }
 
-    private suspend fun getPlantTypes() = withContext(Dispatchers.IO) {
-        taxonId?.let { plantTypes = taxonRepo.getTypes(it) } ?:
-                vernacularId?.let { plantTypes = vernacularRepo.getTypes(it) }
+    private suspend fun getPlantTypes(): Int = withContext(dispatchers.io) {
+        var plantTypeFlags = 0
+        taxonId?.let { plantTypeFlags = taxonRepo.getTypes(it) } ?:
+                vernacularId?.let { plantTypeFlags = vernacularRepo.getTypes(it) }
+        plantTypeFlags
     }
 
-    private fun isPlantTypeKnown(): Boolean {
-        return plantTypes?.let {
-            Plant.Type.flagsToList(it).size == 1
-        } ?: false
-    }
+    private fun isSinglePlantType(plantTypeFlags: Int): Boolean = Plant.Type.flagsToList(plantTypeFlags).size == 1
 
     private fun updateViewState(
             isCommonNameEditable: Boolean = viewState.value?.isCommonNameEditable ?: true,
@@ -223,19 +224,43 @@ data class ViewState(
 )
 
 sealed class ViewEvent {
-    data class ViewCreated(val vernacularId: Long?, val taxonId: Long?) : ViewEvent()
+    data class ViewCreated(val userId: Long, val photoUri: String, val taxonId: Long?, val vernacularId: Long?) : ViewEvent()
     data class CommonEditTextChanged(val editText: String) : ViewEvent()
     data class ScientificEditTextChanged(val editText: String) : ViewEvent()
     data class StarClicked(val searchResult: SearchResult) : ViewEvent()
     data class ResultClicked(val index: Int, val searchResult: SearchResult) : ViewEvent()
-    data class FabClicked(val commonNameEditText: String, val scientificNameEditText: String) : ViewEvent()
+    object FabClicked : ViewEvent()
 }
 
 sealed class ViewEffect {
     object InitView : ViewEffect()
     data class ShowCommonNameAnimation(val name: String) : ViewEffect()
     data class ShowScientificNameAnimation(val name: String) : ViewEffect()
-    object NavigateToNewPlantMeasurement : ViewEffect()
-    object NavigateToNewPlantType : ViewEffect()
     object ShowPlantNameSnackbar : ViewEffect()
+
+    sealed class NavViewEffect : BundleData, ViewEffect() {
+        data class NavigateToNewPlantMeasurement(
+                override val userId: Long,
+                override val photoUri: String,
+                override val taxonId: Long?,
+                override val vernacularId: Long?,
+                override val plantTypeFlags: Int
+        ) : NavViewEffect()
+
+        data class NavigateToNewPlantType(
+                override val userId: Long,
+                override val photoUri: String,
+                override val taxonId: Long?,
+                override val vernacularId: Long?,
+                override val plantTypeFlags: Int
+        ) : NavViewEffect()
+    }
+
+    interface BundleData { // Using an interface for NavViewEffect allows overriding in data classes (need equals() )
+        val userId: Long
+        val photoUri: String
+        val vernacularId: Long?
+        val taxonId: Long?
+        val plantTypeFlags: Int
+    }
 }

@@ -22,10 +22,10 @@ import javax.inject.Singleton
 
 @Singleton
 class SearchPlantNameViewModel @Inject constructor (
-    private val dispatchers: GbDispatchers,
-    private val taxonRepo: TaxonRepo,
-    private val vernacularRepo: VernacularRepo,
-    private val plantNameSearchService: PlantNameSearchService
+        private val dispatchers: GbDispatchers,
+        private val taxonRepo: TaxonRepo,
+        private val vernacularRepo: VernacularRepo,
+        private val plantNameSearchService: PlantNameSearchService
 ): ViewModel() {
     var userId = 0L
     var photoUri: String = ""
@@ -67,10 +67,10 @@ class SearchPlantNameViewModel @Inject constructor (
         is ResultClicked -> {
             Lg.v("onEvent(ResultClicked)")
             val result = event.searchResult
-            if (result.hasTag(COMMON))
-                vernacularId = result.id
-            else if (result.hasTag(SCIENTIFIC))
+            if (result.hasTag(SCIENTIFIC))
                 taxonId = result.id
+            else if (result.hasTag(COMMON))
+                vernacularId = result.id
             if (result.hasTag(STARRED))
                 updateStarredTimestamp(result)
             triggerViewEffect(NavigateToNext)
@@ -118,15 +118,15 @@ class SearchPlantNameViewModel @Inject constructor (
 
     private fun updateIsStarred(result: SearchResult) = viewModelScope.launch(dispatchers.io) {
         when {
-            result.hasTag(COMMON) -> vernacularRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
             result.hasTag(SCIENTIFIC) -> taxonRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
+            result.hasTag(COMMON) -> vernacularRepo.setTagged(result.id, STARRED, result.hasTag(STARRED))
         }
     }
 
     private fun updateStarredTimestamp(result: SearchResult) = viewModelScope.launch(dispatchers.io) {
         when {
-            result.hasTag(COMMON) -> vernacularRepo.updateTagTimestamp(result.id, STARRED)
             result.hasTag(SCIENTIFIC) -> taxonRepo.updateTagTimestamp(result.id, STARRED)
+            result.hasTag(COMMON) -> vernacularRepo.updateTagTimestamp(result.id, STARRED)
         }
     }
 
@@ -169,7 +169,6 @@ sealed class ViewEvent {
     object ClearSearchClicked : ViewEvent()
     object SkipClicked : ViewEvent()
 }
-
 
 sealed class ViewEffect {
     object InitView : ViewEffect()

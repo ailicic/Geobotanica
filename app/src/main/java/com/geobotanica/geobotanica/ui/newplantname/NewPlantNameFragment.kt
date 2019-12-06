@@ -18,6 +18,7 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.*
+import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.NavViewEffect.*
 import com.geobotanica.geobotanica.ui.newplantname.ViewEvent.*
 import com.geobotanica.geobotanica.ui.searchplantname.PlantNameAdapter
 import com.geobotanica.geobotanica.util.*
@@ -32,18 +33,15 @@ class NewPlantNameFragment : BaseFragment() {
 
     private var plantNamesAdapter: PlantNameAdapter? = null
 
-    private var commonNameListener: TextWatcher? = null
-    private var scientificNameListener: TextWatcher? = null
+    private lateinit var commonNameListener: TextWatcher
+    private lateinit var scientificNameListener: TextWatcher
     private var animateTextJob: Job? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
-        viewModel = getViewModel(viewModelFactory) {
-            userId = getFromBundle(userIdKey)
-            photoUri = getFromBundle(photoUriKey)
-        }
+        viewModel = getViewModel(viewModelFactory)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -54,10 +52,12 @@ class NewPlantNameFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         bindViewModel()
-        val vernacularId: Long? = getNullableFromBundle(vernacularIdKey)
-        val taxonId: Long? = getNullableFromBundle(taxonIdKey)
-        viewModel.onEvent(ViewCreated(vernacularId, taxonId))
-        Lg.d("Fragment args: userId=${viewModel.userId}, vernId=$vernacularId, taxonId=$taxonId, photoUri=${viewModel.photoUri}")
+        viewModel.onEvent(ViewCreated(
+                getFromBundle(userIdKey),
+                getFromBundle(photoUriKey),
+                getNullableFromBundle(taxonIdKey),
+                getNullableFromBundle(vernacularIdKey)
+        ))
     }
 
     private fun render(viewState: ViewState) {
@@ -99,13 +99,14 @@ class NewPlantNameFragment : BaseFragment() {
             }
             is ShowCommonNameAnimation -> showTypedNameAnimation(viewEffect.name, commonNameEditText)
             is ShowScientificNameAnimation -> showTypedNameAnimation(viewEffect.name, scientificNameEditText)
-            is NavigateToNewPlantMeasurement -> {
+            is NavViewEffect -> {
                 animateTextJob?.cancel()
-                navigateTo(R.id.action_newPlantName_to_newPlantMeasurement, createBundle())
-            }
-            is NavigateToNewPlantType -> {
-                animateTextJob?.cancel()
-                navigateTo(R.id.action_newPlantName_to_newPlantType, createBundle())
+                when (viewEffect) {
+                    is NavigateToNewPlantMeasurement ->
+                        navigateTo(R.id.action_newPlantName_to_newPlantMeasurement, createBundle(viewEffect))
+                    is NavigateToNewPlantType ->
+                        navigateTo(R.id.action_newPlantName_to_newPlantType, createBundle(viewEffect))
+                }
             }
             is ShowPlantNameSnackbar -> showSnackbar("Provide a plant name")
         }
@@ -124,25 +125,23 @@ class NewPlantNameFragment : BaseFragment() {
 
     private fun bindListeners() {
         bindTextListeners()
-        fab.setOnClickListener {
-            viewModel.onEvent(FabClicked(commonNameTextInput.toString(), scientificNameEditText.toString()))
-        }
+        fab.setOnClickListener { viewModel.onEvent(FabClicked) }
     }
 
     private fun bindTextListeners() {
-        commonNameListener = commonNameEditText?.onTextChanged {
+        commonNameListener = commonNameEditText.onTextChanged {
             if (viewModel.viewState.value?.commonName != it)
                 viewModel.onEvent(CommonEditTextChanged(it))
         }
-        scientificNameListener = scientificNameEditText?.onTextChanged {
+        scientificNameListener = scientificNameEditText.onTextChanged {
             if (viewModel.viewState.value?.scientificName != it)
                 viewModel.onEvent(ScientificEditTextChanged(it))
         }
     }
 
     private fun unbindTextListeners() {
-        commonNameEditText?.removeTextChangedListener(commonNameListener)
-        scientificNameEditText?.removeTextChangedListener(scientificNameListener)
+        commonNameEditText.removeTextChangedListener(commonNameListener)
+        scientificNameEditText.removeTextChangedListener(scientificNameListener)
     }
 
     private fun onClickItem(index: Int, result: SearchResult) = viewModel.onEvent(ResultClicked(index, result))
@@ -151,8 +150,8 @@ class NewPlantNameFragment : BaseFragment() {
         animateTextJob?.cancel()
         unbindTextListeners()
         animateTextJob = lifecycleScope.launch {
-            for (i in 1 .. string.length) {
-                editText.setText(string.substring(0,i))
+            for (i in 1..string.length) {
+                editText.setText(string.substring(0, i))
                 editText.setSelection(i)
                 delay(30)
             }
@@ -162,16 +161,16 @@ class NewPlantNameFragment : BaseFragment() {
 
     private fun onClickStar(result: SearchResult) = viewModel.onEvent(StarClicked(result))
 
-    private fun createBundle(): Bundle {
-        with (viewModel) {
+    private fun createBundle(viewEffect: NavViewEffect): Bundle {
+        with(viewModel.viewState.value!!) {
             return bundleOf(
-                    userIdKey to userId,
-                    photoUriKey to photoUri,
-                    commonNameKey to viewState.value?.commonName.nullIfBlank(),
-                    scientificNameKey to viewState.value?.scientificName.nullIfBlank(),
-                    vernacularIdKey to vernacularId,
-                    taxonIdKey to taxonId,
-                    plantTypeKey to plantTypes
+                    userIdKey to viewEffect.userId,
+                    photoUriKey to viewEffect.photoUri,
+                    commonNameKey to commonName.nullIfBlank(),
+                    scientificNameKey to scientificName.nullIfBlank(),
+                    vernacularIdKey to viewEffect.vernacularId,
+                    taxonIdKey to viewEffect.taxonId,
+                    plantTypeKey to viewEffect.plantTypeFlags
             )
         }
     }

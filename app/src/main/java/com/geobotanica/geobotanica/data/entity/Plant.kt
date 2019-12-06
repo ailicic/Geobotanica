@@ -44,12 +44,12 @@ data class Plant(
             val allTypeFlags = values().map { it.flag }.reduce { acc, it -> acc or it }
             val onlyPlantTypeFlags = allTypeFlags xor FUNGUS.flag
 
-            fun fromFlag(flag: Int): Plant.Type = values().toList().first { it.flag and flag != 0 }
+            fun fromFlag(flag: Int): Type = values().toList().first { it.flag and flag != 0 }
 
-            fun flagsToList(plantTypeFlags: Int): List<Plant.Type> {
-                val plantTypeList = mutableListOf<Plant.Type>()
+            fun flagsToList(plantTypeFlags: Int): List<Type> {
+                val plantTypeList = mutableListOf<Type>()
                 values().forEach {
-                    if (plantTypeFlags and it.flag == it.flag)
+                    if (plantTypeFlags and it.flag != 0)
                         plantTypeList.add(it)
                 }
                 return plantTypeList

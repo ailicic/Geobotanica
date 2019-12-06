@@ -25,23 +25,23 @@ object SearchPlantNameViewModelTest : Spek({
     val testDispatchers = setupTestDispatchers()
 
     val viewStateObserver = mockk<Observer<ViewState>>(relaxed = true)
-    val viewActionObserver = mockk<Observer<ViewEffect>>(relaxed = true)
+    val viewEffectObserver = mockk<Observer<ViewEffect>>(relaxed = true)
 
-    val taxonRepo = mockk<TaxonRepo>(relaxed = true)
-    val vernacularRepo = mockk<VernacularRepo>(relaxed = true)
+    val taxonRepo = mockk<TaxonRepo>()
+    val vernacularRepo = mockk<VernacularRepo>()
     val plantNameSearchService = mockk<PlantNameSearchService>()
 
     val searchPlantNameViewModel by memoized {
         SearchPlantNameViewModel(testDispatchers, taxonRepo, vernacularRepo, plantNameSearchService).apply {
             viewState.observeForever(viewStateObserver)
-            viewEffect.observeForever(viewActionObserver)
+            viewEffect.observeForever(viewEffectObserver)
         }
     }
 
     beforeEachTest {
         clearMocks(
                 viewStateObserver,
-                viewActionObserver,
+                viewEffectObserver,
                 taxonRepo,
                 vernacularRepo,
                 plantNameSearchService,
@@ -52,8 +52,8 @@ object SearchPlantNameViewModelTest : Spek({
     describe("ViewCreated Event") {
         beforeEachTest { searchPlantNameViewModel.onEvent(ViewCreated) }
 
-        it("Should emit InitView action once") {
-            verify(exactly = 1) { viewActionObserver.onChanged(InitView) }
+        it("Should emit InitView effect once") {
+            verify(exactly = 1) { viewEffectObserver.onChanged(InitView) }
         }
 
         it("Should emit default ViewState") {
@@ -72,11 +72,11 @@ object SearchPlantNameViewModelTest : Spek({
             searchPlantNameViewModel.onEvent(OnStart("string"))
         }
 
-        it("Should emit correct ViewStates/ViewActions") {
+        it("Should emit correct ViewStates/ViewEffects") {
             verifyOrder {
                 viewStateObserver.onChanged(ViewState(searchEditText = "string"))
                 viewStateObserver.onChanged(ViewState(searchEditText = "string", isLoadingSpinnerVisible = true))
-                viewActionObserver.onChanged(UpdateSearchResults(searchResults))
+                viewEffectObserver.onChanged(UpdateSearchResults(searchResults))
                 viewStateObserver.onChanged(ViewState(searchEditText = "string", isLoadingSpinnerVisible = false))
             }
         }
@@ -95,12 +95,12 @@ object SearchPlantNameViewModelTest : Spek({
             searchPlantNameViewModel.onEvent(SearchFilterSelected(searchFilterOptions))
         }
 
-        it("Should emit correct ViewStates/ViewActions") {
+        it("Should emit correct ViewStates/ViewEffects") {
             verifyOrder {
-                viewActionObserver.onChanged(UpdateSharedPrefs(searchFilterOptions))
+                viewEffectObserver.onChanged(UpdateSharedPrefs(searchFilterOptions))
                 viewStateObserver.onChanged(ViewState(searchFilterOptions = searchFilterOptions))
                 viewStateObserver.onChanged(ViewState(searchFilterOptions = searchFilterOptions, isLoadingSpinnerVisible = true))
-                viewActionObserver.onChanged(UpdateSearchResults(searchResults))
+                viewEffectObserver.onChanged(UpdateSearchResults(searchResults))
                 viewStateObserver.onChanged(ViewState(searchFilterOptions = searchFilterOptions, isLoadingSpinnerVisible = false))
             }
         }
@@ -159,8 +159,8 @@ object SearchPlantNameViewModelTest : Spek({
 
         beforeEachTest { searchPlantNameViewModel.onEvent(ResultClicked(searchResult)) }
 
-        it("Should emit NavigateToNext ViewAction") {
-            verify(exactly = 1) { viewActionObserver.onChanged(NavigateToNext) }
+        it("Should emit NavigateToNext ViewEffect") {
+            verify(exactly = 1) { viewEffectObserver.onChanged(NavigateToNext) }
         }
     }
 
@@ -198,11 +198,11 @@ object SearchPlantNameViewModelTest : Spek({
             searchPlantNameViewModel.onEvent(SearchEditTextChanged("string"))
         }
 
-        it("Should emit correct ViewStates/ViewActions") {
+        it("Should emit correct ViewStates/ViewEffects") {
             verifyOrder {
                 viewStateObserver.onChanged(ViewState(searchEditText = "string"))
                 viewStateObserver.onChanged(ViewState(searchEditText = "string", isLoadingSpinnerVisible = true))
-                viewActionObserver.onChanged(UpdateSearchResults(emptyList()))
+                viewEffectObserver.onChanged(UpdateSearchResults(emptyList()))
                 viewStateObserver.onChanged(ViewState(searchEditText = "string", isLoadingSpinnerVisible = false))
             }
         }
@@ -226,8 +226,8 @@ object SearchPlantNameViewModelTest : Spek({
             searchPlantNameViewModel.onEvent(ClearSearchClicked)
         }
 
-        it("Should emit ClearSearchText ViewAction") {
-            verify(exactly = 1) { viewActionObserver.onChanged(ClearSearchText) }
+        it("Should emit ClearSearchText ViewEffect") {
+            verify(exactly = 1) { viewEffectObserver.onChanged(ClearSearchText) }
         }
 
         it("Should set vernacularId/taxonId to null") {
@@ -239,8 +239,8 @@ object SearchPlantNameViewModelTest : Spek({
     describe("SkipClicked Event") {
         beforeEachTest { searchPlantNameViewModel.onEvent(SkipClicked) }
 
-        it("Should emit NavigateToNext ViewAction") {
-            verify(exactly = 1) { viewActionObserver.onChanged(NavigateToNext) }
+        it("Should emit NavigateToNext ViewEffect") {
+            verify(exactly = 1) { viewEffectObserver.onChanged(NavigateToNext) }
         }
     }
 })
