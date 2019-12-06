@@ -79,7 +79,7 @@ class NewPlantNameViewModel @Inject constructor (
                 }
                 else -> _viewState.value = ViewState()
             }
-            triggerViewEffect(InitView)
+            emitViewEffect(InitView)
             loadPlantNames()
         }
         is CommonEditTextChanged -> {
@@ -112,7 +112,7 @@ class NewPlantNameViewModel @Inject constructor (
                         lastClickedResult = searchResult
                 )
                 if (! isClickedResultSameAsLast) {
-                    triggerViewEffect(ShowCommonNameAnimation(searchResult.plantName))
+                    emitViewEffect(ShowCommonNameAnimation(searchResult.plantName))
                 }
             }
             if (viewState.value!!.isScientificNameEditable) {
@@ -123,20 +123,20 @@ class NewPlantNameViewModel @Inject constructor (
                         lastClickedResult = searchResult
                 )
                 if (! isClickedResultSameAsLast)
-                    triggerViewEffect(ShowScientificNameAnimation(searchResult.plantName))
+                    emitViewEffect(ShowScientificNameAnimation(searchResult.plantName))
             }; Unit
         }
         is FabClicked -> {
             Lg.v("onEvent(FabClicked)")
             if (viewState.value!!.commonName.isBlank() && viewState.value!!.scientificName.isBlank()) {
-                triggerViewEffect(ShowPlantNameSnackbar)
+                emitViewEffect(ShowPlantNameSnackbar)
             } else {
                 viewModelScope.launch(dispatchers.main) {
                     val plantTypeFlags = getPlantTypes()
                     if (! isSinglePlantType(plantTypeFlags))
-                        triggerViewEffect(NavigateToNewPlantType(userId, photoUri, taxonId, vernacularId, plantTypeFlags))
+                        emitViewEffect(NavigateToNewPlantType(userId, photoUri, taxonId, vernacularId, plantTypeFlags))
                     else
-                        triggerViewEffect(NavigateToNewPlantMeasurement(userId, photoUri, taxonId, vernacularId, plantTypeFlags))
+                        emitViewEffect(NavigateToNewPlantMeasurement(userId, photoUri, taxonId, vernacularId, plantTypeFlags))
                 }
             }; Unit
         }
@@ -161,8 +161,8 @@ class NewPlantNameViewModel @Inject constructor (
         }.invokeOnCompletion { completionError ->
             if (completionError != null) // Coroutine did not complete
                 return@invokeOnCompletion
-            taxonId?.let { triggerViewEffect(ShowScientificNameAnimation(viewState.value?.scientificName!!)) }
-            vernacularId?.let { triggerViewEffect(ShowCommonNameAnimation(viewState.value?.commonName!!)) }
+            taxonId?.let { emitViewEffect(ShowScientificNameAnimation(viewState.value?.scientificName!!)) }
+            vernacularId?.let { emitViewEffect(ShowCommonNameAnimation(viewState.value?.commonName!!)) }
         }
     }
 
@@ -206,7 +206,7 @@ class NewPlantNameViewModel @Inject constructor (
         )
     }
 
-    private fun triggerViewEffect(viewEffect: ViewEffect) {
+    private fun emitViewEffect(viewEffect: ViewEffect) {
         _viewEffect.value = viewEffect
     }
 }

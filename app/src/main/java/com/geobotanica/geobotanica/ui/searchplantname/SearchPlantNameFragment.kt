@@ -34,11 +34,7 @@ class SearchPlantNameFragment : BaseFragment() {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
-        viewModel = getViewModel(viewModelFactory) {
-            userId = getFromBundle(userIdKey)
-            photoUri = getFromBundle(photoUriKey)
-            Lg.d("Fragment args: userId=$userId, photoUri=$photoUri")
-        }
+        viewModel = getViewModel(viewModelFactory)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -50,7 +46,10 @@ class SearchPlantNameFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         bindViewModel()
-        viewModel.onEvent(ViewCreated)
+        viewModel.onEvent(ViewCreated(
+                getFromBundle(userIdKey),
+                getFromBundle(photoUriKey)
+        ))
     }
 
     override fun onStart() {
@@ -99,7 +98,7 @@ class SearchPlantNameFragment : BaseFragment() {
                 plantNameAdapter.notifyDataSetChanged()
             }
             is ClearSearchText -> searchEditText.setText("")
-            is NavigateToNext -> navigateToNext()
+            is NavigateToNext -> navigateToNext(viewEffect)
         }
     }
 
@@ -129,15 +128,15 @@ class SearchPlantNameFragment : BaseFragment() {
         skipButton.setOnClickListener { viewModel.onEvent(SkipClicked) }
     }
 
-    private fun navigateToNext() = navigateTo(R.id.action_searchPlantName_to_newPlantName, createBundle())
+    private fun navigateToNext(viewEffect: NavigateToNext) =
+            navigateTo(R.id.action_searchPlantName_to_newPlantName, createBundle(viewEffect))
 
-    private fun createBundle(): Bundle {
+    private fun createBundle(viewEffect: NavigateToNext): Bundle {
         return bundleOf(
-                userIdKey to viewModel.userId,
-                photoUriKey to viewModel.photoUri
-        ).apply {
-            viewModel.vernacularId?.let { putValue(vernacularIdKey, it) }
-            viewModel.taxonId?.let { putValue(taxonIdKey, it) }
-        }
+                userIdKey to viewEffect.userId,
+                photoUriKey to viewEffect.photoUri,
+                taxonIdKey to viewEffect.taxonId,
+                vernacularIdKey to viewEffect.vernacularId
+        )
     }
 }

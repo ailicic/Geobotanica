@@ -28,10 +28,6 @@ class SearchPlantNameViewModel @Inject constructor (
         private val vernacularRepo: VernacularRepo,
         private val plantNameSearchService: PlantNameSearchService
 ): ViewModel() {
-    var userId = 0L
-    var photoUri: String = ""
-    var taxonId: Long? = null
-    var vernacularId: Long? = null
 
     private val _viewState = MutableLiveData<ViewState>().apply { value = ViewState() }
     val viewState: LiveData<ViewState> = _viewState
@@ -41,13 +37,24 @@ class SearchPlantNameViewModel @Inject constructor (
 
     private var searchJob: Job? = null
 
+    // Bundle data
+    private var userId = 0L
+    private var photoUri: String = ""
+    private var taxonId: Long? = null
+    private var vernacularId: Long? = null
+
     fun onEvent(event: ViewEvent) = when (event) {
         is ViewCreated -> {
             Lg.v("onEvent(ViewCreated)")
+
+            userId = event.userId
+            photoUri = event.photoUri
             taxonId = null
             vernacularId = null
+            Lg.d("Fragment args: userId=$userId, photoUri=$photoUri")
+
             _viewState.value = ViewState()
-            triggerViewEffect(InitView)
+            emitViewEffect(InitView)
         }
         is OnStart -> {
             Lg.v("onEvent(OnStart)")
@@ -59,7 +66,7 @@ class SearchPlantNameViewModel @Inject constructor (
             Lg.v("onEvent(SearchFilterSelected)")
             val searchFilterOptions = event.searchFilterOptions
             if (searchFilterOptions.filterFlags != viewState.value?.searchFilterOptions?.filterFlags) {
-                triggerViewEffect(UpdateSharedPrefs(searchFilterOptions))
+                emitViewEffect(UpdateSharedPrefs(searchFilterOptions))
                 updateViewState(searchFilterOptions = searchFilterOptions)
                 updateSearchResults()
             }
@@ -74,7 +81,7 @@ class SearchPlantNameViewModel @Inject constructor (
                 vernacularId = result.id
             if (result.hasTag(STARRED))
                 updateStarredTimestamp(result)
-            triggerViewEffect(NavigateToNext)
+            emitViewEffect(NavigateToNext(userId, photoUri, taxonId, vernacularId))
         }
         is StarClicked -> { updateIsStarred(event.searchResult); Unit }
         is SearchEditTextChanged -> {
@@ -89,9 +96,9 @@ class SearchPlantNameViewModel @Inject constructor (
         is ClearSearchClicked -> {
             taxonId = null
             vernacularId = null
-            triggerViewEffect(ClearSearchText)
+            emitViewEffect(ClearSearchText)
         }
-        is SkipClicked -> triggerViewEffect(NavigateToNext)
+        is SkipClicked -> emitViewEffect(NavigateToNext(userId, photoUri, taxonId, vernacularId))
     }
 
     private fun updateSearchResults() {
@@ -104,7 +111,7 @@ class SearchPlantNameViewModel @Inject constructor (
             val searchFilterOptions = viewState.value!!.searchFilterOptions
             val showStars = ! searchFilterOptions.hasFilter(STARRED)
             plantNameSearchService.search(searchEditText, searchFilterOptions).collect {
-                triggerViewEffect(UpdateSearchResults(it, showStars))
+                emitViewEffect(UpdateSearchResults(it, showStars))
             }
         }
         searchJob?.invokeOnSuccess {
@@ -145,7 +152,7 @@ class SearchPlantNameViewModel @Inject constructor (
         )
     }
 
-    private fun triggerViewEffect(viewEffect: ViewEffect) {
+    private fun emitViewEffect(viewEffect: ViewEffect) {
         _viewEffect.value = viewEffect
     }
 }
@@ -159,7 +166,7 @@ data class ViewState(
 )
 
 sealed class ViewEvent {
-    object ViewCreated : ViewEvent()
+    data class ViewCreated(val userId: Long, val photoUri: String) : ViewEvent()
     data class OnStart(val searchEditText: String) : ViewEvent()
     data class SearchFilterSelected(val searchFilterOptions: SearchFilterOptions) : ViewEvent()
     data class ResultClicked(val searchResult: SearchResult) : ViewEvent()
@@ -174,5 +181,5 @@ sealed class ViewEffect {
     data class UpdateSearchResults(val searchResults: List<SearchResult>, val showStars: Boolean = true) : ViewEffect()
     object ClearSearchText : ViewEffect()
     data class UpdateSharedPrefs(val searchFilterOptions: SearchFilterOptions) : ViewEffect()
-    object NavigateToNext : ViewEffect()
+    data class NavigateToNext(val userId: Long, val photoUri: String, val taxonId: Long?, val vernacularId: Long?) : ViewEffect()
 }

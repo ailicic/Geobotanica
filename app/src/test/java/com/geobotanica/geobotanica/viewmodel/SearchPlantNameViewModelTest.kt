@@ -16,7 +16,6 @@ import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
 import com.geobotanica.geobotanica.util.SpekExt.setupTestDispatchers
 import io.mockk.*
 import kotlinx.coroutines.flow.flowOf
-import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
@@ -38,6 +37,9 @@ object SearchPlantNameViewModelTest : Spek({
         }
     }
 
+    val userId = 0L
+    val photoUri = "photoUri"
+
     beforeEachTest {
         clearMocks(
                 viewStateObserver,
@@ -50,7 +52,7 @@ object SearchPlantNameViewModelTest : Spek({
     }
 
     describe("ViewCreated Event") {
-        beforeEachTest { searchPlantNameViewModel.onEvent(ViewCreated) }
+        beforeEachTest { searchPlantNameViewModel.onEvent(ViewCreated(userId, photoUri)) }
 
         it("Should emit InitView effect once") {
             verify(exactly = 1) { viewEffectObserver.onChanged(InitView) }
@@ -109,16 +111,7 @@ object SearchPlantNameViewModelTest : Spek({
     describe("ResultClicked Event") {
         val searchResult by memoized { SearchResult(1L, 0, 0, "name") }
 
-        context("When result has COMMON tag") {
-            beforeEachTest {
-                searchResult.toggleTag(COMMON)
-                searchPlantNameViewModel.onEvent(ResultClicked(searchResult))
-            }
-
-            it("Should set vernacularId") {
-                searchPlantNameViewModel.vernacularId shouldEqual 1L
-            }
-        }
+        beforeEachTest { searchPlantNameViewModel.onEvent(ViewCreated(userId, photoUri)) }
 
         context("When result has SCIENTIFIC tag") {
             beforeEachTest {
@@ -126,8 +119,19 @@ object SearchPlantNameViewModelTest : Spek({
                 searchPlantNameViewModel.onEvent(ResultClicked(searchResult))
             }
 
-            it("Should set taxonId") {
-                searchPlantNameViewModel.taxonId shouldEqual 1L
+            it("Should emit NavigateToNext ViewEffect") {
+                verify(exactly = 1) { viewEffectObserver.onChanged(NavigateToNext(userId, photoUri, 1L, null)) }
+            }
+        }
+
+        context("When result has COMMON tag") {
+            beforeEachTest {
+                searchResult.toggleTag(COMMON)
+                searchPlantNameViewModel.onEvent(ResultClicked(searchResult))
+            }
+
+            it("Should emit NavigateToNext ViewEffect") {
+                verify(exactly = 1) { viewEffectObserver.onChanged(NavigateToNext(userId, photoUri, null, 1L)) }
             }
         }
 
@@ -155,12 +159,6 @@ object SearchPlantNameViewModelTest : Spek({
                     coVerify { taxonRepo.updateTagTimestamp(any(), STARRED) }
                 }
             }
-        }
-
-        beforeEachTest { searchPlantNameViewModel.onEvent(ResultClicked(searchResult)) }
-
-        it("Should emit NavigateToNext ViewEffect") {
-            verify(exactly = 1) { viewEffectObserver.onChanged(NavigateToNext) }
         }
     }
 
@@ -220,27 +218,21 @@ object SearchPlantNameViewModelTest : Spek({
     }
 
     describe("ClearSearchClicked Event") {
-        beforeEachTest {
-            searchPlantNameViewModel.vernacularId = 1L
-            searchPlantNameViewModel.taxonId = 1L
-            searchPlantNameViewModel.onEvent(ClearSearchClicked)
-        }
+        beforeEachTest { searchPlantNameViewModel.onEvent(ClearSearchClicked) }
 
         it("Should emit ClearSearchText ViewEffect") {
             verify(exactly = 1) { viewEffectObserver.onChanged(ClearSearchText) }
         }
-
-        it("Should set vernacularId/taxonId to null") {
-            searchPlantNameViewModel.vernacularId shouldEqual null
-            searchPlantNameViewModel.taxonId shouldEqual null
-        }
     }
 
     describe("SkipClicked Event") {
-        beforeEachTest { searchPlantNameViewModel.onEvent(SkipClicked) }
+        beforeEachTest {
+            searchPlantNameViewModel.onEvent(ViewCreated(userId, photoUri))
+            searchPlantNameViewModel.onEvent(SkipClicked)
+        }
 
         it("Should emit NavigateToNext ViewEffect") {
-            verify(exactly = 1) { viewEffectObserver.onChanged(NavigateToNext) }
+            verify(exactly = 1) { viewEffectObserver.onChanged(NavigateToNext(userId, photoUri, null, null)) }
         }
     }
 })
