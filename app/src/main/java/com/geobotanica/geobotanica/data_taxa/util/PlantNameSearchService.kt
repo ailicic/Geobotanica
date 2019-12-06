@@ -105,7 +105,11 @@ class PlantNameSearchService @Inject constructor(
                             aggregateResults[index] = it.mergeTags(search.tags)
                     }
                     addAll(newResults)
-                    emit(this.sortedByDescending { it.tagCount() })
+                    emit(this
+                            .distinctBy { it.plantName }
+                            .sortedBy { it.plantName }
+                            .sortedByDescending { it.tagCount() }
+                    )
                 }
             }
             Lg.d("${search.functionName}: ${aggregateResults.size} hits ($time ms)")

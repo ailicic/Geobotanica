@@ -46,6 +46,7 @@ import javax.inject.Inject
 // TODO: Implement dark theme
 // TODO: Try using object detection for assisted plant measurements
 // TODO: Allow user to select default units in preferences
+// TODO: Consider adding another screen after plant name to select infraspecific epithet (currently dupes for generic+epithet exist due to infras)
 // TODO: Consider allowing plant name searching when editing name (likely going to be messy)
 // TODO: MAYBE Handle nullifying taxon/vernacular id if plant name is modified in PlantDetailFragment (related to above)
 

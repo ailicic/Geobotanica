@@ -11,7 +11,7 @@
     <dimen name="photo_type_icon_dimen">32dp</dimen>
     <dimen name="photo_type_icon_text_size">12sp</dimen>
     <dimen name="list_item_common_text_size">16sp</dimen>
-    <dimen name="list_item_latin_text_size">16sp</dimen>
+    <dimen name="list_item_taxon_text_size">16sp</dimen>
     <dimen name="list_item_name_icon_size">24dp</dimen>
     <dimen name="list_item_filter_icon_size">24dp</dimen>
     <dimen name="list_item_filter_vertical_margin">4dp</dimen>
