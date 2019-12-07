@@ -23,7 +23,6 @@ class NewPlantMeasurementFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantMeasurementViewModel>
     private lateinit var viewModel: NewPlantMeasurementViewModel
 
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
@@ -113,16 +112,16 @@ class NewPlantMeasurementFragment : BaseFragment() {
 
     private fun isMeasurementValid() = measurementsEditView.isNotEmpty
 
-    private fun createBundle(): Bundle {
-        return bundleOf(
+    private fun createBundle(): Bundle = viewModel.run {
+        bundleOf(
                 userIdKey to viewModel.userId,
                 photoUriKey to viewModel.photoUri,
-                plantTypeKey to viewModel.plantType.flag
+                scientificNameKey to scientificName,
+                commonNameKey to commonName,
+                taxonIdKey to taxonId,
+                vernacularIdKey to vernacularId,
+                plantTypeKey to plantType.flag
         ).apply {
-            viewModel.commonName?.let { putValue(commonNameKey, it) }
-            viewModel.scientificName?.let { putValue(scientificNameKey, it) }
-            viewModel.vernacularId?.let { putValue(vernacularIdKey, it) }
-            viewModel.taxonId?.let { putValue(taxonIdKey, it) }
             if (measurementsSwitch.isChecked) {
                 viewModel.heightMeasurement?.let { putSerializable(heightMeasurementKey, it) }
                 viewModel.diameterMeasurement?.let { putSerializable(diameterMeasurementKey, it) }

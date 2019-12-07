@@ -13,7 +13,6 @@ import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.Measurement
 import com.geobotanica.geobotanica.util.Units
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -197,9 +196,7 @@ class PlantDetailViewModel @Inject constructor(
         }
     }
 
-//    private fun deletePlant() = viewModelScope.launch(Dispatchers.IO) {
-//    WARNING RACE CONDITION: viewModel is cleared on exit and might cancel this coroutine before it completes -> Use GlobalScope
-    private fun deletePlant() = GlobalScope.launch(Dispatchers.IO) {
+    private fun deletePlant() = viewModelScope.launch(Dispatchers.IO) {
         deleteAllPlantPhotoFiles()
         database.withTransaction {
             val result = plantRepo.delete(plant.value!!)

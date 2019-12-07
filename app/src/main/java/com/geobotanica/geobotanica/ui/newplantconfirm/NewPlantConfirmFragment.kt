@@ -11,7 +11,7 @@ import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data.entity.Plant
@@ -237,8 +237,7 @@ class NewPlantConfirmFragment : BaseFragment() {
             viewModel.savePlantComposite()
             showToast("Plant saved") // TODO: Make snackbar (maybe?)
 
-            val navController = NavHostFragment.findNavController(this@NewPlantConfirmFragment)
-            navController.popBackStack(R.id.mapFragment, false)
+            findNavController().popBackStack(R.id.mapFragment, false)
             activity.currentLocation = null
         }
     }

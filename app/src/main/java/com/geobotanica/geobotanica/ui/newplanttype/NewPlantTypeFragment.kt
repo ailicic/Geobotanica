@@ -64,15 +64,15 @@ class NewPlantTypeFragment : BaseFragment() {
 
     private fun navigateToNext() = navigateTo(R.id.action_newPlantType_to_newPlantMeasurement, createBundle())
 
-    private fun createBundle(): Bundle =
+    private fun createBundle(): Bundle = viewModel.run {
         bundleOf(
-            userIdKey to viewModel.userId,
-            photoUriKey to viewModel.photoUri,
-            plantTypeKey to viewModel.plantType.flag
-        ).apply {
-            viewModel.commonName?.let { putValue(commonNameKey, it) }
-            viewModel.scientificName?.let { putValue(scientificNameKey, it) }
-            viewModel.vernacularId?.let { putValue(vernacularIdKey, it) }
-            viewModel.taxonId?.let { putValue(taxonIdKey, it) }
-        }
+                userIdKey to userId,
+                photoUriKey to photoUri,
+                scientificNameKey to scientificName,
+                commonNameKey to commonName,
+                taxonIdKey to taxonId,
+                vernacularIdKey to vernacularId,
+                plantTypeKey to plantType.flag
+        )
+    }
 }
