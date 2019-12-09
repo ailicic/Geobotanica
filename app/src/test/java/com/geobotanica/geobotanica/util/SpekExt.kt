@@ -4,7 +4,6 @@ import androidx.arch.core.executor.ArchTaskExecutor
 import androidx.arch.core.executor.TaskExecutor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.*
 import org.spekframework.spek2.dsl.LifecycleAware
 import org.spekframework.spek2.dsl.Root
@@ -42,14 +41,6 @@ object SpekExt {
             testDispatchers.main.cleanupTestCoroutines()
         }
         return testDispatchers
-    }
-
-    fun LifecycleAware.beforeEachFlowTest(block: suspend () -> Unit) {
-        beforeEachTest {
-            runBlocking { // If runBlockingTest(), then Flow fails with "This job has not completed yet"
-                block()
-            }
-        }
     }
 
     @Suppress("EXPERIMENTAL_API_USAGE")

@@ -9,22 +9,25 @@ import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchFilterOptions
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
-import com.geobotanica.geobotanica.util.SpekExt.beforeEachFlowTest
+import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
+import com.geobotanica.geobotanica.util.SpekExt.setupTestDispatchers
 import io.mockk.CapturingSlot
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.flow.collect
+import org.amshove.kluent.shouldContainAll
 import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
 object SearchPlantNameServiceTest : Spek({
+    val testDispatchers = setupTestDispatchers()
 
     val taxonRepo = mockk<TaxonRepo>()
     val vernacularRepo = mockk<VernacularRepo>()
 
-    val plantNameSearchService by memoized { PlantNameSearchService(taxonRepo, vernacularRepo) }
+    val plantNameSearchService by memoized { PlantNameSearchService(testDispatchers, taxonRepo, vernacularRepo) }
 
     val vBag = VernacularBag()
     val tBag = TaxonBag()
@@ -60,7 +63,7 @@ object SearchPlantNameServiceTest : Spek({
             }
 
             context("Default search sequence") {
-                beforeEachFlowTest {
+                beforeEachBlockingTest(testDispatchers) {
                     plantNameSearchService.search("").collect { collected.add(it) }
                 }
 
@@ -73,111 +76,111 @@ object SearchPlantNameServiceTest : Spek({
         context("Populated db") {
 
             context("Default search") {
-                val vStarred = vBag.getSearchResult("starred", STARRED)
-                val vUsed = vBag.getSearchResult("used", USED)
-                val vStarredUsed = vBag.getSearchResult("starredUsed", STARRED, USED)
+                val vStarredUsed = vBag.getSearchResult("V StarredUsed", STARRED, USED)
+                val vStarred = vBag.getSearchResult("V Starred", STARRED)
+                val vUsed = vBag.getSearchResult("V Used", USED)
 
-                val tStarred = tBag.getSearchResult("starred", STARRED)
-                val tUsed = tBag.getSearchResult("used", USED)
-                val tStarredUsed = tBag.getSearchResult("starredUsed", STARRED, USED)
+                val tStarredUsed = tBag.getSearchResult("T StarredUsed", STARRED, USED)
+                val tStarred = tBag.getSearchResult("T Starred", STARRED)
+                val tUsed = tBag.getSearchResult("T Used", USED)
 
                 beforeEachTest {
-                    coEvery { vernacularRepo.getAllStarred(any()) } returns vBag.getIdsOf("starred", "starredUsed")
-                    coEvery { vernacularRepo.getAllUsed(any()) } returns vBag.getIdsOf("used", "starredUsed")
-                    coEvery { taxonRepo.getAllStarred(any()) } returns tBag.getIdsOf("starred", "starredUsed")
-                    coEvery { taxonRepo.getAllUsed(any()) } returns tBag.getIdsOf("used", "starredUsed")
+                    coEvery { vernacularRepo.getAllStarred(any()) } returns vBag.getIdsOf("V Starred", "V StarredUsed")
+                    coEvery { vernacularRepo.getAllUsed(any()) } returns vBag.getIdsOf("V Used", "V StarredUsed")
+                    coEvery { taxonRepo.getAllStarred(any()) } returns tBag.getIdsOf("T Starred", "T StarredUsed")
+                    coEvery { taxonRepo.getAllUsed(any()) } returns tBag.getIdsOf("T Used", "T StarredUsed")
                 }
 
                 context("No search filter") {
-                    beforeEachFlowTest {
+                    beforeEachBlockingTest(testDispatchers) {
                         plantNameSearchService.search("").collect { collected.add(it) }
                     }
                     it("1st emission correct") {
-                        collected[0] shouldEqual listOf(vStarred, vStarredUsed)
+                        collected[0] shouldContainAll listOf(vStarredUsed, vStarred)
                     }
                     it("2nd emission correct") {
-                        collected[1] shouldEqual listOf(vStarred, vStarredUsed, tStarred, tStarredUsed)
+                        collected[1] shouldContainAll listOf(vStarredUsed, vStarred, vUsed)
                     }
                     it("3rd emission correct") {
-                        collected[2] shouldEqual listOf(vStarredUsed, vStarred, tStarred, tStarredUsed, vUsed)
+                        collected[2] shouldContainAll listOf(tStarredUsed, vStarredUsed, tStarred, vStarred, vUsed)
                     }
                     it("4th emission correct") {
-                        collected[3] shouldEqual listOf(vStarredUsed, tStarredUsed, vStarred, tStarred, vUsed, tUsed)
+                        collected[3] shouldContainAll listOf(tStarredUsed, vStarredUsed, tStarred, vStarred, tUsed, vUsed)
                     }
                 }
 
                 context("Starred filtered out") {
-                    beforeEachFlowTest {
+                    beforeEachBlockingTest(testDispatchers) {
                         plantNameSearchService.search("", SearchFilterOptions(STARRED.flag))
                                 .collect { collected.add(it) }
                     }
 
                     it("Should skip starred searches") { collected.size shouldEqual 2 }
                     it("1st emission correct") {
-                        collected[0] shouldEqual listOf(vUsed, vStarredUsed.withoutTag(STARRED))
+                        collected[0] shouldContainAll listOf(vUsed, vStarredUsed.withoutTag(STARRED))
                     }
                     it("2nd emission correct") {
-                        collected[1] shouldEqual listOf(vUsed, vStarredUsed.withoutTag(STARRED), tUsed, tStarredUsed.withoutTag(STARRED))
+                        collected[1] shouldContainAll listOf(vUsed, vStarredUsed.withoutTag(STARRED), tUsed, tStarredUsed.withoutTag(STARRED))
                     }
                 }
 
                 context("Used filtered out") {
-                    beforeEachFlowTest {
+                    beforeEachBlockingTest(testDispatchers) {
                         plantNameSearchService.search("", SearchFilterOptions(USED.flag))
                                 .collect { collected.add(it) }
                     }
 
                     it("Should skip used searches") { collected.size shouldEqual 2 }
                     it("1st emission correct") {
-                        collected[0] shouldEqual listOf(vStarred, vStarredUsed.withoutTag(USED))
+                        collected[0] shouldContainAll listOf(vStarred, vStarredUsed.withoutTag(USED))
                     }
                     it("2nd emission correct") {
-                        collected[1] shouldEqual listOf(vStarred, vStarredUsed.withoutTag(USED), tStarred, tStarredUsed.withoutTag(USED))
+                        collected[1] shouldContainAll listOf(vStarred, vStarredUsed.withoutTag(USED), tStarred, tStarredUsed.withoutTag(USED))
                     }
                 }
 
                 context("Vernaculars filtered out") {
-                    beforeEachFlowTest {
+                    beforeEachBlockingTest(testDispatchers) {
                         plantNameSearchService.search("", SearchFilterOptions(COMMON.flag))
                                 .collect { collected.add(it) }
                     }
 
                     it("Should skip vernacular searches") { collected.size shouldEqual 2 }
-                    it("1st emission correct") { collected[0] shouldEqual listOf(tStarred, tStarredUsed) }
-                    it("2nd emission correct") { collected[1] shouldEqual listOf(tStarredUsed, tStarred, tUsed) }
+                    it("1st emission correct") { collected[0] shouldContainAll listOf(tStarred, tStarredUsed) }
+                    it("2nd emission correct") { collected[1] shouldContainAll listOf(tStarredUsed, tStarred, tUsed) }
                 }
 
                 context("Taxa filtered out") {
-                    beforeEachFlowTest {
+                    beforeEachBlockingTest(testDispatchers) {
                         plantNameSearchService.search("", SearchFilterOptions(SCIENTIFIC.flag))
                                 .collect { collected.add(it) }
                     }
 
                     it("Should skip taxa searches") { collected.size shouldEqual 2 }
-                    it("1st emission correct") { collected[0] shouldEqual listOf(vStarred, vStarredUsed) }
-                    it("2nd emission correct") { collected[1] shouldEqual listOf(vStarredUsed, vStarred, vUsed) }
+                    it("1st emission correct") { collected[0] shouldContainAll listOf(vStarred, vStarredUsed) }
+                    it("2nd emission correct") { collected[1] shouldContainAll listOf(vStarredUsed, vStarred, vUsed) }
                 }
 
                 context("Starred and taxa filtered out") {
-                    beforeEachFlowTest {
+                    beforeEachBlockingTest(testDispatchers) {
                         plantNameSearchService.search(
                                 "", SearchFilterOptions(STARRED.flag or SCIENTIFIC.flag)
                         ).collect { collected.add(it) }
                     }
 
                     it("Should skip starred/taxa searches") { collected.size shouldEqual 1 }
-                    it("1st emission correct") { collected[0] shouldEqual listOf(vUsed, vStarredUsed.withoutTag(STARRED)) }
+                    it("1st emission correct") { collected[0] shouldContainAll listOf(vUsed, vStarredUsed.withoutTag(STARRED)) }
                 }
 
                 context("Used and vernaculars filtered out") {
-                    beforeEachFlowTest {
+                    beforeEachBlockingTest(testDispatchers) {
                         plantNameSearchService.search(
                                 "", SearchFilterOptions(USED.flag or COMMON.flag)
                         ).collect { collected.add(it) }
                     }
 
                     it("Should skip used/vernacular searches") { collected.size shouldEqual 1 }
-                    it("1st emission correct") { collected[0] shouldEqual listOf(tStarred, tStarredUsed.withoutTag(USED)) }
+                    it("1st emission correct") { collected[0] shouldContainAll listOf(tStarred, tStarredUsed.withoutTag(USED)) }
                 }
             }
         }
@@ -195,10 +198,10 @@ class VernacularBag {
 
     init {
         vernaculars.addAll(listOf(
-            Vernacular(vernacular = "Untagged").apply { id = nextId++ },
-            Vernacular(vernacular = "Starred").apply { id = nextId++ },
-            Vernacular(vernacular = "Used").apply { id = nextId++ },
-            Vernacular(vernacular = "StarredUsed").apply { id = nextId++ }
+            Vernacular(vernacular = "V StarredUsed").apply { id = nextId++ },
+            Vernacular(vernacular = "V Starred").apply { id = nextId++ },
+            Vernacular(vernacular = "V Used").apply { id = nextId++ },
+            Vernacular(vernacular = "V Untagged").apply { id = nextId++ }
         ))
     }
 
@@ -233,10 +236,10 @@ class TaxonBag {
 
     init {
         taxa.addAll(listOf(
-            Taxon(generic = "Untagged").apply { id = nextId++ },
-            Taxon(generic = "Starred").apply { id = nextId++ },
-            Taxon(generic = "Used").apply { id = nextId++ },
-            Taxon(generic= "StarredUsed").apply { id = nextId++ }
+            Taxon(generic= "T StarredUsed").apply { id = nextId++ },
+            Taxon(generic = "T Starred").apply { id = nextId++ },
+            Taxon(generic = "T Used").apply { id = nextId++ },
+            Taxon(generic = "T Untagged").apply { id = nextId++ }
         ))
     }
 

@@ -5,8 +5,8 @@ import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag
 import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag.*
 import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
 import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
+import com.geobotanica.geobotanica.util.GbDispatchers
 import com.geobotanica.geobotanica.util.Lg
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -24,14 +24,15 @@ import kotlin.system.measureTimeMillis
 const val defaultFilterFlags = 0b0
 
 class PlantNameSearchService @Inject constructor(
+        private val dispatchers: GbDispatchers,
         private val taxonRepo: TaxonRepo,
         private val vernacularRepo: VernacularRepo
 ) {
 
     private val defaultSearchSequence = listOf(
             PlantNameSearch(fun0 = vernacularRepo::getAllStarred, tagList = listOf(COMMON, STARRED)),
-            PlantNameSearch(fun0 = taxonRepo::getAllStarred, tagList = listOf(SCIENTIFIC, STARRED)),
             PlantNameSearch(fun0 = vernacularRepo::getAllUsed, tagList = listOf(COMMON, USED)),
+            PlantNameSearch(fun0 = taxonRepo::getAllStarred, tagList = listOf(SCIENTIFIC, STARRED)),
             PlantNameSearch(fun0 = taxonRepo::getAllUsed, tagList = listOf(SCIENTIFIC, USED))
     )
 
@@ -80,41 +81,39 @@ class PlantNameSearchService @Inject constructor(
         val searchSequence = getSearchSequence(wordCount, isSuggestionsSearch)
 
 
-        searchSequence.filter { filterOptions.shouldNotFilter(it) }.forEach forEachSearch@{ search ->
+        searchSequence.filter { filterOptions.shouldNotFilter(it) }.forEach forEachSearch@ { search ->
             yield()
 
             if (aggregateResults.size >= DEFAULT_RESULT_LIMIT)
                 return@forEachSearch
 
             val time = measureTimeMillis {
-                val results = getSearchResults(words, search, getLimit(aggregateResults), isSuggestionsSearch)
+                val resultIds = getSearchResults(words, search, getLimit(aggregateResults), isSuggestionsSearch)
                         ?: return@forEachSearch
-                val uniqueIds = results subtract aggregateResultIds
-                val mergeTagsOnIds = results intersect aggregateResultIds
+                val newIds = resultIds subtract aggregateResultIds
+                val mergeTagsOnIds = resultIds intersect aggregateResultIds
 
-                aggregateResultIds.addAll(results)
+                aggregateResultIds.addAll(resultIds)
 
-                val newResults = uniqueIds
+                val newResults = newIds
                         .map { mapIdToSearchResult(it, search) }
                         .filter { filterOptions.shouldNotFilter(it) }
                         .distinctBy { it.plantName }
 
-                with(aggregateResults) {
-                    forEachIndexed { index, it ->
-                        if (mergeTagsOnIds.contains(it.id))
-                            aggregateResults[index] = it.mergeTags(search.tags)
-                    }
-                    addAll(newResults)
-                    emit(this
-                            .distinctBy { it.plantName }
-                            .sortedBy { it.plantName }
-                            .sortedByDescending { it.tagCount() }
-                    )
+                aggregateResults.forEachIndexed { index, result ->
+                    if (mergeTagsOnIds.contains(result.id))
+                        aggregateResults[index] = result.mergeTags(search.tags)
                 }
+                aggregateResults.addAll(newResults)
+
+                emit(aggregateResults
+                        .distinctBy { it.plantName }
+                        .sortedBy { it.plantName }
+                        .sortedByDescending { it.tagCount() })
             }
             Lg.d("${search.functionName}: ${aggregateResults.size} hits ($time ms)")
         }
-    }.flowOn(Dispatchers.Default)
+    }.flowOn(dispatchers.default)
 
     fun searchSuggestedCommonNames(taxonId: Long): Flow<List<SearchResult>> =
             search(taxonId.toString(), SearchFilterOptions(SCIENTIFIC.flag), true)
@@ -140,7 +139,8 @@ class PlantNameSearchService @Inject constructor(
             words: List<String>,
             search: PlantNameSearch,
             limit: Int,
-            isSuggestionsSearch: Boolean): List<Long>? {
+            isSuggestionsSearch: Boolean
+    ): List<Long>? {
         return if (isSuggestionsSearch)
             search.fun0!!(words[0].toInt())
         else when (words.size) {
