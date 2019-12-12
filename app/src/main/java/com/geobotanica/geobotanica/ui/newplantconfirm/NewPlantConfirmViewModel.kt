@@ -1,11 +1,16 @@
 package com.geobotanica.geobotanica.ui.newplantconfirm
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.room.withTransaction
+import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.Plant
+import com.geobotanica.geobotanica.data.entity.Plant.Type
+import com.geobotanica.geobotanica.data.entity.Plant.Type.TREE
 import com.geobotanica.geobotanica.data.entity.PlantLocation
 import com.geobotanica.geobotanica.data.entity.PlantMeasurement
 import com.geobotanica.geobotanica.data.entity.PlantMeasurement.Type.*
@@ -15,14 +20,21 @@ import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag.USED
 import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
 import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.ui.viewpager.PhotoData
+import com.geobotanica.geobotanica.util.GbDispatchers
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.Measurement
+import com.geobotanica.geobotanica.util.SingleLiveEvent
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class NewPlantConfirmViewModel @Inject constructor (
+        private val dispatchers: GbDispatchers,
         private val database: GbDatabase,
+        private val storageHelper: StorageHelper,
         private val userRepo: UserRepo,
         private val plantRepo: PlantRepo,
         private val plantLocationRepo: PlantLocationRepo,
@@ -32,39 +44,115 @@ class NewPlantConfirmViewModel @Inject constructor (
         private val vernacularRepo: VernacularRepo
 ) : ViewModel() {
 
-    var userId = 0L
+    private val _commonName = MutableLiveData<String>()
+    val commonName: LiveData<String> = _commonName // Used for xml data-binding
 
-    val plantType = MutableLiveData<Plant.Type>()
-    val commonName = MutableLiveData<String>() // Used for xml data-binding
-    val scientificName = MutableLiveData<String>() // Used for xml data-binding
-    var taxonId: Long? = null
-    var vernacularId: Long? = null
-    var height = MutableLiveData<Measurement>() // Used for xml data-binding
-    var diameter = MutableLiveData<Measurement>() // Used for xml data-binding
-    var trunkDiameter = MutableLiveData<Measurement>() // Used for xml data-binding
-    var location: Location? = null
-    var photoUri: String = ""
-    val photoData = mutableListOf<PhotoData>()
+    private val _scientificName = MutableLiveData<String>()
+    val scientificName: LiveData<String> = _scientificName // Used for xml data-binding
 
-    init {
-        plantType.observeForever {
-            if (it != Plant.Type.TREE && trunkDiameter.value != null) {
-                trunkDiameter.value = null
+    private val _plantType = MutableLiveData<Type>()
+    val plantType: LiveData<Type> = _plantType
+
+    private val _height = MutableLiveData<Measurement>()
+    val height: LiveData<Measurement> = _height // Used for xml data-binding
+
+    private val _diameter = MutableLiveData<Measurement>()
+    val diameter: LiveData<Measurement> = _diameter // Used for xml data-binding
+
+    private val _trunkDiameter = MutableLiveData<Measurement>()
+    val trunkDiameter: LiveData<Measurement> = _trunkDiameter // Used for xml data-binding
+
+    private val _photoData = MutableLiveData<MutableList<PhotoData>>()
+    val photoData: LiveData<MutableList<PhotoData>> = _photoData
+
+    val startPhotoIntent = SingleLiveEvent<File>()
+    val showPhotoDeletedToast = SingleLiveEvent<Unit>()
+    val showAddedPhoto = SingleLiveEvent<Unit>()
+
+    private var userId = 0L
+    private var taxonId: Long? = null
+    private var vernacularId: Long? = null
+    private var isPhotoRetake: Boolean = false
+    private lateinit var newPhotoType: PlantPhoto.Type
+    private lateinit var newPhotoUri: String
+
+    fun init(
+            userId: Long,
+            photoUri: String,
+            commonName: String?,
+            scientificName: String?,
+            vernacularId: Long?,
+            taxonId: Long?,
+            plantType: Type,
+            height: Measurement?,
+            diameter: Measurement?,
+            trunkDiameter: Measurement?
+    ) {
+        this.userId = userId
+        this.vernacularId = vernacularId
+        this.taxonId = taxonId
+
+        _commonName.value = commonName
+        _scientificName.value = scientificName
+        _plantType.value = plantType
+        _height.value = height
+        _diameter.value = diameter
+        _trunkDiameter.value = trunkDiameter
+
+        viewModelScope.launch {
+            _photoData.value = mutableListOf(PhotoData(PlantPhoto.Type.COMPLETE, photoUri, getUserNickname()))
+        }
+
+        Lg.d("Fragment args: userId=$userId, photoType=$plantType, " +
+                "commonName=$commonName, scientificName=$scientificName, " +
+                "vernId=$vernacularId, taxonId=$taxonId, photos=$photoData, " +
+                "height=$height, diameter=$diameter, trunkDiameter=$trunkDiameter")
+    }
+
+
+    fun deleteTemporaryPhoto() {
+        val result = File(newPhotoUri).delete()
+        Lg.d("Photo cancelled -> Deleted unused photo file: $newPhotoUri (Result = $result)")
+    }
+
+    fun deletePhoto(photoIndex: Int) {
+        photoData.value?.let { photoData ->
+            val photoUri = photoData[photoIndex].photoUri
+            Lg.d("Deleting old photo: $photoUri (Result = ${File(photoUri).delete()})")
+            viewModelScope.launch(dispatchers.main) {
+                delay(300)
+                _photoData.value = photoData.apply { removeAt(photoIndex) }
+                showPhotoDeletedToast.call()
             }
         }
     }
 
-    suspend fun initPhotoData() {
-        photoData.clear()
-        photoData.add(PhotoData(PlantPhoto.Type.COMPLETE, photoUri, getUserNickname()))
+    fun retakePhoto() {
+        isPhotoRetake = true
+        val photoFile = storageHelper.createPhotoFile()
+        newPhotoUri = photoFile.absolutePath
+        startPhotoIntent.value = photoFile
     }
 
-    suspend fun getUserNickname(): String = userRepo.get(userId).nickname
+    fun addPhoto(photoType: PlantPhoto.Type) {
+        isPhotoRetake = false
+        newPhotoType = photoType
+        val photoFile = storageHelper.createPhotoFile()
+        newPhotoUri = photoFile.absolutePath
+        startPhotoIntent.value = photoFile
+    }
+
+    fun deleteAllPhotos() {
+        photoData.value?.forEach {
+            val result = File(it.photoUri).delete()
+            Lg.d("Deleting old photo (result = $result): ${it.photoUri}")
+        }
+    }
 
     fun onNewPlantName(newCommonName: String?, newScientificName: String?) {
         nullPlantIdsIfInvalid(newCommonName, newScientificName)
-        commonName.value = newCommonName
-        scientificName.value = newScientificName
+        _commonName.value = newCommonName
+        _scientificName.value = newScientificName
     }
 
     private fun nullPlantIdsIfInvalid(newCommonName: String?, newScientificName: String?) {
@@ -78,29 +166,55 @@ class NewPlantConfirmViewModel @Inject constructor (
         }
     }
 
-    fun onMeasurementsUpdated(height: Measurement?, diameter: Measurement?, trunkDiameter: Measurement?) {
-        this.height.value = height
-        this.diameter.value = diameter
-        this.trunkDiameter.value = trunkDiameter
+    fun onNewPlantType(plantType: Type) {
+        if (plantType != TREE && trunkDiameter.value != null) {
+            _trunkDiameter.value = null // Trunk diameter measurement permitted only if plantType = TREE
+        }
     }
 
-    suspend fun savePlantComposite() {
+    fun onPhotoComplete(photoIndex: Int) {
+        Lg.d("onPhotoComplete()")
+        photoData.value?.let { photoData ->
+            if (isPhotoRetake) {
+                val oldPhotoUri = photoData[photoIndex].photoUri
+                Lg.d("Deleting old photo: $oldPhotoUri (Result = ${File(oldPhotoUri).delete()})")
+                val newPhoto = photoData[photoIndex].copy(photoUri = newPhotoUri)
+                _photoData.value = photoData.apply { set(photoIndex, newPhoto) }
+            } else {
+                viewModelScope.launch(dispatchers.main) {
+                    _photoData.value = photoData.apply { add(PhotoData(newPhotoType, newPhotoUri, getUserNickname())) }
+                    delay(300)
+                    showAddedPhoto.call()
+                }
+            }
+        }
+    }
+
+    fun onMeasurementsUpdated(height: Measurement?, diameter: Measurement?, trunkDiameter: Measurement?) {
+        _height.value = height
+        _diameter.value = diameter
+        _trunkDiameter.value = trunkDiameter
+    }
+
+    private suspend fun getUserNickname(): String = userRepo.get(userId).nickname
+
+    suspend fun savePlantComposite(location: Location) {
         database.withTransaction {
             Lg.d("Saving PlantComposite to database now...")
-            val plant = Plant(userId, plantType.value!!, commonName.value, scientificName.value, vernacularId, taxonId)
+            val plant = Plant(userId, plantType.value ?: TREE, commonName.value, scientificName.value, vernacularId, taxonId)
             plant.id = plantRepo.insert(plant)
             Lg.d("Saved: $plant (id=${plant.id})")
 
             savePlantPhotos(plant)
             savePlantMeasurements(plant)
-            savePlantLocation(plant)
+            savePlantLocation(plant, location)
             vernacularId?.let { vernacularRepo.setTagged(it, USED) }
             taxonId?.let { taxonRepo.setTagged(it, USED) }
         }
     }
 
     private suspend fun savePlantPhotos(plant: Plant) {
-        photoData.forEach { (photoType, photoUri) ->
+        photoData.value?.forEach { (photoType, photoUri) ->
             val photoFilename = photoUri.substringAfterLast('/')
             val photo = PlantPhoto(userId, plant.id, photoType, photoFilename)
             photo.id = plantPhotoRepo.insert(photo)
@@ -126,8 +240,8 @@ class NewPlantConfirmViewModel @Inject constructor (
         }
     }
 
-    private suspend fun savePlantLocation(plant: Plant) {
-        val plantLocation = PlantLocation(plant.id, location!!)
+    private suspend fun savePlantLocation(plant: Plant, location: Location) {
+        val plantLocation = PlantLocation(plant.id, location)
         plantLocation.id = plantLocationRepo.insert(plantLocation)
         Lg.d("Saved: $plantLocation (id=${plantLocation.id})")
     }

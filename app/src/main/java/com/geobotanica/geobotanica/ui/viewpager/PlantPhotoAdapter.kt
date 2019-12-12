@@ -27,9 +27,9 @@ import org.threeten.bp.OffsetDateTime
 
 class PlantPhotoAdapter(
         private val onClickPhoto: () -> Unit,
-        private val onDeletePhoto: () -> Unit,
-        private val onRetakePhoto: () -> Unit,
-        private val onAddPhoto: (photoType: PlantPhoto.Type) -> Unit,
+        private val onClickDeletePhoto: () -> Unit,
+        private val onClickRetakePhoto: () -> Unit,
+        private val onClickAddPhoto: (photoType: PlantPhoto.Type) -> Unit,
         private val plantType: LiveData<Plant.Type>,
         private val lifecycleOwner: LifecycleOwner,
         private val onNewPhotoType: (PlantPhoto.Type) -> Unit = { }
@@ -70,18 +70,18 @@ class PlantPhotoAdapter(
 
             deletePhotoButton.onDeletePhoto = {
                 isPhotoMenuVisible = false
-                onDeletePhoto()
+                onClickDeletePhoto()
             }
 
             retakePhotoButton.onRetakePhoto = {
                 isPhotoMenuVisible = false
-                onRetakePhoto()
+                onClickRetakePhoto()
             }
 
             addPhotoButton.plantType = plantType
             addPhotoButton.onAddPhoto = {
                 isPhotoMenuVisible = false
-                onAddPhoto(it)
+                onClickAddPhoto(it)
             }
 
             photoMenuButton.setOnClickListener { isPhotoMenuVisible = true }
@@ -119,7 +119,7 @@ class PlantPhotoAdapter(
     }
 }
 
-data class PhotoData(
+data class PhotoData( // TODO: Consider making all immutable
         var photoType: PlantPhoto.Type,
         var photoUri: String,
         val userNickname: String,

@@ -88,7 +88,8 @@ data class OnlineMapListItem(
         val printName: String,
         val status: Long = NOT_DOWNLOADED // Relevant only if isFolder = false
 ) {
-    val isDownloading = status > 0L
+    val isDownloading
+        get() = status > 0L
 }
 
 fun OnlineMapFolder.toListItem(): OnlineMapListItem = OnlineMapListItem(id,true, printName)

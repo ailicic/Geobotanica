@@ -22,7 +22,7 @@ class PlantTypeButton @JvmOverloads constructor(
         setOnClickListener { showPlantTypeDialog() }
     }
 
-    fun init(initialPlantType: Plant.Type) = updatePlantTypeIcon(initialPlantType)
+    fun initIcon(initialPlantType: Plant.Type) = updatePlantTypeIcon(initialPlantType)
 
     private fun updatePlantTypeIcon(plantType: Plant.Type) {
         currentPlantType = plantType

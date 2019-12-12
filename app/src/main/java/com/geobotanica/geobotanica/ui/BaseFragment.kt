@@ -31,6 +31,7 @@ import javax.inject.Inject
 // NavBundle keys
 const val plantNameFilterOptionsKey = "plantNameFilterOptions" // Used by PlantNameFilterDialog : DialogFragment()
 
+@Suppress("unused")
 abstract class BaseFragment : Fragment() {
     @Inject lateinit var appContext: Context
     @Inject lateinit var activity: MainActivity

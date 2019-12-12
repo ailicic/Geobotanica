@@ -13,11 +13,11 @@ class ViewModelFactory<T : ViewModel> @Inject constructor(private val viewModel:
 
 object BaseFragmentExt {
     inline fun <reified T : ViewModel> BaseFragment.getViewModel(
-        viewModelFactory: ViewModelFactory<T>,
-        inject: T.() -> Unit = { }
+            viewModelFactory: ViewModelFactory<T>,
+            block: T.() -> Unit = { }
     ): T {
         return ViewModelProviders.of(activity, viewModelFactory)
             .get(T::class.java)
-            .apply { inject() }
+            .apply { block() }
     }
 }

@@ -10,11 +10,12 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data.entity.Plant
+import com.geobotanica.geobotanica.data.entity.Plant.Type.TREE
 import com.geobotanica.geobotanica.data.entity.PlantPhoto
 import com.geobotanica.geobotanica.databinding.FragmentNewPlantConfirmBinding
 import com.geobotanica.geobotanica.ui.BaseFragment
@@ -22,7 +23,6 @@ import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.dialog.EditPlantNameDialog
 import com.geobotanica.geobotanica.ui.dialog.InputMeasurementsDialog
-import com.geobotanica.geobotanica.ui.viewpager.PhotoData
 import com.geobotanica.geobotanica.ui.viewpager.PlantPhotoAdapter
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.getFromBundle
@@ -30,45 +30,36 @@ import com.geobotanica.geobotanica.util.getNullableFromBundle
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.compound_gps.view.*
 import kotlinx.android.synthetic.main.fragment_new_plant_confirm.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
+
+// TODO: Use newer version of ListAdapter with auto-diffing (or create new SingleLiveEvent for deleting photo smooth scroll)
 
 @Suppress("UNUSED_PARAMETER")
 class NewPlantConfirmFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<NewPlantConfirmViewModel>
     private lateinit var viewModel: NewPlantConfirmViewModel
 
-    @Inject lateinit var storageHelper: StorageHelper
-
     private lateinit var photoAdapter: PlantPhotoAdapter
-
-    private var isPhotoRetake: Boolean = false
-    private lateinit var newPhotoType: PlantPhoto.Type
-    private lateinit var newPhotoUri: String
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
         viewModel = getViewModel(viewModelFactory) {
-            userId = getFromBundle(userIdKey)
-            photoUri = getFromBundle(photoUriKey)
-            plantType.value = Plant.Type.fromFlag(getFromBundle(plantTypeKey))
-            commonName.value = getNullableFromBundle(commonNameKey)
-            scientificName.value = getNullableFromBundle(scientificNameKey)
-            vernacularId = getNullableFromBundle(vernacularIdKey)
-            taxonId = getNullableFromBundle(taxonIdKey)
-            height.value = getNullableFromBundle(heightMeasurementKey)
-            diameter.value = getNullableFromBundle(diameterMeasurementKey)
-            trunkDiameter.value = getNullableFromBundle(trunkDiameterMeasurementKey)
-            Lg.d("Fragment args: userId=$userId, photoType=${plantType.value}, " +
-                    "commonName=${commonName.value}, scientificName=${scientificName.value}, " +
-                    "vernId=$vernacularId, taxonId=$taxonId, photos=$photoData, " +
-                    "height=${height.value}, diameter=${diameter.value}, trunkDiameter=${trunkDiameter.value}")
+            init(
+                getFromBundle(userIdKey),
+                getFromBundle(photoUriKey),
+                getNullableFromBundle(commonNameKey),
+                getNullableFromBundle(scientificNameKey),
+                getNullableFromBundle(vernacularIdKey),
+                getNullableFromBundle(taxonIdKey),
+                Plant.Type.fromFlag(getFromBundle(plantTypeKey)),
+                getNullableFromBundle(heightMeasurementKey),
+                getNullableFromBundle(diameterMeasurementKey),
+                getNullableFromBundle(trunkDiameterMeasurementKey)
+            )
         }
     }
 
@@ -83,12 +74,10 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        lifecycleScope.launch {
             addOnBackPressedCallback()
-            initPlantTypeButton()
-            initPhotoViewPager()
-            bindClickListeners()
-        }
+            initUi()
+            bindViewModel()
+            bindListeners()
     }
 
     override fun onDestroy() {
@@ -99,27 +88,8 @@ class NewPlantConfirmFragment : BaseFragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == requestTakePhoto) {
             when (resultCode) {
-                Activity.RESULT_OK -> {
-                    val photoIndex = plantPhotoPager.currentItem
-                    Lg.d("onActivityResult: RESULT_OK (New photo received)")
-                    if (isPhotoRetake) {
-                        val oldPhotoUri = viewModel.photoData[photoIndex].photoUri
-                        Lg.d("Deleting old photo: $oldPhotoUri (Result = ${File(oldPhotoUri).delete()})")
-                        viewModel.photoData[photoIndex].photoUri = newPhotoUri
-                        photoAdapter.notifyDataSetChanged()
-                    } else {
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            viewModel.photoData.add(PhotoData(newPhotoType, newPhotoUri, viewModel.getUserNickname()))
-                            photoAdapter.notifyDataSetChanged()
-                            delay(300)
-                            plantPhotoPager.setCurrentItem(viewModel.photoData.size, true)
-                        }
-                    }
-                }
-                Activity.RESULT_CANCELED -> { // "X" in GUI or back button pressed
-                    Lg.d("onActivityResult: RESULT_CANCELED")
-                    Lg.d("Deleting unused photo file: $newPhotoUri (Result = ${File(newPhotoUri).delete()})")
-                }
+                Activity.RESULT_OK -> viewModel.onPhotoComplete(plantPhotoPager.currentItem)
+                Activity.RESULT_CANCELED -> viewModel.deleteTemporaryPhoto()  // "X" in GUI or back button pressed
                 else -> Lg.d("onActivityResult: Unrecognized code")
             }
         }
@@ -135,10 +105,7 @@ class NewPlantConfirmFragment : BaseFragment() {
             setTitle(getString(R.string.discard_new_plant))
             setMessage(getString(R.string.discard_new_plant_confirm))
             setPositiveButton(getString(R.string.yes)) { _, _ ->
-                viewModel.photoData.forEach {
-                    val photoUri = it.photoUri
-                    Lg.d("Deleting old photo (result = ${File(photoUri).delete()}): $photoUri")
-                }
+                viewModel.deleteAllPhotos()
                 activity.currentLocation = null
                 showToast(getString(R.string.plant_discarded))
                 popUpTo(R.id.mapFragment)
@@ -148,58 +115,34 @@ class NewPlantConfirmFragment : BaseFragment() {
         }.show()
     }
 
-    private fun initPlantTypeButton() {
-        plantTypeButton.init(viewModel.plantType.value!!)
-        plantTypeButton.onNewPlantType = {
-            viewModel.plantType.value = it
+    private fun bindViewModel() {
+        with(viewModel) {
+            photoData.observe(viewLifecycleOwner, Observer { photoAdapter.items = it; photoAdapter.notifyDataSetChanged() } )
+            showPhotoDeletedToast.observe(viewLifecycleOwner, Observer { showToast(getString(R.string.photo_deleted)) })
+            startPhotoIntent.observe(viewLifecycleOwner, Observer { startPhotoIntent(it) })
+            showAddedPhoto.observe(viewLifecycleOwner, Observer { plantPhotoPager.setCurrentItem(photoAdapter.items.size - 1, true) })
         }
     }
 
-    private suspend fun initPhotoViewPager() {
+    private fun initUi() {
+        fun onClickPhoto() { /* TODO: Clicking on the photo should blow it up */ }
+        fun onClickDeletePhoto() = viewModel.deletePhoto(plantPhotoPager.currentItem)
+        fun onClickRetakePhoto() = viewModel.retakePhoto()
+        fun onClickAddPhoto(photoType: PlantPhoto.Type) = viewModel.addPhoto(photoType)
+
+        viewModel.plantType.value?.let { plantTypeButton.initIcon(it) }
         photoAdapter = PlantPhotoAdapter(
                 ::onClickPhoto,
-                ::onDeletePhoto,
-                ::onRetakePhoto,
-                ::onAddPhoto,
+                ::onClickDeletePhoto,
+                ::onClickRetakePhoto,
+                ::onClickAddPhoto,
                 viewModel.plantType,
                 this)
-        viewModel.initPhotoData()
-        photoAdapter.items = viewModel.photoData
         plantPhotoPager.adapter = photoAdapter
     }
 
-    private fun onClickPhoto() {
-        // TODO: Clicking on the photo should blow it up
-    }
-
-    private fun onDeletePhoto() {
-        val photoIndex = plantPhotoPager.currentItem
-        val photoUri = viewModel.photoData[photoIndex].photoUri
-        Lg.d("Deleting old photo: $photoUri (Result = ${File(photoUri).delete()})")
-        lifecycleScope.launch(Dispatchers.Main) {
-            delay(300)
-            viewModel.photoData.removeAt(photoIndex)
-            photoAdapter.notifyItemRemoved(photoIndex)
-            showToast(getString(R.string.photo_deleted))
-        }
-    }
-
-    private fun onRetakePhoto() {
-        isPhotoRetake = true
-        val photoFile = storageHelper.createPhotoFile()
-        newPhotoUri = photoFile.absolutePath
-        startPhotoIntent(photoFile)
-    }
-
-    private fun onAddPhoto(photoType: PlantPhoto.Type) {
-        isPhotoRetake = false
-        newPhotoType = photoType
-        val photoFile = storageHelper.createPhotoFile()
-        newPhotoUri = photoFile.absolutePath
-        startPhotoIntent(photoFile)
-    }
-
-    private fun bindClickListeners() {
+    private fun bindListeners() {
+        plantTypeButton.onNewPlantType = { viewModel.onNewPlantType(it) }
         editPlantNameButton.setOnClickListener(::onClickEditNames)
         editMeasurementsButton.setOnClickListener(::onClickEditMeasurements)
         fab.setOnClickListener(::onFabClicked)
@@ -219,7 +162,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         with(viewModel) {
             InputMeasurementsDialog(
                     R.string.edit_plant_measurements,
-                    plantType.value!!,
+                    plantType.value ?: TREE,
                     height.value,
                     diameter.value,
                     trunkDiameter.value,
@@ -230,19 +173,17 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     private fun onFabClicked(view: View) {
         lifecycleScope.launch {
-            if (!isLocationValid())
+            if (!verifyPlantLocation())
                 return@launch
-            gps.currentLocation?.let { viewModel.location = it }
+            gps.currentLocation?.let { viewModel.savePlantComposite(it) }
 
-            viewModel.savePlantComposite()
-            showToast("Plant saved") // TODO: Make snackbar (maybe?)
-
+            showToast("Plant saved")
             findNavController().popBackStack(R.id.mapFragment, false)
             activity.currentLocation = null
         }
     }
 
-    private fun isLocationValid(): Boolean {
+    private fun verifyPlantLocation(): Boolean {
         if (!gps.gpsSwitch.isEnabled) {
             showSnackbar("Wait for GPS fix")
             return false

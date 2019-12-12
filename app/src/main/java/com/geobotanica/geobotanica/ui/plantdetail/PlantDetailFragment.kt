@@ -119,7 +119,7 @@ class PlantDetailFragment : BaseFragment() {
 
     private fun initPlantTypeButton() {
         viewModel.plantType.observe(this, Observer {
-            plantTypeButton.init(it)
+            plantTypeButton.initIcon(it)
             viewModel.plantType.removeObservers(this)
         })
         plantTypeButton.onNewPlantType = { viewModel.updatePlantType(it) }
