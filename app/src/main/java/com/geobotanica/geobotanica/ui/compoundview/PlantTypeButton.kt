@@ -22,9 +22,9 @@ class PlantTypeButton @JvmOverloads constructor(
         setOnClickListener { showPlantTypeDialog() }
     }
 
-    fun initIcon(initialPlantType: Plant.Type) = updatePlantTypeIcon(initialPlantType)
+    fun init(PlantType: Plant.Type) = updatePlantType(PlantType)
 
-    private fun updatePlantTypeIcon(plantType: Plant.Type) {
+    private fun updatePlantType(plantType: Plant.Type) {
         currentPlantType = plantType
         val plantTypeDrawables = resources.obtainTypedArray(R.array.plant_type_drawable_array)
         setImageResource(plantTypeDrawables.getResourceId(plantType.ordinal, -1))
@@ -41,7 +41,7 @@ class PlantTypeButton @JvmOverloads constructor(
     }
 
     private fun onNewPlantTypeSelected(plantType: Plant.Type) {
-        updatePlantTypeIcon(plantType)
+        updatePlantType(plantType)
         onNewPlantType(plantType)
     }
 }

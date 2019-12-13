@@ -15,7 +15,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.data.entity.Plant.Type.TREE
 import com.geobotanica.geobotanica.data.entity.PlantPhoto
 import com.geobotanica.geobotanica.databinding.FragmentNewPlantConfirmBinding
 import com.geobotanica.geobotanica.ui.BaseFragment
@@ -33,8 +32,6 @@ import kotlinx.android.synthetic.main.fragment_new_plant_confirm.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-// TODO: Use newer version of ListAdapter with auto-diffing (or create new SingleLiveEvent for deleting photo smooth scroll)
 
 @Suppress("UNUSED_PARAMETER")
 class NewPlantConfirmFragment : BaseFragment() {
@@ -117,27 +114,27 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     private fun bindViewModel() {
         with(viewModel) {
-            photoData.observe(viewLifecycleOwner, Observer { photoAdapter.items = it; photoAdapter.notifyDataSetChanged() } )
+            photoData.observe(viewLifecycleOwner, Observer { photoAdapter.submitList(it) } )
             showPhotoDeletedToast.observe(viewLifecycleOwner, Observer { showToast(getString(R.string.photo_deleted)) })
             startPhotoIntent.observe(viewLifecycleOwner, Observer { startPhotoIntent(it) })
-            showAddedPhoto.observe(viewLifecycleOwner, Observer { plantPhotoPager.setCurrentItem(photoAdapter.items.size - 1, true) })
         }
     }
 
     private fun initUi() {
-        fun onClickPhoto() { /* TODO: Clicking on the photo should blow it up */ }
+        plantTypeButton.init(viewModel.plantType)
+
+        fun onClickPhoto() { /* TODO: Clicking on the photo show it fullscreen */ }
         fun onClickDeletePhoto() = viewModel.deletePhoto(plantPhotoPager.currentItem)
         fun onClickRetakePhoto() = viewModel.retakePhoto()
         fun onClickAddPhoto(photoType: PlantPhoto.Type) = viewModel.addPhoto(photoType)
+        fun onNewPhotoType(photoType: PlantPhoto.Type) = viewModel.updatePhotoType(plantPhotoPager.currentItem, photoType)
 
-        viewModel.plantType.value?.let { plantTypeButton.initIcon(it) }
         photoAdapter = PlantPhotoAdapter(
                 ::onClickPhoto,
                 ::onClickDeletePhoto,
                 ::onClickRetakePhoto,
                 ::onClickAddPhoto,
-                viewModel.plantType,
-                this)
+                ::onNewPhotoType)
         plantPhotoPager.adapter = photoAdapter
     }
 
@@ -162,7 +159,7 @@ class NewPlantConfirmFragment : BaseFragment() {
         with(viewModel) {
             InputMeasurementsDialog(
                     R.string.edit_plant_measurements,
-                    plantType.value ?: TREE,
+                    plantType,
                     height.value,
                     diameter.value,
                     trunkDiameter.value,

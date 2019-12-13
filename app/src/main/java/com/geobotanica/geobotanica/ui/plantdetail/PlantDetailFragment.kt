@@ -119,7 +119,7 @@ class PlantDetailFragment : BaseFragment() {
 
     private fun initPlantTypeButton() {
         viewModel.plantType.observe(this, Observer {
-            plantTypeButton.initIcon(it)
+            plantTypeButton.init(it)
             viewModel.plantType.removeObservers(this)
         })
         plantTypeButton.onNewPlantType = { viewModel.updatePlantType(it) }
@@ -131,13 +131,10 @@ class PlantDetailFragment : BaseFragment() {
                 ::onDeletePhoto,
                 ::onRetakePhoto,
                 ::onAddPhoto,
-                viewModel.plantType,
-                this,
                 ::onNewPhotoType)
         viewModel.photoData.observe(this, Observer {
             Lg.d("Updating photoData: $it")
-            photoAdapter.items = it
-            photoAdapter.notifyDataSetChanged()
+            photoAdapter.submitList(it)
         })
         plantPhotoPager.adapter = photoAdapter
     }

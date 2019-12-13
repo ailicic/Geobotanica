@@ -9,7 +9,6 @@ import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.data.entity.Plant.Type
 import com.geobotanica.geobotanica.data.entity.Plant.Type.TREE
 import com.geobotanica.geobotanica.data.entity.PlantLocation
 import com.geobotanica.geobotanica.data.entity.PlantMeasurement
@@ -50,8 +49,8 @@ class NewPlantConfirmViewModel @Inject constructor (
     private val _scientificName = MutableLiveData<String>()
     val scientificName: LiveData<String> = _scientificName // Used for xml data-binding
 
-    private val _plantType = MutableLiveData<Type>()
-    val plantType: LiveData<Type> = _plantType
+    private lateinit var _plantType: Plant.Type
+    val plantType: Plant.Type get() = _plantType
 
     private val _height = MutableLiveData<Measurement>()
     val height: LiveData<Measurement> = _height // Used for xml data-binding
@@ -62,12 +61,11 @@ class NewPlantConfirmViewModel @Inject constructor (
     private val _trunkDiameter = MutableLiveData<Measurement>()
     val trunkDiameter: LiveData<Measurement> = _trunkDiameter // Used for xml data-binding
 
-    private val _photoData = MutableLiveData<MutableList<PhotoData>>()
-    val photoData: LiveData<MutableList<PhotoData>> = _photoData
+    private val _photoData = MutableLiveData<List<PhotoData>>()
+    val photoData: LiveData<List<PhotoData>> = _photoData
 
     val startPhotoIntent = SingleLiveEvent<File>()
     val showPhotoDeletedToast = SingleLiveEvent<Unit>()
-    val showAddedPhoto = SingleLiveEvent<Unit>()
 
     private var userId = 0L
     private var taxonId: Long? = null
@@ -83,7 +81,7 @@ class NewPlantConfirmViewModel @Inject constructor (
             scientificName: String?,
             vernacularId: Long?,
             taxonId: Long?,
-            plantType: Type,
+            plantType: Plant.Type,
             height: Measurement?,
             diameter: Measurement?,
             trunkDiameter: Measurement?
@@ -94,13 +92,13 @@ class NewPlantConfirmViewModel @Inject constructor (
 
         _commonName.value = commonName
         _scientificName.value = scientificName
-        _plantType.value = plantType
+        _plantType = plantType
         _height.value = height
         _diameter.value = diameter
         _trunkDiameter.value = trunkDiameter
 
         viewModelScope.launch {
-            _photoData.value = mutableListOf(PhotoData(PlantPhoto.Type.COMPLETE, photoUri, getUserNickname()))
+            _photoData.value = mutableListOf(PhotoData(plantType, PlantPhoto.Type.COMPLETE, photoUri, getUserNickname()))
         }
 
         Lg.d("Fragment args: userId=$userId, photoType=$plantType, " +
@@ -121,7 +119,7 @@ class NewPlantConfirmViewModel @Inject constructor (
             Lg.d("Deleting old photo: $photoUri (Result = ${File(photoUri).delete()})")
             viewModelScope.launch(dispatchers.main) {
                 delay(300)
-                _photoData.value = photoData.apply { removeAt(photoIndex) }
+                _photoData.value = photoData.toMutableList().apply { removeAt(photoIndex) }
                 showPhotoDeletedToast.call()
             }
         }
@@ -140,6 +138,13 @@ class NewPlantConfirmViewModel @Inject constructor (
         val photoFile = storageHelper.createPhotoFile()
         newPhotoUri = photoFile.absolutePath
         startPhotoIntent.value = photoFile
+    }
+
+    fun updatePhotoType(photoIndex: Int, photoType: PlantPhoto.Type) {
+        photoData.value?.let { photoData ->
+            val newPhoto = photoData[photoIndex].copy(photoType = photoType)
+            _photoData.value = photoData.toMutableList().apply { set(photoIndex, newPhoto) }
+        }
     }
 
     fun deleteAllPhotos() {
@@ -166,7 +171,9 @@ class NewPlantConfirmViewModel @Inject constructor (
         }
     }
 
-    fun onNewPlantType(plantType: Type) {
+    fun onNewPlantType(plantType: Plant.Type) {
+        _plantType = plantType
+        _photoData.value = photoData.value?.map { it.copy(plantType = plantType) }
         if (plantType != TREE && trunkDiameter.value != null) {
             _trunkDiameter.value = null // Trunk diameter measurement permitted only if plantType = TREE
         }
@@ -179,12 +186,13 @@ class NewPlantConfirmViewModel @Inject constructor (
                 val oldPhotoUri = photoData[photoIndex].photoUri
                 Lg.d("Deleting old photo: $oldPhotoUri (Result = ${File(oldPhotoUri).delete()})")
                 val newPhoto = photoData[photoIndex].copy(photoUri = newPhotoUri)
-                _photoData.value = photoData.apply { set(photoIndex, newPhoto) }
+                _photoData.value = photoData.toMutableList().apply { set(photoIndex, newPhoto) }
             } else {
                 viewModelScope.launch(dispatchers.main) {
-                    _photoData.value = photoData.apply { add(PhotoData(newPhotoType, newPhotoUri, getUserNickname())) }
+                    _photoData.value = photoData.toMutableList().apply {
+                        add(PhotoData(plantType, newPhotoType, newPhotoUri, getUserNickname()))
+                    }
                     delay(300)
-                    showAddedPhoto.call()
                 }
             }
         }
@@ -201,7 +209,7 @@ class NewPlantConfirmViewModel @Inject constructor (
     suspend fun savePlantComposite(location: Location) {
         database.withTransaction {
             Lg.d("Saving PlantComposite to database now...")
-            val plant = Plant(userId, plantType.value ?: TREE, commonName.value, scientificName.value, vernacularId, taxonId)
+            val plant = Plant(userId, plantType, commonName.value, scientificName.value, vernacularId, taxonId)
             plant.id = plantRepo.insert(plant)
             Lg.d("Saved: $plant (id=${plant.id})")
 
@@ -214,7 +222,7 @@ class NewPlantConfirmViewModel @Inject constructor (
     }
 
     private suspend fun savePlantPhotos(plant: Plant) {
-        photoData.value?.forEach { (photoType, photoUri) ->
+        photoData.value?.forEach { (_, photoType, photoUri) ->
             val photoFilename = photoUri.substringAfterLast('/')
             val photo = PlantPhoto(userId, plant.id, photoType, photoFilename)
             photo.id = plantPhotoRepo.insert(photo)

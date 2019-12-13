@@ -82,6 +82,7 @@ class PlantDetailViewModel @Inject constructor(
             val photoData = photos.map { photoList ->
                 photoList.map {
                     PhotoData(
+                        plantType.value!!, // TODO: Fix this
                         it.type,
                         storageHelper.photoUriFrom(it.filename),
                         userNickname,

@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.data.GbDatabase
+import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.network.FileDownloader
 import com.geobotanica.geobotanica.ui.BaseFragment
@@ -23,6 +24,7 @@ import com.geobotanica.geobotanica.ui.map.marker.LocationMarker
 import com.geobotanica.geobotanica.ui.map.marker.PlantMarker
 import com.geobotanica.geobotanica.ui.map.marker.PlantMarkerData
 import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.Measurement
 import com.geobotanica.geobotanica.util.get
 import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.fragment_map.*
@@ -30,6 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+// TODO: Use adapter.notifyItemInserted() in SearchPlantName (MAYBE)
 // TODO: Fix buggy text anim in NewPlantName if click suggested
 // TODO: Remove all double bangs !!
 // TODO: Add more tests
@@ -295,6 +298,19 @@ class MapFragment : BaseFragment() {
                         newPlantSessionIdKey to System.currentTimeMillis()
                 )
         )
+//        navigateTo(
+//                R.id.newPlantConfirmFragment,
+//                bundleOf(
+//                        userIdKey to viewModel.userId,
+//                        photoUriKey to fileFromDrawable(R.drawable.plant_type_tree, "tree"),
+//                        commonNameKey to "Common",
+//                        scientificNameKey to "Scientific",
+//                        plantTypeKey to Plant.Type.TREE.flag,
+//                        heightMeasurementKey to Measurement(1.0f),
+//                        diameterMeasurementKey to Measurement(2.0f),
+//                        trunkDiameterMeasurementKey to Measurement(3.0f)
+//                )
+//        )
     }
 
     private val onPlantMarkers = Observer< List<PlantMarkerData> > { newPlantMarkerData ->

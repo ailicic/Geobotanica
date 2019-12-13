@@ -26,7 +26,6 @@ class MapListAdapter(
         return MapViewHolder(inflater.inflate(R.layout.map_list_item, parent, false))
     }
 
-
     override fun onBindViewHolder(holder: MapViewHolder, position: Int) {
         holder.bindTo(getItem(position), onClickFolder, onClickDownload, onClickCancel, onClickDelete)
     }
