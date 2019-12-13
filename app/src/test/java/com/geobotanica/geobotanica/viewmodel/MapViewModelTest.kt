@@ -1,16 +1,20 @@
 package com.geobotanica.geobotanica.viewmodel
 
 import androidx.lifecycle.Observer
+import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.OnlineAsset
 import com.geobotanica.geobotanica.data.entity.OnlineAssetId
 import com.geobotanica.geobotanica.data.repo.AssetRepo
+import com.geobotanica.geobotanica.data.repo.MapRepo
+import com.geobotanica.geobotanica.data.repo.PlantRepo
 import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.DOWNLOADED
 import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOWNLOADED
 import com.geobotanica.geobotanica.ui.map.MapViewModel
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_FIX
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_OFF
+import com.geobotanica.geobotanica.ui.map.marker.PlanterMarkerDiffer
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
 import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
 import com.geobotanica.geobotanica.util.SpekExt.setupTestDispatchers
@@ -31,11 +35,15 @@ object MapViewModelTest : Spek({
     val redrawMapLayersObserver = mockk<Observer<Unit>>(relaxed = true)
     val navigateToNewPlantObserver = mockk<Observer<Unit>>(relaxed = true)
 
+    val storageHelper = mockk<StorageHelper>()
+    val mapRepo = mockk<MapRepo>()
     val assetRepo = mockk<AssetRepo>()
+    val plantRepo = mockk<PlantRepo>()
+    val plantMarkerDiffer = mockk<PlanterMarkerDiffer>()
     val locationService = mockk<LocationService>(relaxed = true)
 
     val mapViewModel by memoized {
-        MapViewModel(mockk(), mockk(), assetRepo, mockk(), mockk(), locationService).apply {
+        MapViewModel(storageHelper, mapRepo, assetRepo, plantRepo, plantMarkerDiffer, locationService).apply {
             wasGpsSubscribed = true
             showGpsRequiredSnackbar.observeForever(gpsRequiredSnackbarObserver)
             showPlantNamesMissingSnackbar.observeForever(plantNamesMissingSnackbarObserver)

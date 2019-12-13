@@ -43,14 +43,14 @@ object NewPlantNameViewModelTest : Spek({
 
     val taxon1 = Taxon(generic = "Taxon1").apply { id = 1L }
     val taxon2 = Taxon(generic = "Taxon2").apply { id = 2L }
-    val taxonRepo = mockk<TaxonRepo> {
+    val taxonRepo = mockk<TaxonRepo>(relaxed = true) {
         coEvery { this@mockk.get(taxon1.id) } returns taxon1
         coEvery { this@mockk.get(taxon2.id) } returns taxon2
     }
 
     val vernacular1 = Vernacular(vernacular = "Vernacular1").apply { id = 1L }
     val vernacular2 = Vernacular(vernacular = "Vernacular2").apply { id = 2L }
-    val vernacularRepo = mockk<VernacularRepo> {
+    val vernacularRepo = mockk<VernacularRepo>(relaxed = true) {
         coEvery { this@mockk.get(vernacular1.id) } returns vernacular1
         coEvery { this@mockk.get(vernacular2.id) } returns vernacular2
     }

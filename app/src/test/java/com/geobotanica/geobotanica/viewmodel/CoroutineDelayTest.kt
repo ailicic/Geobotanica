@@ -74,19 +74,6 @@ object CoroutineDelayTest : Spek({
                     verify { foo.dependency.call() }
                 }
             }
-
-            context("Test with Thread.sleep()") {
-                beforeEachTest {
-                    testDispatchers.main.runBlockingTest {
-                        foo.launchFun(true)
-                        Thread.sleep(200)
-                    }
-                }
-
-                it("Should call") {
-                    verify { foo.dependency.call() }
-                }
-            }
         }
     }
 })

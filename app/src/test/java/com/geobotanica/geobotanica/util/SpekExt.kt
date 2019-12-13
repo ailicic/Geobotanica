@@ -15,7 +15,7 @@ object SpekExt {
      */
     fun Root.allowLiveData() {
         setExecutorDelegate()
-//        afterGroup { unsetLiveDataDelegate() }
+//        afterGroup { unsetExecutorDelegate() }
     }
 
     private fun setExecutorDelegate() {
@@ -26,7 +26,7 @@ object SpekExt {
         })
     }
 
-    private fun unsetLiveDataDelegate() = ArchTaskExecutor.getInstance().setDelegate(null)
+    private fun unsetExecutorDelegate() = ArchTaskExecutor.getInstance().setDelegate(null)
 
     @Suppress("EXPERIMENTAL_API_USAGE")
     fun Root.setupTestDispatchers(): TestDispatchers {
