@@ -1,10 +1,10 @@
 package com.geobotanica.geobotanica.data
 
+import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import android.content.Context
 import com.geobotanica.geobotanica.data.dao.*
 import com.geobotanica.geobotanica.data.entity.*
 
@@ -27,7 +27,7 @@ import com.geobotanica.geobotanica.data.entity.*
         PlantTypeConverter::class,
         PhotoTypeConverter::class,
         MeasurementTypeConverter::class,
-        OffsetDateTimeConverter::class )
+        DateTimeConverter::class )
 abstract class GbDatabase : RoomDatabase() {
     abstract fun assetDao(): OnlineAssetDao
     abstract fun mapDao(): OnlineMapDao

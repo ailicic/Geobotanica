@@ -19,6 +19,7 @@ import com.geobotanica.geobotanica.di.modules.ApplicationModule
 import com.geobotanica.geobotanica.di.modules.RepoModule
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.isEmulator
+import com.jakewharton.threetenabp.AndroidThreeTen
 import kotlinx.android.synthetic.main.activity_main.*
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
 
@@ -53,6 +54,8 @@ class MainActivity : AppCompatActivity() {
         AndroidGraphicFactory.createInstance(application) // Required by MapsForge
         registerReceiver(onDownloadComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         registerReceiver(onClickDownloadNotification, IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED))
+
+        AndroidThreeTen.init(this)
 
         if (isEmulator())
             Lg.d("Running on emulator")

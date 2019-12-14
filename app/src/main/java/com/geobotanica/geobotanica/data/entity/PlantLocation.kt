@@ -24,4 +24,5 @@ data class PlantLocation(
     @PrimaryKey(autoGenerate = true) var id: Long = 0L
 }
 
-fun List<PlantLocation>.mostRecent(): Location = this.maxBy { it.location.timestamp }?.location!!
+val List<PlantLocation>.mostRecent: Location
+    get() = this.maxBy { it.location.timestamp }?.location!!

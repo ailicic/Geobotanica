@@ -2,9 +2,10 @@ package com.geobotanica.geobotanica.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.geobotanica.geobotanica.util.GbTime
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.Instant
 
 
 @Entity(tableName = "geolocations")
@@ -22,7 +23,7 @@ data class Geolocation (
         @Json(name = "geoplugin_latitude") val latitude: String = "",
         @Json(name = "geoplugin_longitude") val longitude: String = "",
         @Json(name = "geoplugin_locationAccuracyRadius") val locationAccuracyRadius: String = "",
-        val timestamp: OffsetDateTime = OffsetDateTime.now()
+        val timestamp: Instant = GbTime.now()
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0L
 }

@@ -4,7 +4,8 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.geobotanica.geobotanica.data.dao.BaseDao
 import com.geobotanica.geobotanica.data_taxa.entity.Tag
-import org.threeten.bp.OffsetDateTime
+import com.geobotanica.geobotanica.util.GbTime
+import org.threeten.bp.Instant
 
 @Dao
 interface TagDao : BaseDao<Tag> {
@@ -15,7 +16,7 @@ interface TagDao : BaseDao<Tag> {
     suspend fun getVernacularWithTag(vernacularId: Long, tag: Int): Tag?
 
     @Query("UPDATE tags SET timestamp = :timestamp WHERE vernacularId = :vernacularId AND tag = :tag")
-    suspend fun updateVernacularTimestamp(vernacularId: Long, tag: Int, timestamp: OffsetDateTime = OffsetDateTime.now())
+    suspend fun updateVernacularTimestamp(vernacularId: Long, tag: Int, timestamp: Instant = GbTime.now())
 
     @Query("DELETE FROM tags WHERE tag = :tag AND vernacularId=:id")
     suspend fun unsetVernacularTag(id: Long, tag: Int)
@@ -46,7 +47,7 @@ interface TagDao : BaseDao<Tag> {
     suspend fun getTaxonWithTag(taxonId: Long, tag: Int): Tag?
 
     @Query("UPDATE tags SET timestamp = :timestamp WHERE taxonId = :taxonId AND tag = :tag")
-    suspend fun updateTaxonTimestamp(taxonId: Long, tag: Int, timestamp: OffsetDateTime = OffsetDateTime.now())
+    suspend fun updateTaxonTimestamp(taxonId: Long, tag: Int, timestamp: Instant = GbTime.now())
 
     @Query("DELETE FROM tags WHERE taxonId=:id AND tag = :tag")
     suspend fun unsetTaxonTag(id: Long, tag: Int)

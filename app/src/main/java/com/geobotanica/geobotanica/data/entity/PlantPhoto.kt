@@ -2,7 +2,8 @@ package com.geobotanica.geobotanica.data.entity
 
 import androidx.room.*
 import com.geobotanica.geobotanica.data.entity.Plant.Type.*
-import org.threeten.bp.OffsetDateTime
+import com.geobotanica.geobotanica.util.GbTime
+import org.threeten.bp.Instant
 
 @Entity(tableName = "plantPhotos",
     foreignKeys = [
@@ -27,7 +28,7 @@ data class PlantPhoto(
     val plantId: Long,
     val type: Type,
     val filename: String,
-    val timestamp: OffsetDateTime = OffsetDateTime.now()
+    val timestamp: Instant = GbTime.now()
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0
 

@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.geobotanica.geobotanica.data.entity.OffsetDateTimeConverter
+import com.geobotanica.geobotanica.data.entity.DateTimeConverter
 import com.geobotanica.geobotanica.data_taxa.dao.TagDao
 import com.geobotanica.geobotanica.data_taxa.dao.TaxonDao
 import com.geobotanica.geobotanica.data_taxa.dao.TypeDao
@@ -24,7 +24,7 @@ const val DEFAULT_RESULT_LIMIT = 50
         ],
         version = 1
 )
-@TypeConverters(OffsetDateTimeConverter::class )
+@TypeConverters(DateTimeConverter::class )
 abstract class TaxaDatabase : RoomDatabase() {
     abstract fun taxonDao(): TaxonDao
     abstract fun vernacularDao(): VernacularDao

@@ -4,7 +4,8 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import org.threeten.bp.OffsetDateTime
+import com.geobotanica.geobotanica.util.GbTime
+import org.threeten.bp.Instant
 
 @Entity(tableName = "tags",
         foreignKeys = [
@@ -30,7 +31,7 @@ data class Tag(
     val tag: Int, // = PlantNameTag.ordinal (no ORed bitflags in db)
     val vernacularId: Long? = null,
     val taxonId: Long? = null,
-    val timestamp: OffsetDateTime = OffsetDateTime.now()
+    val timestamp: Instant = GbTime.now()
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0L
 }

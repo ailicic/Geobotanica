@@ -68,6 +68,7 @@ class NewPlantConfirmViewModel @Inject constructor (
     val showPhotoDeletedToast = SingleLiveEvent<Unit>()
 
     private var userId = 0L
+    private lateinit var userNickname: String
     private var taxonId: Long? = null
     private var vernacularId: Long? = null
     private var isPhotoRetake: Boolean = false
@@ -97,8 +98,9 @@ class NewPlantConfirmViewModel @Inject constructor (
         _diameter.value = diameter
         _trunkDiameter.value = trunkDiameter
 
-        viewModelScope.launch {
-            _photoData.value = mutableListOf(PhotoData(plantType, PlantPhoto.Type.COMPLETE, photoUri, getUserNickname()))
+        viewModelScope.launch(dispatchers.main) {
+            userNickname = userRepo.get(userId).nickname
+            _photoData.value = mutableListOf(PhotoData(plantType, PlantPhoto.Type.COMPLETE, photoUri, userNickname))
         }
 
         Lg.d("Fragment args: userId=$userId, photoType=$plantType, " +
@@ -109,14 +111,15 @@ class NewPlantConfirmViewModel @Inject constructor (
 
 
     fun deleteTemporaryPhoto() {
-        val result = File(newPhotoUri).delete()
+        val result = storageHelper.deleteFile(newPhotoUri)
         Lg.d("Photo cancelled -> Deleted unused photo file: $newPhotoUri (Result = $result)")
     }
 
     fun deletePhoto(photoIndex: Int) {
         photoData.value?.let { photoData ->
             val photoUri = photoData[photoIndex].photoUri
-            Lg.d("Deleting old photo: $photoUri (Result = ${File(photoUri).delete()})")
+            val result = storageHelper.deleteFile(photoUri)
+            Lg.d("Deleting old photo: $photoUri (Result = $result)")
             viewModelScope.launch(dispatchers.main) {
                 delay(300)
                 _photoData.value = photoData.toMutableList().apply { removeAt(photoIndex) }
@@ -149,7 +152,7 @@ class NewPlantConfirmViewModel @Inject constructor (
 
     fun deleteAllPhotos() {
         photoData.value?.forEach {
-            val result = File(it.photoUri).delete()
+            val result = storageHelper.deleteFile(it.photoUri)
             Lg.d("Deleting old photo (result = $result): ${it.photoUri}")
         }
     }
@@ -184,16 +187,17 @@ class NewPlantConfirmViewModel @Inject constructor (
         photoData.value?.let { photoData ->
             if (isPhotoRetake) {
                 val oldPhotoUri = photoData[photoIndex].photoUri
-                Lg.d("Deleting old photo: $oldPhotoUri (Result = ${File(oldPhotoUri).delete()})")
+                val result = storageHelper.deleteFile(oldPhotoUri)
+                Lg.d("Deleting old photo: $oldPhotoUri (Result = $result)")
                 val newPhoto = photoData[photoIndex].copy(photoUri = newPhotoUri)
                 _photoData.value = photoData.toMutableList().apply { set(photoIndex, newPhoto) }
             } else {
-                viewModelScope.launch(dispatchers.main) {
+//                viewModelScope.launch(dispatchers.main) {
                     _photoData.value = photoData.toMutableList().apply {
-                        add(PhotoData(plantType, newPhotoType, newPhotoUri, getUserNickname()))
+                        add(PhotoData(plantType, newPhotoType, newPhotoUri, userNickname))
                     }
-                    delay(300)
-                }
+//                    delay(300)
+//                }
             }
         }
     }
@@ -203,8 +207,6 @@ class NewPlantConfirmViewModel @Inject constructor (
         _diameter.value = diameter
         _trunkDiameter.value = trunkDiameter
     }
-
-    private suspend fun getUserNickname(): String = userRepo.get(userId).nickname
 
     suspend fun savePlantComposite(location: Location) {
         database.withTransaction {

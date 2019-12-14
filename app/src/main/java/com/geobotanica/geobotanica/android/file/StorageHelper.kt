@@ -4,10 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Environment
 import com.geobotanica.geobotanica.data.entity.OnlineAsset
+import com.geobotanica.geobotanica.util.GbTime
 import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.asFilename
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -36,12 +36,16 @@ class StorageHelper @Inject constructor(val appContext: Context) {
     //  /storage/emulated/0/Android/data/com.geobotanica/files/Pictures/
 
     fun createPhotoFile(): File {
-        val filename: String = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())
+        val filename: String = GbTime.now().asFilename()
         val photosDir = File(getUserPhotosDir())
         photosDir.mkdirs()
         Lg.d("StorageHelper.createPhotoFile(): $photosDir/$filename.jpg")
         return File.createTempFile(filename, ".jpg", photosDir)
     }
+
+    fun absolutePath(file: File) = file.absolutePath
+
+    fun deleteFile(uri: String): Boolean = File(uri).delete()
 
     fun getMapsPath() = "${getDownloadPath()}/maps"
 

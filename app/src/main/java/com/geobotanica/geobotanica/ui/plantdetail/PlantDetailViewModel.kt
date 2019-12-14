@@ -5,13 +5,17 @@ import androidx.room.withTransaction
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.data.GbDatabase
-import com.geobotanica.geobotanica.data.entity.*
+import com.geobotanica.geobotanica.data.entity.Plant
+import com.geobotanica.geobotanica.data.entity.PlantMeasurement
 import com.geobotanica.geobotanica.data.entity.PlantMeasurement.Type.*
+import com.geobotanica.geobotanica.data.entity.PlantPhoto
+import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.data.repo.*
 import com.geobotanica.geobotanica.ui.viewpager.PhotoData
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.Measurement
 import com.geobotanica.geobotanica.util.Units
+import com.geobotanica.geobotanica.util.toDateString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -86,7 +90,7 @@ class PlantDetailViewModel @Inject constructor(
                         it.type,
                         storageHelper.photoUriFrom(it.filename),
                         userNickname,
-                        it.timestamp.toSimpleDate()
+                        it.timestamp.toDateString()
                     )
                 }
             }
@@ -98,21 +102,21 @@ class PlantDetailViewModel @Inject constructor(
         }
 
         heightDateText = plantMeasurementRepo.getLastHeightOfPlant(plantId)
-                .map { it?.timestamp?.toSimpleDate().orEmpty() }
+                .map { it?.timestamp?.toDateString().orEmpty() }
 
         diameter = plantMeasurementRepo.getLastDiameterOfPlant(plantId).map {
             it?.let { Measurement(it.measurement).convertTo(Units.M) }
         }
 
         diameterDateText = plantMeasurementRepo.getLastDiameterOfPlant(plantId)
-                .map { it?.timestamp?.toSimpleDate().orEmpty() }
+                .map { it?.timestamp?.toDateString().orEmpty() }
 
         trunkDiameter = plantMeasurementRepo.getLastTrunkDiameterOfPlant(plantId).map {
             it?.let { Measurement(it.measurement) }
         }
 
         trunkDiameterDateText = plantMeasurementRepo.getLastTrunkDiameterOfPlant(plantId)
-                .map { it?.timestamp?.toSimpleDate().orEmpty() }
+                .map { it?.timestamp?.toDateString().orEmpty() }
 
         lastMeasuredByUser = plantMeasurementRepo.getAllMeasurementsOfPlant(plantId).switchMap { measurements ->
             val lastMeasurement = measurements.maxBy { it.timestamp }
@@ -120,7 +124,7 @@ class PlantDetailViewModel @Inject constructor(
                 userRepo.getLiveData(plantMeasurement.userId).map { it.nickname }
             } ?: MutableLiveData<String>().apply { value = "" }
         }
-        createdDateText = plant.map { it.timestamp.toSimpleDate() }
+        createdDateText = plant.map { it.timestamp.toDateString() }
     }
 
     override fun onCleared() {

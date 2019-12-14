@@ -6,7 +6,8 @@ import com.geobotanica.geobotanica.data.entity.Geolocation
 import com.geobotanica.geobotanica.network.Geolocator
 import com.geobotanica.geobotanica.network.Resource
 import com.geobotanica.geobotanica.network.createNetworkBoundResource
-import org.threeten.bp.OffsetDateTime
+import com.geobotanica.geobotanica.util.GbTime
+import org.threeten.bp.Duration
 import javax.inject.Inject
 
 
@@ -23,7 +24,7 @@ class GeolocationRepo @Inject constructor(
 
     fun get(): LiveData<Resource<Geolocation>> = createNetworkBoundResource(
             loadFromDb = { geolocationDao.getNewest() },
-            shouldFetch = { it == null || it.timestamp.plusDays(1) < OffsetDateTime.now() },
+            shouldFetch = { it == null || it.timestamp.plus(Duration.ofDays(1)) < GbTime.now() },
             saveToDb = { geolocationDao.insert(it) },
             fetchData = { geolocator.get() }
     )

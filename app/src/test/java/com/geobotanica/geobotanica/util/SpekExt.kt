@@ -55,6 +55,11 @@ object SpekExt {
         }
     }
 
+    fun LifecycleAware.mockTime() {
+        beforeGroup { GbTime.freeze() }
+        afterGroup { GbTime.unfreeze() }
+    }
+
     class TestDispatchers : GbDispatchers {
         @ExperimentalCoroutinesApi private val testCoroutineDispatcher = TestCoroutineDispatcher()
 

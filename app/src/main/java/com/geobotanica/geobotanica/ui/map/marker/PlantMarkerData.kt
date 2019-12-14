@@ -1,6 +1,8 @@
 package com.geobotanica.geobotanica.ui.map.marker
 
 import com.geobotanica.geobotanica.data.entity.*
+import com.geobotanica.geobotanica.util.GbTime
+import com.geobotanica.geobotanica.util.toDateString
 
 
 data class PlantMarkerData(
@@ -11,17 +13,17 @@ data class PlantMarkerData(
         val latitude: Double? = null,
         val longitude: Double? = null,
         val photoFilename: String? = null,
-        val dateCreated: String? = null
+        val dateCreated: String? = GbTime.now().toDateString()
 ) {
 
     constructor(plantComposite: PlantComposite): this(
-            plantComposite.plant.id,
-            plantComposite.plant.type,
-            plantComposite.plant.commonName,
-            plantComposite.plant.scientificName,
-            plantComposite.plantLocations.mostRecent().latitude,
-            plantComposite.plantLocations.mostRecent().longitude,
-            plantComposite.plantPhotos.selectMain().filename,
-            plantComposite.plant.timestamp.toSimpleDate()
+            plantId = plantComposite.plant.id,
+            plantType = plantComposite.plant.type,
+            commonName = plantComposite.plant.commonName,
+            scientificName = plantComposite.plant.scientificName,
+            latitude = plantComposite.plantLocations.mostRecent.latitude,
+            longitude = plantComposite.plantLocations.mostRecent.longitude,
+            photoFilename = plantComposite.plantPhotos.selectMain().filename,
+            dateCreated = plantComposite.plant.timestamp.toDateString()
     )
 }

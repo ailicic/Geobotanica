@@ -11,12 +11,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
 import com.geobotanica.geobotanica.data.entity.PlantPhoto
-import com.geobotanica.geobotanica.data.entity.toSimpleDate
 import com.geobotanica.geobotanica.ui.viewpager.PlantPhotoAdapter.PhotoViewHolder
+import com.geobotanica.geobotanica.util.GbTime
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.setScaledBitmap
+import com.geobotanica.geobotanica.util.toDateString
 import kotlinx.android.synthetic.main.compound_plant_photo.view.*
-import org.threeten.bp.OffsetDateTime
 
 
 class PlantPhotoAdapter(
@@ -106,6 +106,6 @@ data class PhotoData(
         val photoType: PlantPhoto.Type,
         val photoUri: String,
         val userNickname: String,
-        val timestamp: String = OffsetDateTime.now().toSimpleDate(),
-        val id: Long = 0L
+        val timestamp: String = GbTime.now().toDateString(),
+        val id: Long = 0L // Not used unless the PlantPhoto exists in the db and id has been generated
 )
