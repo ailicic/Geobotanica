@@ -43,13 +43,13 @@ class VernacularRepo @Inject constructor(
     suspend fun getAllUsed(limit: Int = DEFAULT_RESULT_LIMIT): List<Long>? =
             tagDao.getAllVernacularsWithTag(USED.ordinal, limit)
 
-    suspend fun setTagged(id: Long, tag: PlantNameTag, isTagged: Boolean = true) {
+    suspend fun setTagged(id: Long, plantNameTag: PlantNameTag, isTagged: Boolean = true) {
         if (isTagged) {
-            tagDao.getVernacularWithTag(id, tag.ordinal)?.let {
-                updateTagTimestamp(it.vernacularId!!, tag)
-            } ?: tagDao.insert(Tag(tag.ordinal, vernacularId = id))
+            tagDao.getVernacularWithTag(id, plantNameTag.ordinal)?.let { tag ->
+                tag.vernacularId?.let { updateTagTimestamp(it, plantNameTag) }
+            } ?: tagDao.insert(Tag(plantNameTag.ordinal, vernacularId = id))
         } else
-            tagDao.unsetVernacularTag(id, tag.ordinal)
+            tagDao.unsetVernacularTag(id, plantNameTag.ordinal)
     }
 
     suspend fun updateTagTimestamp(id: Long, tag: PlantNameTag) = tagDao.updateVernacularTimestamp(id, tag.ordinal)

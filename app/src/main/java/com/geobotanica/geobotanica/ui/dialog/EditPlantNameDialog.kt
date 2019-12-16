@@ -28,7 +28,7 @@ class EditPlantNameDialog(
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         customView = LayoutInflater.from(context).inflate(R.layout.dialog_plant_name, null)
 
-        dialog = with(AlertDialog.Builder(activity!!)) {
+        dialog = with(AlertDialog.Builder(requireActivity())) {
             setTitle(getString(R.string.edit_plant_name))
             setView(customView)
             setNegativeButton(getString(R.string.cancel)) { _, _ -> }

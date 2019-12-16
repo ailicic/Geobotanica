@@ -165,16 +165,16 @@ class NewPlantNameFragment : BaseFragment() {
     private fun onClickStar(result: SearchResult) = viewModel.onEvent(StarClicked(result))
 
     private fun createBundle(viewEffect: NavViewEffect): Bundle {
-        with(viewModel.viewState.value!!) {
-            return bundleOf(
+        return viewModel.viewState.value?.let { viewState: ViewState ->
+            bundleOf(
                     userIdKey to viewEffect.userId,
                     photoUriKey to viewEffect.photoUri,
-                    commonNameKey to commonName.nullIfBlank(),
-                    scientificNameKey to scientificName.nullIfBlank(),
+                    commonNameKey to viewState.commonName.nullIfBlank(),
+                    scientificNameKey to viewState.scientificName.nullIfBlank(),
                     vernacularIdKey to viewEffect.vernacularId,
                     taxonIdKey to viewEffect.taxonId,
                     plantTypeKey to viewEffect.plantTypeFlags
             )
-        }
+        } ?: throw IllegalStateException()
     }
 }

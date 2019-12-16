@@ -86,7 +86,7 @@ class PlantDetailViewModel @Inject constructor(
             val photoData = photos.map { photoList ->
                 photoList.map {
                     PhotoData(
-                        plantType.value!!, // TODO: Fix this
+                        plantType.value ?: Plant.Type.TREE,
                         it.type,
                         storageHelper.photoUriFrom(it.filename),
                         userNickname,
@@ -133,27 +133,33 @@ class PlantDetailViewModel @Inject constructor(
     }
 
     fun updatePlantType(plantType: Plant.Type) = viewModelScope.launch(Dispatchers.IO) {
-        val plant = plant.value!!.copy(type = plantType).apply { id = plantId }
-        val result = plantRepo.update(plant)
-        Lg.d("Updated plant type to $plantType (result = $result)")
+        plant.value?.let { plant ->
+            val updatedPlant = plant.copy(type = plantType).apply { id = plantId }
+            val result = plantRepo.update(updatedPlant)
+            Lg.d("Updated plant type to $plantType (result = $result)")
+
+        }
     }
 
     fun updatePlantNames(newCommonName: String?, newScientificName: String?) {
         viewModelScope.launch(Dispatchers.IO) {
-            val plant = plant.value!!.copy(
-                    commonName = newCommonName,
-                    scientificName = newScientificName
-            ).apply { id = plantId }
-            val result = plantRepo.update(plant)
-            Lg.d("Updated plant names (result = $result)")
+            plant.value?.let { plant ->
+                val updatedPlant = plant.copy(
+                        commonName = newCommonName,
+                        scientificName = newScientificName
+                ).apply { id = plantId }
+                val result = plantRepo.update(updatedPlant)
+                Lg.d("Updated plant names (result = $result)")
+            }
         }
     }
 
     fun updatePlantPhotoType(photoIndex: Int, newPhotoType: PlantPhoto.Type) = viewModelScope.launch(Dispatchers.IO) {
-        val photo = photos.value!![photoIndex]
-        val updatedPhoto = photo.copy(type = newPhotoType).apply { id = photo.id }
-        val result = plantPhotoRepo.update(updatedPhoto)
-        Lg.d("Updated plant photo to $newPhotoType (result = $result)")
+        photos.value?.get(photoIndex)?.let { photo ->
+            val updatedPhoto = photo.copy(type = newPhotoType).apply { id = photo.id }
+            val result = plantPhotoRepo.update(updatedPhoto)
+            Lg.d("Updated plant photo to $newPhotoType (result = $result)")
+        }
     }
 
     fun updatePlantPhoto(photoIndex: Int, newPhotoUri: String) = viewModelScope.launch(Dispatchers.IO) {
@@ -165,18 +171,20 @@ class PlantDetailViewModel @Inject constructor(
     }
 
     fun addPlantPhoto(photoType: PlantPhoto.Type, photoUri: String) = viewModelScope.launch(Dispatchers.IO) {
-        val plant = plant.value!!
-        val photo = PlantPhoto(plant.userId, plant.id, photoType, photoUri.substringAfterLast('/'))
-        val id = plantPhotoRepo.insert(photo)
-        Lg.d("Added plant photo (id = $id)")
+        plant.value?.let { plant ->
+            val photo = PlantPhoto(plant.userId, plant.id, photoType, photoUri.substringAfterLast('/'))
+            val id = plantPhotoRepo.insert(photo)
+            Lg.d("Added plant photo (id = $id)")
+        }
     }
 
     suspend fun deletePlantPhoto(photoIndex: Int) = withContext(Dispatchers.IO) {
-        val photo = photos.value!![photoIndex]
-        val photoUri = storageHelper.photoUriFrom(photo.filename)
-        Lg.d("Deleted photo file: $photoUri (result = ${File(photoUri).delete()})")
-        val result = plantPhotoRepo.delete(photo)
-        Lg.d("Deleted photo from db (result = $result)")
+        photos.value?.get(photoIndex)?.let { photo ->
+            val photoUri = storageHelper.photoUriFrom(photo.filename)
+            Lg.d("Deleted photo file: $photoUri (result = ${File(photoUri).delete()})")
+            val result = plantPhotoRepo.delete(photo)
+            Lg.d("Deleted photo from db (result = $result)")
+        }
     }
 
     fun onMeasurementsAdded(height: Measurement?, diameter: Measurement?, trunkDiameter: Measurement?) {
@@ -204,8 +212,10 @@ class PlantDetailViewModel @Inject constructor(
     private fun deletePlant() = viewModelScope.launch(Dispatchers.IO) {
         deleteAllPlantPhotoFiles()
         database.withTransaction {
-            val result = plantRepo.delete(plant.value!!)
-            Lg.d("Deleting plant: ${plant.value!!} (Result=$result)")
+            plant.value?.let { plant ->
+                val result = plantRepo.delete(plant)
+                Lg.d("Deleting plant: $plant (Result=$result)")
+            }
         }
     }
 

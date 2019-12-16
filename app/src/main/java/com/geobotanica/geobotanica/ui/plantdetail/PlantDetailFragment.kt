@@ -104,7 +104,7 @@ class PlantDetailFragment : BaseFragment() {
                         viewModel.addPlantPhoto(newPhotoType, newPhotoUri)
                         lifecycleScope.launch(Dispatchers.Main) {
                             delay(300)
-                            plantPhotoPager.setCurrentItem(viewModel.photos.value!!.size, true)
+                            viewModel.photos.value?.size?.let { plantPhotoPager.setCurrentItem(it, true) }
                         }
                     }
                 }
@@ -180,25 +180,25 @@ class PlantDetailFragment : BaseFragment() {
 
     @Suppress("UNUSED_PARAMETER")
     private fun onClickEditNames(view: View) {
-        with(viewModel.plant.value!!) {
+        viewModel.plant.value?.run {
             EditPlantNameDialog(
                     commonName.orEmpty(),
                     scientificName.orEmpty(),
                     viewModel::updatePlantNames
-            )
-        }.show(requireFragmentManager(),"tag")
+            ).show(requireFragmentManager(),"tag")
+        }
     }
 
     @Suppress("UNUSED_PARAMETER")
     private fun onClickAddMeasurements(view: View?) {
-        with(viewModel) {
+        viewModel.plantType.value?.let { plantType ->
             InputMeasurementsDialog(
                     R.string.add_plant_measurements,
-                    plantType.value!!,
+                    plantType,
                     null,
                     null,
                     null,
-                    ::onMeasurementsAdded
+                    viewModel::onMeasurementsAdded
             ).show(requireFragmentManager(), "tag")
         }
     }

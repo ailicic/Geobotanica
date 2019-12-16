@@ -41,7 +41,7 @@ class GpsCompoundView @JvmOverloads constructor(
 //        Lg.d("GpsCompoundView: onAttachedToWindow()")
 
         if (activity.currentLocation != null)
-            importLocationData(activity.currentLocation!!)
+            activity.currentLocation?.let { importLocationData(it) }
         else
             locationService.subscribe(this)
         gpsSwitch.setOnCheckedChangeListener(::onToggleHoldPosition)

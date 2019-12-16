@@ -28,5 +28,10 @@ data class Location @JvmOverloads constructor(
         )
     }
 
-    fun toLatLong() = LatLong(latitude!!, longitude!!)
+    fun toLatLong(): LatLong {
+        return if (latitude != null && longitude != null)
+            LatLong(latitude, longitude)
+        else
+            LatLong(0.0,0.0)
+    }
 }

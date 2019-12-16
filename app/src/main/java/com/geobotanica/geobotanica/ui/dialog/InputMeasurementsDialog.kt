@@ -32,7 +32,7 @@ class InputMeasurementsDialog(
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         customView = LayoutInflater.from(context).inflate(R.layout.dialog_measurements, null)
 
-        dialog = with(AlertDialog.Builder(activity!!)) {
+        dialog = with(AlertDialog.Builder(requireActivity())) {
             setTitle(getString(titleResId))
             setView(customView)
             setNegativeButton(getString(R.string.cancel)) { _, _ -> }

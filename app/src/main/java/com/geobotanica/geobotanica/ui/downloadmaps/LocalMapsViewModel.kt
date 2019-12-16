@@ -46,7 +46,7 @@ class LocalMapsViewModel @Inject constructor(
                     }
                     ERROR -> {
                         MutableLiveData<Resource<List<OnlineMapListItem>>>()
-                                .apply { value = Resource.error(geolocation.error!!) }
+                                .apply { value = Resource.error(geolocation.error ?: Throwable()) }
                     }
                 }
             }

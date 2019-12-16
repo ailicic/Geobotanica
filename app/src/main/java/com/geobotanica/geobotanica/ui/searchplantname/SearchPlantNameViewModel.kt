@@ -105,20 +105,24 @@ class SearchPlantNameViewModel @Inject constructor (
         updateViewState(isNoResultsTextVisible = false)
         searchJob?.cancel()
         searchJob = viewModelScope.launch(dispatchers.main) {
-            delay(300)
-            updateViewState(isLoadingSpinnerVisible = true)
-            val searchEditText = viewState.value!!.searchEditText
-            val searchFilterOptions = viewState.value!!.searchFilterOptions
-            val showStars = ! searchFilterOptions.hasFilter(STARRED)
-            plantNameSearchService.search(searchEditText, searchFilterOptions).collect {
-                emitViewEffect(UpdateSearchResults(it, showStars))
+            viewState.value?.let { viewState ->
+                delay(300)
+                updateViewState(isLoadingSpinnerVisible = true)
+                val searchEditText = viewState.searchEditText
+                val searchFilterOptions = viewState.searchFilterOptions
+                val showStars = ! searchFilterOptions.hasFilter(STARRED)
+                plantNameSearchService.search(searchEditText, searchFilterOptions).collect {
+                    emitViewEffect(UpdateSearchResults(it, showStars))
+                }
             }
         }
         searchJob?.invokeOnSuccess {
-            updateViewState(isLoadingSpinnerVisible = false)
+            viewState.value?.let { viewState ->
+                updateViewState(isLoadingSpinnerVisible = false)
 
-            if(viewState.value!!.searchResults.isEmpty())
-                updateViewState(isNoResultsTextVisible = true)
+                if(viewState.searchResults.isEmpty())
+                    updateViewState(isNoResultsTextVisible = true)
+            }
         }
     }
 

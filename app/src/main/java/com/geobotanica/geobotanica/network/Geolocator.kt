@@ -16,8 +16,9 @@ class Geolocator @Inject constructor(
 ) {
     private val geolocatorUrl = "http://www.geoplugin.net/json.gp"
 
+    @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun get(): Geolocation {
         val adapter = moshi.adapter<Geolocation>()
-        return adapter.fromJson(okHttpFileDownloader.getJson(geolocatorUrl))!!
+        return adapter.fromJson(okHttpFileDownloader.getJson(geolocatorUrl)) ?: throw IllegalStateException()
     }
 }

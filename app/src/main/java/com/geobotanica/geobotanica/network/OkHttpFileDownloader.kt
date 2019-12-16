@@ -7,6 +7,7 @@ import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
+import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,6 +16,7 @@ import javax.inject.Singleton
 class OkHttpFileDownloader@Inject constructor(
         private val okHttpClient: OkHttpClient
 ) {
+    @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun getJson(url: String): String {
         try {
             val request: Request = Request.Builder()
@@ -22,7 +24,7 @@ class OkHttpFileDownloader@Inject constructor(
                     .build()
             val call: Call = okHttpClient.newCall(request)
             val response = withContext(Dispatchers.IO) { call.execute() }
-            return response.body()!!.string()
+            return response.body()?.string() ?: throw IllegalStateException()
         } catch (e: IOException) {
             Lg.e("IOException = $e")
             throw e
@@ -116,7 +118,7 @@ class OkHttpFileDownloader@Inject constructor(
 //                .build()
 //        val call: Call = okHttpClient.newCall(request)
 //        val response = withContext(Dispatchers.IO) { call.execute() }
-//        return response.body()!!
+//        return response.body() ?: throw IllegalStateException()
 //    }
 //
 //    data class DownloadStatus(

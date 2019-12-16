@@ -25,4 +25,4 @@ data class PlantLocation(
 }
 
 val List<PlantLocation>.mostRecent: Location
-    get() = this.maxBy { it.location.timestamp }?.location!!
+    get() = this.maxBy { it.location.timestamp }?.location ?: throw IllegalStateException()

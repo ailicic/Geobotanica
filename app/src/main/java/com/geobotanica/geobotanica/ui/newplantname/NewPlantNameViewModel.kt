@@ -48,7 +48,7 @@ class NewPlantNameViewModel @Inject constructor (
     private var taxonId: Long? = null
     private var vernacularId: Long? = null
 
-    fun onEvent(event: ViewEvent) = when (event) {
+    fun onEvent(event: ViewEvent): Unit = when (event) {
         is ViewCreated -> {
             Lg.v("onEvent(ViewCreated)")
 
@@ -101,12 +101,12 @@ class NewPlantNameViewModel @Inject constructor (
             taxonId = if (isTextSame) lastClickedResult?.id else null
         }
         is StarClicked -> { updateIsStarred(event.searchResult); Unit }
-        is ResultClicked -> {
+        is ResultClicked -> viewState.value?.let { viewState ->
             Lg.v("onEvent(ResultClicked)")
             val index = event.index
             val searchResult = event.searchResult
-            val isClickedResultSameAsLast = event.index == viewState.value?.lastClickedResultIndex
-            if (viewState.value!!.isCommonNameEditable) {
+            val isClickedResultSameAsLast = event.index == viewState.lastClickedResultIndex
+            if (viewState.isCommonNameEditable) {
                 vernacularId = searchResult.id
                 updateViewState(
                         commonName = searchResult.plantName,
@@ -117,7 +117,7 @@ class NewPlantNameViewModel @Inject constructor (
                     emitViewEffect(ShowCommonNameAnimation(searchResult.plantName))
                 }
             }
-            if (viewState.value!!.isScientificNameEditable) {
+            if (viewState.isScientificNameEditable) {
                 taxonId = searchResult.id
                 updateViewState(
                         scientificName = searchResult.plantName,
@@ -126,11 +126,11 @@ class NewPlantNameViewModel @Inject constructor (
                 )
                 if (! isClickedResultSameAsLast)
                     emitViewEffect(ShowScientificNameAnimation(searchResult.plantName))
-            }; Unit
-        }
-        is FabClicked -> {
+            }
+        } ?: Unit
+        is FabClicked -> viewState.value?.let { viewState ->
             Lg.v("onEvent(FabClicked)")
-            if (viewState.value!!.commonName.isBlank() && viewState.value!!.scientificName.isBlank()) {
+            if (viewState.commonName.isBlank() && viewState.scientificName.isBlank()) {
                 emitViewEffect(ShowPlantNameSnackbar)
             } else {
                 viewModelScope.launch(dispatchers.main) {
@@ -141,7 +141,7 @@ class NewPlantNameViewModel @Inject constructor (
                         emitViewEffect(NavigateToNewPlantMeasurement(userId, photoUri, taxonId, vernacularId, plantTypeFlags))
                 }
             }; Unit
-        }
+        } ?: Unit
     }
 
     @SuppressLint("DefaultLocale")
@@ -163,8 +163,8 @@ class NewPlantNameViewModel @Inject constructor (
         }.invokeOnCompletion { completionError ->
             if (completionError != null) // Coroutine did not complete
                 return@invokeOnCompletion
-            taxonId?.let { emitViewEffect(ShowScientificNameAnimation(viewState.value?.scientificName!!)) }
-            vernacularId?.let { emitViewEffect(ShowCommonNameAnimation(viewState.value?.commonName!!)) }
+            taxonId?.let { emitViewEffect(ShowScientificNameAnimation(viewState.value?.scientificName ?: "")) }
+            vernacularId?.let { emitViewEffect(ShowCommonNameAnimation(viewState.value?.commonName ?: "")) }
         }
     }
 

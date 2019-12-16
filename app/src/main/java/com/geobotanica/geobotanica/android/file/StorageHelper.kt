@@ -56,7 +56,7 @@ class StorageHelper @Inject constructor(val appContext: Context) {
         return if (onlineAsset.isInternalStorage)
             appContext.filesDir.absolutePath.removeSuffix("/files")
         else
-            appContext.getExternalFilesDir(null)!!.absolutePath
+            appContext.getExternalFilesDir(null)?.absolutePath  ?: throw IllegalStateException()
     }
 
     fun isAssetAvailable(asset: OnlineAsset): Boolean {

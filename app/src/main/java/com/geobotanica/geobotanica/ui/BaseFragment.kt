@@ -96,9 +96,11 @@ abstract class BaseFragment : Fragment() {
     protected fun showToast(message: String) = Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
 
     protected fun showSnackbar(message: String, button: String = "", action: ((View) -> Unit)? = null) {
-        Snackbar.make(this.view!!, message, Snackbar.LENGTH_LONG).run {
-            action?.let { setAction(button, action) }
-            show()
+        view?.let { view ->
+            Snackbar.make(view, message, Snackbar.LENGTH_LONG).run {
+                action?.let { setAction(button, action) }
+                show()
+            }
         }
     }
 

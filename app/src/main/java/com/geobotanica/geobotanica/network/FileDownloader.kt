@@ -350,7 +350,7 @@ class FileDownloader @Inject constructor (
 
                 val mapFolderListType = Types.newParameterizedType(List::class.java, OnlineMapFolder::class.java)
                 val adapter = moshi.adapter<List<OnlineMapFolder>>(mapFolderListType)
-                val mapFolderList = adapter.fromJson(mapFolderListJson)!!
+                val mapFolderList = adapter.fromJson(mapFolderListJson) ?: throw IllegalStateException()
                 mapRepo.insertFolders(mapFolderList)
             }
             Lg.d("Deserialized asset: ${mapFoldersAsset.filename} ($time ms)")
@@ -372,7 +372,7 @@ class FileDownloader @Inject constructor (
 
                 val mapListType = Types.newParameterizedType(List::class.java, OnlineMap::class.java)
                 val adapter = moshi.adapter<List<OnlineMap>>(mapListType)
-                val onlineMapList = adapter.fromJson(mapsListJson)!!
+                val onlineMapList = adapter.fromJson(mapsListJson) ?: throw IllegalStateException()
                 mapRepo.insert(onlineMapList)
             }
             Lg.d("Deserialized asset: ${mapListAsset.filename} ($time ms)")

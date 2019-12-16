@@ -28,10 +28,10 @@ class DownloadAssetsViewModel @Inject constructor(
     val showStorageSnackbar = SingleLiveEvent<OnlineAsset>()
 
     val navigateToNext: LiveData<Boolean> = assetRepo.getAllLiveData().map { assets ->
-        val mapFoldersAsset = assets.find { it.id == OnlineAssetId.MAP_FOLDER_LIST.id }!!
-        val mapListAsset = assets.find { it.id == OnlineAssetId.MAP_LIST.id }!!
-        val worldMapAsset = assets.find { it.id == OnlineAssetId.WORLD_MAP.id }!!
-        val plantNamesAsset = assets.find { it.id == OnlineAssetId.PLANT_NAMES.id }!!
+        val mapFoldersAsset = assets.find { it.id == OnlineAssetId.MAP_FOLDER_LIST.id } ?: throw IllegalStateException()
+        val mapListAsset = assets.find { it.id == OnlineAssetId.MAP_LIST.id } ?: throw IllegalStateException()
+        val worldMapAsset = assets.find { it.id == OnlineAssetId.WORLD_MAP.id } ?: throw IllegalStateException()
+        val plantNamesAsset = assets.find { it.id == OnlineAssetId.PLANT_NAMES.id } ?: throw IllegalStateException()
 
         mapFoldersAsset.status == DOWNLOADED && mapListAsset.status == DOWNLOADED &&
                 worldMapAsset.status != NOT_DOWNLOADED && plantNamesAsset.status != NOT_DOWNLOADED

@@ -30,7 +30,7 @@ class PlantMarker(
         private val onPlantMarkerLongPress: (Long) -> Unit
 ) : GbMarker(
         activity.resources.getDrawable(
-                when (plantMarkerData.plantType!!) {
+                when (plantMarkerData.plantType ?: TREE) {
                     // TODO: Use drawable array + enum ordinal instead?
                     TREE -> R.drawable.marker_purple
                     SHRUB -> R.drawable.marker_blue
@@ -72,7 +72,7 @@ class PlantMarker(
 
     init {
         activity.applicationComponent.inject(this)
-        latLong = LatLong(plantMarkerData.latitude!!, plantMarkerData.longitude!!)
+        latLong = LatLong(plantMarkerData.latitude ?: 0.0, plantMarkerData.longitude ?: 0.0)
 
         onPress = {
             if (markerBubble == null) {
@@ -96,10 +96,10 @@ class PlantMarker(
 
     private fun showInfoBubble() {
         val plantTypeDrawables = activity.resources.obtainTypedArray(R.array.plant_type_drawable_array)
-        val plantTypeIconResId = plantTypeDrawables.getResourceId(plantMarkerData.plantType!!.ordinal, -1)
+        val plantTypeIconResId = plantTypeDrawables.getResourceId(plantMarkerData.plantType?.ordinal ?: 0, -1)
         plantTypeDrawables.recycle()
 
-        val photoPath = storageHelper.photoUriFrom(plantMarkerData.photoFilename!!)
+        val photoPath = storageHelper.photoUriFrom(plantMarkerData.photoFilename ?: "")
         Lg.d("photoPath = $photoPath")
         markerBubble = LayoutInflater.from(activity).inflate(R.layout.marker_bubble, mapView, false).apply {
             plantPhoto.doOnPreDraw { plantPhoto.setScaledBitmap(photoPath) }
@@ -119,7 +119,7 @@ class PlantMarker(
         return MapView.LayoutParams(
                 MapView.LayoutParams.WRAP_CONTENT,
                 MapView.LayoutParams.WRAP_CONTENT,
-                LatLong(plantMarkerData.latitude!! + getBubbleLatitudeOffset(), plantMarkerData.longitude!!),
+                LatLong((plantMarkerData.latitude ?: 0.0) + getBubbleLatitudeOffset(), plantMarkerData.longitude ?: 0.0),
                 MapView.LayoutParams.Alignment.BOTTOM_CENTER)
     }
 

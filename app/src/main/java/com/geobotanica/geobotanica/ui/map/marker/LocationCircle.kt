@@ -30,6 +30,6 @@ class LocationCircle(
 
     fun updateLocation(location: Location) {
         setLatLong(location.toLatLong())
-        radius = location.precision!!
+        location.precision?.let { radius = it }
     }
 }

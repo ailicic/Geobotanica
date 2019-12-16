@@ -142,18 +142,18 @@ class PlantNameSearchService @Inject constructor(
             isSuggestionsSearch: Boolean
     ): List<Long>? {
         return if (isSuggestionsSearch)
-            search.fun0!!(words[0].toInt())
+            search.fun0?.invoke(words[0].toInt())
         else when (words.size) {
-            0 -> search.fun0!!(limit)
-            1 -> search.fun1!!(words[0], limit)
-            else -> search.fun2!!(words[0], words[1], limit)
+            0 -> search.fun0?.invoke(limit)
+            1 -> search.fun1?.invoke(words[0], limit)
+            else -> search.fun2?.invoke(words[0], words[1], limit)
         }
     }
 
     private suspend fun mapIdToSearchResult(id: Long, search: PlantNameSearch): SearchResult {
         val plantName: String = when {
-            search.hasTag(COMMON) -> vernacularRepo.get(id)!!.vernacular!!.capitalize()
-            search.hasTag(SCIENTIFIC) -> taxonRepo.get(id)!!.scientific.capitalize()
+            search.hasTag(COMMON) -> vernacularRepo.get(id)?.vernacular?.capitalize() ?: ""
+            search.hasTag(SCIENTIFIC) -> taxonRepo.get(id)?.scientific?.capitalize() ?: ""
             else -> throw IllegalArgumentException("Must specify either COMMON or SCIENTIFIC tag")
         }
         val plantTypes: Int = when {

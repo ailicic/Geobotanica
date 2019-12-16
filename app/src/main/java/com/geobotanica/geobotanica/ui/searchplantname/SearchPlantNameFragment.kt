@@ -71,7 +71,7 @@ class SearchPlantNameFragment : BaseFragment() {
                 onApplyFilters = { filterOptions: SearchFilterOptions ->
                     viewModel.onEvent(SearchFilterSelected(filterOptions))
                 }
-            }.show(this.fragmentManager!!,"tag")
+            }.show(requireFragmentManager(),"tag")
             true
         }
         else -> super.onOptionsItemSelected(item)

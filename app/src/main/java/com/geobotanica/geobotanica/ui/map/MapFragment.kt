@@ -32,8 +32,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Use adapter.notifyItemInserted() in SearchPlantName (MAYBE)
-// TODO: Remove all double bangs !!
 // TODO: Refactor PlantDetailViewModel
 // TODO: Add more tests
 // TODO: Login screen (no authentication, just select user with any pw)

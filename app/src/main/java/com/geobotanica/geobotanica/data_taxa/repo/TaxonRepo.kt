@@ -45,13 +45,13 @@ class TaxonRepo @Inject constructor(
     suspend fun getAllUsed(limit: Int = DEFAULT_RESULT_LIMIT): List<Long> =
             tagDao.getAllTaxaWithTag(USED.ordinal, limit)
 
-    suspend fun setTagged(id: Long, tag: PlantNameTag, isTagged: Boolean = true) {
+    suspend fun setTagged(id: Long, plantNameTag: PlantNameTag, isTagged: Boolean = true) {
         if (isTagged) {
-            tagDao.getTaxonWithTag(id, tag.ordinal)?.let {
-                updateTagTimestamp(it.taxonId!!, tag)
-            } ?: tagDao.insert(Tag(tag.ordinal, taxonId = id))
+            tagDao.getTaxonWithTag(id, plantNameTag.ordinal)?.let { tag ->
+                tag.taxonId?.let { updateTagTimestamp(it, plantNameTag) }
+            } ?: tagDao.insert(Tag(plantNameTag.ordinal, taxonId = id))
         } else
-            tagDao.unsetTaxonTag(id, tag.ordinal)
+            tagDao.unsetTaxonTag(id, plantNameTag.ordinal)
     }
 
     suspend fun updateTagTimestamp(id: Long, tag: PlantNameTag) = tagDao.updateTaxonTimestamp(id, tag.ordinal)

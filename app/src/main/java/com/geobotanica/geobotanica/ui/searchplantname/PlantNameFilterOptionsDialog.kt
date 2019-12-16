@@ -61,11 +61,11 @@ class PlantNameFilterOptionsDialog : DialogFragment() {
 
         scientificCheckbox.setOnCheckedChangeListener { _, isChecked ->
             if (!isChecked)
-                dialog!!.commonCheckbox.isChecked = true
+                dialog?.commonCheckbox?.isChecked = true
         }
         commonCheckbox.setOnCheckedChangeListener { _, isChecked ->
             if (!isChecked)
-                dialog!!.scientificCheckbox.isChecked = true
+                dialog?.scientificCheckbox?.isChecked = true
         }
     }
 }

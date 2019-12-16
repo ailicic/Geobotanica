@@ -6,6 +6,7 @@ import com.geobotanica.geobotanica.util.Lg
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.withContext
+import java.lang.IllegalStateException
 
 // Related links
 // https://proandroiddev.com/android-architecture-d7405db1361c
@@ -27,14 +28,14 @@ inline fun <T> createNetworkBoundResource(
                 emit(Resource.loading(dbResult))
                 saveToDb(fetchData())
                 Lg.v("NetworkBoundResource: Returning data fetched from network")
-                emit(Resource.success(loadFromDb()!!))
+                emit(Resource.success(loadFromDb() ?: throw IllegalStateException()))
             } catch (e: Exception) {
                 Lg.e("NetworkBoundResource Error: $e")
                 emit(Resource.error(e, dbResult))
             }
         } else {
             Lg.v("NetworkBoundResource: Returning data from local database")
-            emit(Resource.success(dbResult!!))
+            emit(Resource.success(dbResult ?: throw IllegalStateException()))
         }
     }
 }

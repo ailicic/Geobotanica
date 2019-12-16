@@ -21,10 +21,10 @@ class MainViewModel @Inject constructor (
             return R.id.downloadAssetsFragment
 
         val onlineAssets = assetRepo.getAll()
-        val mapFoldersAsset = onlineAssets.find { it.id == OnlineAssetId.MAP_FOLDER_LIST.id }!!
-        val mapListAsset = onlineAssets.find { it.id == OnlineAssetId.MAP_LIST.id }!!
-        val worldMapAsset = onlineAssets.find { it.id == OnlineAssetId.WORLD_MAP.id }!!
-        val plantNamesAsset = onlineAssets.find { it.id == OnlineAssetId.PLANT_NAMES.id }!!
+        val mapFoldersAsset = onlineAssets.find { it.id == OnlineAssetId.MAP_FOLDER_LIST.id } ?: throw IllegalStateException()
+        val mapListAsset = onlineAssets.find { it.id == OnlineAssetId.MAP_LIST.id } ?: throw IllegalStateException()
+        val worldMapAsset = onlineAssets.find { it.id == OnlineAssetId.WORLD_MAP.id } ?: throw IllegalStateException()
+        val plantNamesAsset = onlineAssets.find { it.id == OnlineAssetId.PLANT_NAMES.id } ?: throw IllegalStateException()
 
 
         return if (mapFoldersAsset.status != DOWNLOADED || mapListAsset.status != DOWNLOADED ||
