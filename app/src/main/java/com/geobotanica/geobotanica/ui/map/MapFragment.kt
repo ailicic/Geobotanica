@@ -32,7 +32,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Fix buggy text anim in NewPlantName if click suggested
 // TODO: Use adapter.notifyItemInserted() in SearchPlantName (MAYBE)
 // TODO: Remove all double bangs !!
 // TODO: Refactor PlantDetailViewModel

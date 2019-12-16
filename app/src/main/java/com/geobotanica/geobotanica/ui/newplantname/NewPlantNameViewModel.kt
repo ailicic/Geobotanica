@@ -64,6 +64,7 @@ class NewPlantNameViewModel @Inject constructor (
                             isCommonNameEditable = true,
                             isScientificNameEditable = false,
                             commonName = "",
+                            scientificName = "",
                             suggestedText = appContext.resources.getString(R.string.suggested_common),
                             lastClickedResultIndex = null
                     )
@@ -72,6 +73,7 @@ class NewPlantNameViewModel @Inject constructor (
                     updateViewState(
                             isCommonNameEditable = false,
                             isScientificNameEditable = true,
+                            commonName = "",
                             scientificName = "",
                             suggestedText = appContext.resources.getString(R.string.suggested_scientific),
                             lastClickedResultIndex = null
@@ -145,6 +147,7 @@ class NewPlantNameViewModel @Inject constructor (
     @SuppressLint("DefaultLocale")
     private fun loadPlantNames() {
         viewModelScope.launch(dispatchers.main) {
+            delay(appContext.resources.getInteger(R.integer.fragmentAnimTime).toLong())
             taxonId?.let {
                 val scientificName = taxonRepo.get(it)?.scientific?.capitalize() ?: ""
                 plantNameSearchService.searchSuggestedCommonNames(it).collect { results ->
@@ -157,7 +160,6 @@ class NewPlantNameViewModel @Inject constructor (
                     updateViewState(commonName = commonName, scientificName = "", searchResults = results)
                 }
             }
-            delay(appContext.resources.getInteger(R.integer.fragmentAnimTime).toLong())
         }.invokeOnCompletion { completionError ->
             if (completionError != null) // Coroutine did not complete
                 return@invokeOnCompletion
