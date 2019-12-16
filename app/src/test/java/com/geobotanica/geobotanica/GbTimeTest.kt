@@ -5,7 +5,6 @@ import com.geobotanica.geobotanica.util.SpekExt.mockTime
 import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import org.threeten.bp.LocalDate
 
 
 class GbTimeTest : Spek({

@@ -32,9 +32,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Use adapter.notifyItemInserted() in SearchPlantName (MAYBE)
 // TODO: Fix buggy text anim in NewPlantName if click suggested
+// TODO: Use adapter.notifyItemInserted() in SearchPlantName (MAYBE)
 // TODO: Remove all double bangs !!
+// TODO: Refactor PlantDetailViewModel
 // TODO: Add more tests
 // TODO: Login screen (no authentication, just select user with any pw)
 // TODO: Request all permissions in separate screen before map (prob after login/splash screen for ux)
@@ -45,7 +46,7 @@ import javax.inject.Inject
 // https://developer.android.com/training/id-auth/identify.html
 // https://developer.android.com/training/id-auth/custom_auth
 // TODO: Group nearby markers into clusters
-// TODO: Use MediaStore to store photos. They should apppear in Gallery as an album.
+// TODO: Use MediaStore to store photos. They should appear in Gallery as an album.
 // TODO: Make custom camera screen so Espresso can be used for UI testing (New CameraX API)
 // TODO: Implement dark theme
 // TODO: Try using object detection for assisted plant measurements

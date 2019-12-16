@@ -131,7 +131,7 @@ class NewPlantConfirmViewModel @Inject constructor (
     fun retakePhoto() {
         isPhotoRetake = true
         val photoFile = storageHelper.createPhotoFile()
-        newPhotoUri = photoFile.absolutePath
+        newPhotoUri = storageHelper.absolutePath(photoFile)
         startPhotoIntent.value = photoFile
     }
 
@@ -139,7 +139,7 @@ class NewPlantConfirmViewModel @Inject constructor (
         isPhotoRetake = false
         newPhotoType = photoType
         val photoFile = storageHelper.createPhotoFile()
-        newPhotoUri = photoFile.absolutePath
+        newPhotoUri = storageHelper.absolutePath(photoFile)
         startPhotoIntent.value = photoFile
     }
 
@@ -192,12 +192,9 @@ class NewPlantConfirmViewModel @Inject constructor (
                 val newPhoto = photoData[photoIndex].copy(photoUri = newPhotoUri)
                 _photoData.value = photoData.toMutableList().apply { set(photoIndex, newPhoto) }
             } else {
-//                viewModelScope.launch(dispatchers.main) {
-                    _photoData.value = photoData.toMutableList().apply {
-                        add(PhotoData(plantType, newPhotoType, newPhotoUri, userNickname))
-                    }
-//                    delay(300)
-//                }
+                _photoData.value = photoData.toMutableList().apply {
+                    add(PhotoData(plantType, newPhotoType, newPhotoUri, userNickname))
+                }
             }
         }
     }
