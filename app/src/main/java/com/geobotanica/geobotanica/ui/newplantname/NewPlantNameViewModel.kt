@@ -20,6 +20,7 @@ import com.geobotanica.geobotanica.util.GbDispatchers
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -151,12 +152,14 @@ class NewPlantNameViewModel @Inject constructor (
             taxonId?.let {
                 val scientificName = taxonRepo.get(it)?.scientific?.capitalize() ?: ""
                 plantNameSearchService.searchSuggestedCommonNames(it).collect { results ->
+                    ensureActive()
                     updateViewState(commonName = "", scientificName = scientificName, searchResults = results)
                 }
             }
             vernacularId?.let {
                 val commonName = vernacularRepo.get(it)?.vernacular?.capitalize() ?: ""
                 plantNameSearchService.searchSuggestedScientificNames(it).collect { results ->
+                    ensureActive()
                     updateViewState(commonName = commonName, scientificName = "", searchResults = results)
                 }
             }

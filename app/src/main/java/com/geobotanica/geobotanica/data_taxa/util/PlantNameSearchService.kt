@@ -10,7 +10,6 @@ import com.geobotanica.geobotanica.util.Lg
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.yield
 import javax.inject.Inject
 import kotlin.system.measureTimeMillis
 
@@ -82,8 +81,6 @@ class PlantNameSearchService @Inject constructor(
 
 
         searchSequence.filter { filterOptions.shouldNotFilter(it) }.forEach forEachSearch@ { search ->
-            yield()
-
             if (aggregateResults.size >= DEFAULT_RESULT_LIMIT)
                 return@forEachSearch
 

@@ -112,6 +112,7 @@ class SearchPlantNameViewModel @Inject constructor (
                 val searchFilterOptions = viewState.searchFilterOptions
                 val showStars = ! searchFilterOptions.hasFilter(STARRED)
                 plantNameSearchService.search(searchEditText, searchFilterOptions).collect {
+                    ensureActive()
                     emitViewEffect(UpdateSearchResults(it, showStars))
                 }
             }
