@@ -8,7 +8,10 @@ import com.geobotanica.geobotanica.data.entity.Plant
 @Dao
 interface PlantDao : BaseDao<Plant> {
     @Query("SELECT * FROM plants WHERE id = :id")
-    fun get(id: Long): LiveData<Plant>
+    suspend fun get(id: Long): Plant
+
+    @Query("SELECT * FROM plants WHERE id = :id")
+    fun getLiveData(id: Long): LiveData<Plant>
 
 //    @Query("SELECT * FROM plants")
 //    fun getAll(): LiveData<List<Plant>>

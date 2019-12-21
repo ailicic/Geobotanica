@@ -174,10 +174,10 @@ class NewPlantConfirmViewModel @Inject constructor (
         }
     }
 
-    fun onNewPlantType(plantType: Plant.Type) {
-        _plantType = plantType
-        _photoData.value = photoData.value?.map { it.copy(plantType = plantType) }
-        if (plantType != TREE && trunkDiameter.value != null) {
+    fun onNewPlantType(newPlantType: Plant.Type) {
+        _plantType = newPlantType
+        _photoData.value = photoData.value?.map { it.copy(plantType = newPlantType) }
+        if (newPlantType != TREE && trunkDiameter.value != null) {
             _trunkDiameter.value = null // Trunk diameter measurement permitted only if plantType = TREE
         }
     }

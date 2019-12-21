@@ -11,13 +11,21 @@ interface PlantMeasurementDao : BaseDao<PlantMeasurement> {
     fun get(id: Long): LiveData<PlantMeasurement>
 
     @Query("SELECT * FROM plantMeasurements WHERE plantId = :plantId ORDER BY timestamp DESC")
-    fun getAllMeasurementsOfPlant(plantId: Long): LiveData< List<PlantMeasurement> >
+    fun getAllMeasurementsOfPlantLiveData(plantId: Long): LiveData< List<PlantMeasurement> >
 
     @Query("SELECT * FROM plantMeasurements WHERE plantId = :plantId AND type = :type " +
             "ORDER BY timestamp DESC")
-    fun getMeasurementsOfPlant(plantId: Long, type: Int): LiveData< List<PlantMeasurement> >
+    fun getMeasurementsOfPlant(plantId: Long, type: Int): List<PlantMeasurement>
+
+    @Query("SELECT * FROM plantMeasurements WHERE plantId = :plantId AND type = :type " +
+            "ORDER BY timestamp DESC")
+    fun getMeasurementsOfPlantLiveData(plantId: Long, type: Int): LiveData< List<PlantMeasurement> >
 
     @Query("SELECT * FROM plantMeasurements WHERE plantId = :plantId AND type = :type " +
             "ORDER BY timestamp DESC LIMIT 1")
-    fun getLastMeasurementOfPlant(plantId: Long, type: Int): LiveData<PlantMeasurement?>
+    fun getLastMeasurementOfPlant(plantId: Long, type: Int): PlantMeasurement?
+
+    @Query("SELECT * FROM plantMeasurements WHERE plantId = :plantId AND type = :type " +
+            "ORDER BY timestamp DESC LIMIT 1")
+    fun getLastMeasurementOfPlantLiveData(plantId: Long, type: Int): LiveData<PlantMeasurement?>
 }

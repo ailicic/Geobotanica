@@ -15,14 +15,21 @@ class PlantTypeButton @JvmOverloads constructor(
         defStyleAttr: Int = 0
 ) : FloatingActionButton(context, attrs, defStyleAttr) {
 
-    private lateinit var currentPlantType: Plant.Type
-    lateinit var onNewPlantType: (Plant.Type) -> Unit
+    private var currentPlantType: Plant.Type? = null
+    private var onNewPlantType: (Plant.Type) -> Unit = { }
 
     init {
         setOnClickListener { showPlantTypeDialog() }
     }
 
-    fun init(PlantType: Plant.Type) = updatePlantType(PlantType)
+    fun setPlantType(newPlantType: Plant.Type) {
+        if (currentPlantType != newPlantType)
+            updatePlantType(newPlantType)
+    }
+
+    fun setListener(onNewPlantType: (Plant.Type) -> Unit) {
+        this.onNewPlantType = onNewPlantType
+    }
 
     private fun updatePlantType(plantType: Plant.Type) {
         currentPlantType = plantType

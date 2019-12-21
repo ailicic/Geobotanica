@@ -112,16 +112,8 @@ class NewPlantConfirmFragment : BaseFragment() {
         }.show()
     }
 
-    private fun bindViewModel() {
-        with(viewModel) {
-            photoData.observe(viewLifecycleOwner, Observer { photoAdapter.submitList(it) } )
-            showPhotoDeletedToast.observe(viewLifecycleOwner, Observer { showToast(getString(R.string.photo_deleted)) })
-            startPhotoIntent.observe(viewLifecycleOwner, Observer { startPhotoIntent(it) })
-        }
-    }
-
     private fun initUi() {
-        plantTypeButton.init(viewModel.plantType)
+        plantTypeButton.setPlantType(viewModel.plantType)
 
         fun onClickPhoto() { /* TODO: Clicking on the photo show it fullscreen */ }
         fun onClickDeletePhoto() = viewModel.deletePhoto(plantPhotoPager.currentItem)
@@ -138,8 +130,16 @@ class NewPlantConfirmFragment : BaseFragment() {
         plantPhotoPager.adapter = photoAdapter
     }
 
+    private fun bindViewModel() {
+        with(viewModel) {
+            photoData.observe(viewLifecycleOwner, Observer { photoAdapter.submitList(it) } )
+            showPhotoDeletedToast.observe(viewLifecycleOwner, Observer { showToast(getString(R.string.photo_deleted)) })
+            startPhotoIntent.observe(viewLifecycleOwner, Observer { startPhotoIntent(it) })
+        }
+    }
+
     private fun bindListeners() {
-        plantTypeButton.onNewPlantType = { viewModel.onNewPlantType(it) }
+        plantTypeButton.setListener(viewModel::onNewPlantType)
         editPlantNameButton.setOnClickListener(::onClickEditNames)
         editMeasurementsButton.setOnClickListener(::onClickEditMeasurements)
         fab.setOnClickListener(::onFabClicked)

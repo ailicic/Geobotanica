@@ -19,7 +19,9 @@ class PlantRepo @Inject constructor(
 
     suspend fun delete(plant: Plant) = plantDao.delete(plant)
 
-    fun get(id: Long): LiveData<Plant> = plantDao.get(id)
+    suspend fun get(id: Long): Plant = plantDao.get(id)
+
+    fun getLiveData(id: Long): LiveData<Plant> = plantDao.getLiveData(id)
 
 //    fun getAll(): LiveData<List<Plant>> = plantDao.getAll()
 
