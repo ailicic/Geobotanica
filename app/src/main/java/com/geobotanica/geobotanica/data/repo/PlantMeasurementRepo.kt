@@ -12,32 +12,32 @@ class PlantMeasurementRepo @Inject constructor(private val measurementDao: Plant
 
     suspend fun delete(vararg measurement: PlantMeasurement) = measurementDao.delete(*measurement)
 
-    fun get(id: Long): LiveData<PlantMeasurement> = measurementDao.get(id)
+    fun getLiveData(id: Long): LiveData<PlantMeasurement> = measurementDao.get(id)
 
-    fun getLastHeightOfPlant(plantId: Long): LiveData<PlantMeasurement?> =
+    fun getLastHeightOfPlantLiveData(plantId: Long): LiveData<PlantMeasurement?> =
             measurementDao.getLastMeasurementOfPlantLiveData(plantId, PlantMeasurement.Type.HEIGHT.ordinal)
 
-    fun getLastDiameterOfPlant(plantId: Long): LiveData<PlantMeasurement?> =
+    fun getLastDiameterOfPlantLiveData(plantId: Long): LiveData<PlantMeasurement?> =
             measurementDao.getLastMeasurementOfPlantLiveData(plantId, PlantMeasurement.Type.DIAMETER.ordinal)
 
-    fun getLastTrunkDiameterOfPlant(plantId: Long): PlantMeasurement? =
+    suspend fun getLastTrunkDiameterOfPlant(plantId: Long): PlantMeasurement? =
             measurementDao.getLastMeasurementOfPlant(plantId, PlantMeasurement.Type.TRUNK_DIAMETER.ordinal)
 
     fun getLastTrunkDiameterOfPlantLiveData(plantId: Long): LiveData<PlantMeasurement?> =
             measurementDao.getLastMeasurementOfPlantLiveData(plantId, PlantMeasurement.Type.TRUNK_DIAMETER.ordinal)
 
-    fun getHeightsOfPlant(plantId: Long): LiveData< List<PlantMeasurement> > =
+    fun getHeightsOfPlantLiveData(plantId: Long): LiveData< List<PlantMeasurement> > =
             measurementDao.getMeasurementsOfPlantLiveData(plantId, PlantMeasurement.Type.HEIGHT.ordinal)
 
-    fun getDiametersOfPlant(plantId: Long): LiveData< List<PlantMeasurement> >  =
+    fun getDiametersOfPlantLiveData(plantId: Long): LiveData< List<PlantMeasurement> >  =
             measurementDao.getMeasurementsOfPlantLiveData(plantId, PlantMeasurement.Type.DIAMETER.ordinal)
 
-    fun getTrunkDiametersOfPlant(plantId: Long): List<PlantMeasurement>  =
+    suspend fun getTrunkDiametersOfPlant(plantId: Long): List<PlantMeasurement>  =
             measurementDao.getMeasurementsOfPlant(plantId, PlantMeasurement.Type.TRUNK_DIAMETER.ordinal)
 
     fun getTrunkDiametersOfPlantLiveData(plantId: Long): LiveData< List<PlantMeasurement> >  =
             measurementDao.getMeasurementsOfPlantLiveData(plantId, PlantMeasurement.Type.TRUNK_DIAMETER.ordinal)
 
-    fun getAllMeasurementsOfPlant(plantId: Long): LiveData<List<PlantMeasurement>> =
-            measurementDao.getAllMeasurementsOfPlantLiveData(plantId)
+    fun getLastMeasurementOfPlant(plantId: Long): LiveData<PlantMeasurement?> =
+            measurementDao.getLastMeasurementOfPlantLiveData(plantId)
 }

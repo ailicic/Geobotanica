@@ -110,10 +110,6 @@ class NewPlantConfirmViewModel @Inject constructor (
     }
 
 
-    fun deleteTemporaryPhoto() {
-        val result = storageHelper.deleteFile(newPhotoUri)
-        Lg.d("Photo cancelled -> Deleted unused photo file: $newPhotoUri (Result = $result)")
-    }
 
     fun deletePhoto(photoIndex: Int) {
         photoData.value?.let { photoData ->
@@ -141,6 +137,11 @@ class NewPlantConfirmViewModel @Inject constructor (
         val photoFile = storageHelper.createPhotoFile()
         newPhotoUri = storageHelper.absolutePath(photoFile)
         startPhotoIntent.value = photoFile
+    }
+
+    fun deleteTemporaryPhoto() {
+        val result = storageHelper.deleteFile(newPhotoUri)
+        Lg.d("Photo cancelled -> Deleted unused photo file: $newPhotoUri (Result = $result)")
     }
 
     fun updatePhotoType(photoIndex: Int, photoType: PlantPhoto.Type) {
