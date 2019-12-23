@@ -1,7 +1,6 @@
 package com.geobotanica.geobotanica.ui.searchplantname
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag.*
@@ -12,12 +11,12 @@ import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchF
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
 import com.geobotanica.geobotanica.ui.searchplantname.ViewEffect.*
 import com.geobotanica.geobotanica.ui.searchplantname.ViewEvent.*
-import com.geobotanica.geobotanica.util.GbDispatchers
-import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.SingleLiveEvent
-import com.geobotanica.geobotanica.util.invokeOnSuccess
-import kotlinx.coroutines.*
+import com.geobotanica.geobotanica.util.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,7 +28,7 @@ class SearchPlantNameViewModel @Inject constructor (
         private val plantNameSearchService: PlantNameSearchService
 ): ViewModel() {
 
-    private val _viewState = MutableLiveData<ViewState>().apply { value = ViewState() }
+    private val _viewState = mutableLiveData(ViewState())
     val viewState: LiveData<ViewState> = _viewState
 
     private val _viewEffect = SingleLiveEvent<ViewEffect>()

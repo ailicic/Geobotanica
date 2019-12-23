@@ -19,6 +19,7 @@ import com.geobotanica.geobotanica.ui.newplantname.ViewEvent.*
 import com.geobotanica.geobotanica.util.GbDispatchers
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
+import com.geobotanica.geobotanica.util.mutableLiveData
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.collect
@@ -37,7 +38,7 @@ class NewPlantNameViewModel @Inject constructor (
         private val plantNameSearchService: PlantNameSearchService
 ): ViewModel() {
 
-    private val _viewState = MutableLiveData<ViewState>().apply { value = ViewState() }
+    private val _viewState = mutableLiveData(ViewState())
     val viewState: LiveData<ViewState> = _viewState
 
     private val _viewEffect = SingleLiveEvent<ViewEffect>()

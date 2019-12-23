@@ -7,6 +7,7 @@ import com.geobotanica.geobotanica.data.entity.OnlineMapFolder
 import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.network.FileDownloader
 import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.mutableLiveData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
@@ -23,7 +24,7 @@ class BrowseMapsViewModel @Inject constructor(
         mapList.isNotEmpty()
     }
 
-    private var mapFolderId = MutableLiveData<Long?>().apply { value = null }
+    private val mapFolderId = mutableLiveData<Long?>(null)
 
     val mapListItems = mapFolderId.switchMap { childMapListItemsOf(it) }
 

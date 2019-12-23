@@ -10,6 +10,7 @@ import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOW
 import com.geobotanica.geobotanica.network.Resource
 import com.geobotanica.geobotanica.network.ResourceStatus.*
 import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.liveData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
@@ -44,11 +45,7 @@ class LocalMapsViewModel @Inject constructor(
                                     Resource.success(mapList.map { it.toListItem() })
                                 }
                     }
-                    ERROR -> {
-                        MutableLiveData<Resource<List<OnlineMapListItem>>>()
-                                .apply { value = Resource.error(geolocation.error ?: Throwable()) }
-                    }
-                }
+                    ERROR -> liveData(Resource.error(geolocation.error ?: Throwable())) }
             }
 
     fun getMapsFromExtStorage() = viewModelScope.launch(Dispatchers.IO) {
