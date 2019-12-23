@@ -14,6 +14,8 @@ import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.ui.newplantconfirm.NewPlantConfirmViewModel
 import com.geobotanica.geobotanica.ui.viewpager.PhotoData
 import com.geobotanica.geobotanica.util.Measurement
+import com.geobotanica.geobotanica.util.MockkExt.coVerifyOne
+import com.geobotanica.geobotanica.util.MockkExt.verifyOne
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
 import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
 import com.geobotanica.geobotanica.util.SpekExt.mockTime
@@ -126,11 +128,11 @@ object NewPlantConfirmViewModelTest : Spek({
                 )
             }
 
-            it("Should set commonName") { verify(exactly = 1) { commonNameObserver.onChanged("common") } }
+            it("Should set commonName") { verifyOne { commonNameObserver.onChanged("common") } }
             it("Should set plantType") { newPlantConfirmViewModel.plantType shouldEqual Plant.Type.SHRUB }
-            it("Should set height") { verify(exactly = 1) { heightObserver.onChanged(Measurement(1.0f)) } }
-            it("Should set diameter") { verify(exactly = 1) { diameterObserver.onChanged(Measurement(2.0f)) } }
-            it("Should set trunkDiameter") { verify(exactly = 1) { trunkDiameterObserver.onChanged(Measurement(3.0f)) } }
+            it("Should set height") { verifyOne { heightObserver.onChanged(Measurement(1.0f)) } }
+            it("Should set diameter") { verifyOne { diameterObserver.onChanged(Measurement(2.0f)) } }
+            it("Should set trunkDiameter") { verifyOne { trunkDiameterObserver.onChanged(Measurement(3.0f)) } }
             it("Should set photoData") {
                 verify {
                     photoDataObserver.onChanged(listOf(
@@ -143,14 +145,14 @@ object NewPlantConfirmViewModelTest : Spek({
             context("Add photo") {
                 beforeEachTest { newPlantConfirmViewModel.addPhoto(PlantPhoto.Type.FLOWER) }
 
-                it("Should create new photo file") { verify(exactly = 1) { storageHelper.createPhotoFile() } }
-                it("Should start photo capture") { verify(exactly = 1) { startPhotoIntentObserver.onChanged(photoFile) } }
+                it("Should create new photo file") { verifyOne { storageHelper.createPhotoFile() } }
+                it("Should start photo capture") { verifyOne { startPhotoIntentObserver.onChanged(photoFile) } }
 
 
                 context("Cancel photo capture") {
                     beforeEachTest { newPlantConfirmViewModel.deleteTemporaryPhoto() }
                     it("Should delete temporary file") {
-                        verify(exactly = 1) { storageHelper.deleteFile(photoFilename) }
+                        verifyOne { storageHelper.deleteFile(photoFilename) }
                     }
                 }
 
@@ -177,7 +179,7 @@ object NewPlantConfirmViewModelTest : Spek({
                                 ))
                             }
                         }
-                        it("Should show toast") { verify(exactly = 1) { showPhotoDeletedToastObserver.onChanged(any()) } }
+                        it("Should show toast") { verifyOne { showPhotoDeletedToastObserver.onChanged(any()) } }
                     }
 
                     context("Cancel new plant") {
@@ -194,13 +196,13 @@ object NewPlantConfirmViewModelTest : Spek({
 
             context("Retake photo") {
                 beforeEachTest { newPlantConfirmViewModel.retakePhoto() }
-                it("Should start photo capture") { verify(exactly = 1) { startPhotoIntentObserver.onChanged(photoFile) } }
+                it("Should start photo capture") { verifyOne { startPhotoIntentObserver.onChanged(photoFile) } }
 
 
                 context("Photo capture complete") {
                     beforeEachTest { newPlantConfirmViewModel.onPhotoComplete(0) }
 
-                    it("Should delete old photo") { verify(exactly = 1) { storageHelper.deleteFile("photoUri") } }
+                    it("Should delete old photo") { verifyOne { storageHelper.deleteFile("photoUri") } }
                     it("Should update photoData") {
                         verify {
                             photoDataObserver.onChanged(listOf(
@@ -219,9 +221,9 @@ object NewPlantConfirmViewModelTest : Spek({
                     newPlantConfirmViewModel.onMeasurementsUpdated(newHeight, newDiameter, newTrunkDiameter)
                 }
 
-                it("Should update height") { verify(exactly = 1) { heightObserver.onChanged(newHeight) }}
-                it("Should update diameter") { verify(exactly = 1) { diameterObserver.onChanged(newDiameter) }}
-                it("Should update trunkDiameter") { verify(exactly = 1) { trunkDiameterObserver.onChanged(newTrunkDiameter) }}
+                it("Should update height") { verifyOne { heightObserver.onChanged(newHeight) }}
+                it("Should update diameter") { verifyOne { diameterObserver.onChanged(newDiameter) }}
+                it("Should update trunkDiameter") { verifyOne { trunkDiameterObserver.onChanged(newTrunkDiameter) }}
             }
 
 
@@ -232,7 +234,7 @@ object NewPlantConfirmViewModelTest : Spek({
                 beforeEachBlockingTest(testDispatchers) { newPlantConfirmViewModel.savePlantComposite(location) }
 
                 it("Should insert plant in db") {
-                    coVerify(exactly = 1) { plantRepo.insert(
+                    coVerifyOne { plantRepo.insert(
                             Plant(
                                     0L,
                                     Plant.Type.SHRUB,
@@ -246,7 +248,7 @@ object NewPlantConfirmViewModelTest : Spek({
                 }
 
                 it("Should insert photo in db") {
-                    coVerify(exactly = 1) {
+                    coVerifyOne {
                         plantPhotoRepo.insert(PlantPhoto(
                                 0L,
                                 10L,
@@ -282,7 +284,7 @@ object NewPlantConfirmViewModelTest : Spek({
                 }
 
                 it("Should insert location in db") {
-                    coVerify(exactly = 1) {
+                    coVerifyOne {
                         plantLocationRepo.insert(PlantLocation(
                                 10L,
                                 Location(1.0, 2.0, 3.0, 0.1f, 10, 20)

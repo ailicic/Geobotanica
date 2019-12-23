@@ -18,6 +18,10 @@ import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.*
 import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.NavViewEffect.NavigateToNewPlantMeasurement
 import com.geobotanica.geobotanica.ui.newplantname.ViewEvent.*
 import com.geobotanica.geobotanica.ui.newplantname.ViewState
+import com.geobotanica.geobotanica.util.MockkExt.coVerifyOne
+import com.geobotanica.geobotanica.util.MockkExt.coVerifyZero
+import com.geobotanica.geobotanica.util.MockkExt.verifyOne
+import com.geobotanica.geobotanica.util.MockkExt.verifyZero
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
 import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
 import com.geobotanica.geobotanica.util.SpekExt.setupTestDispatchers
@@ -95,17 +99,16 @@ object NewPlantNameViewModelTest : Spek({
             beforeEachTest { newPlantNameViewModel.onEvent(ViewCreated(userId, photoUri, null, null)) }
 
             it("Should emit InitView effect once") {
-                verify(exactly = 1) { viewEffectObserver.onChanged(InitView) }
+                verifyOne { viewEffectObserver.onChanged(InitView) }
             }
             it("Should reset ViewState") {
-                //                newPlantNameViewModel.viewState.value shouldEqual ViewState()
                 verify { viewStateObserver.onChanged(ViewState()) }
             }
             it("Should not query db") {
-                coVerify(exactly = 0) { vernacularRepo.get(any()) }
-                coVerify(exactly = 0) { taxonRepo.get(any()) }
-                coVerify(exactly = 0) { plantNameSearchService.searchSuggestedCommonNames(any()) }
-                coVerify(exactly = 0) { plantNameSearchService.searchSuggestedScientificNames(any()) }
+                coVerifyZero { vernacularRepo.get(any()) }
+                coVerifyZero { taxonRepo.get(any()) }
+                coVerifyZero { plantNameSearchService.searchSuggestedCommonNames(any()) }
+                coVerifyZero { plantNameSearchService.searchSuggestedScientificNames(any()) }
             }
         }
 
@@ -179,7 +182,7 @@ object NewPlantNameViewModelTest : Spek({
             beforeEachTest { newPlantNameViewModel.onEvent(StarClicked(tSearchResult1)) }
 
             it("Should update star") {
-                coVerify(exactly = 1) { taxonRepo.setTagged(taxon1.id, STARRED, false) }
+                coVerifyOne { taxonRepo.setTagged(taxon1.id, STARRED, false) }
             }
         }
 
@@ -187,7 +190,7 @@ object NewPlantNameViewModelTest : Spek({
             beforeEachTest { newPlantNameViewModel.onEvent(StarClicked(vSearchResult1)) }
 
             it("Should update star") {
-                coVerify(exactly = 1) { vernacularRepo.setTagged(vernacular1.id, STARRED, false) }
+                coVerifyOne { vernacularRepo.setTagged(vernacular1.id, STARRED, false) }
             }
         }
     }
@@ -260,7 +263,7 @@ object NewPlantNameViewModelTest : Spek({
                 }
 
                 it("Should animate only once") {
-                    verify(exactly = 1) { viewEffectObserver.onChanged(ShowScientificNameAnimation(tSearchResult1.plantName)) }
+                    verifyOne { viewEffectObserver.onChanged(ShowScientificNameAnimation(tSearchResult1.plantName)) }
                 }
             }
         }
@@ -332,7 +335,7 @@ object NewPlantNameViewModelTest : Spek({
                 }
 
                 it("Should animate only once") {
-                    verify(exactly = 1) { viewEffectObserver.onChanged(ShowCommonNameAnimation(vSearchResult1.plantName)) }
+                    verifyOne { viewEffectObserver.onChanged(ShowCommonNameAnimation(vSearchResult1.plantName)) }
                 }
             }
         }
@@ -465,7 +468,7 @@ object NewPlantNameViewModelTest : Spek({
             }
 
             it("Should emit ShowPlantNameSnackbar ViewEffect") {
-                verify(exactly = 1) { viewEffectObserver.onChanged(ShowPlantNameSnackbar) }
+                verifyOne { viewEffectObserver.onChanged(ShowPlantNameSnackbar) }
             }
         }
 
@@ -482,7 +485,7 @@ object NewPlantNameViewModelTest : Spek({
                 }
 
                 it("Should emit NavigateToNewPlantMeasurement ViewEffect") {
-                    verify(exactly = 1) {
+                    verifyOne {
                         viewEffectObserver.onChanged(NavigateToNewPlantMeasurement(
                                 userId, photoUri, taxon1.id, null, TREE.flag
                         ))
@@ -490,7 +493,7 @@ object NewPlantNameViewModelTest : Spek({
                 }
 
                 it("Should not emit ShowPlantNameSnackbar ViewEffect") {
-                    verify(exactly = 0) { viewEffectObserver.onChanged(ShowPlantNameSnackbar) }
+                    verifyZero { viewEffectObserver.onChanged(ShowPlantNameSnackbar) }
                 }
             }
 
@@ -501,7 +504,7 @@ object NewPlantNameViewModelTest : Spek({
                 }
 
                 it("Should emit NavigateToNewPlantMeasurement ViewEffect") {
-                    verify(exactly = 1) {
+                    verifyOne {
                         viewEffectObserver.onChanged(NavViewEffect.NavigateToNewPlantType(
                                 userId, photoUri, taxon1.id, null, (TREE.flag or SHRUB.flag)
                         ))
@@ -509,7 +512,7 @@ object NewPlantNameViewModelTest : Spek({
                 }
 
                 it("Should not emit ShowPlantNameSnackbar ViewEffect") {
-                    verify(exactly = 0) { viewEffectObserver.onChanged(ShowPlantNameSnackbar) }
+                    verifyZero { viewEffectObserver.onChanged(ShowPlantNameSnackbar) }
                 }
             }
         }

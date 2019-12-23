@@ -15,6 +15,8 @@ import com.geobotanica.geobotanica.ui.map.MapViewModel
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_FIX
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_OFF
 import com.geobotanica.geobotanica.ui.map.marker.PlanterMarkerDiffer
+import com.geobotanica.geobotanica.util.MockkExt.verifyOne
+import com.geobotanica.geobotanica.util.MockkExt.verifyZero
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
 import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
 import com.geobotanica.geobotanica.util.SpekExt.setupTestDispatchers
@@ -83,7 +85,7 @@ object MapViewModelTest : Spek({
 
                 it("Should subscribe to GPS") {
                     mapViewModel.initGpsSubscribe()
-                    verify(exactly = 1) { locationService.subscribe(mapViewModel, any()) }
+                    verifyOne { locationService.subscribe(mapViewModel, any()) }
                 }
             }
 
@@ -92,7 +94,7 @@ object MapViewModelTest : Spek({
 
                 it("Should not subscribe to GPS") {
                     mapViewModel.initGpsSubscribe()
-                    verify(exactly = 0) { locationService.subscribe(mapViewModel, any()) }
+                    verifyZero { locationService.subscribe(mapViewModel, any()) }
                 }
             }
         }
@@ -102,7 +104,7 @@ object MapViewModelTest : Spek({
 
             it("Should trigger GPS required snackbar") {
                 mapViewModel.initGpsSubscribe()
-                verify(exactly = 1) { gpsRequiredSnackbarObserver.onChanged(any()) }
+                verifyOne { gpsRequiredSnackbarObserver.onChanged(any()) }
             }
         }
     }
@@ -114,7 +116,7 @@ object MapViewModelTest : Spek({
 
             it("Should trigger GPS required snackbar") {
                 mapViewModel.onClickGpsFab()
-                verify(exactly = 1) { gpsRequiredSnackbarObserver.onChanged(any()) }
+                verifyOne { gpsRequiredSnackbarObserver.onChanged(any()) }
             }
         }
 
@@ -126,7 +128,7 @@ object MapViewModelTest : Spek({
 
                 it("Should unsubscribe GPS") {
                     mapViewModel.onClickGpsFab()
-                    verify(exactly = 1) { locationService.unsubscribe(mapViewModel) }
+                    verifyOne { locationService.unsubscribe(mapViewModel) }
                 }
             }
 
@@ -135,7 +137,7 @@ object MapViewModelTest : Spek({
 
                 it("Should subscribe GPS") {
                     mapViewModel.onClickGpsFab()
-                    verify(exactly = 1) { locationService.subscribe(mapViewModel, any()) }
+                    verifyOne { locationService.subscribe(mapViewModel, any()) }
                 }
             }
         }
@@ -160,11 +162,11 @@ object MapViewModelTest : Spek({
             beforeEachTest { mapViewModel.onLocation(emptyLocation) }
 
             it("Should ignore") {
-                verify(exactly = 0) { gpsFabIconObserver.onChanged(any()) }
-                verify(exactly = 0) { locationPrecisionMarkerObserver.onChanged(any()) }
-                verify(exactly = 0) { locationMarkerObserver.onChanged(any()) }
-                verify(exactly = 0) { centerMapObserver.onChanged(any()) }
-                verify(exactly = 0) { redrawMapLayersObserver.onChanged(any()) }
+                verifyZero { gpsFabIconObserver.onChanged(any()) }
+                verifyZero { locationPrecisionMarkerObserver.onChanged(any()) }
+                verifyZero { locationMarkerObserver.onChanged(any()) }
+                verifyZero { centerMapObserver.onChanged(any()) }
+                verifyZero { redrawMapLayersObserver.onChanged(any()) }
             }
 
         }
@@ -185,23 +187,23 @@ object MapViewModelTest : Spek({
             beforeEachTest { mapViewModel.onLocation(recentLocation) }
 
             it("Should set GpsFabIcon to GPS_FIX") {
-                verify(exactly = 1) { gpsFabIconObserver.onChanged(GPS_FIX.drawable) }
+                verifyOne { gpsFabIconObserver.onChanged(GPS_FIX.drawable) }
             }
 
             it("Should update location precision marker") {
-                verify(exactly = 1) { locationPrecisionMarkerObserver.onChanged(any()) }
+                verifyOne { locationPrecisionMarkerObserver.onChanged(any()) }
             }
 
             it("Should center map") {
-                verify(exactly = 1) { centerMapObserver.onChanged(any()) }
+                verifyOne { centerMapObserver.onChanged(any()) }
             }
 
             it("Should update location marker") {
-                verify(exactly = 1) { locationMarkerObserver.onChanged(any()) }
+                verifyOne { locationMarkerObserver.onChanged(any()) }
             }
 
             it("Should redraw map") {
-                verify(exactly = 1) { redrawMapLayersObserver.onChanged(any()) }
+                verifyOne { redrawMapLayersObserver.onChanged(any()) }
             }
         }
     }
@@ -215,11 +217,11 @@ object MapViewModelTest : Spek({
             }
 
             it("Should show GPS required snackbar") {
-                verify(exactly = 1) { gpsRequiredSnackbarObserver.onChanged(any()) }
+                verifyOne { gpsRequiredSnackbarObserver.onChanged(any()) }
             }
 
             it("Should set GPS FAB icon to GPS_OFF") {
-                verify(exactly = 1) { gpsFabIconObserver.onChanged(GPS_OFF.drawable) }
+                verifyOne { gpsFabIconObserver.onChanged(GPS_OFF.drawable) }
             }
         }
 
@@ -234,7 +236,7 @@ object MapViewModelTest : Spek({
                 }
 
                 it("Should show 'Plant names missing' snackbar") {
-                    verify(exactly = 1) { plantNamesMissingSnackbarObserver.onChanged(any()) }
+                    verifyOne { plantNamesMissingSnackbarObserver.onChanged(any()) }
                 }
             }
 
@@ -246,7 +248,7 @@ object MapViewModelTest : Spek({
                 }
 
                 it("Should navigate to new plant screen") {
-                    verify(exactly = 1) { navigateToNewPlantObserver.onChanged(any()) }
+                    verifyOne { navigateToNewPlantObserver.onChanged(any()) }
                 }
             }
         }
@@ -263,11 +265,11 @@ object MapViewModelTest : Spek({
             }
 
             it("Should set GPS FAB icon to GPS_OFF") {
-                verify(exactly = 1) { gpsFabIconObserver.onChanged(GPS_OFF.drawable) }
+                verifyOne { gpsFabIconObserver.onChanged(GPS_OFF.drawable) }
             }
 
             it("Should unsubscribe GPS") {
-                verify(exactly = 1) { locationService.unsubscribe(any()) }
+                verifyOne { locationService.unsubscribe(any()) }
             }
         }
 
@@ -278,8 +280,8 @@ object MapViewModelTest : Spek({
             }
 
             it("Should do nothing") {
-                verify(exactly = 0) { gpsFabIconObserver.onChanged(GPS_OFF.drawable) }
-                verify(exactly = 0) { locationService.unsubscribe(mapViewModel) }
+                verifyZero { gpsFabIconObserver.onChanged(GPS_OFF.drawable) }
+                verifyZero { locationService.unsubscribe(mapViewModel) }
             }
         }
     }

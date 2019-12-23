@@ -32,8 +32,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Use verifyOne() / coVerifyOne() everywhere
-// TODO: Use liveData() everywhere
 // TODO: Define PlantPhoto.Type flags and simplify DAO accordingly
 // TODO: Add more tests
 // TODO: Login screen (no authentication, just select user with any pw)

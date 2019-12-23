@@ -11,6 +11,7 @@ import com.geobotanica.geobotanica.ui.searchplantname.ViewEffect
 import com.geobotanica.geobotanica.ui.searchplantname.ViewEffect.*
 import com.geobotanica.geobotanica.ui.searchplantname.ViewEvent.*
 import com.geobotanica.geobotanica.ui.searchplantname.ViewState
+import com.geobotanica.geobotanica.util.MockkExt.verifyOne
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
 import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
 import com.geobotanica.geobotanica.util.SpekExt.setupTestDispatchers
@@ -55,7 +56,7 @@ object SearchPlantNameViewModelTest : Spek({
         beforeEachTest { searchPlantNameViewModel.onEvent(ViewCreated(userId, photoUri)) }
 
         it("Should emit InitView effect once") {
-            verify(exactly = 1) { viewEffectObserver.onChanged(InitView) }
+            verifyOne { viewEffectObserver.onChanged(InitView) }
         }
 
         it("Should emit default ViewState") {
@@ -120,7 +121,7 @@ object SearchPlantNameViewModelTest : Spek({
             }
 
             it("Should emit NavigateToNext ViewEffect") {
-                verify(exactly = 1) { viewEffectObserver.onChanged(NavigateToNext(userId, photoUri, 1L, null)) }
+                verifyOne { viewEffectObserver.onChanged(NavigateToNext(userId, photoUri, 1L, null)) }
             }
         }
 
@@ -131,7 +132,7 @@ object SearchPlantNameViewModelTest : Spek({
             }
 
             it("Should emit NavigateToNext ViewEffect") {
-                verify(exactly = 1) { viewEffectObserver.onChanged(NavigateToNext(userId, photoUri, null, 1L)) }
+                verifyOne { viewEffectObserver.onChanged(NavigateToNext(userId, photoUri, null, 1L)) }
             }
         }
 
@@ -212,7 +213,7 @@ object SearchPlantNameViewModelTest : Spek({
             }
 
             it("Should perform search only once") {
-                verify(exactly = 1) { plantNameSearchService.search("string") }
+                verifyOne { plantNameSearchService.search("string") }
             }
         }
     }
@@ -221,7 +222,7 @@ object SearchPlantNameViewModelTest : Spek({
         beforeEachTest { searchPlantNameViewModel.onEvent(ClearSearchClicked) }
 
         it("Should emit ClearSearchText ViewEffect") {
-            verify(exactly = 1) { viewEffectObserver.onChanged(ClearSearchText) }
+            verifyOne { viewEffectObserver.onChanged(ClearSearchText) }
         }
     }
 
@@ -232,7 +233,7 @@ object SearchPlantNameViewModelTest : Spek({
         }
 
         it("Should emit NavigateToNext ViewEffect") {
-            verify(exactly = 1) { viewEffectObserver.onChanged(NavigateToNext(userId, photoUri, null, null)) }
+            verifyOne { viewEffectObserver.onChanged(NavigateToNext(userId, photoUri, null, null)) }
         }
     }
 })
