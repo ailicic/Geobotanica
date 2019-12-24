@@ -15,8 +15,8 @@ import com.geobotanica.geobotanica.ui.map.MapViewModel
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_FIX
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_OFF
 import com.geobotanica.geobotanica.ui.map.marker.PlanterMarkerDiffer
-import com.geobotanica.geobotanica.util.MockkExt.verifyOne
-import com.geobotanica.geobotanica.util.MockkExt.verifyZero
+import com.geobotanica.geobotanica.util.MockkUtil.verifyOne
+import com.geobotanica.geobotanica.util.MockkUtil.verifyZero
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
 import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
 import com.geobotanica.geobotanica.util.SpekExt.setupTestDispatchers
@@ -26,7 +26,7 @@ import org.spekframework.spek2.style.specification.describe
 
 object MapViewModelTest : Spek({
     allowLiveData()
-    setupTestDispatchers()
+    val testDispatchers = setupTestDispatchers()
 
     val gpsRequiredSnackbarObserver = mockk<Observer<Unit>>(relaxed = true)
     val plantNamesMissingSnackbarObserver = mockk<Observer<Unit>>(relaxed = true)
@@ -211,7 +211,7 @@ object MapViewModelTest : Spek({
     describe("New Plant FAB Click") {
 
         context("When GPS disabled") {
-            beforeEachBlockingTest {
+            beforeEachBlockingTest(testDispatchers) {
                 every { locationService.isGpsEnabled() } returns false
                 mapViewModel.onClickNewPlantFab()
             }
@@ -229,7 +229,7 @@ object MapViewModelTest : Spek({
             beforeEachTest { every { locationService.isGpsEnabled() } returns true }
 
             context("When plant names not available") {
-                beforeEachBlockingTest {
+                beforeEachBlockingTest(testDispatchers) {
                     val missingAsset = OnlineAsset("", "", "", false, 0L, 0L, NOT_DOWNLOADED)
                     coEvery { assetRepo.get(OnlineAssetId.PLANT_NAMES.id) } returns missingAsset
                     mapViewModel.onClickNewPlantFab()
@@ -241,7 +241,7 @@ object MapViewModelTest : Spek({
             }
 
             context("When plant names available") {
-                beforeEachBlockingTest {
+                beforeEachBlockingTest(testDispatchers) {
                     val downloadedAsset = OnlineAsset("", "", "", false, 0L, 0L, DOWNLOADED)
                     coEvery { assetRepo.get(OnlineAssetId.PLANT_NAMES.id) } returns downloadedAsset
                     mapViewModel.onClickNewPlantFab()

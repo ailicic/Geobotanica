@@ -18,20 +18,19 @@ import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.*
 import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.NavViewEffect.NavigateToNewPlantMeasurement
 import com.geobotanica.geobotanica.ui.newplantname.ViewEvent.*
 import com.geobotanica.geobotanica.ui.newplantname.ViewState
-import com.geobotanica.geobotanica.util.MockkExt.coVerifyOne
-import com.geobotanica.geobotanica.util.MockkExt.coVerifyZero
-import com.geobotanica.geobotanica.util.MockkExt.verifyOne
-import com.geobotanica.geobotanica.util.MockkExt.verifyZero
+import com.geobotanica.geobotanica.util.MockkUtil.coVerifyOne
+import com.geobotanica.geobotanica.util.MockkUtil.coVerifyZero
+import com.geobotanica.geobotanica.util.MockkUtil.verifyOne
+import com.geobotanica.geobotanica.util.MockkUtil.verifyZero
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
 import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
 import com.geobotanica.geobotanica.util.SpekExt.setupTestDispatchers
 import io.mockk.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
-@ExperimentalCoroutinesApi
+
 object NewPlantNameViewModelTest : Spek({
     allowLiveData()
     val testDispatchers = setupTestDispatchers()
@@ -42,7 +41,7 @@ object NewPlantNameViewModelTest : Spek({
     val appContext = mockk<Context> {
         every { resources.getString(R.string.suggested_common) } returns "Suggested common"
         every { resources.getString(R.string.suggested_scientific) } returns "Suggested scientific"
-        every { resources.getInteger(R.integer.fragmentAnimTime) } returns 200
+        every { resources.getInteger(R.integer.fragmentAnimTime) } returns 0 // TODO: Need to inject TestCoroutineScope in NewPlantNameViewModel if non-zero
     }
 
     val taxon1 = Taxon(generic = "Taxon1").apply { id = 1L }
@@ -98,12 +97,8 @@ object NewPlantNameViewModelTest : Spek({
         context("Null ids") {
             beforeEachTest { newPlantNameViewModel.onEvent(ViewCreated(userId, photoUri, null, null)) }
 
-            it("Should emit InitView effect once") {
-                verifyOne { viewEffectObserver.onChanged(InitView) }
-            }
-            it("Should reset ViewState") {
-                verify { viewStateObserver.onChanged(ViewState()) }
-            }
+            it("Should emit InitView effect once") { verifyOne { viewEffectObserver.onChanged(InitView) } }
+            it("Should reset ViewState") { verify { viewStateObserver.onChanged(ViewState()) } }
             it("Should not query db") {
                 coVerifyZero { vernacularRepo.get(any()) }
                 coVerifyZero { taxonRepo.get(any()) }

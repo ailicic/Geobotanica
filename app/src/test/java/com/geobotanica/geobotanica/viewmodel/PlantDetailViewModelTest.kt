@@ -15,8 +15,10 @@ import com.geobotanica.geobotanica.data.repo.*
 import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailViewModel
 import com.geobotanica.geobotanica.ui.viewpager.PhotoData
 import com.geobotanica.geobotanica.util.Measurement
-import com.geobotanica.geobotanica.util.MockkExt.coVerifyOne
-import com.geobotanica.geobotanica.util.MockkExt.verifyOne
+import com.geobotanica.geobotanica.util.MockkUtil.coVerifyOne
+import com.geobotanica.geobotanica.util.MockkUtil.mockRoomStatic
+import com.geobotanica.geobotanica.util.MockkUtil.mockkBeforeGroup
+import com.geobotanica.geobotanica.util.MockkUtil.verifyOne
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
 import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
 import com.geobotanica.geobotanica.util.SpekExt.mockTime
@@ -26,6 +28,7 @@ import io.mockk.*
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.io.File
+
 
 object PlantDetailViewModelTest : Spek({
     mockTime()
@@ -68,26 +71,27 @@ object PlantDetailViewModelTest : Spek({
     val fakeTrunkDiameter = PlantMeasurement(fakeUser.id, fakePlant.id, TRUNK_DIAMETER, 3f)
 
 
-    val userRepo = mockk<UserRepo> {
+    val userRepo = mockkBeforeGroup<UserRepo> {
         coEvery { get(any<Long>()) } returns fakeUser
         coEvery { getLiveData(any()) } returns liveData(fakeUser)
     }
-    val plantRepo = mockk<PlantRepo> {
+
+    val plantRepo = mockkBeforeGroup<PlantRepo> {
         coEvery { getLiveData(any()) } returns liveData(fakePlant)
         coEvery { update(any()) } returns 1
         coEvery { delete(any()) } returns 1
     }
-    val plantLocationRepo = mockk<PlantLocationRepo> {
+    val plantLocationRepo = mockkBeforeGroup<PlantLocationRepo> {
         coEvery { getLastPlantLocation(any()) } returns liveData(fakePlantLocation)
     }
-    val plantPhotoRepo = mockk<PlantPhotoRepo> {
+    val plantPhotoRepo = mockkBeforeGroup<PlantPhotoRepo> {
         coEvery { getAllPhotosOfPlant(any()) } returns listOf(fakePhoto)
         coEvery { getAllPhotosOfPlantLiveData(any()) } returns liveData(listOf(fakePhoto))
         coEvery { update(any()) } returns 1
         coEvery { delete(any()) } returns 1
         coEvery { insert(any()) } returns 0L
     }
-    val plantMeasurementRepo = mockk<PlantMeasurementRepo> {
+    val plantMeasurementRepo = mockkBeforeGroup<PlantMeasurementRepo> {
         coEvery { getLastHeightOfPlantLiveData(any()) } returns liveData(fakeHeight)
         coEvery { getLastDiameterOfPlantLiveData(any()) } returns liveData(fakeDiameter)
         coEvery { getLastTrunkDiameterOfPlantLiveData(any()) } returns liveData(fakeTrunkDiameter)
@@ -97,7 +101,7 @@ object PlantDetailViewModelTest : Spek({
         coEvery { delete(any()) } returns 1
     }
 
-    mockkStatic("androidx.room.RoomDatabaseKt") // db.withTransaction{} test hangs indefinitely if omitted!
+    mockRoomStatic()
     val block = slot<suspend () -> Unit>()
     val database = mockk<GbDatabase> {
         coEvery {
@@ -167,108 +171,106 @@ object PlantDetailViewModelTest : Spek({
     }
 
 
-    describe("NewPlantConfirmViewModel") {
 
-        context("Delete photo") {
-            beforeEachBlockingTest(testDispatchers) { plantDetailViewModel.onDeletePhoto(0) }
+    describe("Delete photo") {
+        beforeEachBlockingTest(testDispatchers) { plantDetailViewModel.onDeletePhoto(0) }
 
-            it("Should delete plant") { coVerifyOne { plantPhotoRepo.delete(fakePhoto) } }
-            it("Should show plant deleted toast") { verifyOne { showPlantDeletedToastObserver.onChanged(null) } }
-        }
+        it("Should delete plant") { coVerifyOne { plantPhotoRepo.delete(fakePhoto) } }
+        it("Should show plant deleted toast") { verifyOne { showPlantDeletedToastObserver.onChanged(null) } }
+    }
 
-        context("Retake photo") {
-            beforeEachTest { plantDetailViewModel.onRetakePhoto() }
+    describe("Retake photo") {
+        beforeEachTest { plantDetailViewModel.onRetakePhoto() }
 
-            it("Should start photo capture") { verifyOne { startPhotoIntentObserver.onChanged(newPhotoFile) } }
+        it("Should start photo capture") { verifyOne { startPhotoIntentObserver.onChanged(newPhotoFile) } }
 
-            context("Photo captured") {
-                beforeEachTest { plantDetailViewModel.onPhotoComplete(0) }
+        context("Photo captured") {
+            beforeEachTest { plantDetailViewModel.onPhotoComplete(0) }
 
-                it("Should update photo") {
-                    coVerifyOne { plantPhotoRepo.update(fakePhoto.copy(filename = newPhotoFilename)) }
-                }
+            it("Should update photo") {
+                coVerifyOne { plantPhotoRepo.update(fakePhoto.copy(filename = newPhotoFilename)) }
             }
         }
+    }
 
-        context("Add photo") {
-            beforeEachTest { plantDetailViewModel.onAddPhoto(COMPLETE) }
+    describe("Add photo") {
+        beforeEachTest { plantDetailViewModel.onAddPhoto(COMPLETE) }
 
-            it("Should start photo capture") { verifyOne { startPhotoIntentObserver.onChanged(newPhotoFile) } }
+        it("Should start photo capture") { verifyOne { startPhotoIntentObserver.onChanged(newPhotoFile) } }
 
-            context("Cancel photo capture") {
-                beforeEachTest { plantDetailViewModel.deleteTemporaryPhoto() }
+        context("Cancel photo capture") {
+            beforeEachTest { plantDetailViewModel.deleteTemporaryPhoto() }
 
-                it("Should delete temp photo") { verifyOne { storageHelper.deleteFile(newPhotoFilename) } }
-            }
-
-            context("Photo captured") {
-                val plantPhoto by memoized { PlantPhoto(fakeUser.id, fakePlant.id, COMPLETE, newPhotoFilename) }
-
-                beforeEachTest { plantDetailViewModel.onPhotoComplete(0) }
-
-                it("Should insert photo in db") { coVerifyOne { plantPhotoRepo.insert(plantPhoto) } }
-            }
+            it("Should delete temp photo") { verifyOne { storageHelper.deleteFile(newPhotoFilename) } }
         }
 
-        context("New plant type") {
-            beforeEachBlockingTest(testDispatchers) { plantDetailViewModel.onNewPlantType(SHRUB) }
+        context("Photo captured") {
+            val plantPhoto by memoized { PlantPhoto(fakeUser.id, fakePlant.id, COMPLETE, newPhotoFilename) }
 
-            it("Should update plant type") {
-                coVerifyOne { plantRepo.update(fakePlant.copy(type = SHRUB).apply { id = fakePlant.id }) }
-            }
-            it("Should delete trunk diameters") { coVerifyOne { plantMeasurementRepo.delete(fakeTrunkDiameter) } }
+            beforeEachTest { plantDetailViewModel.onPhotoComplete(0) }
+
+            it("Should insert photo in db") { coVerifyOne { plantPhotoRepo.insert(plantPhoto) } }
+        }
+    }
+
+    describe("New plant type") {
+        beforeEachBlockingTest(testDispatchers) { plantDetailViewModel.onNewPlantType(SHRUB) }
+
+        it("Should update plant type") {
+            coVerifyOne { plantRepo.update(fakePlant.copy(type = SHRUB).apply { id = fakePlant.id }) }
+        }
+        it("Should delete trunk diameters") { coVerifyOne { plantMeasurementRepo.delete(fakeTrunkDiameter) } }
+    }
+
+    describe("Update plant names") {
+        beforeEachBlockingTest(testDispatchers) {
+            plantDetailViewModel.onUpdatePlantNames("common2", "scientific2")
         }
 
-        context("Update plant names") {
-            beforeEachBlockingTest(testDispatchers) {
-                plantDetailViewModel.onUpdatePlantNames("common2", "scientific2")
-            }
+        it("Should update plant names") {
+            coVerifyOne {
+                plantRepo.update(fakePlant.copy(
+                        commonName = "common2",
+                        scientificName = "scientific2"
+                ).apply { id = fakePlant.id }) }
+        }
+    }
 
-            it("Should update plant names") {
-                coVerifyOne {
-                    plantRepo.update(fakePlant.copy(
-                            commonName = "common2",
-                            scientificName = "scientific2"
-                    ).apply { id = fakePlant.id }) }
-            }
+    describe("Update photo type") {
+        beforeEachBlockingTest(testDispatchers) { plantDetailViewModel.onUpdatePhotoType(0, FLOWER) }
+
+        it("Should update photo type") {
+            coVerifyOne { plantPhotoRepo.update(fakePhoto.copy(type = FLOWER).apply { id = fakePhoto.id }) }
+        }
+    }
+
+    describe("New measurements") {
+        val newHeight by memoized { Measurement(4f) }
+        val newDiameter by memoized { Measurement(5f) }
+        val newTrunkDiameter by memoized { Measurement(6f) }
+        val newPlantHeight by memoized { PlantMeasurement(fakeUser.id, fakePlant.id, HEIGHT, 4f) }
+        val newPlantDiameter by memoized { PlantMeasurement(fakeUser.id, fakePlant.id, DIAMETER, 5f) }
+        val newPlantTrunkDiameter by memoized { PlantMeasurement(fakeUser.id, fakePlant.id, TRUNK_DIAMETER, 6f) }
+
+        beforeEachBlockingTest(testDispatchers) {
+            plantDetailViewModel.onMeasurementsAdded(newHeight, newDiameter, newTrunkDiameter)
         }
 
-        context("Update photo type") {
-            beforeEachBlockingTest { plantDetailViewModel.onUpdatePhotoType(0, FLOWER) }
-
-            it("Should update photo type") {
-                coVerifyOne { plantPhotoRepo.update(fakePhoto.copy(type = FLOWER).apply { id = fakePhoto.id }) }
+        it("Should insert measurements in db") {
+            coVerifyOrder {
+                plantMeasurementRepo.insert(newPlantHeight)
+                plantMeasurementRepo.insert(newPlantDiameter)
+                plantMeasurementRepo.insert(newPlantTrunkDiameter)
             }
         }
+    }
 
-        context("New measurements") {
-            val newHeight by memoized { Measurement(4f) }
-            val newDiameter by memoized { Measurement(5f) }
-            val newTrunkDiameter by memoized { Measurement(6f) }
-            val newPlantHeight by memoized { PlantMeasurement(fakeUser.id, fakePlant.id, HEIGHT, 4f) }
-            val newPlantDiameter by memoized { PlantMeasurement(fakeUser.id, fakePlant.id, DIAMETER, 5f) }
-            val newPlantTrunkDiameter by memoized { PlantMeasurement(fakeUser.id, fakePlant.id, TRUNK_DIAMETER, 6f) }
-
-            beforeEachBlockingTest(testDispatchers) {
-                plantDetailViewModel.onMeasurementsAdded(newHeight, newDiameter, newTrunkDiameter)
-            }
-
-            it("Should insert measurements in db") {
-                coVerifyOrder {
-                    plantMeasurementRepo.insert(newPlantHeight)
-                    plantMeasurementRepo.insert(newPlantDiameter)
-                    plantMeasurementRepo.insert(newPlantTrunkDiameter)
-                }
-            }
+    describe("Delete plant") {
+        beforeEachBlockingTest(testDispatchers) {
+            plantDetailViewModel.markPlantForDeletion()
+            plantDetailViewModel.onDestroyFragment()
         }
 
-        context("Delete plant") {
-            beforeEachTest {
-                plantDetailViewModel.markPlantForDeletion()
-                plantDetailViewModel.onDestroyFragment()
-            }
-
-            it("Should delete plant") { coVerifyOne { plantRepo.delete(fakePlant) } }
-        }
+        it("Should delete plant") { coVerifyOne { plantRepo.delete(fakePlant) } }
     }
 })

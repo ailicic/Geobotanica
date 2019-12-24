@@ -13,15 +13,13 @@ class GbTimeTest : Spek({
     var now = "now"
     var later = "later"
 
-    describe("GbTime") {
-        context("Mock time") {
-            beforeEachTest {
-                now = GbTime.now().toString()
-                Thread.sleep(2)
-                later = GbTime.now().toString()
-            }
-
-            it("Should be constant time") { now shouldEqual later }
+    describe("Mock time") {
+        beforeEachTest {
+            now = GbTime.now().toString()
+            Thread.sleep(2)
+            later = GbTime.now().toString()
         }
+
+        it("Should be constant time") { now shouldEqual later }
     }
 })

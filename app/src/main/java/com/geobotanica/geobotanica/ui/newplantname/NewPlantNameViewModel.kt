@@ -3,7 +3,6 @@ package com.geobotanica.geobotanica.ui.newplantname
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geobotanica.geobotanica.R
@@ -14,17 +13,15 @@ import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService
 import com.geobotanica.geobotanica.data_taxa.util.PlantNameSearchService.SearchResult
 import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.*
-import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.NavViewEffect.*
+import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.NavViewEffect.NavigateToNewPlantMeasurement
+import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.NavViewEffect.NavigateToNewPlantType
 import com.geobotanica.geobotanica.ui.newplantname.ViewEvent.*
 import com.geobotanica.geobotanica.util.GbDispatchers
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
 import com.geobotanica.geobotanica.util.mutableLiveData
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -115,9 +112,8 @@ class NewPlantNameViewModel @Inject constructor (
                         lastClickedResultIndex = index,
                         lastClickedResult = searchResult
                 )
-                if (! isClickedResultSameAsLast) {
+                if (! isClickedResultSameAsLast)
                     emitViewEffect(ShowCommonNameAnimation(searchResult.plantName))
-                }
             }
             if (viewState.isScientificNameEditable) {
                 taxonId = searchResult.id

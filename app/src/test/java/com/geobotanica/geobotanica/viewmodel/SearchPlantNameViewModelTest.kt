@@ -11,7 +11,7 @@ import com.geobotanica.geobotanica.ui.searchplantname.ViewEffect
 import com.geobotanica.geobotanica.ui.searchplantname.ViewEffect.*
 import com.geobotanica.geobotanica.ui.searchplantname.ViewEvent.*
 import com.geobotanica.geobotanica.ui.searchplantname.ViewState
-import com.geobotanica.geobotanica.util.MockkExt.verifyOne
+import com.geobotanica.geobotanica.util.MockkUtil.verifyOne
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
 import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
 import com.geobotanica.geobotanica.util.SpekExt.setupTestDispatchers

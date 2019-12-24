@@ -5,8 +5,8 @@ import androidx.arch.core.executor.TaskExecutor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
-import org.spekframework.spek2.dsl.LifecycleAware
 import org.spekframework.spek2.dsl.Root
+import org.spekframework.spek2.style.specification.Suite
 
 object SpekExt {
 
@@ -14,8 +14,8 @@ object SpekExt {
      * This avoids the "getMainLooper in android.os.Looper not mocked" error when using LiveData in Spek.
      */
     fun Root.allowLiveData() {
-        setExecutorDelegate()
-//        afterGroup { unsetExecutorDelegate() }
+        beforeEachGroup { setExecutorDelegate() }
+        afterEachGroup { unsetExecutorDelegate() }
     }
 
     private fun setExecutorDelegate() {
@@ -44,18 +44,18 @@ object SpekExt {
     }
 
     @Suppress("EXPERIMENTAL_API_USAGE")
-    fun LifecycleAware.beforeEachBlockingTest(
-            testDispatchers: TestDispatchers = TestDispatchers(),
+    fun Suite.beforeEachBlockingTest(
+            testDispatchers: TestDispatchers,
             block: suspend TestCoroutineScope.() -> Unit
     ) {
         beforeEachTest {
-            testDispatchers.main.runBlockingTest {
+            runBlockingTest(testDispatchers.main) {
                 block()
             }
         }
     }
 
-    fun LifecycleAware.mockTime() {
+    fun Root.mockTime() {
         beforeGroup { GbTime.freeze() }
         afterGroup { GbTime.unfreeze() }
     }
