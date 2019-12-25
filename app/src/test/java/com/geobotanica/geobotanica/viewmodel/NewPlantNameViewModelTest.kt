@@ -20,6 +20,7 @@ import com.geobotanica.geobotanica.ui.newplantname.ViewEvent.*
 import com.geobotanica.geobotanica.ui.newplantname.ViewState
 import com.geobotanica.geobotanica.util.MockkUtil.coVerifyOne
 import com.geobotanica.geobotanica.util.MockkUtil.coVerifyZero
+import com.geobotanica.geobotanica.util.MockkUtil.mockkObserver
 import com.geobotanica.geobotanica.util.MockkUtil.verifyOne
 import com.geobotanica.geobotanica.util.MockkUtil.verifyZero
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
@@ -34,8 +35,8 @@ object NewPlantNameViewModelTest : Spek({
     allowLiveData()
     val testDispatchers = setupTestDispatchers()
 
-    val viewStateObserver = mockk<Observer<ViewState>>(relaxed = true)
-    val viewEffectObserver = mockk<Observer<ViewEffect>>(relaxed = true)
+    val viewStateObserver = mockkObserver<ViewState>()
+    val viewEffectObserver = mockkObserver<ViewEffect>()
 
     val appContext = mockk<Context> {
         every { resources.getString(R.string.suggested_common) } returns "Suggested common"
@@ -45,16 +46,18 @@ object NewPlantNameViewModelTest : Spek({
 
     val taxon1 = Taxon(generic = "Taxon1").apply { id = 1L }
     val taxon2 = Taxon(generic = "Taxon2").apply { id = 2L }
-    val taxonRepo = mockk<TaxonRepo>(relaxed = true) {
+    val taxonRepo = mockk<TaxonRepo> {
         coEvery { this@mockk.get(taxon1.id) } returns taxon1
         coEvery { this@mockk.get(taxon2.id) } returns taxon2
+        coEvery { this@mockk.setTagged(any(), any(), any()) } returns Unit
     }
 
     val vernacular1 = Vernacular(vernacular = "Vernacular1").apply { id = 1L }
     val vernacular2 = Vernacular(vernacular = "Vernacular2").apply { id = 2L }
-    val vernacularRepo = mockk<VernacularRepo>(relaxed = true) {
+    val vernacularRepo = mockk<VernacularRepo> {
         coEvery { this@mockk.get(vernacular1.id) } returns vernacular1
         coEvery { this@mockk.get(vernacular2.id) } returns vernacular2
+        coEvery { this@mockk.setTagged(any(), any(), any()) } returns Unit
     }
 
     val tSearchResult1 = SearchResult(taxon1.id, SCIENTIFIC.flag, 0, taxon1.generic ?: "")

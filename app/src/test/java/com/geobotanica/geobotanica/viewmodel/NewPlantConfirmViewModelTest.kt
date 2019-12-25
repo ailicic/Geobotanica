@@ -1,6 +1,5 @@
 package com.geobotanica.geobotanica.viewmodel
 
-import androidx.lifecycle.Observer
 import androidx.room.withTransaction
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.Location
@@ -15,7 +14,8 @@ import com.geobotanica.geobotanica.ui.newplantconfirm.NewPlantConfirmViewModel
 import com.geobotanica.geobotanica.ui.viewpager.PhotoData
 import com.geobotanica.geobotanica.util.Measurement
 import com.geobotanica.geobotanica.util.MockkUtil.coVerifyOne
-import com.geobotanica.geobotanica.util.MockkUtil.mockRoomStatic
+import com.geobotanica.geobotanica.util.MockkUtil.mockkObserver
+import com.geobotanica.geobotanica.util.MockkUtil.mockkRoomStatic
 import com.geobotanica.geobotanica.util.MockkUtil.verifyOne
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
 import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
@@ -32,14 +32,14 @@ object NewPlantConfirmViewModelTest : Spek({
     allowLiveData()
     val testDispatchers = setupTestDispatchers()
 
-    val commonNameObserver = mockk<Observer<String>>(relaxed = true)
-    val scientificNameObserver = mockk<Observer<String>>(relaxed = true)
-    val heightObserver = mockk<Observer<Measurement>>(relaxed = true)
-    val diameterObserver = mockk<Observer<Measurement>>(relaxed = true)
-    val trunkDiameterObserver = mockk<Observer<Measurement>>(relaxed = true)
-    val photoDataObserver = mockk<Observer<List<PhotoData>>>(relaxed = true)
-    val startPhotoIntentObserver = mockk<Observer<File>>(relaxed = true)
-    val showPhotoDeletedToastObserver = mockk<Observer<Unit>>(relaxed = true)
+    val commonNameObserver = mockkObserver<String>()
+    val scientificNameObserver = mockkObserver<String>()
+    val heightObserver = mockkObserver<Measurement>()
+    val diameterObserver = mockkObserver<Measurement>()
+    val trunkDiameterObserver = mockkObserver<Measurement>()
+    val photoDataObserver = mockkObserver<List<PhotoData>>()
+    val startPhotoIntentObserver = mockkObserver<File>()
+    val showPhotoDeletedToastObserver = mockkObserver<Unit>()
 
     val photoFilename = "photo.jpg"
     val photoFile = File(photoFilename)
@@ -57,7 +57,7 @@ object NewPlantConfirmViewModelTest : Spek({
     val taxonRepo = mockk<TaxonRepo> { coEvery { setTagged(any(), PlantNameTag.USED) } returns Unit }
     val vernacularRepo = mockk<VernacularRepo> { coEvery { setTagged(any(), PlantNameTag.USED) } returns Unit }
 
-    mockRoomStatic()
+    mockkRoomStatic()
     val block = slot<suspend () -> Unit>()
     val database = mockk<GbDatabase> {
         coEvery {

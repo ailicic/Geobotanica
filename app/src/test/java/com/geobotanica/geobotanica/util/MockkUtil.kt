@@ -1,5 +1,6 @@
 package com.geobotanica.geobotanica.util
 
+import androidx.lifecycle.Observer
 import io.mockk.*
 import org.spekframework.spek2.dsl.Root
 
@@ -8,10 +9,24 @@ object MockkUtil {
     private var isRoomMocked = false
 
     @Suppress("unused")
-    fun Root.mockRoomStatic() {
+    fun Root.mockkRoomStatic() {
         if (! isRoomMocked) {
             mockkStatic("androidx.room.RoomDatabaseKt") // db.withTransaction{} test hangs indefinitely if omitted!
             isRoomMocked = true
+        }
+    }
+
+    @Suppress("unused")
+    inline fun <reified T: Any> Root.mockkObserver(): Observer<T> {
+        return mockk {
+            every { onChanged(any()) } returns Unit
+        }
+    }
+
+    @Suppress("unused")
+    inline fun <reified T: Any> Root.mockkObserverNullable(): Observer<T?> {
+        return mockk {
+            every { onChanged(any()) } returns Unit
         }
     }
 

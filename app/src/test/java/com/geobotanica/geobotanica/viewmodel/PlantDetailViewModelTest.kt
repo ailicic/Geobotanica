@@ -1,6 +1,5 @@
 package com.geobotanica.geobotanica.viewmodel
 
-import androidx.lifecycle.Observer
 import androidx.room.withTransaction
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.Location
@@ -16,8 +15,10 @@ import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailViewModel
 import com.geobotanica.geobotanica.ui.viewpager.PhotoData
 import com.geobotanica.geobotanica.util.Measurement
 import com.geobotanica.geobotanica.util.MockkUtil.coVerifyOne
-import com.geobotanica.geobotanica.util.MockkUtil.mockRoomStatic
 import com.geobotanica.geobotanica.util.MockkUtil.mockkBeforeGroup
+import com.geobotanica.geobotanica.util.MockkUtil.mockkObserver
+import com.geobotanica.geobotanica.util.MockkUtil.mockkObserverNullable
+import com.geobotanica.geobotanica.util.MockkUtil.mockkRoomStatic
 import com.geobotanica.geobotanica.util.MockkUtil.verifyOne
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
 import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
@@ -35,21 +36,21 @@ object PlantDetailViewModelTest : Spek({
     allowLiveData()
     val testDispatchers = setupTestDispatchers()
 
-    val plantObserver = mockk<Observer<Plant>>(relaxed = true)
-    val plantTypeObserver = mockk<Observer<Plant.Type>>(relaxed = true)
-    val createdByUserObserver = mockk<Observer<User>>(relaxed = true)
-    val locationObserver = mockk<Observer<Location>>(relaxed = true)
-    val photoDataObserver = mockk<Observer<List<PhotoData>>>(relaxed = true)
-    val heightObserver = mockk<Observer<Measurement?>>(relaxed = true)
-    val heightDateObserver = mockk<Observer<String>>(relaxed = true)
-    val diameterObserver = mockk<Observer<Measurement?>>(relaxed = true)
-    val diameterDateTextObserver = mockk<Observer<String>>(relaxed = true)
-    val trunkDiameterObserver = mockk<Observer<Measurement?>>(relaxed = true)
-    val trunkDiameterDateTextObserver = mockk<Observer<String>>(relaxed = true)
-    val lastMeasuredByUserObserver = mockk<Observer<String>>(relaxed = true)
-    val createdDateTextObserver = mockk<Observer<String>>(relaxed = true)
-    val startPhotoIntentObserver = mockk<Observer<File>>(relaxed = true)
-    val showPlantDeletedToastObserver = mockk<Observer<Unit>>(relaxed = true)
+    val plantObserver = mockkObserver<Plant>()
+    val plantTypeObserver = mockkObserver<Plant.Type>()
+    val createdByUserObserver = mockkObserver<User>()
+    val locationObserver = mockkObserver<Location>()
+    val photoDataObserver = mockkObserver<List<PhotoData>>()
+    val heightObserver = mockkObserverNullable<Measurement>()
+    val heightDateObserver = mockkObserver<String>()
+    val diameterObserver = mockkObserverNullable<Measurement>()
+    val diameterDateTextObserver = mockkObserver<String>()
+    val trunkDiameterObserver = mockkObserverNullable<Measurement>()
+    val trunkDiameterDateTextObserver = mockkObserver<String>()
+    val lastMeasuredByUserObserver = mockkObserver<String>()
+    val createdDateTextObserver = mockkObserver<String>()
+    val startPhotoIntentObserver = mockkObserver<File>()
+    val showPlantDeletedToastObserver = mockkObserver<Unit>()
 
     val newPhotoFilename = "photo.jpg"
     val newPhotoFile = File(newPhotoFilename)
@@ -101,7 +102,7 @@ object PlantDetailViewModelTest : Spek({
         coEvery { delete(any()) } returns 1
     }
 
-    mockRoomStatic()
+    mockkRoomStatic()
     val block = slot<suspend () -> Unit>()
     val database = mockk<GbDatabase> {
         coEvery {

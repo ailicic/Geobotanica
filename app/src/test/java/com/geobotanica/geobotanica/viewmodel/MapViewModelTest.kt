@@ -1,6 +1,5 @@
 package com.geobotanica.geobotanica.viewmodel
 
-import androidx.lifecycle.Observer
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.android.location.LocationService
@@ -15,6 +14,7 @@ import com.geobotanica.geobotanica.ui.map.MapViewModel
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_FIX
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_OFF
 import com.geobotanica.geobotanica.ui.map.marker.PlanterMarkerDiffer
+import com.geobotanica.geobotanica.util.MockkUtil.mockkObserver
 import com.geobotanica.geobotanica.util.MockkUtil.verifyOne
 import com.geobotanica.geobotanica.util.MockkUtil.verifyZero
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
@@ -27,21 +27,24 @@ object MapViewModelTest : Spek({
     allowLiveData()
     setupTestDispatchers()
 
-    val gpsRequiredSnackbarObserver = mockk<Observer<Unit>>(relaxed = true)
-    val plantNamesMissingSnackbarObserver = mockk<Observer<Unit>>(relaxed = true)
-    val gpsFabIconObserver = mockk<Observer<Int>>(relaxed = true)
-    val locationPrecisionMarkerObserver = mockk<Observer<Location>>(relaxed = true)
-    val locationMarkerObserver = mockk<Observer<Location>>(relaxed = true)
-    val centerMapObserver = mockk<Observer<Location>>(relaxed = true)
-    val redrawMapLayersObserver = mockk<Observer<Unit>>(relaxed = true)
-    val navigateToNewPlantObserver = mockk<Observer<Unit>>(relaxed = true)
+    val gpsRequiredSnackbarObserver = mockkObserver<Unit>()
+    val plantNamesMissingSnackbarObserver = mockkObserver<Unit>()
+    val gpsFabIconObserver = mockkObserver<Int>()
+    val locationPrecisionMarkerObserver = mockkObserver<Location>()
+    val locationMarkerObserver = mockkObserver<Location>()
+    val centerMapObserver = mockkObserver<Location>()
+    val redrawMapLayersObserver = mockkObserver<Unit>()
+    val navigateToNewPlantObserver = mockkObserver<Unit>()
 
     val storageHelper = mockk<StorageHelper>()
     val mapRepo = mockk<MapRepo>()
     val assetRepo = mockk<AssetRepo>()
     val plantRepo = mockk<PlantRepo>()
     val plantMarkerDiffer = mockk<PlanterMarkerDiffer>()
-    val locationService = mockk<LocationService>(relaxed = true)
+    val locationService = mockk<LocationService> {
+        every { subscribe(any(), any()) } returns Unit
+        every { unsubscribe(any()) } returns Unit
+    }
 
     val mapViewModel by memoized {
         MapViewModel(storageHelper, mapRepo, assetRepo, plantRepo, plantMarkerDiffer, locationService).apply {

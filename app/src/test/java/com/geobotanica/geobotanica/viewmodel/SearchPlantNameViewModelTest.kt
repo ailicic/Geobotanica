@@ -1,6 +1,5 @@
 package com.geobotanica.geobotanica.viewmodel
 
-import androidx.lifecycle.Observer
 import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag.*
 import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
 import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
@@ -11,6 +10,7 @@ import com.geobotanica.geobotanica.ui.searchplantname.ViewEffect
 import com.geobotanica.geobotanica.ui.searchplantname.ViewEffect.*
 import com.geobotanica.geobotanica.ui.searchplantname.ViewEvent.*
 import com.geobotanica.geobotanica.ui.searchplantname.ViewState
+import com.geobotanica.geobotanica.util.MockkUtil.mockkObserver
 import com.geobotanica.geobotanica.util.MockkUtil.verifyOne
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
 import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
@@ -24,11 +24,11 @@ object SearchPlantNameViewModelTest : Spek({
     allowLiveData()
     val testDispatchers = setupTestDispatchers()
 
-    val viewStateObserver = mockk<Observer<ViewState>>(relaxed = true)
-    val viewEffectObserver = mockk<Observer<ViewEffect>>(relaxed = true)
+    val viewStateObserver = mockkObserver<ViewState>()
+    val viewEffectObserver = mockkObserver<ViewEffect>()
 
-    val taxonRepo = mockk<TaxonRepo>(relaxed = true)
-    val vernacularRepo = mockk<VernacularRepo>(relaxed = true)
+    val taxonRepo = mockk<TaxonRepo>()
+    val vernacularRepo = mockk<VernacularRepo>()
     val plantNameSearchService = mockk<PlantNameSearchService>()
 
     val searchPlantNameViewModel by memoized {
