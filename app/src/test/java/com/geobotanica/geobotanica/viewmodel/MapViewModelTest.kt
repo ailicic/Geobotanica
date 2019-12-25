@@ -18,7 +18,6 @@ import com.geobotanica.geobotanica.ui.map.marker.PlanterMarkerDiffer
 import com.geobotanica.geobotanica.util.MockkUtil.verifyOne
 import com.geobotanica.geobotanica.util.MockkUtil.verifyZero
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
-import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
 import com.geobotanica.geobotanica.util.SpekExt.setupTestDispatchers
 import io.mockk.*
 import org.spekframework.spek2.Spek
@@ -26,7 +25,7 @@ import org.spekframework.spek2.style.specification.describe
 
 object MapViewModelTest : Spek({
     allowLiveData()
-    val testDispatchers = setupTestDispatchers()
+    setupTestDispatchers()
 
     val gpsRequiredSnackbarObserver = mockk<Observer<Unit>>(relaxed = true)
     val plantNamesMissingSnackbarObserver = mockk<Observer<Unit>>(relaxed = true)
@@ -211,7 +210,7 @@ object MapViewModelTest : Spek({
     describe("New Plant FAB Click") {
 
         context("When GPS disabled") {
-            beforeEachBlockingTest(testDispatchers) {
+            beforeEachTest {
                 every { locationService.isGpsEnabled() } returns false
                 mapViewModel.onClickNewPlantFab()
             }
@@ -229,7 +228,7 @@ object MapViewModelTest : Spek({
             beforeEachTest { every { locationService.isGpsEnabled() } returns true }
 
             context("When plant names not available") {
-                beforeEachBlockingTest(testDispatchers) {
+                beforeEachTest {
                     val missingAsset = OnlineAsset("", "", "", false, 0L, 0L, NOT_DOWNLOADED)
                     coEvery { assetRepo.get(OnlineAssetId.PLANT_NAMES.id) } returns missingAsset
                     mapViewModel.onClickNewPlantFab()
@@ -241,7 +240,7 @@ object MapViewModelTest : Spek({
             }
 
             context("When plant names available") {
-                beforeEachBlockingTest(testDispatchers) {
+                beforeEachTest {
                     val downloadedAsset = OnlineAsset("", "", "", false, 0L, 0L, DOWNLOADED)
                     coEvery { assetRepo.get(OnlineAssetId.PLANT_NAMES.id) } returns downloadedAsset
                     mapViewModel.onClickNewPlantFab()

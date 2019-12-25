@@ -32,7 +32,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Remove unnecessary usage of beforeEachBlockingTest { }
 // TODO: Use relaxed mocks sparingly (slow to generate) (create mockObserver() )
 // TODO: Define PlantPhoto.Type flags and simplify DAO accordingly
 // TODO: Add more tests

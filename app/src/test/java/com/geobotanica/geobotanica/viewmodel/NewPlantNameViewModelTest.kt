@@ -23,7 +23,6 @@ import com.geobotanica.geobotanica.util.MockkUtil.coVerifyZero
 import com.geobotanica.geobotanica.util.MockkUtil.verifyOne
 import com.geobotanica.geobotanica.util.MockkUtil.verifyZero
 import com.geobotanica.geobotanica.util.SpekExt.allowLiveData
-import com.geobotanica.geobotanica.util.SpekExt.beforeEachBlockingTest
 import com.geobotanica.geobotanica.util.SpekExt.setupTestDispatchers
 import io.mockk.*
 import kotlinx.coroutines.flow.flowOf
@@ -108,7 +107,7 @@ object NewPlantNameViewModelTest : Spek({
         }
 
         context("Non-null taxonId") {
-            beforeEachBlockingTest(testDispatchers) {
+            beforeEachTest {
                 newPlantNameViewModel.onEvent(ViewCreated(userId, photoUri, taxon1.id, null))
             }
 
@@ -139,7 +138,7 @@ object NewPlantNameViewModelTest : Spek({
         }
 
         context("Non-null vernacularId") {
-            beforeEachBlockingTest(testDispatchers) {
+            beforeEachTest {
                 newPlantNameViewModel.onEvent(ViewCreated(userId, photoUri, null, vernacular1.id))
             }
 
@@ -193,7 +192,7 @@ object NewPlantNameViewModelTest : Spek({
     describe("ResultClicked Event") {
 
         context("From taxon list") {
-            beforeEachBlockingTest(testDispatchers) {
+            beforeEachTest {
                 newPlantNameViewModel.onEvent(ViewCreated(userId, photoUri, null, vernacular1.id))
             }
 
@@ -265,7 +264,7 @@ object NewPlantNameViewModelTest : Spek({
 
         context("From vernacular list") {
 
-            beforeEachBlockingTest(testDispatchers) {
+            beforeEachTest {
                 newPlantNameViewModel.onEvent(ViewCreated(userId, photoUri, taxon1.id, null))
             }
 
@@ -338,7 +337,7 @@ object NewPlantNameViewModelTest : Spek({
 
     describe("CommonEditTextChanged Event") {
 
-        beforeEachBlockingTest(testDispatchers) {
+        beforeEachTest {
             newPlantNameViewModel.onEvent(ViewCreated(userId, photoUri, taxon1.id, null))
             newPlantNameViewModel.onEvent(ResultClicked(0, vSearchResult1))
         }
@@ -397,7 +396,7 @@ object NewPlantNameViewModelTest : Spek({
 
     describe("ScientificEditTextChanged Event") {
 
-        beforeEachBlockingTest(testDispatchers) {
+        beforeEachTest {
             newPlantNameViewModel.onEvent(ViewCreated(userId, photoUri, null, vernacular1.id))
             newPlantNameViewModel.onEvent(ResultClicked(0, tSearchResult1))
         }
@@ -457,7 +456,7 @@ object NewPlantNameViewModelTest : Spek({
     describe("FabClicked Event") {
 
         context("Both names empty") {
-            beforeEachBlockingTest(testDispatchers) {
+            beforeEachTest {
                 newPlantNameViewModel.onEvent(ViewCreated(userId, photoUri, null, null))
                 newPlantNameViewModel.onEvent(FabClicked)
             }
@@ -469,12 +468,12 @@ object NewPlantNameViewModelTest : Spek({
 
         context("One name non-empty") {
 
-            beforeEachBlockingTest(testDispatchers) {
+            beforeEachTest {
                 newPlantNameViewModel.onEvent(ViewCreated(userId, photoUri, taxon1.id, null))
             }
 
             context("Single PlantType") {
-                beforeEachBlockingTest(testDispatchers) {
+                beforeEachTest {
                     coEvery { taxonRepo.getTypes(taxon1.id) } returns TREE.flag
                     newPlantNameViewModel.onEvent(FabClicked)
                 }
@@ -493,7 +492,7 @@ object NewPlantNameViewModelTest : Spek({
             }
 
             context("Multiple PlantTypes") {
-                beforeEachBlockingTest(testDispatchers) {
+                beforeEachTest {
                     coEvery { taxonRepo.getTypes(taxon1.id) } returns (TREE.flag or SHRUB.flag)
                     newPlantNameViewModel.onEvent(FabClicked)
                 }

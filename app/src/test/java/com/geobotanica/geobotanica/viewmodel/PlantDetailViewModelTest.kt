@@ -214,7 +214,7 @@ object PlantDetailViewModelTest : Spek({
     }
 
     describe("New plant type") {
-        beforeEachBlockingTest(testDispatchers) { plantDetailViewModel.onNewPlantType(SHRUB) }
+        beforeEachTest { plantDetailViewModel.onNewPlantType(SHRUB) }
 
         it("Should update plant type") {
             coVerifyOne { plantRepo.update(fakePlant.copy(type = SHRUB).apply { id = fakePlant.id }) }
@@ -223,7 +223,7 @@ object PlantDetailViewModelTest : Spek({
     }
 
     describe("Update plant names") {
-        beforeEachBlockingTest(testDispatchers) {
+        beforeEachTest {
             plantDetailViewModel.onUpdatePlantNames("common2", "scientific2")
         }
 
@@ -237,7 +237,7 @@ object PlantDetailViewModelTest : Spek({
     }
 
     describe("Update photo type") {
-        beforeEachBlockingTest(testDispatchers) { plantDetailViewModel.onUpdatePhotoType(0, FLOWER) }
+        beforeEachTest { plantDetailViewModel.onUpdatePhotoType(0, FLOWER) }
 
         it("Should update photo type") {
             coVerifyOne { plantPhotoRepo.update(fakePhoto.copy(type = FLOWER).apply { id = fakePhoto.id }) }
@@ -252,7 +252,7 @@ object PlantDetailViewModelTest : Spek({
         val newPlantDiameter by memoized { PlantMeasurement(fakeUser.id, fakePlant.id, DIAMETER, 5f) }
         val newPlantTrunkDiameter by memoized { PlantMeasurement(fakeUser.id, fakePlant.id, TRUNK_DIAMETER, 6f) }
 
-        beforeEachBlockingTest(testDispatchers) {
+        beforeEachTest {
             plantDetailViewModel.onMeasurementsAdded(newHeight, newDiameter, newTrunkDiameter)
         }
 
@@ -266,7 +266,7 @@ object PlantDetailViewModelTest : Spek({
     }
 
     describe("Delete plant") {
-        beforeEachBlockingTest(testDispatchers) {
+        beforeEachTest {
             plantDetailViewModel.markPlantForDeletion()
             plantDetailViewModel.onDestroyFragment()
         }

@@ -112,7 +112,7 @@ object NewPlantConfirmViewModelTest : Spek({
 
 
     describe("NewPlantConfirmViewModel") {
-        beforeEachBlockingTest(testDispatchers) {
+        beforeEachTest {
             newPlantConfirmViewModel.init(
                     0L,
                     "photoUri",
