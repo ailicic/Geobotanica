@@ -2,6 +2,7 @@ package com.geobotanica.geobotanica.data.entity
 
 import androidx.room.*
 import com.geobotanica.geobotanica.util.GbTime
+import com.geobotanica.geobotanica.util.log2
 import org.threeten.bp.Instant
 
 @Entity(tableName = "plants",
@@ -61,8 +62,8 @@ data class Plant(
 
 object PlantTypeConverter {
     @TypeConverter @JvmStatic
-    fun toPlantType(ordinal: Int): Plant.Type = Plant.Type.values()[ordinal]
+    fun toPlantType(flag: Int): Plant.Type = Plant.Type.values()[flag.log2()]
 
     @TypeConverter @JvmStatic
-    fun fromPlantType(type: Plant.Type): Int = type.ordinal
+    fun fromPlantType(type: Plant.Type): Int = type.flag
 }

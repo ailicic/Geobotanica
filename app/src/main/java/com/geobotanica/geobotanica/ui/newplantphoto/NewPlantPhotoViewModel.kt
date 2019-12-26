@@ -10,8 +10,8 @@ import javax.inject.Singleton
 class NewPlantPhotoViewModel @Inject constructor (): ViewModel() {
     var userId = 0L
     var currentSessionId = 0L // = Timestamp of when session began
-    var lastSessionId = 0L
     var photoUri: String = ""
+    private var lastSessionId = 0L
 
     fun deleteLastPhoto() {  // Required if user navigates back to re-take photo
         if (currentSessionId == lastSessionId) {

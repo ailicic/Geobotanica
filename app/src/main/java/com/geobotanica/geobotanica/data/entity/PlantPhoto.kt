@@ -4,6 +4,7 @@ import androidx.room.*
 import com.geobotanica.geobotanica.data.entity.Plant.Type.*
 import com.geobotanica.geobotanica.util.GbTime
 import org.threeten.bp.Instant
+import com.geobotanica.geobotanica.util.log2
 
 @Entity(tableName = "plantPhotos",
     foreignKeys = [
@@ -32,14 +33,14 @@ data class PlantPhoto(
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0
 
-    enum class Type {
-        COMPLETE,
-        LEAF,
+    enum class Type(val flag: Int) {
+        COMPLETE(   0b0000_0001), // 1
+        LEAF(       0b0000_0010), // 2
+        FLOWER(     0b0000_0100), // 4
+        FRUIT(      0b0000_1000), // 8
+        TRUNK(      0b0001_0000); // 16
 //        BUDS,
-        FLOWER,
-        FRUIT,
 //        STEM,
-        TRUNK;
 
         override fun toString() = when (this) {
             COMPLETE -> "Complete"
@@ -73,8 +74,8 @@ fun List<PlantPhoto>.selectMain(): PlantPhoto {
 
 object PhotoTypeConverter {
     @TypeConverter @JvmStatic
-    fun toPhotoType(ordinal: Int): PlantPhoto.Type = PlantPhoto.Type.values()[ordinal]
+    fun toPhotoType(flag: Int): PlantPhoto.Type = PlantPhoto.Type.values()[flag.log2()]
 
     @TypeConverter @JvmStatic
-    fun fromPhotoType(type: PlantPhoto.Type): Int = type.ordinal
+    fun fromPhotoType(type: PlantPhoto.Type): Int = type.flag
 }
