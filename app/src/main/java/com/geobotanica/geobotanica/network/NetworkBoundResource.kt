@@ -20,7 +20,7 @@ inline fun <T> createNetworkBoundResource(
         crossinline saveToDb: suspend (T) -> Unit
 ) = liveData {
 
-    emit(Resource.loading<T>())
+    emit(Resource.loading())
     withContext(SupervisorJob() + Dispatchers.IO) {
         val dbResult = loadFromDb()
         if (shouldFetch(dbResult)) {

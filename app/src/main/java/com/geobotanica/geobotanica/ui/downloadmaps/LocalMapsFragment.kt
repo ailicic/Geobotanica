@@ -10,12 +10,9 @@ import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.databinding.FragmentLocalMapsBinding
-import com.geobotanica.geobotanica.network.NetworkValidator
-import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
 import com.geobotanica.geobotanica.network.Resource
 import com.geobotanica.geobotanica.network.ResourceStatus.*
 import com.geobotanica.geobotanica.ui.BaseFragment
@@ -27,18 +24,14 @@ import com.geobotanica.geobotanica.util.get
 import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_local_maps.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 class LocalMapsFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<LocalMapsViewModel>
-    @Inject lateinit var networkValidator: NetworkValidator
-
     private lateinit var viewModel: LocalMapsViewModel
 
     private val mapListAdapter = MapListAdapter(::onClickDownload, ::onClickCancel, ::onClickDelete)
-
     private val sharedPrefsExitOnBackInDownloadMaps = "exitOnBackPermittedInDownloadMaps"
 
     override fun onAttach(context: Context) {
@@ -101,12 +94,16 @@ class LocalMapsFragment : BaseFragment() {
 
     private fun bindClickListeners() {
         browseMapsButton.setOnClickListener { browseMaps() }
-        getMapsButton.setOnClickListener { lifecycleScope.launch { rebindViewModel() } }
+        getMapsButton.setOnClickListener { rebindViewModel() }
         fab.setOnClickListener { navigateToNext() }
     }
 
     private fun bindViewModel() {
         viewModel.localMaps.observe(viewLifecycleOwner, onLocalMaps)
+        viewModel.showMeteredNetworkDialog.observe(viewLifecycleOwner, onShowMeteredNetworkDialog)
+        viewModel.showInternetUnavailableSnackbar.observe(viewLifecycleOwner, Observer {
+            showSnackbar(resources.getString(R.string.internet_unavailable))
+        })
     }
 
     private fun rebindViewModel() {
@@ -151,23 +148,17 @@ class LocalMapsFragment : BaseFragment() {
         }
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    private fun onClickDownload(mapListItem: OnlineMapListItem) {
-        when (networkValidator.getStatus()) {
-            INVALID -> showSnackbar(resources.getString(R.string.internet_unavailable))
-            VALID -> downloadMap(mapListItem)
-            VALID_IF_METERED_PERMITTED -> {
-                WarningDialog(
-                        getString(R.string.metered_network),
-                        getString(R.string.metered_network_confirm)
-                ) {
-                    networkValidator.allowMeteredNetwork(); downloadMap(mapListItem)
-                }.show(requireFragmentManager(), "tag")
-            }
-        }
+    private val onShowMeteredNetworkDialog = Observer<Unit> {
+        WarningDialog(
+                getString(R.string.metered_network),
+                getString(R.string.metered_network_confirm)
+        ) {
+            viewModel.onMeteredNetworkAllowed()
+        }.show(requireFragmentManager(), "tag")
     }
 
-    private fun downloadMap(mapListItem: OnlineMapListItem) { viewModel.downloadMap(mapListItem.id) }
+    @Suppress("UNUSED_PARAMETER")
+    private fun onClickDownload(mapListItem: OnlineMapListItem) = viewModel.startDownload(mapListItem)
 
     private fun onClickCancel(mapListItem: OnlineMapListItem) { viewModel.cancelDownload(mapListItem.status) }
 

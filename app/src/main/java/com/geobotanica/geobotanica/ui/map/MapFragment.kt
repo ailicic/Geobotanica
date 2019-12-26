@@ -32,6 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+// TODO: Handle download manager errors better (e.g. DownloadLocalMaps hangs on loading if insufficient space)
 // TODO: Add more tests
 // TODO: Login screen (no authentication, just select user with any pw)
 // TODO: Request all permissions in separate screen before map (prob after login/splash screen for ux)

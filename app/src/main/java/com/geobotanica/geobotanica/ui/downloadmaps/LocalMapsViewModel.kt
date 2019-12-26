@@ -7,9 +7,12 @@ import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.network.FileDownloader
 import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.DOWNLOADED
 import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOWNLOADED
+import com.geobotanica.geobotanica.network.NetworkValidator
+import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
 import com.geobotanica.geobotanica.network.Resource
 import com.geobotanica.geobotanica.network.ResourceStatus.*
 import com.geobotanica.geobotanica.util.Lg
+import com.geobotanica.geobotanica.util.SingleLiveEvent
 import com.geobotanica.geobotanica.util.liveData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,15 +23,12 @@ import javax.inject.Singleton
 
 @Singleton
 class LocalMapsViewModel @Inject constructor(
+        private val networkValidator: NetworkValidator,
         private val storageHelper: StorageHelper,
         private val fileDownloader: FileDownloader,
         private val mapRepo: MapRepo,
         geolocationRepo: GeolocationRepo
 ): ViewModel() {
-
-    val showFab: LiveData<Boolean> = mapRepo
-            .getInitiatedDownloadsLiveData()
-            .map { it.isNotEmpty() }
 
     val localMaps: LiveData<Resource<List<OnlineMapListItem>>> =
             geolocationRepo.get().switchMap { geolocation ->
@@ -48,6 +48,15 @@ class LocalMapsViewModel @Inject constructor(
                     ERROR -> liveData(Resource.error(geolocation.error ?: Throwable())) }
             }
 
+    val showFab: LiveData<Boolean> = mapRepo
+            .getInitiatedDownloadsLiveData()
+            .map { it.isNotEmpty() }
+
+    val showMeteredNetworkDialog = SingleLiveEvent<Unit>()
+    val showInternetUnavailableSnackbar = SingleLiveEvent<Unit>()
+
+    private var lastClickedMap: OnlineMapListItem? = null
+
     fun getMapsFromExtStorage() = viewModelScope.launch(Dispatchers.IO) {
         File(storageHelper.getExtStorageRootDir()).listFiles().forEach { file ->
             if (file.extension == "map") {
@@ -64,9 +73,19 @@ class LocalMapsViewModel @Inject constructor(
         }
     }
 
-    fun downloadMap(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
-        val onlineMap = mapRepo.get(onlineMapId)
-        fileDownloader.downloadMap(onlineMap)
+
+    fun startDownload(mapListItem: OnlineMapListItem) {
+        lastClickedMap = mapListItem
+        when (networkValidator.getStatus()) {
+            INVALID -> showInternetUnavailableSnackbar.call()
+            VALID -> downloadMap(mapListItem.id)
+            VALID_IF_METERED_PERMITTED -> showMeteredNetworkDialog.call()
+        }
+    }
+
+    fun onMeteredNetworkAllowed() {
+        networkValidator.allowMeteredNetwork()
+        lastClickedMap?.let { downloadMap(it.id) }
     }
 
     fun cancelDownload(downloadId: Long) = viewModelScope.launch(Dispatchers.IO) {
@@ -85,5 +104,10 @@ class LocalMapsViewModel @Inject constructor(
         onlineMap.status = NOT_DOWNLOADED
         mapRepo.update(onlineMap)
         Lg.i("Deleted map: ${onlineMap.filename} (Result=$result)")
+    }
+
+    private fun downloadMap(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
+        val onlineMap = mapRepo.get(onlineMapId)
+        fileDownloader.downloadMap(onlineMap)
     }
 }
