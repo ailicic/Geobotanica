@@ -59,38 +59,38 @@ class PlantDetailViewModel @Inject constructor(
     }
 
     val height: LiveData<Measurement?> by lazy {
-        plantMeasurementRepo.getLastHeightOfPlantLiveData(plantId).map {
+        plantMeasurementRepo.getLastOfPlantLiveData(plantId, HEIGHT.flag).map {
             it?.let { Measurement(it.measurement).convertTo(Units.M) }
         }
     }
     val heightDateText: LiveData<String> by lazy {
-        plantMeasurementRepo.getLastHeightOfPlantLiveData(plantId)
+        plantMeasurementRepo.getLastOfPlantLiveData(plantId, HEIGHT.flag)
                 .map { it?.timestamp?.toDateString().orEmpty() }
     }
 
     val diameter: LiveData<Measurement?> by lazy {
-        plantMeasurementRepo.getLastDiameterOfPlantLiveData(plantId).map {
+        plantMeasurementRepo.getLastOfPlantLiveData(plantId, DIAMETER.flag).map {
             it?.let { Measurement(it.measurement).convertTo(Units.M) }
         }
     }
 
     val diameterDateText: LiveData<String> by lazy {
-        plantMeasurementRepo.getLastDiameterOfPlantLiveData(plantId)
+        plantMeasurementRepo.getLastOfPlantLiveData(plantId, DIAMETER.flag)
                 .map { it?.timestamp?.toDateString().orEmpty() }
     }
 
     val trunkDiameter: LiveData<Measurement?> by lazy {
-        plantMeasurementRepo.getLastTrunkDiameterOfPlantLiveData(plantId).map {
+        plantMeasurementRepo.getLastOfPlantLiveData(plantId, TRUNK_DIAMETER.flag).map {
             it?.let { Measurement(it.measurement) }
         }
     }
     val trunkDiameterDateText: LiveData<String> by lazy {
-        plantMeasurementRepo.getLastTrunkDiameterOfPlantLiveData(plantId)
+        plantMeasurementRepo.getLastOfPlantLiveData(plantId, TRUNK_DIAMETER.flag)
                 .map { it?.timestamp?.toDateString().orEmpty() }
     }
 
     val lastMeasuredByUser: LiveData<String> by lazy {
-        plantMeasurementRepo.getLastMeasurementOfPlant(plantId).switchMap { plantMeasurementNullable ->
+        plantMeasurementRepo.getLastOfPlantLiveData(plantId).switchMap { plantMeasurementNullable ->
             plantMeasurementNullable?.let { plantMeasurement ->
                 userRepo.getLiveData(plantMeasurement.userId).map { it.nickname }
             } ?: liveData("")
@@ -163,7 +163,7 @@ class PlantDetailViewModel @Inject constructor(
             }
 
             // TODO: Maybe show warning before deleting all trunk diameter measurements
-            val trunkDiameterList = plantMeasurementRepo.getTrunkDiametersOfPlant(plantId)
+            val trunkDiameterList = plantMeasurementRepo.getAllOfPlant(plantId, TRUNK_DIAMETER.flag)
             if (newPlantType != TREE && trunkDiameterList.isNotEmpty()) {
                 val result = plantMeasurementRepo.delete(*trunkDiameterList.toTypedArray())
                 Lg.w("Trunk diameter measurements incompatible with new plant type: $newPlantType. Deleted $result measurements.")

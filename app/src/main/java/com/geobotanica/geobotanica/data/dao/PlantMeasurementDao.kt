@@ -10,22 +10,19 @@ interface PlantMeasurementDao : BaseDao<PlantMeasurement> {
     @Query("SELECT * FROM plantMeasurements WHERE id = :id")
     fun get(id: Long): LiveData<PlantMeasurement>
 
-    @Query("SELECT * FROM plantMeasurements WHERE plantId = :plantId AND type = :type " +
+    @Query("SELECT * FROM plantMeasurements WHERE plantId = :plantId AND type & :typeFlags != 0 " +
             "ORDER BY timestamp DESC")
-    suspend fun getMeasurementsOfPlant(plantId: Long, type: Int): List<PlantMeasurement>
+    suspend fun getAllOfPlant(plantId: Long, typeFlags: Int): List<PlantMeasurement>
 
-    @Query("SELECT * FROM plantMeasurements WHERE plantId = :plantId AND type = :type " +
+    @Query("SELECT * FROM plantMeasurements WHERE plantId = :plantId AND type & :typeFlags != 0 " +
             "ORDER BY timestamp DESC")
-    fun getMeasurementsOfPlantLiveData(plantId: Long, type: Int): LiveData< List<PlantMeasurement> >
+    fun getAllOfPlantLiveData(plantId: Long, typeFlags: Int): LiveData< List<PlantMeasurement> >
 
-    @Query("SELECT * FROM plantMeasurements WHERE plantId = :plantId AND type = :type " +
+    @Query("SELECT * FROM plantMeasurements WHERE plantId = :plantId AND type & :typeFlags != 0 " +
             "ORDER BY timestamp DESC LIMIT 1")
-    suspend fun getLastMeasurementOfPlant(plantId: Long, type: Int): PlantMeasurement?
+    suspend fun getLastOfPlant(plantId: Long, typeFlags: Int): PlantMeasurement?
 
-    @Query("SELECT * FROM plantMeasurements WHERE plantId = :plantId AND type = :type " +
+    @Query("SELECT * FROM plantMeasurements WHERE plantId = :plantId AND type & :typeFlags != 0  " +
             "ORDER BY timestamp DESC LIMIT 1")
-    fun getLastMeasurementOfPlantLiveData(plantId: Long, type: Int): LiveData<PlantMeasurement?>
-
-    @Query("SELECT * FROM plantMeasurements WHERE plantId = :plantId ORDER BY timestamp DESC LIMIT 1")
-    fun getLastMeasurementOfPlantLiveData(plantId: Long): LiveData<PlantMeasurement?>
+    fun getLastOfPlantLiveData(plantId: Long, typeFlags: Int): LiveData<PlantMeasurement?>
 }
