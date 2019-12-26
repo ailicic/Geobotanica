@@ -20,6 +20,7 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// TODO: If/when tests are created, consider converting this to MVI first
 
 @Singleton
 class LocalMapsViewModel @Inject constructor(
@@ -73,8 +74,7 @@ class LocalMapsViewModel @Inject constructor(
         }
     }
 
-
-    fun startDownload(mapListItem: OnlineMapListItem) {
+    fun initDownload(mapListItem: OnlineMapListItem) {
         lastClickedMap = mapListItem
         when (networkValidator.getStatus()) {
             INVALID -> showInternetUnavailableSnackbar.call()

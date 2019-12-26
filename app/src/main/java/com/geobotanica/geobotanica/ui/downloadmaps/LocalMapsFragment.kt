@@ -158,7 +158,7 @@ class LocalMapsFragment : BaseFragment() {
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun onClickDownload(mapListItem: OnlineMapListItem) = viewModel.startDownload(mapListItem)
+    private fun onClickDownload(mapListItem: OnlineMapListItem) = viewModel.initDownload(mapListItem)
 
     private fun onClickCancel(mapListItem: OnlineMapListItem) { viewModel.cancelDownload(mapListItem.status) }
 

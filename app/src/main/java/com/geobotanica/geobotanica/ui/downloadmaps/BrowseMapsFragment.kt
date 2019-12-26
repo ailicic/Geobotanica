@@ -12,8 +12,6 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.databinding.FragmentBrowseMapsBinding
-import com.geobotanica.geobotanica.network.NetworkValidator
-import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -28,8 +26,6 @@ import javax.inject.Inject
 class BrowseMapsFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<BrowseMapsViewModel>
     private lateinit var viewModel: BrowseMapsViewModel
-
-    @Inject lateinit var networkValidator: NetworkValidator
 
     private val mapListAdapter = MapListAdapter(::onClickDownload, ::onClickCancel, ::onClickDelete, ::onClickFolder)
     private val parentMapFolderIds = mutableListOf<Long>()
@@ -53,8 +49,9 @@ class BrowseMapsFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         addOnBackPressedCallback()
-        bindClickListeners()
         initRecyclerView()
+        bindClickListeners()
+        bindViewModel()
     }
 
     override fun onDestroy() {
@@ -82,10 +79,6 @@ class BrowseMapsFragment : BaseFragment() {
             viewModel.browseMapFolder(parentMapFolderIds.last())
     }
 
-    private fun bindClickListeners() {
-        fab.setOnClickListener { navigateToNext() }
-    }
-
     private fun initRecyclerView() {
         recyclerView.isVisible = true
         recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
@@ -95,30 +88,26 @@ class BrowseMapsFragment : BaseFragment() {
         })
     }
 
-    private fun onClickFolder(mapFolderItem: OnlineMapListItem) {
-        Lg.d("onClickFolder(): ${mapFolderItem.printName}")
-        parentMapFolderIds.add(mapFolderItem.id)
-        viewModel.browseMapFolder(mapFolderItem.id)
+    private fun bindClickListeners() = fab.setOnClickListener { navigateToNext() }
+
+    private fun bindViewModel() {
+        viewModel.mapListItems.observe(viewLifecycleOwner, Observer { mapListAdapter.submitList(it) })
+        viewModel.showMeteredNetworkDialog.observe(viewLifecycleOwner, onShowMeteredNetworkDialog)
+        viewModel.showInternetUnavailableSnackbar.observe(viewLifecycleOwner, Observer {
+            showSnackbar(resources.getString(R.string.internet_unavailable))
+        })
     }
 
-
-    @Suppress("UNUSED_PARAMETER")
-    private fun onClickDownload(mapListItem: OnlineMapListItem) {
-        when (networkValidator.getStatus()) {
-            INVALID -> showSnackbar(resources.getString(R.string.internet_unavailable))
-            VALID -> downloadMap(mapListItem)
-            VALID_IF_METERED_PERMITTED -> {
-                WarningDialog(
-                        getString(R.string.metered_network),
-                        getString(R.string.metered_network_confirm)
-                ) {
-                    networkValidator.allowMeteredNetwork(); downloadMap(mapListItem)
-                }.show(requireFragmentManager(), "tag")
-            }
-        }
+    private val onShowMeteredNetworkDialog = Observer<Unit> {
+        WarningDialog(
+                getString(R.string.metered_network),
+                getString(R.string.metered_network_confirm)
+        ) {
+            viewModel.onMeteredNetworkAllowed()
+        }.show(requireFragmentManager(), "tag")
     }
 
-    private fun downloadMap(mapListItem: OnlineMapListItem) { viewModel.downloadMap(mapListItem.id) }
+    private fun onClickDownload(mapListItem: OnlineMapListItem) { viewModel.initDownload(mapListItem) }
 
     private fun onClickCancel(mapListItem: OnlineMapListItem) { viewModel.cancelDownload(mapListItem.status) }
 
@@ -129,6 +118,12 @@ class BrowseMapsFragment : BaseFragment() {
         ) {
             viewModel.deleteMap(mapListItem.id)
         }.show(requireFragmentManager(), null)
+    }
+
+    private fun onClickFolder(mapFolderItem: OnlineMapListItem) {
+        Lg.d("onClickFolder(): ${mapFolderItem.printName}")
+        parentMapFolderIds.add(mapFolderItem.id)
+        viewModel.browseMapFolder(mapFolderItem.id)
     }
 
     private fun navigateToNext() {
