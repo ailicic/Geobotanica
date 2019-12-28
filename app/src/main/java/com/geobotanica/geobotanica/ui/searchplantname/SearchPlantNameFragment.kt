@@ -123,7 +123,7 @@ class SearchPlantNameFragment : BaseFragment() {
     }
 
     private fun bindListeners() {
-        searchEditText.onTextChanged { editText -> viewModel.onEvent(SearchEditTextChanged(editText)) }
+        searchEditText.onTextChanged { viewModel.onEvent(SearchEditTextChanged(it)) }
         clearButton.setOnClickListener { viewModel.onEvent(ClearSearchClicked) }
         skipButton.setOnClickListener { viewModel.onEvent(SkipClicked) }
     }

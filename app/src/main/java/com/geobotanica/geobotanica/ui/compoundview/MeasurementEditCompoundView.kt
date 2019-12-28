@@ -62,19 +62,14 @@ class MeasurementEditCompoundView @JvmOverloads constructor(
     }
 
     private fun bindListeners() {
-        measurementUnitSpinner.onItemSelectedListener = object : OnItemSelectedListener {
-
-            override fun onItemSelected(parentView: AdapterView<*>, selectedItemView: View?, position: Int, id: Long) {
-                if (id == Units.FT.ordinal.toLong()) {
-                    measurementInchesEditText.isVisible = true
-                    inchesText.isVisible = true
-                } else {
-                    measurementInchesEditText.isVisible = false
-                    inchesText.isVisible = false
-                }
+        measurementUnitSpinner.onItemSelected { rowIndex ->
+            if (rowIndex == Units.FT.ordinal) {
+                measurementInchesEditText.isVisible = true
+                inchesText.isVisible = true
+            } else {
+                measurementInchesEditText.isVisible = false
+                inchesText.isVisible = false
             }
-
-            override fun onNothingSelected(parentView: AdapterView<*>) { }
         }
     }
 

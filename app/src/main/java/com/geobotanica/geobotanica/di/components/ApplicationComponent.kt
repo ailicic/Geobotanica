@@ -15,6 +15,7 @@ import com.geobotanica.geobotanica.ui.newplantconfirm.NewPlantConfirmFragment
 import com.geobotanica.geobotanica.ui.newplantmeasurement.NewPlantMeasurementFragment
 import com.geobotanica.geobotanica.ui.newplantname.NewPlantNameFragment
 import com.geobotanica.geobotanica.ui.newplantphoto.NewPlantPhotoFragment
+import com.geobotanica.geobotanica.ui.login.LoginFragment
 import com.geobotanica.geobotanica.ui.newplanttype.NewPlantTypeFragment
 import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailFragment
 import com.geobotanica.geobotanica.ui.searchplantname.SearchPlantNameFragment
@@ -32,6 +33,7 @@ interface ApplicationComponent {
     fun inject(localMapsFragment: LocalMapsFragment)
     fun inject(browseMapsFragment: BrowseMapsFragment)
 
+    fun inject(loginFragment: LoginFragment)
     fun inject(mapFragment: MapFragment)
     fun inject(newPlantTypeFragment: NewPlantTypeFragment)
     fun inject(newPlantPhotoFragment: NewPlantPhotoFragment)

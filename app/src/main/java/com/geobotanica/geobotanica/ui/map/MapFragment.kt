@@ -12,9 +12,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.location.Location
-import com.geobotanica.geobotanica.data.GbDatabase
-import com.geobotanica.geobotanica.data.entity.Plant
-import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.network.FileDownloader
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
@@ -24,17 +21,17 @@ import com.geobotanica.geobotanica.ui.map.marker.LocationMarker
 import com.geobotanica.geobotanica.ui.map.marker.PlantMarker
 import com.geobotanica.geobotanica.ui.map.marker.PlantMarkerData
 import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.Measurement
 import com.geobotanica.geobotanica.util.get
+import com.geobotanica.geobotanica.util.getFromBundle
 import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.fragment_map.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Handle download manager errors better (e.g. DownloadLocalMaps hangs on loading if insufficient space)
-// TODO: Login screen (no authentication, just select user with any pw)
+// TODO: Move Splash/login before downloads (fits better with storage permission). Fix crash on back from MapFragment.
+// TODO: Write LoginViewModel tests
 // TODO: Request all permissions in separate screen before map (prob after login/splash screen for ux)
+// TODO: Handle download manager errors better (e.g. DownloadLocalMaps hangs on loading if insufficient space)
 // TODO: Setup CI (Bitrise)
 
 // LONG TERM
@@ -86,12 +83,8 @@ class MapFragment : BaseFragment() {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
-        lifecycleScope.launch(Dispatchers.IO) {
-//            GbDatabase.getInstance(appContext).clearAllTables()
-            GbDatabase.getInstance(appContext).userDao().insert(User(1, "Guest")) // TODO: Move to Login Screen
-        }
         viewModel = getViewModel(viewModelFactory) {
-            userId = 1L // TODO: Retrieve userId from LoginFragment Navigation bundle
+            userId = getFromBundle(userIdKey)
         }
         loadSharedPrefsToViewModel()
     }

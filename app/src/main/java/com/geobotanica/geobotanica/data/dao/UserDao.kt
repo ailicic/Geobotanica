@@ -15,6 +15,12 @@ interface UserDao : BaseDao<User> {
     @Query("SELECT * FROM users WHERE id = :id")
     fun getLiveData(id: Long): LiveData<User>
 
-    @Query("SELECT * FROM users")
-    fun getAll(): LiveData<List<User>>
+    @Query("SELECT * FROM users ORDER BY nickname ASC")
+    suspend fun getAll(): List<User>
+
+    @Query("SELECT * FROM users ORDER BY nickname ASC")
+    fun getAllLiveData(): LiveData<List<User>>
+
+    @Query("SELECT * FROM users where nickname = :nickname")
+    suspend fun getByNickname(nickname: String): User
 }

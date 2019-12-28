@@ -34,8 +34,8 @@
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
         <action
-            android:id="@+id/action_localMaps_to_map"
-            app:destination="@id/mapFragment"
+            android:id="@+id/action_localMaps_to_login"
+            app:destination="@id/loginFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
@@ -46,7 +46,19 @@
         android:name="com.geobotanica.geobotanica.ui.downloadmaps.BrowseMapsFragment"
         android:label="@string/download_maps">
         <action
-            android:id="@+id/action_browseMaps_to_map"
+            android:id="@+id/action_browseMaps_to_login"
+            app:destination="@id/loginFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.geobotanica.geobotanica.ui.login.LoginFragment"
+        android:label="@string/select_user">
+        <action
+            android:id="@+id/action_login_to_map"
             app:destination="@id/mapFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"

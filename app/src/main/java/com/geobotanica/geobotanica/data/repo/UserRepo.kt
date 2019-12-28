@@ -14,5 +14,9 @@ class UserRepo @Inject constructor(private val userDao: UserDao) {
 
     fun getLiveData(id: Long): LiveData<User> = userDao.getLiveData(id)
 
-    fun getAll(): LiveData<List<User>> = userDao.getAll()
+    suspend fun getAll(): List<User> = userDao.getAll()
+
+    fun getAllLiveData(): LiveData<List<User>> = userDao.getAllLiveData()
+
+    suspend fun getByNickname(nickname: String): User = userDao.getByNickname(nickname)
 }

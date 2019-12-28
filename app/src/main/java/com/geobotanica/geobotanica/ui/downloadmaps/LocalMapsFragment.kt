@@ -175,7 +175,7 @@ class LocalMapsFragment : BaseFragment() {
 
     private fun navigateToNext() {
         if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true))
-            navigateTo(R.id.action_localMaps_to_map, popUpTo = R.id.localMapsFragment)
+            navigateTo(R.id.action_localMaps_to_login, popUpTo = R.id.localMapsFragment)
         else
             navigateBack()
     }

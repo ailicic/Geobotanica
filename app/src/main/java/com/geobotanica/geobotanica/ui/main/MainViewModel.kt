@@ -34,6 +34,6 @@ class MainViewModel @Inject constructor (
         } else if (mapRepo.getInitiatedDownloads().isEmpty()) {
             R.id.localMapsFragment
         } else
-            R.id.mapFragment
+            R.id.loginFragment
     }
 }

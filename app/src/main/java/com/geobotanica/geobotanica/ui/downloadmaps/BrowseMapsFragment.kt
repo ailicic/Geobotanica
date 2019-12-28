@@ -128,7 +128,7 @@ class BrowseMapsFragment : BaseFragment() {
 
     private fun navigateToNext() {
         if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true))
-            navigateTo(R.id.action_browseMaps_to_map, popUpTo = R.id.browseMapsFragment)
+            navigateTo(R.id.action_browseMaps_to_login, popUpTo = R.id.browseMapsFragment)
         else
             popUpTo(R.id.mapFragment)
     }

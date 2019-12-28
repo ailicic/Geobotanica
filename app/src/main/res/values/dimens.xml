@@ -1,4 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <dimen name="user_spinner_text_size">20sp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="design_fab_image_size" tools:override="true">36dp</dimen>
     <dimen name="image_button_size">30dp</dimen>
