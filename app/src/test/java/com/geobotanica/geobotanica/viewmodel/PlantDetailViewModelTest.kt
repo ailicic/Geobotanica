@@ -93,11 +93,11 @@ object PlantDetailViewModelTest : Spek({
         coEvery { insert(any()) } returns 0L
     }
     val plantMeasurementRepo = mockkBeforeGroup<PlantMeasurementRepo> {
-        coEvery { getLastHeightOfPlantLiveData(any()) } returns liveData(fakeHeight)
-        coEvery { getLastDiameterOfPlantLiveData(any()) } returns liveData(fakeDiameter)
-        coEvery { getLastTrunkDiameterOfPlantLiveData(any()) } returns liveData(fakeTrunkDiameter)
-        coEvery { getTrunkDiametersOfPlant(any()) } returns listOf(fakeTrunkDiameter)
-        coEvery { getLastMeasurementOfPlant(any()) } returns liveData(fakeHeight)
+        coEvery { getLastOfPlantLiveData(any(), HEIGHT.flag) } returns liveData(fakeHeight)
+        coEvery { getLastOfPlantLiveData(any(), DIAMETER.flag) } returns liveData(fakeDiameter)
+        coEvery { getLastOfPlantLiveData(any(), TRUNK_DIAMETER.flag) } returns liveData(fakeTrunkDiameter)
+        coEvery { getAllOfPlant(any(), TRUNK_DIAMETER.flag) } returns listOf(fakeTrunkDiameter)
+        coEvery { getLastOfPlantLiveData(any()) } returns liveData(fakeHeight)
         coEvery { insert(any()) } returns 0L
         coEvery { delete(any()) } returns 1
     }
