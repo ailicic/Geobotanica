@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -18,6 +19,7 @@ import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.dialog.WarningDialog
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.get
+import com.geobotanica.geobotanica.util.getFromBundle
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_browse_maps.*
 import javax.inject.Inject
@@ -34,7 +36,9 @@ class BrowseMapsFragment : BaseFragment() {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
-        viewModel = getViewModel(viewModelFactory)
+        viewModel = getViewModel(viewModelFactory) {
+            userId = getFromBundle(userIdKey)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -128,8 +132,10 @@ class BrowseMapsFragment : BaseFragment() {
 
     private fun navigateToNext() {
         if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true))
-            navigateTo(R.id.action_browseMaps_to_login, popUpTo = R.id.browseMapsFragment)
+            navigateTo(R.id.action_browseMaps_to_map, createBundle(), R.id.browseMapsFragment)
         else
             popUpTo(R.id.mapFragment)
     }
+
+    private fun createBundle() = bundleOf(userIdKey to viewModel.userId)
 }

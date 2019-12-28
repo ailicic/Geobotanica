@@ -26,6 +26,8 @@ class BrowseMapsViewModel @Inject constructor(
         private val fileDownloader: FileDownloader,
         private val mapRepo: MapRepo
 ): ViewModel() {
+    var userId = 0L
+
     val showFab: LiveData<Boolean> = mapRepo.getInitiatedDownloadsLiveData().map { mapList ->
         mapList.isNotEmpty()
     }

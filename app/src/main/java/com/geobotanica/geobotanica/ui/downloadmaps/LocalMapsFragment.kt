@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.FragmentActivity
@@ -21,6 +22,7 @@ import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.dialog.WarningDialog
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.get
+import com.geobotanica.geobotanica.util.getFromBundle
 import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_local_maps.*
@@ -38,7 +40,9 @@ class LocalMapsFragment : BaseFragment() {
         super.onAttach(context)
         activity.applicationComponent.inject(this)
 
-        viewModel = getViewModel(viewModelFactory)
+        viewModel = getViewModel(viewModelFactory) {
+            userId = getFromBundle(userIdKey)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -175,8 +179,10 @@ class LocalMapsFragment : BaseFragment() {
 
     private fun navigateToNext() {
         if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true))
-            navigateTo(R.id.action_localMaps_to_login, popUpTo = R.id.localMapsFragment)
+            navigateTo(R.id.action_localMaps_to_map, createBundle(), R.id.localMapsFragment)
         else
             navigateBack()
     }
+
+    private fun createBundle() = bundleOf(userIdKey to viewModel.userId)
 }

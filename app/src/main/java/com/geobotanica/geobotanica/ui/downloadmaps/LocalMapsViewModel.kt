@@ -30,6 +30,7 @@ class LocalMapsViewModel @Inject constructor(
         private val mapRepo: MapRepo,
         geolocationRepo: GeolocationRepo
 ): ViewModel() {
+    var userId = 0L
 
     val localMaps: LiveData<Resource<List<OnlineMapListItem>>> =
             geolocationRepo.get().switchMap { geolocation ->

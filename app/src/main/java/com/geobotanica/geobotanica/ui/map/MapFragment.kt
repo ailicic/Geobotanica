@@ -28,9 +28,8 @@ import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Move Splash/login before downloads (fits better with storage permission). Fix crash on back from MapFragment.
 // TODO: Write LoginViewModel tests
-// TODO: Request all permissions in separate screen before map (prob after login/splash screen for ux)
+// TODO: Request all permissions in separate screen before map (prob after login/splash screen for ux). Ensure no animation problems (like lingering spinner)
 // TODO: Handle download manager errors better (e.g. DownloadLocalMaps hangs on loading if insufficient space)
 // TODO: Setup CI (Bitrise)
 
@@ -86,6 +85,7 @@ class MapFragment : BaseFragment() {
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
         }
+        Lg.d("MapFragment bundle args: userId = ${viewModel.userId}")
         loadSharedPrefsToViewModel()
     }
 
@@ -133,6 +133,16 @@ class MapFragment : BaseFragment() {
     override fun onStart() {
         super.onStart()
         viewModel.initGpsSubscribe()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapView.mapScaleBar.isVisible = false // Prevents crash on fragment anim
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mapView.mapScaleBar.isVisible = true
     }
 
     override fun onStop() {
@@ -280,7 +290,6 @@ class MapFragment : BaseFragment() {
     private val onRedrawMapLayers = Observer<Unit> { mapView.layerManager.redrawLayers() }
 
     private val onNavigateToNewPlant = Observer<Unit> {
-        mapView.mapScaleBar.isVisible = false // Prevents crash on fragment anim
         navigateTo(
                 R.id.action_map_to_newPlantPhoto,
                 bundleOf(

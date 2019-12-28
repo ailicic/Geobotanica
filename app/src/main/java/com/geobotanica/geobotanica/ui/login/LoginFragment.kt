@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
@@ -17,6 +18,7 @@ import com.geobotanica.geobotanica.ui.login.ViewEffect.*
 import com.geobotanica.geobotanica.ui.login.ViewEvent.*
 import com.geobotanica.geobotanica.util.*
 import kotlinx.android.synthetic.main.fragment_login.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -75,11 +77,10 @@ class LoginFragment : BaseFragment() {
         }
         is ShowUserExistsSnackbar -> showSnackbar(getString(R.string.userExists, viewEffect.nickname))
         is NavigateToNext -> {
-            sharedPrefs.put(sharedPrefsLastUserId to viewEffect.userId)
-            navigateTo(
-                    R.id.action_login_to_map,
-                    bundleOf(userIdKey to viewEffect.userId)
-            )
+            lifecycleScope.launch {
+                sharedPrefs.put(sharedPrefsLastUserId to viewEffect.userId)
+                navigateTo(viewModel.getNextFragmentId(), bundleOf(userIdKey to viewEffect.userId))
+            }; Unit
         }
     }
 
