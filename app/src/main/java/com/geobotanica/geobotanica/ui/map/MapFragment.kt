@@ -28,7 +28,6 @@ import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Write LoginViewModel tests
 // TODO: Request all permissions in separate screen before map (prob after login/splash screen for ux). Ensure no animation problems (like lingering spinner)
 // TODO: Handle download manager errors better (e.g. DownloadLocalMaps hangs on loading if insufficient space)
 // TODO: Setup CI (Bitrise)

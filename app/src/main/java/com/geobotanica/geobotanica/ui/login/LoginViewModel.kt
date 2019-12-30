@@ -41,51 +41,46 @@ class LoginViewModel @Inject constructor (
     fun onEvent(event: ViewEvent): Unit = when (event) {
         is ViewCreated -> {
             emitViewEffect(InitView)
-            viewModelScope.launch {
+            viewModelScope.launch(dispatchers.main) {
+                selectedUserId = event.lastUserId
                 val users = userRepo.getAll()
                 val lastUser = users.firstOrNull { it.id == event.lastUserId }
                 val lastRowIndex = lastUser?.let { users.indexOf(it) } ?: 0
-
                 val nicknames = users.map { it.nickname }
-                val isEditTextVisible = nicknames.isEmpty()
-                val isNicknameSpinnerVisible = nicknames.isNotEmpty()
-                val isFabVisible = nicknames.isNotEmpty()
 
                 updateViewState(
                         spinnerRowIndex = lastRowIndex,
                         nicknames = nicknames,
-                        isEditTextVisible = isEditTextVisible,
-                        isNicknameSpinnerVisible = isNicknameSpinnerVisible,
-                        isFabVisible = isFabVisible
+                        isEditTextVisible = nicknames.isEmpty(),
+                        isNicknameSpinnerVisible =  nicknames.isNotEmpty(),
+                        isFabVisible = nicknames.isNotEmpty()
                 )
             }; Unit
         }
         is NicknameEditTextChanged -> {
             val editText = event.editText
             val isClearButtonVisible = editText.isNotBlank()
-            val isFabVisible = editText.length >= minLength
             updateViewState(
                     nicknameEditText = editText,
                     isClearButtonVisible = isClearButtonVisible,
-                    isFabVisible = isFabVisible
+                    isFabVisible = isNicknameValid(editText)
             )
         }
         is ClearButtonClicked -> updateViewState(nicknameEditText = "")
         is ItemSelected -> {
             if (newUserSelected(event.rowIndex)) {
                 selectedUserId = 0L
-                val editTextLength = viewState.value?.nicknameEditText?.length ?: 0
+                val editText = viewState.value?.nicknameEditText
                 val isClearButtonVisible = viewState.value?.nicknameEditText?.isNotEmpty() ?: false
-                val isFabVisible = editTextLength >= minLength
                 updateViewState(
                         spinnerRowIndex = event.rowIndex,
                         isEditTextVisible = true,
                         isClearButtonVisible = isClearButtonVisible,
-                        isFabVisible = isFabVisible
+                        isFabVisible = isNicknameValid(editText ?: "")
                 )
             } else {
                 viewState.value?.nicknames?.get(event.rowIndex)?.let { nickname ->
-                    viewModelScope.launch {
+                    viewModelScope.launch(dispatchers.main) {
                         selectedUserId = userRepo.getByNickname(nickname).id
                         updateViewState(
                                 spinnerRowIndex = event.rowIndex,
@@ -101,7 +96,7 @@ class LoginViewModel @Inject constructor (
                 if (selectedUserId != 0L)
                     emitViewEffect(NavigateToNext(selectedUserId))
                 else {
-                    viewModelScope.launch {
+                    viewModelScope.launch(dispatchers.main) {
                         val newNickname = viewState.value?.nicknameEditText ?: ""
                         val nicknames = userRepo.getAll().map { it.nickname }
                         if (nicknames.contains(newNickname)) {
@@ -116,6 +111,8 @@ class LoginViewModel @Inject constructor (
                 }
         }
     }
+
+    private fun isNicknameValid(nickname: String) = nickname.length >= minLength
 
     private fun newUserSelected(rowIndex: Int): Boolean = rowIndex == viewState.value?.nicknames?.size
 

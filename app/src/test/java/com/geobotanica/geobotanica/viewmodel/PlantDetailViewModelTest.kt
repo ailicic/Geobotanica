@@ -62,7 +62,7 @@ object PlantDetailViewModelTest : Spek({
         every { photoUriFrom(any()) } returns newPhotoFilename
     }
 
-    val fakeUser = User(0L, "user")
+    val fakeUser = User("user").apply { id = 0L }
     val fakePlant = Plant(fakeUser.id, TREE, "common", "scientific", 2L, 3L)
     val fakeLocation = Location(1.0, 2.0, 3.0, 0.1f, 10, 20)
     val fakePlantLocation = PlantLocation(fakePlant.id, fakeLocation)
