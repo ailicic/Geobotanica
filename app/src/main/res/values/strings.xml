@@ -124,4 +124,9 @@
     <string name="nickname">Nickname</string>
     <string name="userExists">User \'%s\' already exists</string>
     <string name="select_user">Select User</string>
+    <string name="app_permissions">App Permissions</string>
+    <string name="grant_permissions">Grant Permissions</string>
+    <string name="writeExternalStorage">Write external storage</string>
+    <string name="accessFineLocation">Access fine location</string>
+    <string name="permissions_required">Permissions are required.</string>
 </resources>

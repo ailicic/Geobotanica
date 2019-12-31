@@ -137,7 +137,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/media/Data/Backup/Android/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/file/ic_folder_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/media/Data/Backup/Android/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/action/ic_done_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -148,7 +148,7 @@
                         <option name="values">
                           <map>
                             <entry key="color" value="ffffff" />
-                            <entry key="outputName" value="ic_folder_black_24dp" />
+                            <entry key="outputName" value="ic_done_white_24dp" />
                             <entry key="sourceFile" value="$PROJECT_DIR$/../../../baseline-add-24px.svg" />
                           </map>
                         </option>

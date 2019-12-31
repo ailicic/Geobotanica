@@ -16,6 +16,7 @@ import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -39,11 +40,10 @@ class DownloadAssetsViewModel @Inject constructor(
                 worldMapAsset.status != NOT_DOWNLOADED && plantNamesAsset.status != NOT_DOWNLOADED
     }
 
-    init {
-        viewModelScope.launch (Dispatchers.IO) {
-//             fileDownloader.removeQueuedDownloads()
-            importOnlineAssetInfo()
-        }
+    suspend fun init() = withContext(Dispatchers.IO) {
+//        fileDownloader.removeQueuedDownloads()
+        importOnlineAssetInfo()
+
     }
 
     fun downloadAssets() = viewModelScope.launch(Dispatchers.IO) {

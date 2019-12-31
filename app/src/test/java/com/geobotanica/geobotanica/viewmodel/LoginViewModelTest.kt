@@ -64,7 +64,7 @@ object LoginViewModelTest : Spek({
             }
 
             it("Should emit correct ViewState") {
-                verifyOne { viewStateObserver.onChanged(
+                verify { viewStateObserver.onChanged(
                         ViewState(
                                 isEditTextVisible = true,
                                 isNicknameSpinnerVisible = false,

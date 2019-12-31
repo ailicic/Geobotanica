@@ -146,7 +146,7 @@ class LoginViewModel @Inject constructor (
 
     suspend fun getNextFragmentId(): Int {
         if (assetRepo.isEmpty())
-            return R.id.downloadAssetsFragment
+            return R.id.action_login_to_download_assets
 
         val onlineAssets = assetRepo.getAll()
         val mapFoldersAsset = onlineAssets.find { it.id == OnlineAssetId.MAP_FOLDER_LIST.id } ?: throw IllegalStateException()
@@ -171,7 +171,7 @@ data class ViewState(
         val nicknames: List<String> = emptyList(),
         val spinnerRowIndex: Int = 0,
         val isNicknameSpinnerVisible: Boolean = false,
-        val isEditTextVisible: Boolean = false,
+        val isEditTextVisible: Boolean = true,
         val nicknameEditText: String = "",
         val isClearButtonVisible: Boolean = false,
         val isFabVisible: Boolean = false

@@ -16,6 +16,7 @@ import com.geobotanica.geobotanica.ui.newplantmeasurement.NewPlantMeasurementFra
 import com.geobotanica.geobotanica.ui.newplantname.NewPlantNameFragment
 import com.geobotanica.geobotanica.ui.newplantphoto.NewPlantPhotoFragment
 import com.geobotanica.geobotanica.ui.newplanttype.NewPlantTypeFragment
+import com.geobotanica.geobotanica.ui.permissions.PermissionsFragment
 import com.geobotanica.geobotanica.ui.plantdetail.PlantDetailFragment
 import com.geobotanica.geobotanica.ui.searchplantname.SearchPlantNameFragment
 import dagger.Component
@@ -27,11 +28,12 @@ interface ApplicationComponent {
     fun inject(mainActivity: MainActivity)
     fun inject(baseFragment: BaseFragment)
 
+    fun inject(loginFragment: LoginFragment)
+    fun inject(permissionsFragment: PermissionsFragment)
     fun inject(downloadAssetsFragment: DownloadAssetsFragment)
     fun inject(localMapsFragment: LocalMapsFragment)
     fun inject(browseMapsFragment: BrowseMapsFragment)
 
-    fun inject(loginFragment: LoginFragment)
     fun inject(mapFragment: MapFragment)
     fun inject(newPlantTypeFragment: NewPlantTypeFragment)
     fun inject(newPlantPhotoFragment: NewPlantPhotoFragment)

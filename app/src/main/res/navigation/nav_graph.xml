@@ -10,6 +10,13 @@
         android:name="com.geobotanica.geobotanica.ui.login.LoginFragment"
         android:label="@string/select_user">
         <action
+            android:id="@+id/action_login_to_permissions"
+            app:destination="@id/permissionsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
             android:id="@+id/action_login_to_download_assets"
             app:destination="@id/downloadAssetsFragment"
             app:enterAnim="@anim/slide_in_right"
@@ -26,6 +33,18 @@
         <action
             android:id="@+id/action_login_to_map"
             app:destination="@id/mapFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/permissionsFragment"
+        android:name="com.geobotanica.geobotanica.ui.permissions.PermissionsFragment"
+        android:label="@string/app_permissions">
+        <action
+            android:id="@+id/action_permissions_to_downloadAssets"
+            app:destination="@id/downloadAssetsFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"

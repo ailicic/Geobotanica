@@ -34,7 +34,7 @@ class LocalMapsFragment : BaseFragment() {
     private lateinit var viewModel: LocalMapsViewModel
 
     private val mapListAdapter = MapListAdapter(::onClickDownload, ::onClickCancel, ::onClickDelete)
-    private val sharedPrefsExitOnBackInDownloadMaps = "exitOnBackPermittedInDownloadMaps"
+    private val sharedPrefsExitOnBack = "exitOnBackPermitted"
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -77,7 +77,7 @@ class LocalMapsFragment : BaseFragment() {
 
     private fun exitAppWithWarning() {
         Lg.d("LocalMapsFragment: exitAppWithWarning()")
-        val isPermitted = defaultSharedPrefs.get(sharedPrefsExitOnBackInDownloadMaps, false)
+        val isPermitted = sharedPrefs.get(sharedPrefsExitOnBack, false)
         if (isPermitted)
             activity.finish()
         else {
@@ -85,7 +85,7 @@ class LocalMapsFragment : BaseFragment() {
                     getString(R.string.exit_app),
                     getString(R.string.exit_app_confirm)
             ) {
-                defaultSharedPrefs.put(sharedPrefsExitOnBackInDownloadMaps to true)
+                sharedPrefs.put(sharedPrefsExitOnBack to true)
                 activity.finish()
             }.show((activity as FragmentActivity).supportFragmentManager, "tag")
         }

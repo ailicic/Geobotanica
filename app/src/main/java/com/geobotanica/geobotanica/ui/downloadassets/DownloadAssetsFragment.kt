@@ -1,9 +1,8 @@
 package com.geobotanica.geobotanica.ui.downloadassets
 
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
@@ -14,6 +13,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.geobotanica.geobotanica.R
+import com.geobotanica.geobotanica.data.entity.OnlineAsset
 import com.geobotanica.geobotanica.network.NetworkValidator
 import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
 import com.geobotanica.geobotanica.ui.BaseFragment
@@ -48,67 +48,46 @@ class DownloadAssetsFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initAfterPermissionsGranted()
-    }
-
-    private fun initAfterPermissionsGranted() {
-        if (! wasPermissionGranted(WRITE_EXTERNAL_STORAGE))
-            requestPermission(WRITE_EXTERNAL_STORAGE)
-        else
-            init()
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        when (requestCode) {
-            getRequestCode(WRITE_EXTERNAL_STORAGE) -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    Lg.i("permission.WRITE_EXTERNAL_STORAGE: PERMISSION_GRANTED")
-                    initAfterPermissionsGranted()
-                } else {
-                    Lg.i("permission.WRITE_EXTERNAL_STORAGE: PERMISSION_DENIED")
-                    showToast("External storage permission required") // TODO: Find better UX approach (separate screen)
-                    activity.finish()
-                }
-            }
-            else -> { }
+        lifecycleScope.launch {
+            viewModel.init()
+            initUi()
+            bindViewModel()
+            downloadButton.setOnClickListener(::onClickDownload)
         }
     }
 
-    private fun init() = lifecycleScope.launch {
-        constraintLayout.isVisible = true
-        downloadButton.setOnClickListener(::onClickDownload)
-        initUi()
-        bindViewModel()
-    }
-
-    private fun bindViewModel() {
-        viewModel.navigateToNext.observe(viewLifecycleOwner, Observer {
-            if (it) {
-                Lg.d("DownloadAssetsFragment: Map data imported and asset downloads initialized -> navigateToNext()")
-                progressBar.isVisible = false
-                navigateToNext()
-            }
-        })
-
-        viewModel.showStorageSnackbar.observe(this, Observer { asset ->
-            Lg.i("Error: Insufficient storage for ${asset.description}")
-            if (asset.isInternalStorage) {
-                showSnackbar(R.string.not_enough_internal_storage, R.string.Inspect) {
-                    startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
-                }
-            } else {
-                showSnackbar(R.string.not_enough_external_storage, R.string.Inspect) {
-                    startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
-                }
-            }
-        })
-    }
-
+    @SuppressLint("UsableSpace")
     private suspend fun initUi() {
         worldMapText.text = viewModel.getWorldMapText()
         plantNameDbText.text = viewModel.getPlantNameDbText()
         internalStorageText.text = getString(R.string.internal_storage,
                 File(appContext.filesDir.absolutePath).usableSpace / 1024 / 1024)
+    }
+
+    private fun bindViewModel() {
+        viewModel.navigateToNext.observe(viewLifecycleOwner, onNavigateToNextObserver)
+        viewModel.showStorageSnackbar.observe(viewLifecycleOwner, onShowStorageSnackbar)
+    }
+
+    private val onNavigateToNextObserver = Observer<Boolean> {
+        if (it) {
+            Lg.d("DownloadAssetsFragment: Map data imported and asset downloads initialized -> navigateToNext()")
+            progressBar.isVisible = false
+            navigateToNext()
+        }
+    }
+
+    private val onShowStorageSnackbar = Observer<OnlineAsset> { onlineAsset ->
+        Lg.i("Error: Insufficient storage for ${onlineAsset.description}")
+        if (onlineAsset.isInternalStorage) {
+            showSnackbar(R.string.not_enough_internal_storage, R.string.Inspect) {
+                startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
+            }
+        } else {
+            showSnackbar(R.string.not_enough_external_storage, R.string.Inspect) {
+                startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
+            }
+        }
     }
 
     @Suppress("UNUSED_PARAMETER")

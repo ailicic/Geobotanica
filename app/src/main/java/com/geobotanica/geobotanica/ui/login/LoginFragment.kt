@@ -1,5 +1,7 @@
 package com.geobotanica.geobotanica.ui.login
 
+import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -42,9 +44,8 @@ class LoginFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        bindViewModel()
-
         val lastUserId = sharedPrefs.get(sharedPrefsLastUserId, 0L)
+        bindViewModel()
         viewModel.onEvent(ViewCreated(lastUserId))
     }
 
@@ -77,9 +78,14 @@ class LoginFragment : BaseFragment() {
         }
         is ShowUserExistsSnackbar -> showSnackbar(getString(R.string.userExists, viewEffect.nickname))
         is NavigateToNext -> {
-            lifecycleScope.launch {
-                sharedPrefs.put(sharedPrefsLastUserId to viewEffect.userId)
-                navigateTo(viewModel.getNextFragmentId(), bundleOf(userIdKey to viewEffect.userId))
+            val userId = viewEffect.userId
+            if (! arePermissionsGranted())
+                navigateTo(R.id.action_login_to_permissions, createBundle(userId))
+            else {
+                lifecycleScope.launch {
+                    sharedPrefs.put(sharedPrefsLastUserId to userId)
+                    navigateTo(viewModel.getNextFragmentId(), createBundle(userId))
+                }
             }; Unit
         }
     }
@@ -101,4 +107,9 @@ class LoginFragment : BaseFragment() {
         viewModel.viewState.observe(viewLifecycleOwner, Observer { render(it) })
         viewModel.viewEffect.observe(viewLifecycleOwner, Observer { execute(it) })
     }
+
+    private fun arePermissionsGranted(): Boolean =
+        isPermissionGranted(WRITE_EXTERNAL_STORAGE) && isPermissionGranted(ACCESS_FINE_LOCATION)
+
+    private fun createBundle(userId: Long) = bundleOf(userIdKey to userId)
 }

@@ -1,9 +1,7 @@
 package com.geobotanica.geobotanica.ui.map
 
-import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.*
 import androidx.core.os.bundleOf
@@ -28,7 +26,6 @@ import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Request all permissions in separate screen before map (prob after login/splash screen for ux). Ensure no animation problems (like lingering spinner)
 // TODO: Handle download manager errors better (e.g. DownloadLocalMaps hangs on loading if insufficient space)
 // TODO: Setup CI (Bitrise)
 
@@ -65,9 +62,9 @@ import javax.inject.Inject
 
 class MapFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<MapViewModel>
-    @Inject lateinit var fileDownloader: FileDownloader
-
     private lateinit var viewModel: MapViewModel
+
+    @Inject lateinit var fileDownloader: FileDownloader
 
     private var locationMarker: LocationMarker? = null
     private var locationPrecisionCircle: LocationCircle? = null
@@ -119,15 +116,9 @@ class MapFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initAfterPermissionsGranted()
+        init()
     }
 
-    private fun initAfterPermissionsGranted() {
-        if (! wasPermissionGranted(ACCESS_FINE_LOCATION))
-            requestPermission(ACCESS_FINE_LOCATION)
-        else
-            init()
-    }
 
     override fun onStart() {
         super.onStart()
@@ -146,10 +137,7 @@ class MapFragment : BaseFragment() {
 
     override fun onStop() {
         super.onStop()
-
-        // TODO: Remove this conditional after Login screen (permission check will happen there)
-        if (wasPermissionGranted(ACCESS_FINE_LOCATION)) // Conditional required for first boot if GPS permission denied
-            saveMapStateToViewModel()
+        saveMapStateToViewModel()
         saveSharedPrefsFromViewModel()
         viewModel.unsubscribeGps()
     }
@@ -186,21 +174,6 @@ class MapFragment : BaseFragment() {
         viewModel.wasGpsSubscribed = viewModel.isGpsSubscribed()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        when (requestCode) {
-            getRequestCode(ACCESS_FINE_LOCATION) -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    Lg.i("permission.ACCESS_FINE_LOCATION: PERMISSION_GRANTED")
-                    initAfterPermissionsGranted()
-                } else {
-                    Lg.i("permission.ACCESS_FINE_LOCATION: PERMISSION_DENIED")
-                    showToast("GPS permission required") // TODO: Find better UX approach (separate screen)
-                    activity.finish()
-                }
-            }
-            else -> { }
-        }
-    }
 
     private fun init() = lifecycleScope.launch {
         defaultSharedPrefs.put(sharedPrefsIsFirstRunKey to false)
