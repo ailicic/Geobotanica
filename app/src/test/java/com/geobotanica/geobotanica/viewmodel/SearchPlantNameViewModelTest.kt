@@ -27,8 +27,14 @@ object SearchPlantNameViewModelTest : Spek({
     val viewStateObserver = mockkObserver<ViewState>()
     val viewEffectObserver = mockkObserver<ViewEffect>()
 
-    val taxonRepo = mockk<TaxonRepo>()
-    val vernacularRepo = mockk<VernacularRepo>()
+    val taxonRepo = mockk<TaxonRepo> {
+        coEvery { setTagged(any(), any()) } returns Unit
+        coEvery { updateTagTimestamp(any(), any()) } returns Unit
+    }
+    val vernacularRepo = mockk<VernacularRepo> {
+        coEvery { setTagged(any(), any()) } returns Unit
+        coEvery { updateTagTimestamp(any(), any()) } returns Unit
+    }
     val plantNameSearchService = mockk<PlantNameSearchService>()
 
     val searchPlantNameViewModel by memoized {
