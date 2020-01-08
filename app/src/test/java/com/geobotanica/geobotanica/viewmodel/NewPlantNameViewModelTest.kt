@@ -1,7 +1,6 @@
 package com.geobotanica.geobotanica.viewmodel
 
 import android.content.Context
-import androidx.lifecycle.Observer
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant.Type.SHRUB
 import com.geobotanica.geobotanica.data.entity.Plant.Type.TREE

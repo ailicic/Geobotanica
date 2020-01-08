@@ -16,6 +16,6 @@ interface PlantPhotoDao : BaseDao<PlantPhoto> {
     @Query("SELECT * FROM plantPhotos WHERE plantId = :plantId ORDER BY timestamp ASC")
     suspend fun getAllPhotosOfPlant(plantId: Long): List<PlantPhoto>
 
-    @Query("SELECT * FROM plantPhotos WHERE userId = :userId")
-    suspend fun getAllPhotosByUser(userId: Long): List<PlantPhoto>
+//    @Query("SELECT * FROM plantPhotos WHERE userId = :userId")
+//    suspend fun getAllPhotosByUser(userId: Long): List<PlantPhoto>
 }

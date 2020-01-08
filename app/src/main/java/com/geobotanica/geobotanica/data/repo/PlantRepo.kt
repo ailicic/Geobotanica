@@ -25,7 +25,7 @@ class PlantRepo @Inject constructor(
 
 //    fun getAll(): LiveData<List<Plant>> = plantDao.getAll()
 
-    fun getPlantComposite(plantId: Long): LiveData<PlantComposite> = plantCompositeDao.get(plantId)
+//    fun getPlantComposite(plantId: Long): LiveData<PlantComposite> = plantCompositeDao.get(plantId)
 
     fun getAllPlantComposites(): LiveData<List<PlantComposite>> = plantCompositeDao.getAll()
 }

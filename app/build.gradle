@@ -50,6 +50,10 @@ android {
             }
         }
     }
+
+    lintOptions {
+        disable 'IconMissingDensityFolder'
+    }
 }
 
 dependencies {

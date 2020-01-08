@@ -48,7 +48,7 @@ import javax.inject.Inject
 // TODO: Use code reformatter:
 // Check tabs on fn params / data class
 // Subclass in class declaration: colon needs space on both sides
-// TODO: Use vector graphics for all icons where possible
+// TODO: Use vector graphics for all icons where possible (or define bitmaps at different densities: hdpi/xhdpi/xxhdpi)
 // TODO: Decide on Lg.v/d/i etc.
 // TODO: Double check proper placement of methods in lifecycle callbacks
     // https://developer.android.com/guide/components/activities/activity-lifecycle
@@ -57,6 +57,7 @@ import javax.inject.Inject
 // TODO: Figure out how to resume app state after onStop, then process death (e.g. home or switch app, then kill app)
 // https://medium.com/google-developers/viewmodels-persistence-onsaveinstancestate-restoring-ui-state-and-loaders-fc7cc4a6c090
 // TODO: Consider allowing app to be installed on external storage
+// TODO: U
 
 
 class MapFragment : BaseFragment() {

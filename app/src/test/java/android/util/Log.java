@@ -1,5 +1,6 @@
 package android.util;
 
+@SuppressWarnings({"unused", "SameReturnValue", "WeakerAccess", "RedundantSuppression"})
 public class Log {
     public static int v(String tag, String msg) {
 //        System.out.println("VERBOSE: " + tag + ": " + msg);

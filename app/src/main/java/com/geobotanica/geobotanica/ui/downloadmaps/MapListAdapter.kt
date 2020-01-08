@@ -52,19 +52,23 @@ class MapViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
             view.icon.isVisible = true
             view.setOnClickListener { onClickFolder(mapListItem) }
         } else {
-            if (mapListItem.status == NOT_DOWNLOADED) {
-                view.icon.setImageResource(R.drawable.ic_file_download_24dp)
-                view.icon.isVisible = true
-                view.setOnClickListener{ onClickDownload(mapListItem) }
-            } else if (mapListItem.isDownloading) {
-                view.progressBar.isVisible = true
-                view.cancelButton.isVisible = true
-                view.cancelButton.setOnClickListener { onClickCancel(mapListItem) }
-            } else if (mapListItem.status == DOWNLOADED) {
-                view.icon.setImageResource(R.drawable.ic_done_black_24dp)
-                view.icon.isVisible = true
-                view.deleteButton.isVisible = true
-                view.deleteButton.setOnClickListener { onClickDelete(mapListItem) }
+            when {
+                mapListItem.status == NOT_DOWNLOADED -> {
+                    view.icon.setImageResource(R.drawable.ic_file_download_24dp)
+                    view.icon.isVisible = true
+                    view.setOnClickListener{ onClickDownload(mapListItem) }
+                }
+                mapListItem.isDownloading -> {
+                    view.progressBar.isVisible = true
+                    view.cancelButton.isVisible = true
+                    view.cancelButton.setOnClickListener { onClickCancel(mapListItem) }
+                }
+                mapListItem.status == DOWNLOADED -> {
+                    view.icon.setImageResource(R.drawable.ic_done_black_24dp)
+                    view.icon.isVisible = true
+                    view.deleteButton.isVisible = true
+                    view.deleteButton.setOnClickListener { onClickDelete(mapListItem) }
+                }
             }
         }
         view.text.text = mapListItem.printName

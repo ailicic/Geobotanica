@@ -1,21 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <dimen name="user_spinner_text_size">20sp</dimen>
     <dimen name="fab_margin">16dp</dimen>
-    <dimen name="design_fab_image_size" tools:override="true">36dp</dimen>
-    <dimen name="image_button_size">30dp</dimen>
-    <dimen name="plant_type_icon_layout_width">128dp</dimen>>
-    <dimen name="plant_type_icon_padding">8dp</dimen>
-    <dimen name="plant_type_icon_height">72dp</dimen>
-    <dimen name="plant_type_icon_text_size">16sp</dimen>
-    <dimen name="photo_type_icon_padding">8dp</dimen>
-    <dimen name="photo_type_icon_margin">16dp</dimen>
-    <dimen name="photo_type_icon_dimen">32dp</dimen>
-    <dimen name="photo_type_icon_text_size">12sp</dimen>
     <dimen name="list_item_common_text_size">16sp</dimen>
-    <dimen name="list_item_taxon_text_size">16sp</dimen>
     <dimen name="list_item_name_icon_size">24dp</dimen>
     <dimen name="list_item_filter_icon_size">24dp</dimen>
-    <dimen name="list_item_filter_vertical_margin">4dp</dimen>
     <dimen name="list_item_filter_start_margin">24dp</dimen>
     <dimen name="list_item_filter_end_margin">16dp</dimen>
     <dimen name="list_item_filter_text_margin">8dp</dimen>
@@ -26,3 +14,5 @@
     <dimen name="dialogButtonTextSize">8sp</dimen>
     <dimen name="bubbleTitleTextSize">14sp</dimen>
 </resources>
+
+<!--<dimen name="design_fab_image_size" tools:override="true">36dp</dimen>-->

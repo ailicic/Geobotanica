@@ -3,7 +3,7 @@ package com.geobotanica.geobotanica.util
 import android.annotation.SuppressLint
 import java.util.*
 
-@SuppressLint("DefaultLocale")
+@SuppressLint("DefaultLocale") // TODO: Remove this when capitalize(Locale) no longer requires @ExperimentalStdlibApi
 fun String.capitalizeWords(): String = split(" ").joinToString(" ") { it.capitalize() }
 
 fun String.replacePrefix(oldPrefix: String, newPrefix: String): String {

@@ -17,7 +17,6 @@ import com.geobotanica.geobotanica.ui.dialog.ListItemAdapter
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.getFromBundle
 import com.geobotanica.geobotanica.util.getNullableFromBundle
-import com.geobotanica.geobotanica.util.putValue
 import kotlinx.android.synthetic.main.fragment_new_plant_type.*
 import javax.inject.Inject
 

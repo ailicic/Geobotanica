@@ -6,10 +6,10 @@ import com.geobotanica.geobotanica.data_taxa.dao.TagDao
 import com.geobotanica.geobotanica.data_taxa.dao.TaxonDao
 import com.geobotanica.geobotanica.data_taxa.dao.TypeDao
 import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag
-import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag.*
+import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag.STARRED
+import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag.USED
 import com.geobotanica.geobotanica.data_taxa.entity.Tag
 import com.geobotanica.geobotanica.data_taxa.entity.Taxon
-import com.geobotanica.geobotanica.data_taxa.entity.TaxonType
 import javax.inject.Inject
 
 
@@ -77,8 +77,6 @@ class TaxonRepo @Inject constructor(
 
 
     // Plant Types
-
-    suspend fun insertType(obj: TaxonType): Long = typeDao.insert(obj)
 
     suspend fun getTypes(id: Long): Int {
         if (taxonDao.getKingdom(id) == Taxon.Kingdom.FUNGI.toString())

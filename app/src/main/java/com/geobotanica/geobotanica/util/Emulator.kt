@@ -9,4 +9,4 @@ fun isEmulator(): Boolean = Build.FINGERPRINT.startsWith("generic")
     || Build.MODEL.contains("Android SDK built for x86")
     || Build.MANUFACTURER.contains("Genymotion")
     || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
-    || "google_sdk".equals(Build.PRODUCT)
+    || "google_sdk" == Build.PRODUCT

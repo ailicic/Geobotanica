@@ -31,16 +31,7 @@ class StorageHelper @Inject constructor(val appContext: Context) {
             Environment.getExternalStorageDirectory().absolutePath // "/sdcard/"
     }
 
-    fun getExtFilesDir() = appContext.getExternalFilesDir(null)?.absolutePath
-    // /storage/emulated/0/Android/data/com.geobotanica/files/
-
     fun getDownloadPath() = getExtFilesDir()
-
-    fun getPicturesDir() = appContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath
-    //  /storage/emulated/0/Android/data/com.geobotanica/files/Pictures/
-
-    fun getUserPhotosDir() = "${getPicturesDir()}"
-    //  /storage/emulated/0/Android/data/com.geobotanica/files/Pictures/
 
     fun createPhotoFile(): File {
         val filename: String = GbTime.now().asFilename()
@@ -50,7 +41,7 @@ class StorageHelper @Inject constructor(val appContext: Context) {
         return File.createTempFile(filename, ".jpg", photosDir)
     }
 
-    fun absolutePath(file: File) = file.absolutePath
+    fun absolutePath(file: File): String = file.absolutePath
 
     fun deleteFile(uri: String): Boolean = File(uri).delete()
 
@@ -59,6 +50,13 @@ class StorageHelper @Inject constructor(val appContext: Context) {
     fun getLocalPath(onlineAsset: OnlineAsset): String =
             getRootPath(onlineAsset) + "/${onlineAsset.relativePath}"
 
+    fun isAssetAvailable(asset: OnlineAsset): Boolean {
+        val file = File(getLocalPath(asset), asset.filename)
+        return file.exists() && file.length() == asset.decompressedSize
+    }
+
+    fun photoUriFrom(filename: String): String = "${getUserPhotosDir()}/$filename"
+
     private fun getRootPath(onlineAsset: OnlineAsset): String {
         return if (onlineAsset.isInternalStorage)
             appContext.filesDir.absolutePath.removeSuffix("/files")
@@ -66,10 +64,12 @@ class StorageHelper @Inject constructor(val appContext: Context) {
             appContext.getExternalFilesDir(null)?.absolutePath  ?: throw IllegalStateException()
     }
 
-    fun isAssetAvailable(asset: OnlineAsset): Boolean {
-        val file = File(getLocalPath(asset), asset.filename)
-        return file.exists() && file.length() == asset.decompressedSize
-    }
+    private fun getExtFilesDir() = appContext.getExternalFilesDir(null)?.absolutePath
+    // /storage/emulated/0/Android/data/com.geobotanica/files/
 
-    fun photoUriFrom(filename: String): String = "${getUserPhotosDir()}/$filename"
+    private fun getUserPhotosDir() = "${getPicturesDir()}"
+    //  /storage/emulated/0/Android/data/com.geobotanica/files/Pictures/
+
+    private fun getPicturesDir() = appContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath
+    //  /storage/emulated/0/Android/data/com.geobotanica/files/Pictures/
 }

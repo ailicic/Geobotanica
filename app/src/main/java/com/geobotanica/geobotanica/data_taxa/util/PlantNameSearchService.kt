@@ -1,5 +1,6 @@
 package com.geobotanica.geobotanica.data_taxa.util
 
+import android.annotation.SuppressLint
 import com.geobotanica.geobotanica.data_taxa.DEFAULT_RESULT_LIMIT
 import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag
 import com.geobotanica.geobotanica.data_taxa.entity.PlantNameTag.*
@@ -147,6 +148,7 @@ class PlantNameSearchService @Inject constructor(
         }
     }
 
+    @SuppressLint("DefaultLocale") // TODO: Remove this when capitalize(Locale) no longer requires @ExperimentalStdlibApi
     private suspend fun mapIdToSearchResult(id: Long, search: PlantNameSearch): SearchResult {
         val plantName: String = when {
             search.hasTag(COMMON) -> vernacularRepo.get(id)?.vernacular?.capitalize() ?: ""

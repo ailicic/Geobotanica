@@ -81,7 +81,7 @@
             android:padding="16dp"
             android:text="@string/browse_maps"
             android:textColor="@color/colorPrimary"
-            android:textSize="16dp"
+            android:textSize="18sp"
             android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"

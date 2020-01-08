@@ -21,8 +21,4 @@
         <item>@drawable/photo_type_fruit</item>
         <item>@drawable/photo_type_trunk</item>
     </integer-array>
-    <integer-array name="photo_action_drawable_array">
-        <item>@drawable/ic_refresh_24dp</item>
-        <item>@drawable/ic_close_24dp</item>
-    </integer-array>
 </resources>

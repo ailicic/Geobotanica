@@ -1,7 +1,6 @@
 package com.geobotanica.geobotanica.util
 
 import android.content.SharedPreferences
-import com.geobotanica.geobotanica.ui.BaseFragment
 
 
 inline fun <reified T: Any> SharedPreferences.get(key: String, defaultValue: T): T {

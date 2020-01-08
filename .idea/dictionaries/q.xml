@@ -1,23 +1,59 @@
 <component name="ProjectDictionaryState">
   <dictionary name="q">
     <words>
+      <w>adde</w>
+      <w>autofill</w>
       <w>bitflags</w>
+      <w>compoundview</w>
       <w>coroutine</w>
       <w>coroutines</w>
       <w>deduplicator</w>
+      <w>deserialized</w>
+      <w>deserializing</w>
+      <w>downloadassets</w>
+      <w>downloadmaps</w>
+      <w>eacbf</w>
+      <w>failover</w>
+      <w>fileprovider</w>
+      <w>genymotion</w>
       <w>geobotanica</w>
       <w>geolocations</w>
       <w>geolocator</w>
+      <w>geoplugin</w>
+      <w>gnss</w>
+      <w>horiz</w>
+      <w>infras</w>
       <w>infraspecific</w>
       <w>kluent</w>
+      <w>kotlinx</w>
+      <w>mapcache</w>
+      <w>mapsforge</w>
+      <w>memoized</w>
       <w>mockk</w>
       <w>moshi</w>
+      <w>newplantconfirm</w>
+      <w>newplantmeasurement</w>
+      <w>newplantname</w>
+      <w>newplantphoto</w>
+      <w>newplanttype</w>
       <w>okio</w>
+      <w>penticton</w>
+      <w>plantae</w>
+      <w>plantdetail</w>
+      <w>recyclerview</w>
+      <w>reformatter</w>
+      <w>searchplantname</w>
       <w>snackbar</w>
       <w>spek</w>
+      <w>squareup</w>
+      <w>sserra</w>
       <w>taxa</w>
       <w>taxon</w>
       <w>ungzip</w>
+      <w>unhold</w>
+      <w>vascan</w>
+      <w>vert</w>
+      <w>visiblity</w>
     </words>
   </dictionary>
 </component>

@@ -142,7 +142,7 @@ class NewPlantNameViewModel @Inject constructor (
         } ?: Unit
     }
 
-    @SuppressLint("DefaultLocale")
+    @SuppressLint("DefaultLocale") // TODO: Remove this when capitalize(Locale) no longer requires @ExperimentalStdlibApi
     private fun loadPlantNames() {
         viewModelScope.launch(dispatchers.main) {
             delay(appContext.resources.getInteger(R.integer.fragmentAnimTime).toLong())

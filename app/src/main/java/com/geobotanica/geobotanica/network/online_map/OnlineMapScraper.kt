@@ -38,7 +38,7 @@ class OnlineMapScraper @Inject constructor (
 
     init { scrape() }
 
-    fun scrape() = GlobalScope.launch(Dispatchers.IO) {
+    private fun scrape() = GlobalScope.launch(Dispatchers.IO) {
         fetchMaps(mapsBaseUrl)
         exportMapsToJsonFiles()
     }
@@ -81,6 +81,7 @@ class OnlineMapScraper @Inject constructor (
         }
     }
 
+    @Suppress("BlockingMethodInNonBlockingContext") // Runs in coroutine on IO thread. No idea why it complains.
     private suspend fun exportMapsToJsonFiles() {
         val maps = mapRepo.getAll()
         val mapsAdapter = moshi.adapter<List<OnlineMap>>()

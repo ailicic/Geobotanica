@@ -26,11 +26,11 @@ class MapRepo @Inject constructor(
     suspend fun getDownloaded(): List<OnlineMap> = mapDao.getDownloaded()
     suspend fun getInitiatedDownloads(): List<OnlineMap> = mapDao.getInitiatedDownloads()
     fun getInitiatedDownloadsLiveData(): LiveData<List<OnlineMap>> = mapDao.getInitiatedDownloadsLiveData()
-    suspend fun getDecompressing(): List<OnlineMap> = mapDao.getDecompressing()
+//    suspend fun getDecompressing(): List<OnlineMap> = mapDao.getDecompressing()
     suspend fun getByFilename(filename: String): OnlineMap? = mapDao.getByFilename(filename)
     suspend fun getByDownloadId(downloadId: Long): OnlineMap? = mapDao.getByDownloadId(downloadId)
 
-    suspend fun getFolder(id: Long): OnlineMapFolder = mapFolderDao.get(id)
+//    suspend fun getFolder(id: Long): OnlineMapFolder = mapFolderDao.get(id)
     suspend fun getAllFolders(): List<OnlineMapFolder> = mapFolderDao.getAll()
 
     fun getChildMapsOf(parentFolderId: Long?): LiveData<List<OnlineMap>> {
@@ -49,5 +49,5 @@ class MapRepo @Inject constructor(
             mapDao.search(region.formatAsMapFilename(), country.formatAsMapFilename())
 
     suspend fun delete(map: OnlineMap) = mapDao.delete(map)
-    suspend fun deleteFolder(folder: OnlineMapFolder) = mapFolderDao.delete(folder)
+//    suspend fun deleteFolder(folder: OnlineMapFolder) = mapFolderDao.delete(folder)
 }

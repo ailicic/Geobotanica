@@ -35,18 +35,6 @@ inline fun <reified T: Any?> Bundle.getValue(key: String): T? {
     }
 }
 
-inline fun <reified T: Any> Bundle.putValue(key: String, value: T) {
-    when (T::class) {
-        Boolean::class -> { this.putBoolean(key, value as Boolean) }
-        Int::class -> { this.putInt(key, value as Int) }
-        Long::class -> { this.putLong(key, value as Long) }
-        Float::class -> { this.putFloat(key, value as Float) }
-        Double::class -> { this.putDouble(key, value as Double) }
-        String::class -> { this.putString(key, value as String) }
-        else -> throw IllegalArgumentException("$key is of unknown type")
-    }
-}
-
 inline fun <reified T: Any>getDefault(): T {
     return when (T::class) {
         Boolean::class -> false as T
@@ -58,11 +46,3 @@ inline fun <reified T: Any>getDefault(): T {
         else -> throw IllegalArgumentException("${T::class.java.name} is of unknown type")
     }
 }
-
-
-// Restructured since nav bundle is always provided to fragment, even after process death
-// https://medium.com/google-developers/viewmodels-persistence-onsaveinstancestate-restoring-ui-state-and-loaders-fc7cc4a6c090
-//    inline fun <reified T: Any> BaseFragment.getFromBundleOrPrefs(key: String, default: T? = null): T {
-//        return this.arguments?.getValue<T>(key)
-//                ?: getSharedPrefs(this.sharedPrefsKey).get(key, default ?: getDefault())
-//    }

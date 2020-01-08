@@ -79,7 +79,7 @@ class LocationService @Inject constructor (private val locationManager: Location
                     // Discard tempLocation, wait for next event
                     tempLocation = location
                     msSinceLastEvent = System.currentTimeMillis()
-                } else { // Events arrived within 100 ms of eachother. Merge them and publish()
+                } else { // Events arrived within 100 ms of each other. Merge them and publish()
                     tempLocation?.let { publish(location.mergeWith(it)) }
                     tempLocation = null
                 }

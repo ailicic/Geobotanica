@@ -2,9 +2,6 @@ package com.geobotanica.geobotanica.ui.compoundview
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
-import android.widget.AdapterView
-import android.widget.AdapterView.OnItemSelectedListener
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.isVisible
 import com.geobotanica.geobotanica.R
