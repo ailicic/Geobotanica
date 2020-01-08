@@ -5,16 +5,16 @@ apply plugin: 'kotlin-kapt' // Non-default
 apply plugin: 'de.mannodermaus.android-junit5' // For Spek
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         applicationId "com.geobotanica.geobotanica"
         minSdkVersion 21
-        targetSdkVersion 28 // WARNING: Bumping to 29 breaks android.util.Log ref for Spek tests
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
-        vectorDrawables.useSupportLibrary = true // Non-default // TODO: Keep?
+        vectorDrawables.useSupportLibrary = true // Non-default, TODO: Keep?
     }
     buildTypes {
         release {
@@ -61,6 +61,7 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:1.1.0"
     implementation "androidx.viewpager2:viewpager2:1.0.0"
     implementation 'com.google.android.material:material:1.0.0'
+    implementation "androidx.preference:preference-ktx:1.1.0"
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     androidTestImplementation 'androidx.test:rules:1.2.0' // Non-default
@@ -80,7 +81,7 @@ dependencies {
     testImplementation "org.spekframework.spek2:spek-dsl-jvm:$spek_version"
     testImplementation "org.spekframework.spek2:spek-runner-junit5:$spek_version"
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestRuntimeOnly "de.mannodermaus.junit5:android-instrumentation-test-runner:0.2.2"
 
     // Dagger 2
@@ -111,12 +112,11 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.2.0-rc03" // liveData { } coroutine builder
 
     // KTX
-    implementation "androidx.core:core-ktx:1.1.0"
+    implementation 'androidx.core:core-ktx:1.1.0'
 
-    // Navigation TODO: Use androidx if/when it becomes available
-    def navigation_version = "1.0.0"
-    implementation "android.arch.navigation:navigation-fragment-ktx:$navigation_version"
-    implementation "android.arch.navigation:navigation-ui-ktx:$navigation_version"
+    def navigation_version = "2.2.0-rc04"
+    implementation "androidx.navigation:navigation-fragment-ktx:$navigation_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$navigation_version"
 
     // Work manager
     implementation "androidx.work:work-runtime-ktx:2.2.0"

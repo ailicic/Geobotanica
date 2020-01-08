@@ -23,8 +23,8 @@ interface LocationSubscriber {
 class LocationService @Inject constructor (private val locationManager: LocationManager) {
     private val subscribers = mutableListOf<LocationSubscriber>()
     private var currentInterval = 0L
-    private var gnssStatusCallback:GnssStatusCallback? = null
-    private val gpsLocationListener:GpsLocationListener = GpsLocationListener()
+    private var gnssStatusCallback: GnssStatusCallback? = null
+    private val gpsLocationListener: GpsLocationListener = GpsLocationListener()
     private val gpsStatusListener = GpsStatusListener()
 
     private var hasFirstFix = false
@@ -94,7 +94,7 @@ class LocationService @Inject constructor (private val locationManager: Location
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, interval, 0f, gpsLocationListener)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            locationManager.registerGnssStatusCallback(gnssStatusCallback)
+            gnssStatusCallback?.let { locationManager.registerGnssStatusCallback(it) }
 //            val isAdded = locationManager.registerGnssStatusCallback(gnssStatusCallback)
 //            Lg.v("Registering GPS status (API >= 24), isAdded=$isAdded, callback=$gnssStatusCallback")
         } else {
@@ -109,7 +109,7 @@ class LocationService @Inject constructor (private val locationManager: Location
         locationManager.removeUpdates(gpsLocationListener)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 //            Lg.v("Unregistering GPS status (API >= 24), callback=$gnssStatusCallback")
-            locationManager.unregisterGnssStatusCallback(gnssStatusCallback)
+            gnssStatusCallback?.let { locationManager.unregisterGnssStatusCallback(it) }
         } else {
 //            Lg.v("Unregistering GPS status (API < 24), callback=$gpsStatusListener")
             locationManager.removeGpsStatusListener(gpsStatusListener)
@@ -189,8 +189,8 @@ class LocationService @Inject constructor (private val locationManager: Location
                 GpsStatus.GPS_EVENT_FIRST_FIX->  Lg.v("GPS_EVENT_FIRST_FIX")
                 GpsStatus.GPS_EVENT_SATELLITE_STATUS-> {
                     val status = locationManager.getGpsStatus(null)
-                    val satellitesInUse = status.satellites.filter {it.usedInFix()}.count()
-                    val satellitesVisible = status.satellites.count()
+                    val satellitesInUse = status?.satellites?.filter {it.usedInFix()}?.count() ?: 0
+                    val satellitesVisible = status?.satellites?.count() ?: 0
 //                    Lg.d("GPS_EVENT_SATELLITE_STATUS: $satellitesInUse/$satellitesVisible")
                     onLocation(Location(
                             satellitesInUse = satellitesInUse,

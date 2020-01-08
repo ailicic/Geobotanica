@@ -98,7 +98,7 @@ abstract class BaseFragment : Fragment() {
     // TODO: Remove after better approach to create test images
     protected fun fileFromDrawable(resId: Int, filename: String): String {
         val bitmap = BitmapFactory.decodeResource(resources, resId)
-        val extStorageDir = Environment.getExternalStorageDirectory().toString()
+        val extStorageDir = activity.getExternalFilesDir(null).toString()
         val file = File(extStorageDir, "$filename.png")
         val outStream = FileOutputStream(file)
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream)

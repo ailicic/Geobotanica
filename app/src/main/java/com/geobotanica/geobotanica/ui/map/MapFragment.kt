@@ -26,8 +26,8 @@ import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+// TODO: Fix missing mocks
 // TODO: Handle download manager errors better (e.g. DownloadLocalMaps hangs on loading if insufficient space)
-// TODO: Setup CI (Bitrise)
 
 // LONG TERM
 // TODO: Use Okio everywhere

@@ -19,7 +19,7 @@ class DecompressionWorker(val appContext: Context, workerParams: WorkerParameter
     override fun doWork(): Result {
         val assetId = inputData.getLong(ASSET_ID, -1)
         val assetLocalPath = inputData.getString(ASSET_LOCAL_PATH)
-        val assetFilename = inputData.getString(ASSET_FILENAME)
+        val assetFilename = inputData.getString(ASSET_FILENAME) ?: ""
         val assetFilenameGzip = "$assetFilename.gz"
         val assetDownloadPath = appContext.getExternalFilesDir(null)?.absolutePath
 
@@ -55,8 +55,8 @@ class DecompressionWorker(val appContext: Context, workerParams: WorkerParameter
     }
 
     companion object {
-        val ASSET_ID = "AssetIdKey"
-        val ASSET_FILENAME = "AssetFilenameKey"
-        val ASSET_LOCAL_PATH = "AssetLocalPathKey"
+        const val ASSET_ID = "AssetIdKey"
+        const val ASSET_FILENAME = "AssetFilenameKey"
+        const val ASSET_LOCAL_PATH = "AssetLocalPathKey"
     }
 }

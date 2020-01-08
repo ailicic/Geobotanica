@@ -2,6 +2,7 @@ package com.geobotanica.geobotanica.android.file
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
 import android.os.Environment
 import com.geobotanica.geobotanica.data.entity.OnlineAsset
 import com.geobotanica.geobotanica.util.GbTime
@@ -22,7 +23,13 @@ class StorageHelper @Inject constructor(val appContext: Context) {
 
     fun mkdirs(onlineAsset: OnlineAsset) = File(getLocalPath(onlineAsset)).mkdirs()
 
-    fun getExtStorageRootDir() = "/sdcard/"
+    fun getExtStorageRootDir(): String {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            appContext.getExternalFilesDirs(null)[0].absolutePath
+            // TODO: Check if root external storage is accessible on Q+ in future
+        else @Suppress("DEPRECATION")
+            Environment.getExternalStorageDirectory().absolutePath // "/sdcard/"
+    }
 
     fun getExtFilesDir() = appContext.getExternalFilesDir(null)?.absolutePath
     // /storage/emulated/0/Android/data/com.geobotanica/files/

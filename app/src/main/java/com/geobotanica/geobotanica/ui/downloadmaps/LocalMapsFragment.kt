@@ -158,7 +158,7 @@ class LocalMapsFragment : BaseFragment() {
                 getString(R.string.metered_network_confirm)
         ) {
             viewModel.onMeteredNetworkAllowed()
-        }.show(requireFragmentManager(), "tag")
+        }.show(parentFragmentManager, "tag")
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -172,7 +172,7 @@ class LocalMapsFragment : BaseFragment() {
                 getString(R.string.confirm_delete_map, mapListItem.printName)
         ) {
             viewModel.deleteMap(mapListItem.id)
-        }.show(requireFragmentManager(), null)
+        }.show(parentFragmentManager, null)
     }
 
     private fun browseMaps() = navigateTo(R.id.action_localMaps_to_browseMaps)

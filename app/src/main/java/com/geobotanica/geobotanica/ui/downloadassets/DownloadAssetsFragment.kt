@@ -102,7 +102,7 @@ class DownloadAssetsFragment : BaseFragment() {
                 {
                     networkValidator.allowMeteredNetwork(); downloadAssets()
                 }
-                .show(requireFragmentManager(), "tag")
+                .show(parentFragmentManager, "tag")
             }
         }
     }

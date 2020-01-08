@@ -133,7 +133,7 @@ class PlantDetailFragment : BaseFragment() {
                     commonName.orEmpty(),
                     scientificName.orEmpty(),
                     viewModel::onUpdatePlantNames
-            ).show(requireFragmentManager(),"tag")
+            ).show(parentFragmentManager,"tag")
         }
     }
 
@@ -147,7 +147,7 @@ class PlantDetailFragment : BaseFragment() {
                     null,
                     null,
                     viewModel::onMeasurementsAdded
-            ).show(requireFragmentManager(), "tag")
+            ).show(parentFragmentManager, "tag")
         }
     }
 

@@ -152,7 +152,7 @@ class NewPlantConfirmFragment : BaseFragment() {
                     scientificName.value.orEmpty(),
                     ::onNewPlantName
             )
-        }.show(requireFragmentManager(),"tag")
+        }.show(parentFragmentManager,"tag")
     }
 
     private fun onClickEditMeasurements(view: View) {
@@ -164,7 +164,7 @@ class NewPlantConfirmFragment : BaseFragment() {
                     diameter.value,
                     trunkDiameter.value,
                     ::onMeasurementsUpdated
-            ).show(requireFragmentManager(), "tag")
+            ).show(parentFragmentManager, "tag")
         }
     }
 

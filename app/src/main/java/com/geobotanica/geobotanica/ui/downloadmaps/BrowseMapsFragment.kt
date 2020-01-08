@@ -108,7 +108,7 @@ class BrowseMapsFragment : BaseFragment() {
                 getString(R.string.metered_network_confirm)
         ) {
             viewModel.onMeteredNetworkAllowed()
-        }.show(requireFragmentManager(), "tag")
+        }.show(parentFragmentManager, "tag")
     }
 
     private fun onClickDownload(mapListItem: OnlineMapListItem) { viewModel.initDownload(mapListItem) }
@@ -121,7 +121,7 @@ class BrowseMapsFragment : BaseFragment() {
                 getString(R.string.confirm_delete_map, mapListItem.printName)
         ) {
             viewModel.deleteMap(mapListItem.id)
-        }.show(requireFragmentManager(), null)
+        }.show(parentFragmentManager, null)
     }
 
     private fun onClickFolder(mapFolderItem: OnlineMapListItem) {

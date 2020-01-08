@@ -2,7 +2,9 @@ package com.geobotanica.geobotanica.network
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.preference.PreferenceManager
+import android.net.NetworkCapabilities.*
+import android.os.Build
+import androidx.preference.PreferenceManager
 import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
 import com.geobotanica.geobotanica.util.get
 import com.geobotanica.geobotanica.util.put
@@ -31,7 +33,15 @@ class NetworkValidator @Inject constructor(appContext: Context) {
 
     fun allowMeteredNetwork() = defaultSharedPrefs.put(sharedPrefsAllowMeteredNetwork to true)
 
-    private fun isNetworkConnected(): Boolean = connectivityManager.activeNetworkInfo?.isConnected ?: false
+    private fun isNetworkConnected(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+             connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)?.run {
+                 hasTransport(TRANSPORT_WIFI) || hasTransport(TRANSPORT_CELLULAR) || hasTransport(TRANSPORT_ETHERNET)
+            } ?: false
+        } else { @Suppress("DEPRECATION")
+            connectivityManager.activeNetworkInfo?.isConnected ?: false
+        }
+    }
 
     private fun isMeteredNetworkAllowed(): Boolean =
         defaultSharedPrefs.get(sharedPrefsAllowMeteredNetwork, false)

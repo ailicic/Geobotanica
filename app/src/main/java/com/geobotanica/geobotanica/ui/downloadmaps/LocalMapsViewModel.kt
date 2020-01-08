@@ -60,7 +60,7 @@ class LocalMapsViewModel @Inject constructor(
     private var lastClickedMap: OnlineMapListItem? = null
 
     fun getMapsFromExtStorage() = viewModelScope.launch(Dispatchers.IO) {
-        File(storageHelper.getExtStorageRootDir()).listFiles().forEach { file ->
+        File(storageHelper.getExtStorageRootDir()).listFiles()?.forEach { file ->
             if (file.extension == "map") {
                 mapRepo.getByFilename(file.name)?.let { map ->
                     if (map.status == NOT_DOWNLOADED) {
