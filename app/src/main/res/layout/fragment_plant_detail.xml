@@ -197,12 +197,12 @@
             app:layout_constraintTop_toBottomOf="@+id/lastMeasuredByText" />
 
         <TextView
-            android:id="@+id/locationText"
+            android:id="@+id/locationPrecisionText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="4dp"
-            android:text="@{ @string/location(viewModel.location.precision) }"
+            android:text="@{ @string/location_precision(viewModel.location.precision) }"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/measurementsDivider" />
 
@@ -213,7 +213,7 @@
             android:layout_marginStart="16dp"
             android:text="@{ @string/satellites(viewModel.location.satellitesInUse, viewModel.location.satellitesVisible) }"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/locationText" />
+            app:layout_constraintTop_toBottomOf="@id/locationPrecisionText" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/overflowButton"

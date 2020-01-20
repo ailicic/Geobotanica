@@ -52,6 +52,8 @@ class MainActivity : AppCompatActivity() {
         applicationComponent.inject(this)
 
         AndroidGraphicFactory.createInstance(application) // Required by MapsForge
+
+
         registerReceiver(onDownloadComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         registerReceiver(onClickDownloadNotification, IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED))
 

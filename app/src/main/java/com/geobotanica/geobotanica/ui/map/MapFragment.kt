@@ -26,7 +26,9 @@ import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+// TODO: Fix geolocation cleartext error
 // TODO: Handle download manager errors better (e.g. DownloadLocalMaps hangs on loading if insufficient space)
+// TODO: Remove "-r -t" flags in run config after AS 3.6
 
 // LONG TERM
 // TODO: Use Okio everywhere

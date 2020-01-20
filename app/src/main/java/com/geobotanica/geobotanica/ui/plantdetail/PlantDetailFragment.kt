@@ -122,7 +122,7 @@ class PlantDetailFragment : BaseFragment() {
         editPlantNameButton.setOnClickListener(::onClickEditNames)
         overflowButton.setOnClickListener(::onClickOverflow)
         addMeasurementButton.setOnClickListener(::onClickAddMeasurements)
-        updateLocationButton.setOnClickListener { showSnackbar("Update location") }
+        updateLocationButton.setOnClickListener { showSnackbar(getString(R.string.update_location)) }
         deleteButton.setOnClickListener(::onClickDelete)
     }
 
