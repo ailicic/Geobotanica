@@ -11,7 +11,7 @@
         android:id="@+id/commonNameIcon"
         android:layout_width="@dimen/list_item_filter_icon_size"
         android:layout_height="@dimen/list_item_filter_icon_size"
-        android:layout_marginStart="@dimen/list_item_filter_start_margin"
+        android:layout_marginStart="@dimen/dialog_start_margin"
         android:src="@drawable/common_name"
         android:tint="@color/colorBrown"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,10 +23,10 @@
         android:id="@+id/commonName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/list_item_filter_text_margin"
-        android:layout_marginTop="@dimen/list_item_filter_top_margin"
+        android:layout_marginStart="@dimen/tiny_gap"
+        android:layout_marginTop="@dimen/small_gap"
         android:text="@string/common_names"
-        android:textSize="@dimen/list_item_filter_text_size"
+        android:textSize="@dimen/medium_text"
         app:layout_constraintStart_toEndOf="@id/commonNameIcon"
         app:layout_constraintTop_toTopOf="parent"/>
 
@@ -34,18 +34,17 @@
         android:id="@+id/commonCheckbox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/list_item_filter_end_margin"
+        android:layout_marginEnd="@dimen/small_gap"
         android:layoutDirection="rtl"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/commonName"
         app:layout_constraintBottom_toBottomOf="@id/commonName" />
 
-
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/scientificNameIcon"
         android:layout_width="@dimen/list_item_filter_icon_size"
         android:layout_height="@dimen/list_item_filter_icon_size"
-        android:layout_marginStart="@dimen/list_item_filter_start_margin"
+        android:layout_marginStart="@dimen/dialog_start_margin"
         android:src="@drawable/scientific_name"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/scientificText"
@@ -56,29 +55,28 @@
         android:id="@+id/scientificText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/list_item_filter_text_margin"
-        android:layout_marginTop="@dimen/list_item_filter_top_margin"
+        android:layout_marginStart="@dimen/tiny_gap"
+        android:layout_marginTop="@dimen/small_gap"
         android:text="@string/scientific_names"
-        android:textSize="@dimen/list_item_filter_text_size"
+        android:textSize="@dimen/medium_text"
         app:layout_constraintStart_toEndOf="@id/scientificNameIcon"
         app:layout_constraintTop_toBottomOf="@id/commonName"/>
-
 
     <androidx.appcompat.widget.AppCompatCheckBox
         android:id="@+id/scientificCheckbox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/list_item_filter_end_margin"
+        android:layout_marginEnd="@dimen/small_gap"
         android:layoutDirection="rtl"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/scientificText"
         app:layout_constraintBottom_toBottomOf="@id/scientificText" />
 
-
+    <!-- Note: Star must be larger than other icons for visual consistency. Margins are adjusted as needed. -->
     <ImageView
         android:id="@+id/starIcon"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="@dimen/list_item_filter_star_size"
+        android:layout_height="@dimen/list_item_filter_star_size"
         android:layout_marginStart="20dp"
         android:src="@drawable/ic_star"
         android:tint="@color/colorYellow"
@@ -91,30 +89,28 @@
         android:id="@+id/starText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="@dimen/list_item_filter_top_margin"
+        android:layout_marginStart="@dimen/micro_gap"
+        android:layout_marginTop="@dimen/small_gap"
         android:text="@string/starred"
-        android:textSize="@dimen/list_item_filter_text_size"
+        android:textSize="@dimen/medium_text"
         app:layout_constraintStart_toEndOf="@id/starIcon"
         app:layout_constraintTop_toBottomOf="@id/scientificText"/>
-
 
     <androidx.appcompat.widget.AppCompatCheckBox
         android:id="@+id/starredCheckbox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/list_item_filter_end_margin"
+        android:layout_marginEnd="@dimen/small_gap"
         android:layoutDirection="rtl"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/starText"
         app:layout_constraintBottom_toBottomOf="@id/starText" />
 
-
     <ImageView
         android:id="@+id/historyIcon"
         android:layout_width="@dimen/list_item_filter_icon_size"
         android:layout_height="@dimen/list_item_filter_icon_size"
-        android:layout_marginStart="@dimen/list_item_filter_start_margin"
+        android:layout_marginStart="@dimen/dialog_start_margin"
         android:src="@drawable/ic_time"
         android:tint="@color/colorDarkGrey"
         app:layout_constraintStart_toStartOf="parent"
@@ -126,24 +122,21 @@
         android:id="@+id/historyText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/list_item_filter_text_margin"
-        android:layout_marginTop="@dimen/list_item_filter_top_margin"
+        android:layout_marginStart="@dimen/tiny_gap"
+        android:layout_marginTop="@dimen/small_gap"
         android:text="@string/history"
-        android:textSize="@dimen/list_item_filter_text_size"
+        android:textSize="@dimen/medium_text"
         app:layout_constraintStart_toEndOf="@id/historyIcon"
         app:layout_constraintTop_toBottomOf="@id/starText"/>
-
 
     <androidx.appcompat.widget.AppCompatCheckBox
         android:id="@+id/historyCheckbox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/list_item_filter_end_margin"
+        android:layout_marginEnd="@dimen/small_gap"
         android:layoutDirection="rtl"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/historyText"
         app:layout_constraintBottom_toBottomOf="@id/historyText" />
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

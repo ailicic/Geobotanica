@@ -14,9 +14,9 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/splash"
-            android:layout_width="256dp"
-            android:layout_height="256dp"
-            android:layout_marginTop="32dp"
+            android:layout_width="@dimen/splash_size"
+            android:layout_height="@dimen/splash_size"
+            android:layout_marginTop="@dimen/medium_gap"
             android:src="@drawable/splash"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -27,8 +27,8 @@
             android:id="@+id/writeExternalStorageText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:textSize="18sp"
+            android:layout_marginTop="@dimen/medium_gap"
+            android:textSize="@dimen/large_text"
             android:text="@string/writeExternalStorage"
             app:layout_constraintTop_toBottomOf="@id/splash"
             app:layout_constraintStart_toStartOf="parent"
@@ -36,9 +36,9 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/writeExternalStorageCheckMark"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginStart="8dp"
+            android:layout_width="@dimen/check_mark_icon_size"
+            android:layout_height="@dimen/check_mark_icon_size"
+            android:layout_marginStart="@dimen/tiny_gap"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_done_black_24dp"
             android:tint="@color/colorPrimaryDark"
@@ -51,8 +51,8 @@
             android:id="@+id/AccessFineLocationText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textSize="18sp"
+            android:layout_marginTop="@dimen/tiny_gap"
+            android:textSize="@dimen/large_text"
             android:text="@string/accessFineLocation"
             app:layout_constraintTop_toBottomOf="@id/writeExternalStorageText"
             app:layout_constraintStart_toStartOf="parent"
@@ -60,9 +60,9 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/accessFineLocationCheckMark"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginStart="8dp"
+            android:layout_width="@dimen/check_mark_icon_size"
+            android:layout_height="@dimen/check_mark_icon_size"
+            android:layout_marginStart="@dimen/tiny_gap"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_done_black_24dp"
             android:tint="@color/colorPrimaryDark"
@@ -75,11 +75,11 @@
             android:id="@+id/permissionsButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="64dp"
-            android:padding="16dp"
+            android:layout_marginBottom="@dimen/large_gap"
+            android:padding="@dimen/small_gap"
             android:text="@string/grant_permissions"
             android:textColor="@color/colorWhite"
-            android:drawablePadding="8dp"
+            android:drawablePadding="@dimen/tiny_gap"
             android:drawableStart="@drawable/ic_done_white_24dp"
             android:foregroundTint="@color/colorWhite"
             android:backgroundTint="@color/colorPrimaryDark"
@@ -97,6 +97,6 @@
         android:layout_gravity="bottom|end"
         android:visibility="gone"
         app:tint="@color/colorWhite"
-        app:srcCompat="@drawable/ic_done_black_24dp" />
+        app:srcCompat="@drawable/ic_navigate_next_black_24dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

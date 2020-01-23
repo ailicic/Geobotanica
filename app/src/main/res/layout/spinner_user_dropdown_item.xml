@@ -5,7 +5,7 @@
     style="?android:attr/spinnerDropDownItemStyle"
     android:singleLine="true"
     android:layout_width="match_parent"
-    android:layout_height="36dp"
+    android:layout_height="@dimen/user_spinner_height"
     android:ellipsize="marquee"
     android:textSize="@dimen/user_spinner_text_size"/>
 <!--    android:layout_height="?android:attr/dropdownListPreferredItemHeight" ERROR PRIVATE-->

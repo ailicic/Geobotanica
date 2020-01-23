@@ -1,16 +1,24 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <dimen name="small_text">14sp</dimen>
+    <dimen name="medium_text">16sp</dimen>
+    <dimen name="large_text">18sp</dimen>
     <dimen name="user_spinner_text_size">20sp</dimen>
+    <dimen name="user_spinner_height">36dp</dimen>
+    <dimen name="micro_gap">4dp</dimen>
+    <dimen name="tiny_gap">8dp</dimen>
+    <dimen name="small_gap">16dp</dimen>
+    <dimen name="medium_gap">32dp</dimen>
+    <dimen name="large_gap">64dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
-    <dimen name="list_item_common_text_size">16sp</dimen>
-    <dimen name="list_item_name_icon_size">24dp</dimen>
-    <dimen name="list_item_filter_icon_size">24dp</dimen>
-    <dimen name="list_item_filter_start_margin">24dp</dimen>
-    <dimen name="list_item_filter_end_margin">16dp</dimen>
-    <dimen name="list_item_filter_text_margin">8dp</dimen>
-    <dimen name="list_item_filter_top_margin">16dp</dimen>
-    <dimen name="list_item_filter_text_size">18sp</dimen>
-    <dimen name="measurement_text_size">14sp</dimen>
-    <dimen name="mini_fab_max_image_size">24dp</dimen>
-    <dimen name="bubble_title_text_size">14sp</dimen>
     <dimen name="design_fab_image_size" tools:override="true" tools:ignore="UnusedResources">36dp</dimen>
+    <dimen name="splash_size">256dp</dimen>
+    <dimen name="photo_pager_size">256dp</dimen>
+    <dimen name="progress_bar_size">32dp</dimen>
+    <dimen name="icon_size">32dp</dimen>
+    <dimen name="dialog_start_margin">24dp</dimen>
+    <dimen name="list_item_name_icon_size">24dp</dimen>
+    <dimen name="check_mark_icon_size">24dp</dimen>
+    <dimen name="list_item_filter_icon_size">24dp</dimen>
+    <dimen name="list_item_filter_star_size">32dp</dimen>
+    <dimen name="mini_fab_max_image_size">24dp</dimen>
 </resources>

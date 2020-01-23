@@ -14,9 +14,9 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/splash"
-            android:layout_width="256dp"
-            android:layout_height="256dp"
-            android:layout_marginTop="32dp"
+            android:layout_width="@dimen/splash_size"
+            android:layout_height="@dimen/splash_size"
+            android:layout_marginTop="@dimen/medium_gap"
             android:src="@drawable/splash"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -27,9 +27,9 @@
             android:id="@+id/nicknameSpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:layout_marginStart="64dp"
-            android:layout_marginEnd="64dp"
+            android:layout_marginTop="@dimen/medium_gap"
+            android:layout_marginStart="@dimen/large_gap"
+            android:layout_marginEnd="@dimen/large_gap"
             app:layout_constraintTop_toBottomOf="@id/splash"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -38,9 +38,9 @@
             android:id="@+id/nicknameTextInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="64dp"
-            android:layout_marginEnd="64dp"
+            android:layout_marginTop="@dimen/tiny_gap"
+            android:layout_marginStart="@dimen/large_gap"
+            android:layout_marginEnd="@dimen/large_gap"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/nicknameSpinner">
@@ -55,12 +55,12 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/clearButton"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_close_24dp"
             android:tint="@color/colorPrimaryDark"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="@dimen/tiny_gap"
             app:layout_constraintEnd_toEndOf="@id/nicknameTextInput"
             app:layout_constraintBottom_toBottomOf="@id/nicknameTextInput"
             tools:ignore="ContentDescription" />
@@ -74,6 +74,6 @@
         android:layout_margin="@dimen/fab_margin"
         android:layout_gravity="bottom|end"
         app:tint="@color/colorWhite"
-        app:srcCompat="@drawable/ic_done_black_24dp" />
+        app:srcCompat="@drawable/ic_navigate_next_black_24dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -11,18 +11,18 @@
     android:id="@+id/heightEditView"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginStart="16dp" />
+    android:layout_marginStart="@dimen/small_gap" />
 
     <com.geobotanica.geobotanica.ui.compoundview.MeasurementEditCompoundView
     android:id="@+id/diameterEditView"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"/>
+    android:layout_marginStart="@dimen/small_gap"/>
 
     <com.geobotanica.geobotanica.ui.compoundview.MeasurementEditCompoundView
     android:id="@+id/trunkDiameterEditView"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginStart="16dp" />
+    android:layout_marginStart="@dimen/small_gap" />
 
 </androidx.appcompat.widget.LinearLayoutCompat>

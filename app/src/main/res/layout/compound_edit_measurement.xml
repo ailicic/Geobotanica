@@ -9,14 +9,14 @@
         android:id="@+id/measurementNameText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="@dimen/tiny_gap"
         android:textColor="@color/colorBlack" />
 
     <EditText
         android:id="@+id/measurementEditText"
         android:layout_width="48dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="@dimen/tiny_gap"
         android:ems="10"
         android:inputType="numberDecimal"
         tools:ignore="Autofill,LabelFor" />
@@ -25,7 +25,7 @@
         android:id="@+id/measurementUnitSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="@dimen/tiny_gap"
         android:entries="@array/measurement_unit_array" />
 
     <EditText
@@ -41,8 +41,8 @@
         android:id="@+id/inchesText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginStart="@dimen/tiny_gap"
+        android:layout_marginBottom="@dimen/tiny_gap"
         android:text="@string/inches"
         android:textColor="@color/colorBlack"
         android:textSize="16sp"

@@ -14,8 +14,8 @@
             android:id="@+id/addMeasurementsText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginStart="@dimen/small_gap"
+            android:layout_marginTop="@dimen/small_gap"
             android:text="@string/add_measurements"
             android:textColor="@color/colorBlack"
             app:layout_constraintStart_toStartOf="parent"
@@ -25,18 +25,18 @@
             android:id="@+id/measurementsSwitch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="@dimen/small_gap"
             android:checked="true"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="@id/addMeasurementsText"
+            app:layout_constraintBottom_toBottomOf="@id/addMeasurementsText"
             app:layout_constraintEnd_toEndOf="parent" />
 
         <RadioGroup
             android:id="@+id/measurementRadioGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="16dp"
+            android:layout_marginTop="@dimen/tiny_gap"
+            android:layout_marginStart="@dimen/small_gap"
             android:orientation="vertical"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/addMeasurementsText">
@@ -77,6 +77,6 @@
         android:layout_margin="@dimen/fab_margin"
         android:layout_gravity="bottom|end"
         app:tint="@color/colorWhite"
-        app:srcCompat="@drawable/ic_done_black_24dp" />
+        app:srcCompat="@drawable/ic_navigate_next_black_24dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -26,7 +26,15 @@ import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+// TODO: Check Recyclerview layout on different screen sizes for NewPlantNameFragment (c.f. android:layout_height="350dp")
+// TODO: Consider checking for assets on sdcard in fragment, not FileDownloader. (Requires additional method to be exposed from StorageHelper)
 // TODO: Handle download manager errors better (e.g. DownloadLocalMaps hangs on loading if insufficient space)
+// TODO: Ensure internet is available before downloading (Android connection status can be misleading under some circumstances)
+// TODO: Catch failed downloads by download manager. Sometimes app thinks download began but it failed to start. Need to detect. Also check on app start and update db?
+// TODO: App incorrectly interprets failed asset downloads as active downloads.
+// TODO: Force GPS compound view to stay at bottom when keyboard visible
+// TODO: Force keyboard to close when navigating away from text input screen (stays open during fragment animation sometimes!)
+// TODO: Add ripple to plant name search items and suggested plant name list items
 // TODO: Remove "-r -t" flags in run config after AS 3.6
 
 // LONG TERM
