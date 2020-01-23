@@ -127,7 +127,7 @@ class NewPlantConfirmViewModel @Inject constructor (
     fun retakePhoto() {
         isPhotoRetake = true
         val photoFile = storageHelper.createPhotoFile()
-        newPhotoUri = storageHelper.absolutePath(photoFile)
+        newPhotoUri = storageHelper.getAbsolutePath(photoFile)
         startPhotoIntent.value = photoFile
     }
 
@@ -135,7 +135,7 @@ class NewPlantConfirmViewModel @Inject constructor (
         isPhotoRetake = false
         newPhotoType = photoType
         val photoFile = storageHelper.createPhotoFile()
-        newPhotoUri = storageHelper.absolutePath(photoFile)
+        newPhotoUri = storageHelper.getAbsolutePath(photoFile)
         startPhotoIntent.value = photoFile
     }
 

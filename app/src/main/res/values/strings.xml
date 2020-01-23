@@ -100,4 +100,5 @@
     <string name="accessFineLocation">Access fine location</string>
     <string name="permissions_required">Permissions are required.</string>
     <string name="update_location">Update location</string>
+    <string name="import_assets">Import Assets</string>
 </resources>

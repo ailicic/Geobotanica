@@ -58,11 +58,6 @@ class FileDownloader @Inject constructor (
     }
 
     suspend fun downloadAsset(asset: OnlineAsset) {
-        if (getAssetFromExtStorage(asset)) {
-            decompressAsset(asset)
-            return
-        }
-
         val file = File(storageHelper.getDownloadPath(), asset.filenameGzip)
 
         val request = Request(Uri.parse(asset.url))
@@ -80,17 +75,6 @@ class FileDownloader @Inject constructor (
         asset.status = downloadId
         assetRepo.update(asset)
         Lg.i("Downloading asset: ${asset.filenameGzip}")
-    }
-
-    private fun getAssetFromExtStorage(asset: OnlineAsset): Boolean {
-        Lg.d("getAssetFromExtStorage(): ${asset.filenameGzip}")
-        val assetFileGzip = File(storageHelper.getExtStorageRootDir(), asset.filenameGzip)
-        return if (assetFileGzip.exists()) {
-            Lg.d("Found asset on external storage: ${asset.filenameGzip}")
-            assetFileGzip.copyTo(File(storageHelper.getDownloadPath(), asset.filenameGzip), overwrite = true)
-            true
-        } else
-            false
     }
 
     suspend fun downloadMap(onlineMap: OnlineMap) {
@@ -253,6 +237,7 @@ class FileDownloader @Inject constructor (
             GlobalScope.launch(Dispatchers.IO) {
                 if (isAsset(downloadId)) {
                     assetRepo.getByDownloadId(downloadId)?.let { asset ->
+                        Lg.i("Downloaded asset: ${asset.filenameGzip}")
                         decompressAsset(asset)
                     }
 
@@ -269,8 +254,7 @@ class FileDownloader @Inject constructor (
         }
     }
 
-    private suspend fun decompressAsset(asset: OnlineAsset) {
-        Lg.i("Downloaded asset: ${asset.filenameGzip}")
+    suspend fun decompressAsset(asset: OnlineAsset) {
         val decompressionWorkerRequest = OneTimeWorkRequestBuilder<DecompressionWorker>()
                 .addTag(asset.filenameGzip)
                 .setInputData(workDataOf(

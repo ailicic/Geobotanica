@@ -51,8 +51,8 @@ class DownloadAssetsFragment : BaseFragment() {
         lifecycleScope.launch {
             viewModel.init()
             initUi()
+            bindClickListeners()
             bindViewModel()
-            downloadButton.setOnClickListener(::onClickDownload)
         }
     }
 
@@ -62,6 +62,15 @@ class DownloadAssetsFragment : BaseFragment() {
         plantNameDbText.text = viewModel.getPlantNameDbText()
         internalStorageText.text = getString(R.string.internal_storage,
                 File(appContext.filesDir.absolutePath).usableSpace / 1024 / 1024)
+        if (viewModel.areOnlineAssetsInExtStorageRootDir()) {
+            downloadButton.isVisible = false
+            importButton.isVisible = true
+        }
+    }
+
+    private fun bindClickListeners() {
+        downloadButton.setOnClickListener(::onClickDownload)
+        importButton.setOnClickListener(::onClickImport)
     }
 
     private fun bindViewModel() {
@@ -111,6 +120,13 @@ class DownloadAssetsFragment : BaseFragment() {
         downloadButton.isVisible = false
         progressBar.isVisible = true
         viewModel.downloadAssets()
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onClickImport(view: View?) {
+        importButton.isVisible = false
+        progressBar.isVisible = true
+        viewModel.importAssets()
     }
 
     private fun navigateToNext() =

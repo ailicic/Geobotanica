@@ -46,7 +46,7 @@ object NewPlantConfirmViewModelTest : Spek({
 
     val storageHelper = mockk<StorageHelper> {
         every { createPhotoFile() } returns photoFile
-        every { absolutePath(any()) } returns photoFilename
+        every { getAbsolutePath(any()) } returns photoFilename
         every { deleteFile(any()) } returns true
     }
     val userRepo = mockk<UserRepo> { coEvery { get(any<Long>()) } returns User("user") }

@@ -17,6 +17,7 @@ import com.geobotanica.geobotanica.util.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -41,9 +42,17 @@ class DownloadAssetsViewModel @Inject constructor(
     }
 
     suspend fun init() = withContext(Dispatchers.IO) {
-//        fileDownloader.removeQueuedDownloads()
+//        fileDownloader.removeQueuedDownloads() // TODO: Consider re-enabling
         importOnlineAssetInfo()
+    }
 
+    suspend fun areOnlineAssetsInExtStorageRootDir(): Boolean = withContext(Dispatchers.IO) {
+        var result = true
+        assetRepo.getAll().forEach { asset ->
+            if (! storageHelper.isGzipAssetInExtStorageRootDir(asset))
+                result = false
+        }
+        result
     }
 
     fun downloadAssets() = viewModelScope.launch(Dispatchers.IO) {
@@ -73,6 +82,15 @@ class DownloadAssetsViewModel @Inject constructor(
     suspend fun getWorldMapText(): String = assetRepo.get(OnlineAssetId.WORLD_MAP.id).printName
 
     suspend fun getPlantNameDbText(): String = assetRepo.get(OnlineAssetId.PLANT_NAMES.id).printName
+
+    fun importAssets() = viewModelScope.launch(Dispatchers.IO) {
+        assetRepo.getAll().forEach { asset ->
+            Lg.d("Importing asset: ${asset.filenameGzip}")
+            val assetFileGzip = File(storageHelper.getExtStorageRootDir(), asset.filenameGzip)
+            assetFileGzip.copyTo(File(storageHelper.getDownloadPath(), asset.filenameGzip), overwrite = true)
+            fileDownloader.decompressAsset(asset)
+        }
+    }
 }
 
 
@@ -107,7 +125,7 @@ val onlineAssetList = listOf(
         "http://people.okanagan.bc.ca/ailicic/Maps/taxa.db.gz",
         "databases",
         true,
-        29_038_255,
+        29_037_482,
         129_412_096
     )
 )

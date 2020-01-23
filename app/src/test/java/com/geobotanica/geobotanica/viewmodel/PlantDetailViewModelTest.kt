@@ -57,7 +57,7 @@ object PlantDetailViewModelTest : Spek({
 
     val storageHelper = mockk<StorageHelper> {
         every { createPhotoFile() } returns newPhotoFile
-        every { absolutePath(any()) } returns newPhotoFilename
+        every { getAbsolutePath(any()) } returns newPhotoFilename
         every { deleteFile(any()) } returns true
         every { photoUriFrom(any()) } returns newPhotoFilename
     }

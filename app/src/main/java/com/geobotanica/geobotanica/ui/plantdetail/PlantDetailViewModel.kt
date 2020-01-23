@@ -129,7 +129,7 @@ class PlantDetailViewModel @Inject constructor(
     fun onRetakePhoto() {
         isPhotoRetake = true
         val photoFile = storageHelper.createPhotoFile()
-        newPhotoUri = storageHelper.absolutePath(photoFile)
+        newPhotoUri = storageHelper.getAbsolutePath(photoFile)
         startPhotoIntent.value = photoFile
     }
 
@@ -137,7 +137,7 @@ class PlantDetailViewModel @Inject constructor(
         isPhotoRetake = false
         newPhotoType = photoType
         val photoFile = storageHelper.createPhotoFile()
-        newPhotoUri = storageHelper.absolutePath(photoFile)
+        newPhotoUri = storageHelper.getAbsolutePath(photoFile)
         startPhotoIntent.value = photoFile
     }
 

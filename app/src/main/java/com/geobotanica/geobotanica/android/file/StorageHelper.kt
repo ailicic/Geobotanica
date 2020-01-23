@@ -15,6 +15,23 @@ import javax.inject.Singleton
 @Singleton
 class StorageHelper @Inject constructor(val appContext: Context) {
 
+    fun getAbsolutePath(file: File): String = file.absolutePath
+
+    fun getLocalPath(onlineAsset: OnlineAsset): String =
+            getRootPath(onlineAsset) + "/${onlineAsset.relativePath}"
+
+    fun getDownloadPath() = getExtFilesDir()
+
+    fun getExtStorageRootDir(): String {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            appContext.getExternalFilesDirs(null)[0].absolutePath
+        // TODO: Check if root external storage is accessible on Q+ in future
+        else @Suppress("DEPRECATION")
+            Environment.getExternalStorageDirectory().absolutePath // "/sdcard/"
+    }
+
+    fun deleteFile(uri: String): Boolean = File(uri).delete()
+
     @SuppressLint("UsableSpace")
     fun isStorageAvailable(onlineAsset: OnlineAsset): Boolean {
         val dir = File(getRootPath(onlineAsset))
@@ -23,15 +40,28 @@ class StorageHelper @Inject constructor(val appContext: Context) {
 
     fun mkdirs(onlineAsset: OnlineAsset) = File(getLocalPath(onlineAsset)).mkdirs()
 
-    fun getExtStorageRootDir(): String {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            appContext.getExternalFilesDirs(null)[0].absolutePath
-            // TODO: Check if root external storage is accessible on Q+ in future
-        else @Suppress("DEPRECATION")
-            Environment.getExternalStorageDirectory().absolutePath // "/sdcard/"
+    fun isAssetAvailable(asset: OnlineAsset): Boolean {
+        val file = File(getLocalPath(asset), asset.filename)
+        return file.exists() && file.length() == asset.decompressedSize
     }
 
-    fun getDownloadPath() = getExtFilesDir()
+    fun isGzipAssetInExtStorageRootDir(asset: OnlineAsset): Boolean {
+        return File(getExtStorageRootDir(), asset.filenameGzip).run {
+            var result = true
+            if (exists() && length() == asset.compressedSize)
+                Lg.d("Found asset on external storage: $path")
+            else if (! exists()) {
+                Lg.d("Failed to find asset on external storage: $path")
+                result = false
+            } else {
+                Lg.d("Wrong file size of asset on external storage: $path (expected ${asset.compressedSize} b, found ${length()} b)")
+                result = false
+            }
+            result
+        }
+    }
+
+    fun getMapsPath() = "${getDownloadPath()}/maps"
 
     fun createPhotoFile(): File {
         val filename: String = GbTime.now().asFilename()
@@ -39,20 +69,6 @@ class StorageHelper @Inject constructor(val appContext: Context) {
         photosDir.mkdirs()
         Lg.d("StorageHelper.createPhotoFile(): $photosDir/$filename.jpg")
         return File.createTempFile(filename, ".jpg", photosDir)
-    }
-
-    fun absolutePath(file: File): String = file.absolutePath
-
-    fun deleteFile(uri: String): Boolean = File(uri).delete()
-
-    fun getMapsPath() = "${getDownloadPath()}/maps"
-
-    fun getLocalPath(onlineAsset: OnlineAsset): String =
-            getRootPath(onlineAsset) + "/${onlineAsset.relativePath}"
-
-    fun isAssetAvailable(asset: OnlineAsset): Boolean {
-        val file = File(getLocalPath(asset), asset.filename)
-        return file.exists() && file.length() == asset.decompressedSize
     }
 
     fun photoUriFrom(filename: String): String = "${getUserPhotosDir()}/$filename"

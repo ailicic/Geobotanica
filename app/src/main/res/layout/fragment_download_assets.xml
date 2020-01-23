@@ -52,6 +52,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
+    <Button
+        android:id="@+id/importButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/large_gap"
+        android:padding="@dimen/small_gap"
+        android:text="@string/import_assets"
+        android:textColor="@color/colorWhite"
+        android:drawablePadding="@dimen/tiny_gap"
+        android:drawableStart="@drawable/ic_file_download_24dp_white"
+        android:backgroundTint="@color/colorPrimaryDark"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
