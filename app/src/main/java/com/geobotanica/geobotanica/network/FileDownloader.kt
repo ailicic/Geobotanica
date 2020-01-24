@@ -240,7 +240,6 @@ class FileDownloader @Inject constructor (
                         Lg.i("Downloaded asset: ${asset.filenameGzip}")
                         decompressAsset(asset)
                     }
-
                 }
                 if (isMap(downloadId)) {
                     mapRepo.getByDownloadId(downloadId)?.let { map ->

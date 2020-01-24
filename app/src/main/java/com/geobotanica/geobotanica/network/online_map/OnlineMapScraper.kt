@@ -19,6 +19,7 @@ import java.io.File
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.roundToLong
 
 
 // JSoup selectors: https://jsoup.org/apidocs/org/jsoup/select/Selector.html
@@ -54,18 +55,26 @@ class OnlineMapScraper @Inject constructor (
 
                     val columns = rows[i].select("td")
                     val url = baseUrl + columns[1].select("a[href]").text()
-                    val timestamp = columns[2].text()
-                    val size = columns[3].text()
-                            .replace("G", " GB")
-                            .replace("M", " MB")
+                    val timestamp = columns[2].text() // TODO: Parse to DateTime object to enable comparisons
+                    val sizeString = columns[3].text()
+                    if (sizeString.contains('K'))
+                        continue // Ignore maps less than 0.5 MB
+                    val sizeFactor = if (sizeString.contains('G')) 1000 else 1
+                    val sizeMb = columns[3].text()
+                            .replace("G", "")
+                            .replace("M", "")
+                            .replace("-", "0")
+                            .toFloat()
+                            .times(sizeFactor)
+                            .roundToLong()
 
-                    if (size == "-") {
+                    if (sizeString == "-") {
                         val onlineMapFolder = OnlineMapFolder(url, timestamp, parentFolderId)
                         val folderId = mapRepo.insertFolder(onlineMapFolder)
                         Lg.d("Found folder: ${onlineMapFolder.printName}")
                         fetchMaps(url, folderId)
                     } else {
-                        val onlineMap = OnlineMap(url, size, timestamp, parentFolderId)
+                        val onlineMap = OnlineMap(url, sizeMb, timestamp, parentFolderId)
                         mapRepo.insert(onlineMap)
                         Lg.d("Found map: ${onlineMap.printName}")
                     }

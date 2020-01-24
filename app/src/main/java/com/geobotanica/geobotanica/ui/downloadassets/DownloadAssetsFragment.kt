@@ -1,6 +1,5 @@
 package com.geobotanica.geobotanica.ui.downloadassets
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -24,7 +23,6 @@ import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.getFromBundle
 import kotlinx.android.synthetic.main.fragment_download_assets.*
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 class DownloadAssetsFragment : BaseFragment() {
@@ -56,12 +54,10 @@ class DownloadAssetsFragment : BaseFragment() {
         }
     }
 
-    @SuppressLint("UsableSpace")
     private suspend fun initUi() {
         worldMapText.text = viewModel.getWorldMapText()
         plantNameDbText.text = viewModel.getPlantNameDbText()
-        internalStorageText.text = getString(R.string.internal_storage,
-                File(appContext.filesDir.absolutePath).usableSpace / 1024 / 1024)
+        storageAvailableText.text = getString(R.string.storage_available, getInternalStorageFreeInMb())
         if (viewModel.areOnlineAssetsInExtStorageRootDir()) {
             downloadButton.isVisible = false
             importButton.isVisible = true
@@ -87,15 +83,9 @@ class DownloadAssetsFragment : BaseFragment() {
     }
 
     private val onShowStorageSnackbar = Observer<OnlineAsset> { onlineAsset ->
-        Lg.i("Error: Insufficient storage for ${onlineAsset.description}")
-        if (onlineAsset.isInternalStorage) {
-            showSnackbar(R.string.not_enough_internal_storage, R.string.Inspect) {
-                startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
-            }
-        } else {
-            showSnackbar(R.string.not_enough_external_storage, R.string.Inspect) {
-                startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
-            }
+        Lg.e("Error: Insufficient storage for ${onlineAsset.description}")
+        showSnackbar(R.string.insufficient_storage, R.string.Inspect) {
+            startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
         }
     }
 

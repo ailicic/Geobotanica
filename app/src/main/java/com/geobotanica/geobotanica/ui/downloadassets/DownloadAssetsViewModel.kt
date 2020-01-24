@@ -66,7 +66,7 @@ class DownloadAssetsViewModel @Inject constructor(
             } else if (asset.status == DOWNLOADED) {
                 Lg.d("Asset already available: ${asset.filename}")
                 return@forEach
-            } else if (!storageHelper.isStorageAvailable(asset)) {
+            } else if (! storageHelper.isStorageAvailable(asset)) {
                 showStorageSnackbar.postValue(asset)
                 return@forEach
             } else
@@ -109,8 +109,8 @@ val onlineAssetList = listOf(
         "http://people.okanagan.bc.ca/ailicic/Maps/maps.json.gz",
         "",
         false,
-        5_792,
-        42_619
+        5_812,
+        41_751
     ),
     OnlineAsset(
         "World map",

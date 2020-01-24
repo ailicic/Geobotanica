@@ -76,7 +76,7 @@
             android:id="@+id/browseMapsButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/tiny_gap"
+            android:layout_marginBottom="@dimen/medium_gap"
             android:layout_marginStart="@dimen/small_gap"
             android:padding="@dimen/small_gap"
             android:text="@string/browse_maps"
@@ -85,6 +85,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             style="@style/Widget.AppCompat.Button.Borderless"/>
+
+        <TextView
+            android:id="@+id/storageAvailableText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/small_gap"
+            android:layout_marginStart="@dimen/medium_gap"
+            android:textSize="@dimen/small_text"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"

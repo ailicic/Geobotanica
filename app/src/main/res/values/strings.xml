@@ -72,9 +72,8 @@
     <string name="search_plant_name">Search Plant Name</string>
     <string name="plant_name">Plant Name</string>
     <string name="confirm_new_plant">Confirm New Plant</string>
-    <string name="internal_storage" tools:ignore="UnusedResources">Internal storage available: %1$d MB</string>
-    <string name="not_enough_internal_storage" >Not enough free internal storage</string>
-    <string name="not_enough_external_storage">Not enough free external storage</string>
+    <string name="storage_available" tools:ignore="UnusedResources">Storage available: %1$d MB</string>
+    <string name="insufficient_storage" >Insufficient storage</string>
     <string name="Inspect">Inspect</string>
     <string name="download_maps">Download Maps</string>
     <string name="download_assets">Download Assets</string>
@@ -101,4 +100,5 @@
     <string name="permissions_required">Permissions are required.</string>
     <string name="update_location">Update location</string>
     <string name="import_assets">Import Assets</string>
+    <string name="import_map">Import Maps</string>
 </resources>

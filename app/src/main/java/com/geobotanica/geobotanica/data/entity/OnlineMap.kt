@@ -1,9 +1,6 @@
 package com.geobotanica.geobotanica.data.entity
 
-import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.Index
-import androidx.room.PrimaryKey
+import androidx.room.*
 import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOWNLOADED
 import com.geobotanica.geobotanica.util.capitalizeWords
 import com.geobotanica.geobotanica.util.replacePrefix
@@ -26,18 +23,21 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class  OnlineMap(
         val url: String,
-        val size: String,
+        val sizeMb: Long,
         val timestamp: String,
         val parentFolderId: Long?,
 
-//        @Transient // Exclude from JSON serialization // TODO: REMOVE AFTER SCRAPER IS MOVED TO SERVER
-//        @ColumnInfo(name = "status") // Force include in Room DB, despite @Transient // TODO: REMOVE AFTER SCRAPER IS MOVED TO SERVER
+        @Transient // Exclude from JSON serialization // TODO: REMOVE AFTER SCRAPER IS MOVED TO SERVER
+        @ColumnInfo(name = "status") // Force include in Room DB, despite @Transient // TODO: REMOVE AFTER SCRAPER IS MOVED TO SERVER
         var status: Long = NOT_DOWNLOADED
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0L
 
     val filename: String
         get() = url.substringAfterLast('/')
+
+    val printSize: String
+        get() = "$sizeMb MB"
 
     val printName: String
         get() = filename
@@ -46,10 +46,8 @@ data class  OnlineMap(
             .removeSuffix(">") // Present if filename is too long on scraped Mapsforge website
             .replace('-', ' ')
             .capitalizeWords() +
-            " ($size)"
+            " ($printSize)"
 }
-
-
 
 
 @Entity(tableName = "mapFolders",

@@ -26,7 +26,7 @@ import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Check for storage space before downloading maps. Show free storage at bottom.
+// TODO: BrowseMapsViewModel: Check for storage space before downloading maps. Show free storage at bottom.
 // TODO: Ensure internet is available before downloading (Android connection status can be misleading under some circumstances)
 // TODO: Catch failed downloads by download manager. Sometimes app thinks download began but it failed to start. Need to detect. Also check on app start and update db?
 // TODO: App incorrectly interprets failed asset downloads as active downloads.
@@ -36,6 +36,13 @@ import javax.inject.Inject
 // TODO: Check Recyclerview layout on different screen sizes for NewPlantNameFragment (c.f. android:layout_height="350dp")
 // TODO: Put onlineAssetList on backend and implement versioning
 // TODO: Remove "-r -t" flags in run config after AS 3.6
+
+// SERVER TODOs
+// TODO: Move online map scraping to server. Would be nice to have maps downloaded on demand first time from mapsforge. Then gzip and provide from Gb server (+ check for stale maps).
+// TODO: Automatic map updates?
+// TODO: Provide OnlineAssets with versioning
+// TODO: Allow uploading of plant records (need remoteId)
+// TODO: Allow synchronization of plant records with server
 
 // LONG TERM
 // TODO: Use Okio everywhere

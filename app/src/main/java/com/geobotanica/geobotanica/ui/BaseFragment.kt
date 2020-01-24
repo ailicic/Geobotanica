@@ -1,5 +1,6 @@
 package com.geobotanica.geobotanica.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -106,7 +107,7 @@ abstract class BaseFragment : Fragment() {
         return file.absolutePath
     }
 
-    fun startPhotoIntent(photoFile: File) {
+    protected fun startPhotoIntent(photoFile: File) {
         val capturePhotoIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         capturePhotoIntent.resolveActivity(activity.packageManager)
 
@@ -121,6 +122,9 @@ abstract class BaseFragment : Fragment() {
             showToast("Photo not captured")
         }
     }
+
+    @SuppressLint("UsableSpace")
+    protected fun getInternalStorageFreeInMb() = File(appContext.filesDir.absolutePath).usableSpace / 1024 / 1024  // Note: Same as /sdcard/ (i.e. /data/media/..)
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

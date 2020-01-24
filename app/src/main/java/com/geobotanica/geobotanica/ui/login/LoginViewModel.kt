@@ -10,6 +10,7 @@ import com.geobotanica.geobotanica.data.repo.AssetRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.data.repo.UserRepo
 import com.geobotanica.geobotanica.network.FileDownloader
+import com.geobotanica.geobotanica.network.online_map.OnlineMapScraper
 import com.geobotanica.geobotanica.ui.login.ViewEffect.*
 import com.geobotanica.geobotanica.ui.login.ViewEvent.*
 import com.geobotanica.geobotanica.util.GbDispatchers
@@ -28,6 +29,7 @@ class LoginViewModel @Inject constructor (
         private val userRepo: UserRepo,
         private val assetRepo: AssetRepo,
         private val mapRepo: MapRepo
+//        ,onlineMapScraper: OnlineMapScraper // Uncomment to perform scrape TODO: REMOVE AFTER SCRAPER MOVED TO SERVER
 ): ViewModel() {
     private val _viewState = mutableLiveData(ViewState())
     val viewState: LiveData<ViewState> = _viewState

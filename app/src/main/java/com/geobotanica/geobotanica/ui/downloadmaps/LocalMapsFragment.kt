@@ -1,7 +1,9 @@
 package com.geobotanica.geobotanica.ui.downloadmaps
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -60,6 +62,8 @@ class LocalMapsFragment : BaseFragment() {
         initRecyclerView()
         bindClickListeners()
         bindViewModel()
+
+        storageAvailableText.text = getString(R.string.storage_available, viewModel.getFreeExternalStorageInMb())
         viewModel.getMapsFromExtStorage()
     }
 
@@ -105,9 +109,8 @@ class LocalMapsFragment : BaseFragment() {
     private fun bindViewModel() {
         viewModel.localMaps.observe(viewLifecycleOwner, onLocalMaps)
         viewModel.showMeteredNetworkDialog.observe(viewLifecycleOwner, onShowMeteredNetworkDialog)
-        viewModel.showInternetUnavailableSnackbar.observe(viewLifecycleOwner, Observer {
-            showSnackbar(resources.getString(R.string.internet_unavailable))
-        })
+        viewModel.showStorageSnackbar.observe(viewLifecycleOwner, onShowStorageSnackbar)
+        viewModel.showInternetUnavailableSnackbar.observe(viewLifecycleOwner, Observer { showSnackbar(resources.getString(R.string.internet_unavailable)) })
     }
 
     private fun rebindViewModel() {
@@ -159,6 +162,12 @@ class LocalMapsFragment : BaseFragment() {
         ) {
             viewModel.onMeteredNetworkAllowed()
         }.show(parentFragmentManager, "tag")
+    }
+
+    private val onShowStorageSnackbar = Observer<Unit> {
+        showSnackbar(R.string.insufficient_storage, R.string.Inspect) {
+            startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
+        }
     }
 
     @Suppress("UNUSED_PARAMETER")

@@ -30,6 +30,9 @@ class StorageHelper @Inject constructor(val appContext: Context) {
             Environment.getExternalStorageDirectory().absolutePath // "/sdcard/"
     }
 
+    @SuppressLint("UsableSpace")
+    fun getFreeExternalStorageInMb() = File(getExtStorageRootDir()).usableSpace / 1024 / 1024
+
     fun deleteFile(uri: String): Boolean = File(uri).delete()
 
     @SuppressLint("UsableSpace")
