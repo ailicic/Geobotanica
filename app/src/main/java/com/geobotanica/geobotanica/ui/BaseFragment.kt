@@ -123,6 +123,7 @@ abstract class BaseFragment : Fragment() {
         }
     }
 
+    // WARNING: This does not include space required by active downloads (i.e. DownloadManager does not pre-allocate space)
     @SuppressLint("UsableSpace")
     protected fun getInternalStorageFreeInMb() = File(appContext.filesDir.absolutePath).usableSpace / 1024 / 1024  // Note: Same as /sdcard/ (i.e. /data/media/..)
 

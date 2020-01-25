@@ -102,20 +102,20 @@ class LocalMapsFragment : BaseFragment() {
 
     private fun bindClickListeners() {
         browseMapsButton.setOnClickListener { browseMaps() }
-        getMapsButton.setOnClickListener { rebindViewModel() }
+        getMapsButton.setOnClickListener { rebindLocalMapsObserver() }
         fab.setOnClickListener { navigateToNext() }
     }
 
     private fun bindViewModel() {
         viewModel.localMaps.observe(viewLifecycleOwner, onLocalMaps)
         viewModel.showMeteredNetworkDialog.observe(viewLifecycleOwner, onShowMeteredNetworkDialog)
-        viewModel.showStorageSnackbar.observe(viewLifecycleOwner, onShowStorageSnackbar)
+        viewModel.showInsufficientStorageSnackbar.observe(viewLifecycleOwner, onShowInsufficientStorageSnackbar)
         viewModel.showInternetUnavailableSnackbar.observe(viewLifecycleOwner, Observer { showSnackbar(resources.getString(R.string.internet_unavailable)) })
     }
 
-    private fun rebindViewModel() {
+    private fun rebindLocalMapsObserver() {
         viewModel.localMaps.removeObserver(onLocalMaps)
-        bindViewModel()
+        viewModel.localMaps.observe(viewLifecycleOwner, onLocalMaps)
     }
 
     private val onLocalMaps = Observer<Resource<List<OnlineMapListItem>>> { mapListItems ->
@@ -164,7 +164,7 @@ class LocalMapsFragment : BaseFragment() {
         }.show(parentFragmentManager, "tag")
     }
 
-    private val onShowStorageSnackbar = Observer<Unit> {
+    private val onShowInsufficientStorageSnackbar = Observer<Unit> {
         showSnackbar(R.string.insufficient_storage, R.string.Inspect) {
             startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
         }

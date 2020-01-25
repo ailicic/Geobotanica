@@ -55,7 +55,7 @@ class LocalMapsViewModel @Inject constructor(
             .map { it.isNotEmpty() }
 
     val showMeteredNetworkDialog = SingleLiveEvent<Unit>()
-    val showStorageSnackbar = SingleLiveEvent<Unit>()
+    val showInsufficientStorageSnackbar = SingleLiveEvent<Unit>()
     val showInternetUnavailableSnackbar = SingleLiveEvent<Unit>()
 
     private var lastClickedMap: OnlineMapListItem? = null
@@ -112,11 +112,8 @@ class LocalMapsViewModel @Inject constructor(
 
     private fun downloadMap(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
         val onlineMap = mapRepo.get(onlineMapId)
-        val requiredStorageMb = (onlineMap.sizeMb.toFloat() * 1.2f).toLong()
-        val freeStorageMb = storageHelper.getFreeExternalStorageInMb()
-        if (requiredStorageMb > freeStorageMb) {
-            Lg.e("Insufficient storage ($freeStorageMb MB) for map: ${onlineMap.printName})")
-            showStorageSnackbar.postValue(Unit)
+        if (! storageHelper.isStorageAvailable(onlineMap)) {
+            showInsufficientStorageSnackbar.postValue(Unit)
             return@launch
         }
         fileDownloader.downloadMap(onlineMap)

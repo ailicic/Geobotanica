@@ -1,7 +1,9 @@
 package com.geobotanica.geobotanica.ui.downloadmaps
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -97,6 +99,7 @@ class BrowseMapsFragment : BaseFragment() {
     private fun bindViewModel() {
         viewModel.mapListItems.observe(viewLifecycleOwner, Observer { mapListAdapter.submitList(it) })
         viewModel.showMeteredNetworkDialog.observe(viewLifecycleOwner, onShowMeteredNetworkDialog)
+        viewModel.showInsufficientStorageSnackbar.observe(viewLifecycleOwner, onShowInsufficientStorageSnackbar)
         viewModel.showInternetUnavailableSnackbar.observe(viewLifecycleOwner, Observer {
             showSnackbar(resources.getString(R.string.internet_unavailable))
         })
@@ -109,6 +112,12 @@ class BrowseMapsFragment : BaseFragment() {
         ) {
             viewModel.onMeteredNetworkAllowed()
         }.show(parentFragmentManager, "tag")
+    }
+
+    private val onShowInsufficientStorageSnackbar = Observer<Unit> {
+        showSnackbar(R.string.insufficient_storage, R.string.Inspect) {
+            startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
+        }
     }
 
     private fun onClickDownload(mapListItem: OnlineMapListItem) { viewModel.initDownload(mapListItem) }

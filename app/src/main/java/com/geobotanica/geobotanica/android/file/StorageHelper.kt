@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Environment
 import com.geobotanica.geobotanica.data.entity.OnlineAsset
+import com.geobotanica.geobotanica.data.entity.OnlineMap
 import com.geobotanica.geobotanica.util.GbTime
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.asFilename
@@ -30,6 +31,7 @@ class StorageHelper @Inject constructor(val appContext: Context) {
             Environment.getExternalStorageDirectory().absolutePath // "/sdcard/"
     }
 
+    // WARNING: This does not include space required by active downloads (i.e. DownloadManager does not pre-allocate space)
     @SuppressLint("UsableSpace")
     fun getFreeExternalStorageInMb() = File(getExtStorageRootDir()).usableSpace / 1024 / 1024
 
@@ -39,6 +41,17 @@ class StorageHelper @Inject constructor(val appContext: Context) {
     fun isStorageAvailable(onlineAsset: OnlineAsset): Boolean {
         val dir = File(getRootPath(onlineAsset))
         return dir.usableSpace > 2 * onlineAsset.decompressedSize
+    }
+
+    @SuppressLint("UsableSpace")
+    fun isStorageAvailable(onlineMap: OnlineMap): Boolean {
+        val requiredStorageMb = (onlineMap.sizeMb.toFloat() * 1.2f).toLong()
+        val freeStorageMb = getFreeExternalStorageInMb()
+        return if (requiredStorageMb > freeStorageMb) {
+            Lg.e("Insufficient storage ($freeStorageMb MB) for map: ${onlineMap.printName})")
+            false
+        } else
+            true
     }
 
     fun mkdirs(onlineAsset: OnlineAsset) = File(getLocalPath(onlineAsset)).mkdirs()

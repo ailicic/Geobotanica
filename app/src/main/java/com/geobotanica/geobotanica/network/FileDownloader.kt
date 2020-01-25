@@ -96,7 +96,6 @@ class FileDownloader @Inject constructor (
         mapRepo.update(onlineMap)
     }
 
-
     fun isMap(downloadId: Long): Boolean {
         return downloadManager.query(Query().setFilterById(downloadId)).run {
             moveToFirst()
@@ -105,18 +104,6 @@ class FileDownloader @Inject constructor (
             uri.endsWith(".map")
         }
     }
-
-    private suspend fun isAsset(downloadId: Long): Boolean {
-        return downloadManager.query(Query().setFilterById(downloadId)).run {
-            moveToFirst()
-            val isAsset = assetRepo.getAll().any {
-                it.url == getString(this.getColumnIndex(COLUMN_URI))
-            }
-            close()
-            isAsset
-        }
-    }
-
 
     fun filenameFrom(downloadId: Long): String {
         return downloadManager.query(Query().setFilterById(downloadId)).run {
@@ -211,6 +198,17 @@ class FileDownloader @Inject constructor (
         }
     }
 
+    private suspend fun isAsset(downloadId: Long): Boolean {
+        return downloadManager.query(Query().setFilterById(downloadId)).run {
+            moveToFirst()
+            val isAsset = assetRepo.getAll().any {
+                it.url == getString(this.getColumnIndex(COLUMN_URI))
+            }
+            close()
+            isAsset
+        }
+    }
+
     // NOTE: Manually cancelled downloads appear to be non-referencable by their downloadId
     private fun downloadExists(downloadId: Long): Boolean {
         return downloadManager.query(Query().setFilterById(downloadId)).run {
@@ -288,9 +286,7 @@ class FileDownloader @Inject constructor (
                 null
             }
         }
-
     }
-
 
     private suspend fun registerDecompressionObserver(workRequestTag: String) {
         withContext(Dispatchers.Main) {

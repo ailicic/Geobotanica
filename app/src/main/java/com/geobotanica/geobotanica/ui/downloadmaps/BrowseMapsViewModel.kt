@@ -36,6 +36,7 @@ class BrowseMapsViewModel @Inject constructor(
     val mapListItems = mapFolderId.switchMap { childMapListItemsOf(it) }
 
     val showMeteredNetworkDialog = SingleLiveEvent<Unit>()
+    val showInsufficientStorageSnackbar = SingleLiveEvent<Unit>()
     val showInternetUnavailableSnackbar = SingleLiveEvent<Unit>()
 
     private var lastClickedMap: OnlineMapListItem? = null
@@ -77,6 +78,10 @@ class BrowseMapsViewModel @Inject constructor(
 
     private fun downloadMap(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
         val onlineMap = mapRepo.get(onlineMapId)
+        if (! storageHelper.isStorageAvailable(onlineMap)) {
+            showInsufficientStorageSnackbar.postValue(Unit)
+            return@launch
+        }
         fileDownloader.downloadMap(onlineMap)
     }
 
