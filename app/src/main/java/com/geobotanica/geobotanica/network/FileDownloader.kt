@@ -4,6 +4,7 @@ import android.app.DownloadManager
 import android.app.DownloadManager.*
 import android.net.Uri
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -25,7 +26,6 @@ import com.geobotanica.geobotanica.util.Lg
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.buffer
@@ -34,6 +34,7 @@ import java.io.File
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.absoluteValue
 import kotlin.system.measureTimeMillis
 
 // TODO: Seems like FileDownloader has too many responsibilities: decompression, deserialization, download status management
@@ -53,7 +54,6 @@ class FileDownloader @Inject constructor (
 ) {
 
     init {
-        synchronizeDbDownloadStatuses()
         mainActivity.downloadComplete.observe(mainActivity, Observer { onDownloadComplete(it) })
     }
 
@@ -98,7 +98,8 @@ class FileDownloader @Inject constructor (
 
     fun isMap(downloadId: Long): Boolean {
         return downloadManager.query(Query().setFilterById(downloadId)).run {
-            moveToFirst()
+            if (! moveToFirst())
+                return false
             val uri = getString(getColumnIndex(COLUMN_URI))
             close()
             uri.endsWith(".map")
@@ -114,93 +115,103 @@ class FileDownloader @Inject constructor (
         }
     }
 
-//    suspend fun removeQueuedDownloads() {
-//        val query = Query().setFilterByStatus(STATUS_PENDING or STATUS_PAUSED or STATUS_RUNNING)
-//        val cursor = downloadManager.query(query)
-//        while (cursor.moveToNext()) {
-//            val downloadId = cursor.getLong(cursor.getColumnIndex(COLUMN_ID))
-//            val uri = cursor.getString(cursor.getColumnIndex(COLUMN_URI))
-//            val status = cursor.getInt(cursor.getColumnIndex(COLUMN_STATUS))
-//            val title = cursor.getString(cursor.getColumnIndex(COLUMN_TITLE))
-//            val bytes = cursor.getLong(cursor.getColumnIndex(COLUMN_BYTES_DOWNLOADED_SO_FAR))
-//            val totalBytes = cursor.getLong(cursor.getColumnIndex(COLUMN_TOTAL_SIZE_BYTES))
-//            val progress = bytes.toFloat() / totalBytes.toFloat()
-//
-//            if (status == STATUS_RUNNING || status == STATUS_PAUSED) {
-//                if (bytes == 0L ) {
-//                    Lg.d("Removed zero progress download: $title")
-//                    if (uri.endsWith(".map")) {
-//                        val map = mapRepo.getByDownloadId(downloadId)
-//                        map?.let {
-//                            it.status = NOT_DOWNLOADED
-//                            mapRepo.update(it)
-//                        }
-//                        Lg.e("FileDownloader: removeQueuedDownloads() -> ${map.filename} download not in OnlineMap database table")
-//                    } else {
-//                        val asset
-//                    }
-//                    downloadManager.remove(downloadId)
-//
-//                } else {
-//                    Lg.d("Observed $progress% complete download: $title")
-//                }
-//            } else {
-//                Lg.d("Removed pending download: $title")
-//                downloadManager.remove(downloadId)
-//            }
-//            Lg.d("Removed download: $title (id = $downloadId, status = $status, bytes = $bytes B)")
-//            downloadManager.remove(downloadId)
-//        }
-//        cursor.close()
-//    }
+    suspend fun verifyAssets() = withContext(Dispatchers.IO) {
+        cancelIncompleteAssetDownloads()
+        verifyDownloadedAssets()
+    }
 
-    // TODO: Handle downloaded files that are manually deleted
-    // TODO: Implementation is messy. But it catches some common incorrect db states.
-    private fun synchronizeDbDownloadStatuses() { // Catch download/decompression completed while app not in foreground.
-        Lg.d("FileDownloader: synchronizeDbDownloadStatuses()")
-        GlobalScope.launch(Dispatchers.IO) {
-            assetRepo.getDownloading().forEach { asset ->
-                Lg.d("synchronizeDbDownloadStatuses(): Processing downloading asset $asset")
-                if (downloadExists(asset.status)) {
-                    if (isDownloadSuccessful(asset.status)) {
-                        asset.status = DECOMPRESSING
-                        assetRepo.update(asset)
-                        Lg.d("Updated ${asset.filenameGzip} download status to decompressing")
+    private suspend fun cancelIncompleteAssetDownloads() = withContext(Dispatchers.IO) {
+        assetRepo.getIncomplete().forEach { asset ->
+            if (asset.isDownloading)
+                downloadManager.remove(asset.downloadId)
+            setAssetToNotDownloaded(asset)
+            Lg.d("Reset ${asset.filenameGzip} incomplete download to NOT_DOWNLOADED")
+        }
+    }
+
+    private suspend fun verifyDownloadedAssets() = withContext(Dispatchers.IO) {
+        assetRepo.getDownloaded().forEach { asset ->
+            when (asset.id) {
+                OnlineAssetId.MAP_FOLDER_LIST.id -> {
+                    if (mapRepo.getAllFolders().isEmpty()) { // TODO: Verify based on expected count instead
+                        setAssetToNotDownloaded(asset)
+                        Lg.d("Reset ${asset.filename} missing asset to NOT_DOWNLOADED")
                     }
-                } else {
-                    asset.status = NOT_DOWNLOADED
-                    assetRepo.update(asset)
-                    Lg.d("Reset ${asset.filenameGzip} download to NOT_DOWNLOADED")
                 }
-            }
-            assetRepo.getDecompressing().forEach { asset ->
-                if (storageHelper.isAssetAvailable(asset)) {
-                    asset.status = DOWNLOADED
-                    assetRepo.update(asset)
-                    Lg.d("Updated ${asset.filenameGzip} download status to downloaded")
-                } else
-                    registerDecompressionObserver(asset.filenameGzip)
-            }
-            mapRepo.getDownloading().forEach { map ->
-                Lg.d("synchronizeDbDownloadStatuses(): Processing downloading map $map")
-                if (downloadExists(map.status)) {
-                    if (isDownloadSuccessful(map.status)) {
-                        map.status = DOWNLOADED
-                        mapRepo.update(map)
-                        Lg.d("Updated ${map.filename} download status to downloaded")
+                OnlineAssetId.MAP_LIST.id -> {
+                    if (mapRepo.getAll().isEmpty()) { // TODO: Verify based on expected count instead
+                        setAssetToNotDownloaded(asset)
+                        Lg.d("Reset ${asset.filename} missing asset to NOT_DOWNLOADED")
                     }
-                } else {
-                    map.status = NOT_DOWNLOADED
-                    mapRepo.update(map)
-                    Lg.d("Reset ${map.filename} download to NOT_DOWNLOADED")
+                }
+                OnlineAssetId.WORLD_MAP.id -> {
+                    if (! storageHelper.isAssetAvailable(asset)) {
+                        setAssetToNotDownloaded(asset)
+                        Lg.d("Reset ${asset.filename} missing asset to NOT_DOWNLOADED")
+                    }
+                }
+                OnlineAssetId.PLANT_NAMES.id -> {
+                    if (! taxaDatabaseValidator.isPopulated()) {
+                        setAssetToNotDownloaded(asset)
+                        Lg.d("Reset ${asset.filename} missing asset to NOT_DOWNLOADED")
+                    }
                 }
             }
         }
     }
 
+    private suspend fun setAssetToNotDownloaded(asset: OnlineAsset) {
+        asset.status = NOT_DOWNLOADED
+        assetRepo.update(asset)
+        File(storageHelper.getLocalPath(asset), asset.filenameGzip).delete()
+        File(storageHelper.getLocalPath(asset), asset.filename).delete()
+    }
+
+    suspend fun verifyMaps() = withContext(Dispatchers.IO) {
+//        updateStatusOfMapDownloads()
+        verifyDownloadedMaps()
+    }
+
+    // TODO: Should be able to delete this if background service works out
+//    private suspend fun updateStatusOfMapDownloads() = withContext(Dispatchers.IO) {
+//        mapRepo.getDownloading().forEach { map ->
+//            if (downloadExists(map.downloadId)) {
+//                getDownloadInfo(map.downloadId)?.let { downloadInfo ->
+//                    if (downloadInfo.status == STATUS_SUCCESSFUL && storageHelper.isMapAvailable(map)) {
+//                        map.status = DOWNLOADED
+//                        mapRepo.update(map)
+//                        Lg.d("Updated ${map.filename} active download to DOWNLOADED")
+//                    } else if (downloadInfo.progress < 1f) {
+//                        downloadManager.remove(map.downloadId)
+//                        map.status = NOT_DOWNLOADED
+//                        mapRepo.update(map)
+//                        Lg.d("Reset ${map.filename} low progress download to NOT_DOWNLOADED")
+//                    }; Unit
+//                }
+//            } else {
+//                map.status = NOT_DOWNLOADED
+//                mapRepo.update(map)
+//                Lg.d("Reset ${map.filename} missing active download to NOT_DOWNLOADED")
+//            }
+//        }
+//    }
+
+    private suspend fun verifyDownloadedMaps() = withContext(Dispatchers.IO) {
+        mapRepo.getDownloaded().forEach { map ->
+            if (! storageHelper.isMapAvailable(map)) {
+                map.status = NOT_DOWNLOADED
+                mapRepo.update(map)
+                File(storageHelper.getMapsPath(), map.filename).delete()
+                Lg.d("Reset ${map.filename} missing completed download to NOT_DOWNLOADED")
+            }
+
+        }
+    }
+
     private suspend fun isAsset(downloadId: Long): Boolean {
         return downloadManager.query(Query().setFilterById(downloadId)).run {
-            moveToFirst()
+            if (! moveToFirst())
+                return false
             val isAsset = assetRepo.getAll().any {
                 it.url == getString(this.getColumnIndex(COLUMN_URI))
             }
@@ -209,42 +220,27 @@ class FileDownloader @Inject constructor (
         }
     }
 
-    // NOTE: Manually cancelled downloads appear to be non-referencable by their downloadId
-    private fun downloadExists(downloadId: Long): Boolean {
-        return downloadManager.query(Query().setFilterById(downloadId)).run {
-            val exists = moveToFirst()
-            close()
-            exists
-        }
-    }
-
-    private fun isDownloadSuccessful(downloadId: Long): Boolean {
-        return downloadManager.query(Query().setFilterById(downloadId)).run {
-            moveToFirst()
-            val status = getInt(getColumnIndex(COLUMN_STATUS))
-            close()
-            status == STATUS_SUCCESSFUL
-        }
-    }
-
     private fun onDownloadComplete(downloadId: Long) {
-        Lg.v("FileDownloader: onDownloadComplete() ${getDownloadInfo(downloadId)}")
-        if (! downloadExists(downloadId)) // Catches manually cancelled download
-            synchronizeDbDownloadStatuses()
-        else if (isDownloadSuccessful(downloadId)) {
-            GlobalScope.launch(Dispatchers.IO) {
-                if (isAsset(downloadId)) {
-                    assetRepo.getByDownloadId(downloadId)?.let { asset ->
-                        Lg.i("Downloaded asset: ${asset.filenameGzip}")
-                        decompressAsset(asset)
+        mainActivity.lifecycleScope.launch(Dispatchers.IO) {
+            Lg.v("FileDownloader: onDownloadComplete() ${getDownloadInfo(downloadId)}")
+            getDownloadInfo(downloadId)?.let { downloadInfo ->
+                if (downloadInfo.status == STATUS_SUCCESSFUL) {
+                    if (isAsset(downloadId)) {
+                        assetRepo.getByDownloadId(downloadId)?.let { asset ->
+                            Lg.i("Downloaded asset: ${asset.filenameGzip}")
+                            if (storageHelper.isGzipAssetAvailable(asset))
+                                decompressAsset(asset)
+                            else
+                                Lg.e("onDownloadComplete: Downloaded asset ${asset.filenameGzip} not available")
+                        }
                     }
-                }
-                if (isMap(downloadId)) {
-                    mapRepo.getByDownloadId(downloadId)?.let { map ->
-                        Lg.i("Downloaded map: ${map.filename}")
-                        map.status = DOWNLOADED
-                        mapRepo.update(map)
-                        return@launch
+                    if (isMap(downloadId)) {
+                        mapRepo.getByDownloadId(downloadId)?.let { map ->
+                            Lg.i("Downloaded map: ${map.filename}")
+                            map.status = DOWNLOADED
+                            mapRepo.update(map)
+                            return@launch
+                        }
                     }
                 }
             }
@@ -268,6 +264,7 @@ class FileDownloader @Inject constructor (
         return
     }
 
+    // NOTE: Manually cancelled downloads appear to be non-referencable by their downloadId
     private fun getDownloadInfo(downloadId: Long): DownloadInfo? {
         return downloadManager.query(Query().setFilterById(downloadId)).run {
             if (moveToFirst()) {
@@ -299,7 +296,7 @@ class FileDownloader @Inject constructor (
     private val decompressionWorkerObserver = Observer<MutableList<WorkInfo>> { infoList ->
         infoList.forEach {  info ->
             if (info.state.isFinished) {
-                GlobalScope.launch(Dispatchers.IO) {
+                mainActivity.lifecycleScope.launch(Dispatchers.IO) {
                     val assetId = info.outputData.getLong(ASSET_ID, -1)
                     val asset = assetRepo.get(assetId)
 
@@ -384,4 +381,7 @@ data class DownloadInfo(
         val bytes: Long,
         val totalBytes: Long,
         val lastModifiedTimestamp: Long
-)
+) {
+    val progress: Float
+        get() = (bytes.toFloat() / totalBytes.toFloat()).absoluteValue
+}

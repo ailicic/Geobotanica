@@ -28,7 +28,8 @@ class LoginViewModel @Inject constructor (
         private val dispatchers: GbDispatchers,
         private val userRepo: UserRepo,
         private val assetRepo: AssetRepo,
-        private val mapRepo: MapRepo
+        private val mapRepo: MapRepo,
+        private val fileDownloader: FileDownloader
 //        ,onlineMapScraper: OnlineMapScraper // Uncomment to perform scrape TODO: REMOVE AFTER SCRAPER MOVED TO SERVER
 ): ViewModel() {
     private val _viewState = mutableLiveData(ViewState())
@@ -165,6 +166,11 @@ class LoginViewModel @Inject constructor (
             R.id.action_login_to_local_maps
         } else
             R.id.action_login_to_map
+    }
+
+    fun verifyDownloads() = viewModelScope.launch(dispatchers.io) {
+        fileDownloader.verifyAssets()
+        fileDownloader.verifyMaps()
     }
 }
 

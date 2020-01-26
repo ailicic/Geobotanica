@@ -110,6 +110,10 @@ class LocalMapsViewModel @Inject constructor(
         Lg.i("Deleted map: ${onlineMap.filename} (Result=$result)")
     }
 
+    fun verifyMapDownloads() = viewModelScope.launch(Dispatchers.IO) {
+        fileDownloader.verifyMaps()
+    }
+
     private fun downloadMap(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
         val onlineMap = mapRepo.get(onlineMapId)
         if (! storageHelper.isStorageAvailable(onlineMap)) {

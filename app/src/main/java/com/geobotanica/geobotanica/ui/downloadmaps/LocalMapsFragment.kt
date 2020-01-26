@@ -67,6 +67,11 @@ class LocalMapsFragment : BaseFragment() {
         viewModel.getMapsFromExtStorage()
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.verifyMapDownloads()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         activity.toolbar.setNavigationOnClickListener(null)

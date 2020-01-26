@@ -26,9 +26,12 @@ import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Ensure internet is available before downloading (Android connection status can be misleading under some circumstances)
-// TODO: Catch failed downloads by download manager. Sometimes app thinks download began but it failed to start. Need to detect. Also check on app start and update db?
-// TODO: App incorrectly interprets failed asset downloads as active downloads.
+// TODO: Consider using a background service during downloading/decompression. Otherwise there are problems if app goes in bg.
+// TODO: Break up FileDownloader into smaller classes: DownloadVerifier, SerializationService, DecompressionService
+// TODO: Cancel all OnlineAsset downloads + reset UI (eg progressBar) when DownloadAssetsFragment started/resumed (need to cancel here in case user presses HOME and comes back). Make it reactive
+// TODO: Check behaviour of OnlineMap downloads that must pause after losing internet.
+// TODO: Test navigating back and forth from DownloadAssetsFragment and check if nav error appears afterwards
+// TODO: Check animations on initial flow
 // TODO: Fix hidden FAB on Login screen after typed name is sufficiently long and keyboard visible (have coordinator layout already...)
 // TODO: Force GPS compound view to stay at bottom when keyboard visible
 // TODO: Force keyboard to close when navigating away from text input screen (stays open during fragment animation sometimes!)
@@ -39,6 +42,7 @@ import javax.inject.Inject
 
 // SERVER TODOs
 // TODO: Move online map scraping to server. Would be nice to have maps downloaded on demand first time from mapsforge. Then gzip and provide from Gb server (+ check for stale maps).
+// TODO: Need actual file size to be available in OnlineMap, not MB approximation. Fix after maps cached on server.
 // TODO: Automatic map updates?
 // TODO: Provide OnlineAssets with versioning
 // TODO: Allow uploading of plant records (need remoteId)

@@ -47,11 +47,16 @@ class DownloadAssetsFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         lifecycleScope.launch {
-            viewModel.init()
+            viewModel.importOnlineAssetList()
             initUi()
             bindClickListeners()
             bindViewModel()
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        viewModel.verifyDownloads()
     }
 
     private suspend fun initUi() {

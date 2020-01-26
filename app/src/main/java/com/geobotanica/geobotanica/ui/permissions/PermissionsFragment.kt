@@ -81,7 +81,7 @@ class PermissionsFragment : BaseFragment() {
     }
 
     private fun areAllPermissionsGranted(): Boolean =
-            isPermissionGranted(WRITE_EXTERNAL_STORAGE) && isPermissionGranted(ACCESS_FINE_LOCATION)
+        isPermissionGranted(WRITE_EXTERNAL_STORAGE) && isPermissionGranted(ACCESS_FINE_LOCATION)
 
     private fun navigateToNext() =
         navigateTo(R.id.action_permissions_to_downloadAssets, bundleOf(userIdKey to viewModel.userId))

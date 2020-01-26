@@ -34,6 +34,9 @@ data class  OnlineAsset(
 
     val isDownloaded: Boolean
         get() = status == DOWNLOADED
+
+    val downloadId: Long
+        get() = status
 }
 
 // TODO: This is fragile. If asset list changes in updated version it will break.

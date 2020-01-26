@@ -49,6 +49,11 @@ class LoginFragment : BaseFragment() {
         viewModel.onEvent(ViewCreated(lastUserId))
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.verifyDownloads()
+    }
+
     private fun render(viewState: ViewState) {
         Lg.d("render(): $viewState")
         if (viewState.nicknames.size != spinnerAdapter?.count) {
@@ -79,11 +84,11 @@ class LoginFragment : BaseFragment() {
         is ShowUserExistsSnackbar -> showSnackbar(getString(R.string.userExists, viewEffect.nickname))
         is NavigateToNext -> {
             val userId = viewEffect.userId
+            sharedPrefs.put(sharedPrefsLastUserId to userId)
             if (! arePermissionsGranted())
                 navigateTo(R.id.action_login_to_permissions, createBundle(userId))
             else {
                 lifecycleScope.launch {
-                    sharedPrefs.put(sharedPrefsLastUserId to userId)
                     navigateTo(viewModel.getNextFragmentId(), createBundle(userId))
                 }
             }; Unit

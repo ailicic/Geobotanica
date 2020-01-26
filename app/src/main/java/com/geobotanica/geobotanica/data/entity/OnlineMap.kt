@@ -27,8 +27,8 @@ data class  OnlineMap(
         val timestamp: String,
         val parentFolderId: Long?,
 
-        @Transient // Exclude from JSON serialization // TODO: REMOVE AFTER SCRAPER IS MOVED TO SERVER
-        @ColumnInfo(name = "status") // Force include in Room DB, despite @Transient // TODO: REMOVE AFTER SCRAPER IS MOVED TO SERVER
+//        @Transient // Exclude from JSON serialization // TODO: REMOVE AFTER SCRAPER IS MOVED TO SERVER
+//        @ColumnInfo(name = "status") // Force include in Room DB, despite @Transient // TODO: REMOVE AFTER SCRAPER IS MOVED TO SERVER
         var status: Long = NOT_DOWNLOADED
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0L
@@ -47,6 +47,9 @@ data class  OnlineMap(
             .replace('-', ' ')
             .capitalizeWords() +
             " ($printSize)"
+
+    val downloadId: Long
+        get() = status
 }
 
 

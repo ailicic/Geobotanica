@@ -41,9 +41,9 @@ class DownloadAssetsViewModel @Inject constructor(
                 worldMapAsset.status != NOT_DOWNLOADED && plantNamesAsset.status != NOT_DOWNLOADED
     }
 
-    suspend fun init() = withContext(Dispatchers.IO) {
-//        fileDownloader.removeQueuedDownloads() // TODO: Consider re-enabling
-        importOnlineAssetInfo()
+    suspend fun importOnlineAssetList() = withContext(Dispatchers.IO) {
+        if (assetRepo.isEmpty())
+            assetRepo.insert(onlineAssetList)
     }
 
     suspend fun areOnlineAssetsInExtStorageRootDir(): Boolean = withContext(Dispatchers.IO) {
@@ -73,12 +73,6 @@ class DownloadAssetsViewModel @Inject constructor(
                 fileDownloader.downloadAsset(asset)
         }
     }
-
-    private suspend fun importOnlineAssetInfo() {
-        if (assetRepo.isEmpty())
-            assetRepo.insert(onlineAssetList)
-    }
-
     suspend fun getWorldMapText(): String = assetRepo.get(OnlineAssetId.WORLD_MAP.id).printName
 
     suspend fun getPlantNameDbText(): String = assetRepo.get(OnlineAssetId.PLANT_NAMES.id).printName
@@ -90,6 +84,11 @@ class DownloadAssetsViewModel @Inject constructor(
             assetFileGzip.copyTo(File(storageHelper.getDownloadPath(), asset.filenameGzip), overwrite = true)
             fileDownloader.decompressAsset(asset)
         }
+    }
+
+    fun verifyDownloads() = viewModelScope.launch(Dispatchers.IO) {
+        fileDownloader.verifyAssets()
+        fileDownloader.verifyMaps()
     }
 }
 
@@ -125,7 +124,7 @@ val onlineAssetList = listOf(
         "http://people.okanagan.bc.ca/ailicic/Maps/taxa.db.gz",
         "databases",
         true,
-        29_037_482,
+        29_037_443,
         129_412_096
     )
 )

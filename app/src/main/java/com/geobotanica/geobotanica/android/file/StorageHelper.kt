@@ -56,9 +56,19 @@ class StorageHelper @Inject constructor(val appContext: Context) {
 
     fun mkdirs(onlineAsset: OnlineAsset) = File(getLocalPath(onlineAsset)).mkdirs()
 
+    fun isGzipAssetAvailable(asset: OnlineAsset): Boolean {
+        val file = File(getDownloadPath(), asset.filenameGzip)
+        return file.exists() && file.length() == asset.compressedSize
+    }
+
     fun isAssetAvailable(asset: OnlineAsset): Boolean {
         val file = File(getLocalPath(asset), asset.filename)
         return file.exists() && file.length() == asset.decompressedSize
+    }
+
+    fun isMapAvailable(map: OnlineMap): Boolean {
+        val file = File(getMapsPath(), map.filename)
+        return file.exists() && file.length() > map.sizeMb * 1024 * 900 // TODO: Fix after actual map size is available. Use > 90% for now
     }
 
     fun isGzipAssetInExtStorageRootDir(asset: OnlineAsset): Boolean {
