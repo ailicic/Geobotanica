@@ -32,10 +32,11 @@ abstract class TaxaDatabase : RoomDatabase() {
     abstract fun typeDao(): TypeDao
 
     companion object {
-        @Volatile private var plantDatabaseRo: TaxaDatabase? = null
+        @Volatile private var taxaDatabase: TaxaDatabase? = null
+
         fun getInstance(appContext: Context): TaxaDatabase =
-                plantDatabaseRo ?: synchronized(this) {
-                    plantDatabaseRo ?: buildDatabase(appContext).also{ plantDatabaseRo = it }
+                taxaDatabase ?: synchronized(this) {
+                    taxaDatabase ?: buildDatabase(appContext).also { taxaDatabase = it }
             }
 
         private fun buildDatabase(appContext: Context) =

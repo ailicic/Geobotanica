@@ -11,6 +11,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.observe
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.OnlineAsset
 import com.geobotanica.geobotanica.network.NetworkValidator
@@ -24,6 +25,7 @@ import com.geobotanica.geobotanica.util.getFromBundle
 import kotlinx.android.synthetic.main.fragment_download_assets.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 
 class DownloadAssetsFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<DownloadAssetsViewModel>
@@ -47,7 +49,6 @@ class DownloadAssetsFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         lifecycleScope.launch {
-            viewModel.importOnlineAssetList()
             initUi()
             bindClickListeners()
             bindViewModel()
@@ -56,35 +57,26 @@ class DownloadAssetsFragment : BaseFragment() {
 
     override fun onStart() {
         super.onStart()
-        viewModel.verifyDownloads()
+        viewModel.syncDownloadStatuses()
     }
 
     private suspend fun initUi() {
         worldMapText.text = viewModel.getWorldMapText()
         plantNameDbText.text = viewModel.getPlantNameDbText()
         storageAvailableText.text = getString(R.string.storage_available, getInternalStorageFreeInMb())
-        if (viewModel.areOnlineAssetsInExtStorageRootDir()) {
-            downloadButton.isVisible = false
-            importButton.isVisible = true
-        }
+        if (viewModel.areOnlineAssetsInExtStorageRootDir())
+            downloadButton.text = getString(R.string.import_assets)
     }
 
     private fun bindClickListeners() {
         downloadButton.setOnClickListener(::onClickDownload)
-        importButton.setOnClickListener(::onClickImport)
     }
 
     private fun bindViewModel() {
-        viewModel.navigateToNext.observe(viewLifecycleOwner, onNavigateToNextObserver)
         viewModel.showStorageSnackbar.observe(viewLifecycleOwner, onShowStorageSnackbar)
-    }
-
-    private val onNavigateToNextObserver = Observer<Boolean> {
-        if (it) {
-            Lg.d("DownloadAssetsFragment: Map data imported and asset downloads initialized -> navigateToNext()")
-            progressBar.isVisible = false
-            navigateToNext()
-        }
+        viewModel.showDownloadButton.observe(viewLifecycleOwner) { downloadButton.isVisible = it }
+        viewModel.showProgressSpinner.observe(viewLifecycleOwner) { progressSpinner.isVisible = it }
+        viewModel.navigateToNext.observe(viewLifecycleOwner, onNavigateToNextObserver)
     }
 
     private val onShowStorageSnackbar = Observer<OnlineAsset> { onlineAsset ->
@@ -94,38 +86,30 @@ class DownloadAssetsFragment : BaseFragment() {
         }
     }
 
+    private val onNavigateToNextObserver = Observer<Boolean> {
+        if (it) {
+            Lg.d("DownloadAssetsFragment: navigateToNext()")
+            navigateTo(R.id.action_downloadAssets_to_localMaps, createBundle(), R.id.downloadAssetsFragment)
+        }
+    }
+
     @Suppress("UNUSED_PARAMETER")
     private fun onClickDownload(view: View?) {
         when (networkValidator.getStatus()) {
             INVALID -> showSnackbar(resources.getString(R.string.internet_unavailable))
-            VALID -> downloadAssets()
+            VALID -> viewModel.downloadAssets()
             VALID_IF_METERED_PERMITTED -> {
                 WarningDialog(
                         getString(R.string.metered_network),
                         getString(R.string.metered_network_confirm))
                 {
-                    networkValidator.allowMeteredNetwork(); downloadAssets()
+                    networkValidator.allowMeteredNetwork()
+                    viewModel.downloadAssets()
                 }
                 .show(parentFragmentManager, "tag")
             }
         }
     }
-
-    private fun downloadAssets() {
-        downloadButton.isVisible = false
-        progressBar.isVisible = true
-        viewModel.downloadAssets()
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    private fun onClickImport(view: View?) {
-        importButton.isVisible = false
-        progressBar.isVisible = true
-        viewModel.importAssets()
-    }
-
-    private fun navigateToNext() =
-        navigateTo(R.id.action_downloadAssets_to_localMaps, createBundle(), R.id.downloadAssetsFragment)
 
     private fun createBundle() = bundleOf(userIdKey to viewModel.userId)
 }

@@ -27,7 +27,8 @@ import com.geobotanica.geobotanica.data.entity.*
         PlantTypeConverter::class,
         PhotoTypeConverter::class,
         MeasurementTypeConverter::class,
-        DateTimeConverter::class )
+        DateTimeConverter::class,
+        DownloadStatusConverter::class)
 abstract class GbDatabase : RoomDatabase() {
     abstract fun assetDao(): OnlineAssetDao
     abstract fun mapDao(): OnlineMapDao

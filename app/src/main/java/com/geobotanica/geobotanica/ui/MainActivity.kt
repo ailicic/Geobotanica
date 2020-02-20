@@ -1,12 +1,18 @@
 package com.geobotanica.geobotanica.ui
 
 import android.app.DownloadManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.NotificationManager.IMPORTANCE_LOW
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.findNavController
@@ -23,10 +29,14 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import kotlinx.android.synthetic.main.activity_main.*
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
 
+// TODO: Consider extracting all notification channel code to NotificationChannelHelper
+const val NOTIFICATION_CHANNEL_ID_DOWNLOADS = "com.geobotanica.geobotanica.downloads"
+
 class MainActivity : AppCompatActivity() {
     lateinit var applicationComponent: ApplicationComponent
 
     private val className = "MainActivity"
+    private var notificationManager: NotificationManager? = null
 
     private val _downloadComplete = MutableLiveData<Long>()
     val downloadComplete: LiveData<Long> = _downloadComplete // Emits downloadId. Used by FileDownloader.
@@ -54,8 +64,13 @@ class MainActivity : AppCompatActivity() {
         AndroidGraphicFactory.createInstance(application) // Required by MapsForge
 
 
-        registerReceiver(onDownloadComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         registerReceiver(onClickDownloadNotification, IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED))
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationManager =
+                    ContextCompat.getSystemService<NotificationManager>(this, NotificationManager::class.java)
+            createNotificationChannels()
+        }
 
         AndroidThreeTen.init(this)
 
@@ -65,14 +80,35 @@ class MainActivity : AppCompatActivity() {
             Lg.d("Running on device")
     }
 
-    override fun onSupportNavigateUp() = findNavController(R.id.fragment).navigateUp()
-
-    private val onDownloadComplete = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-            _downloadComplete.value = downloadId
-        }
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createNotificationChannels() {
+        createNotificationChannel(
+                R.string.notification_channel_downloads,
+                R.string.notification_channel_description_downloads,
+                NOTIFICATION_CHANNEL_ID_DOWNLOADS
+        )
     }
+
+    @Suppress("SameParameterValue")
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createNotificationChannel(nameResId: Int, descriptionResId: Int, id: String) {
+        val name = applicationContext.getString(nameResId)
+        if (! channelExists(id)) {
+            Lg.d("MainActivity: Creating notification channel: $name")
+            val channel = NotificationChannel(id, name, IMPORTANCE_LOW)
+            channel.description = applicationContext.getString(descriptionResId)
+            notificationManager?.createNotificationChannel(channel)
+        } else
+            Lg.d("MainActivity: Skipped creating existing channel: $name")
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun channelExists(channelId: String): Boolean {
+        val channel = notificationManager?.notificationChannels?.firstOrNull { it.id == channelId }
+        return channel != null
+    }
+
+    override fun onSupportNavigateUp() = findNavController(R.id.fragment).navigateUp()
 
     private val onClickDownloadNotification = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -105,7 +141,6 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         Lg.v("$className: onDestroy()")
         AndroidGraphicFactory.clearResourceMemoryCache()
-        unregisterReceiver(onDownloadComplete)
         unregisterReceiver(onClickDownloadNotification)
     }
 }

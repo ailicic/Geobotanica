@@ -5,6 +5,7 @@ import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.data.entity.OnlineMap
 import com.geobotanica.geobotanica.data.entity.OnlineMapFolder
 import com.geobotanica.geobotanica.data.repo.MapRepo
+import com.geobotanica.geobotanica.network.DownloadStatus.NOT_DOWNLOADED
 import com.geobotanica.geobotanica.network.FileDownloader
 import com.geobotanica.geobotanica.network.NetworkValidator
 import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
@@ -58,21 +59,20 @@ class BrowseMapsViewModel @Inject constructor(
         lastClickedMap?.let { downloadMap(it.id) }
     }
 
-    fun cancelDownload(downloadId: Long) = viewModelScope.launch(Dispatchers.IO) {
-        val result = fileDownloader.cancelDownload(downloadId)
-        mapRepo.getByDownloadId(downloadId)?.let { onlineMap ->
-            onlineMap.status = FileDownloader.NOT_DOWNLOADED
-            mapRepo.update(onlineMap)
-            Lg.i("Cancelled map download: ${onlineMap.filename} (Result=$result)")
-        }
+    fun cancelDownloadWork(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
+        val onlineMap = mapRepo.get(onlineMapId)
+        fileDownloader.cancelDownloadWork(onlineMap)
+        Lg.i("Cancelled map download: ${onlineMap.filename}")
+//        mapRepo.update(onlineMap.copy(status = NOT_DOWNLOADED))
+        // TODO: Ensure status is updated in db
     }
 
     fun deleteMap(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
         val onlineMap = mapRepo.get(onlineMapId)
         val mapFile = File(storageHelper.getMapsPath(), onlineMap.filename)
         val result = mapFile.delete()
-        onlineMap.status = FileDownloader.NOT_DOWNLOADED
-        mapRepo.update(onlineMap)
+//        onlineMap.status = FileDownloader.NOT_DOWNLOADED
+        mapRepo.update(onlineMap.copy(status = NOT_DOWNLOADED))
         Lg.i("Deleted map: ${onlineMap.filename} (Result=$result)")
     }
 

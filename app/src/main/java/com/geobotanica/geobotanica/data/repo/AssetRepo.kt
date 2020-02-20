@@ -17,10 +17,6 @@ class AssetRepo @Inject constructor(private val assetDao: OnlineAssetDao) {
     suspend fun get(id: Long): OnlineAsset = assetDao.get(id)
     suspend fun getAll(): List<OnlineAsset> = assetDao.getAll()
     fun getAllLiveData(): LiveData<List<OnlineAsset>> = assetDao.getAllLiveData()
-    suspend fun getByDownloadId(downloadId: Long): OnlineAsset? = assetDao.getByDownloadId(downloadId)
-    suspend fun getDownloading(): List<OnlineAsset> = assetDao.getDownloading()
-    suspend fun getDecompressing(): List<OnlineAsset> = assetDao.getDecompressing()
-    suspend fun getIncomplete(): List<OnlineAsset> = assetDao.getIncomplete()
     suspend fun getDownloaded(): List<OnlineAsset> = assetDao.getDownloaded()
 
     suspend fun delete(asset: OnlineAsset) = assetDao.delete(asset)

@@ -6,10 +6,10 @@ import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.android.location.LocationSubscriber
 import com.geobotanica.geobotanica.android.location.LocationService
-import com.geobotanica.geobotanica.data.entity.OnlineAssetId
 import com.geobotanica.geobotanica.data.repo.AssetRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
+import com.geobotanica.geobotanica.ui.login.OnlineAssetId.*
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.*
 import com.geobotanica.geobotanica.ui.map.marker.PlantMarkerData
 import com.geobotanica.geobotanica.ui.map.marker.PlanterMarkerDiffer
@@ -89,7 +89,7 @@ class MapViewModel @Inject constructor(
     suspend fun getDownloadedMapFileList(): List<File> {
         val mapsPath = storageHelper.getMapsPath()
         return mutableListOf(
-                File(mapsPath, assetRepo.get(OnlineAssetId.WORLD_MAP.id).filename)
+                File(mapsPath, assetRepo.get(WORLD_MAP.id).filenameUngzip)
         ).apply {
             mapRepo.getDownloaded().forEach { map ->
                 add(File(mapsPath, map.filename))
@@ -119,7 +119,7 @@ class MapViewModel @Inject constructor(
         if (!isGpsEnabled()) {
             _gpsFabIcon.value = GPS_OFF.drawable
             showGpsRequiredSnackbar.call()
-        } else if (! assetRepo.get(OnlineAssetId.PLANT_NAMES.id).isDownloaded) {
+        } else if (! assetRepo.get(PLANT_NAMES.id).isDownloaded) {
             showPlantNamesMissingSnackbar.call()
         } else
             navigateToNewPlant.call()

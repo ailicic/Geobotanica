@@ -51,7 +51,7 @@ class LoginFragment : BaseFragment() {
 
     override fun onStart() {
         super.onStart()
-        viewModel.verifyDownloads()
+        viewModel.syncDownloadsStatus()
     }
 
     private fun render(viewState: ViewState) {

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.location.LocationManager
 import androidx.preference.PreferenceManager
+import androidx.work.WorkManager
 import com.geobotanica.geobotanica.ui.MainActivity
 import com.geobotanica.geobotanica.util.DefaultDispatchers
 import com.geobotanica.geobotanica.util.GbDispatchers
@@ -34,6 +35,8 @@ class ApplicationModule(private val appContext: Context, private val activity: M
 
     @Provides @Singleton fun provideOkHttpClient(): OkHttpClient = OkHttpClient()
     @Provides @Singleton fun provideMoshi(): Moshi = Moshi.Builder().build()
+
+    @Provides @Singleton fun provideWorkManager(): WorkManager = WorkManager.getInstance(appContext)
 
 //     Not required due to constructor injection:
 //    @Provides @Singleton fun provideLocationService(locationManager: LocationManager) = LocationService(locationManager)

@@ -22,6 +22,7 @@
       <w>geoplugin</w>
       <w>gnss</w>
       <w>horiz</w>
+      <w>infos</w>
       <w>infras</w>
       <w>infraspecific</w>
       <w>kluent</w>
@@ -47,6 +48,7 @@
       <w>spek</w>
       <w>squareup</w>
       <w>sserra</w>
+      <w>synchronizer</w>
       <w>taxa</w>
       <w>taxon</w>
       <w>ungzip</w>

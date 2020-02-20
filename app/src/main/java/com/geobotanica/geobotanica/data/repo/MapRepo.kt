@@ -16,21 +16,19 @@ class MapRepo @Inject constructor(
     suspend fun insert(map: OnlineMap): Long = mapDao.insert(map)
     suspend fun insert(maps: List<OnlineMap>): LongArray = mapDao.insert(*(maps.toTypedArray()))
     suspend fun insertFolder(folder: OnlineMapFolder): Long = mapFolderDao.insert(folder)
-    suspend fun insertFolders(folders: List<OnlineMapFolder>) = folders.forEach { mapFolderDao.insert(it) }
+    suspend fun insertFolders(folders: List<OnlineMapFolder>): LongArray = mapFolderDao.insert(*(folders.toTypedArray()))
 
     suspend fun update(map: OnlineMap) = mapDao.update(map)
 
     suspend fun get(id: Long): OnlineMap = mapDao.get(id)
     suspend fun getAll(): List<OnlineMap> = mapDao.getAll()
-    suspend fun getDownloading(): List<OnlineMap> = mapDao.getDownloading()
+//    suspend fun getDownloading(): List<OnlineMap> = mapDao.getDownloading()
     suspend fun getDownloaded(): List<OnlineMap> = mapDao.getDownloaded()
+//    fun getDownloadedLiveData(): LiveData<List<OnlineMap>> = mapDao.getDownloadedLiveData()
     suspend fun getInitiatedDownloads(): List<OnlineMap> = mapDao.getInitiatedDownloads()
     fun getInitiatedDownloadsLiveData(): LiveData<List<OnlineMap>> = mapDao.getInitiatedDownloadsLiveData()
-//    suspend fun getDecompressing(): List<OnlineMap> = mapDao.getDecompressing()
     suspend fun getByFilename(filename: String): OnlineMap? = mapDao.getByFilename(filename)
-    suspend fun getByDownloadId(downloadId: Long): OnlineMap? = mapDao.getByDownloadId(downloadId)
 
-//    suspend fun getFolder(id: Long): OnlineMapFolder = mapFolderDao.get(id)
     suspend fun getAllFolders(): List<OnlineMapFolder> = mapFolderDao.getAll()
 
     fun getChildMapsOf(parentFolderId: Long?): LiveData<List<OnlineMap>> {

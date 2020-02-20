@@ -101,4 +101,12 @@
     <string name="update_location">Update location</string>
     <string name="import_assets">Import Assets</string>
     <string name="import_map">Import Maps</string>
+    <string name="downloading">Downloading</string>
+    <string name="notification_channel_downloads">Downloads</string>
+    <string name="notification_channel_description_downloads">Shows progress of downloads</string>
+    <string name="decompressing">Decompressing</string>
+    <string name="importing">Importing</string>
+    <string name="validating">Validating</string>
+    <string name="moving_file">Moving file</string>
+    <string name="copying_file">Copying file</string>
 </resources>

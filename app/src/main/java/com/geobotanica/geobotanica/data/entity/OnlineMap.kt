@@ -1,7 +1,8 @@
 package com.geobotanica.geobotanica.data.entity
 
 import androidx.room.*
-import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOWNLOADED
+import com.geobotanica.geobotanica.network.DownloadStatus
+import com.geobotanica.geobotanica.network.DownloadStatus.*
 import com.geobotanica.geobotanica.util.capitalizeWords
 import com.geobotanica.geobotanica.util.replacePrefix
 import com.squareup.moshi.JsonClass
@@ -23,21 +24,22 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class  OnlineMap(
         val url: String,
-        val sizeMb: Long,
+        val sizeMb: Long, // TODO: Get actual size in bytes during scrape?
         val timestamp: String,
         val parentFolderId: Long?,
 
 //        @Transient // Exclude from JSON serialization // TODO: REMOVE AFTER SCRAPER IS MOVED TO SERVER
 //        @ColumnInfo(name = "status") // Force include in Room DB, despite @Transient // TODO: REMOVE AFTER SCRAPER IS MOVED TO SERVER
-        var status: Long = NOT_DOWNLOADED
+        val status: DownloadStatus = NOT_DOWNLOADED
 ) {
     @PrimaryKey(autoGenerate = true) var id: Long = 0L
 
     val filename: String
         get() = url.substringAfterLast('/')
 
-    val printSize: String
-        get() = "$sizeMb MB"
+    val isDownloaded: Boolean get() = status == DOWNLOADED
+    val isDownloading: Boolean get() = status == DOWNLOADING
+    val isNotDownloaded: Boolean get() = status == NOT_DOWNLOADED
 
     val printName: String
         get() = filename
@@ -48,8 +50,8 @@ data class  OnlineMap(
             .capitalizeWords() +
             " ($printSize)"
 
-    val downloadId: Long
-        get() = status
+    val printSize: String
+        get() = "$sizeMb MB"
 }
 
 

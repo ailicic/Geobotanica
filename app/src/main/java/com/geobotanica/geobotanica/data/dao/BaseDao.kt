@@ -7,8 +7,8 @@ interface BaseDao<T> {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(obj: T): Long
-//    @Update fun update(obj: T)
-//    @Delete fun delete(obj: T)
+//    @Update suspend fun update(obj: T)
+//    @Delete suspend fun delete(obj: T)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(vararg obj: T): LongArray

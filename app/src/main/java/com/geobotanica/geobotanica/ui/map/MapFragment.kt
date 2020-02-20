@@ -26,10 +26,12 @@ import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Consider using a background service during downloading/decompression. Otherwise there are problems if app goes in bg.
-// TODO: Break up FileDownloader into smaller classes: DownloadVerifier, SerializationService, DecompressionService
+// TODO: Fix/update tests
+// TODO: Maybe apply INTERNET_CONNECTED constraint to download worker?
 // TODO: Cancel all OnlineAsset downloads + reset UI (eg progressBar) when DownloadAssetsFragment started/resumed (need to cancel here in case user presses HOME and comes back). Make it reactive
+// TODO: Try making all entities with id as data class val, not var (requires apply { id = id } )
 // TODO: Check behaviour of OnlineMap downloads that must pause after losing internet.
+// TODO: Remove all "Observer" in observe calls (use androidx helper with trailing lambda)
 // TODO: Test navigating back and forth from DownloadAssetsFragment and check if nav error appears afterwards
 // TODO: Check animations on initial flow
 // TODO: Fix hidden FAB on Login screen after typed name is sufficiently long and keyboard visible (have coordinator layout already...)
@@ -38,7 +40,9 @@ import javax.inject.Inject
 // TODO: Add ripple to plant name search items and suggested plant name list items
 // TODO: Check Recyclerview layout on different screen sizes for NewPlantNameFragment (c.f. android:layout_height="350dp")
 // TODO: Put onlineAssetList on backend and implement versioning
+// TODO: Consider removing appContext and activity from Dagger (or at least not injecting these into BaseFragment)
 // TODO: Remove "-r -t" flags in run config after AS 3.6
+
 
 // SERVER TODOs
 // TODO: Move online map scraping to server. Would be nice to have maps downloaded on demand first time from mapsforge. Then gzip and provide from Gb server (+ check for stale maps).

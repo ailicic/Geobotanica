@@ -69,7 +69,7 @@ class LocalMapsFragment : BaseFragment() {
 
     override fun onStart() {
         super.onStart()
-        viewModel.verifyMapDownloads()
+        viewModel.verifyMaps()
     }
 
     override fun onDestroy() {
@@ -178,7 +178,7 @@ class LocalMapsFragment : BaseFragment() {
     @Suppress("UNUSED_PARAMETER")
     private fun onClickDownload(mapListItem: OnlineMapListItem) = viewModel.initDownload(mapListItem)
 
-    private fun onClickCancel(mapListItem: OnlineMapListItem) { viewModel.cancelDownload(mapListItem.status) }
+    private fun onClickCancel(mapListItem: OnlineMapListItem) { viewModel.cancelDownload(mapListItem.id) }
 
     private fun onClickDelete(mapListItem: OnlineMapListItem) {
         WarningDialog(

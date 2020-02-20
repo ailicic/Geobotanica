@@ -4,13 +4,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geobotanica.geobotanica.R
-import com.geobotanica.geobotanica.data.entity.OnlineAssetId
+import com.geobotanica.geobotanica.android.worker.DownloadStatusSynchronizer
+import com.geobotanica.geobotanica.data.entity.OnlineAsset
 import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.data.repo.AssetRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.data.repo.UserRepo
-import com.geobotanica.geobotanica.network.FileDownloader
-import com.geobotanica.geobotanica.network.online_map.OnlineMapScraper
+import com.geobotanica.geobotanica.ui.login.OnlineAssetId.*
 import com.geobotanica.geobotanica.ui.login.ViewEffect.*
 import com.geobotanica.geobotanica.ui.login.ViewEvent.*
 import com.geobotanica.geobotanica.util.GbDispatchers
@@ -29,7 +29,7 @@ class LoginViewModel @Inject constructor (
         private val userRepo: UserRepo,
         private val assetRepo: AssetRepo,
         private val mapRepo: MapRepo,
-        private val fileDownloader: FileDownloader
+        private val downloadStatusSynchronizer: DownloadStatusSynchronizer
 //        ,onlineMapScraper: OnlineMapScraper // Uncomment to perform scrape TODO: REMOVE AFTER SCRAPER MOVED TO SERVER
 ): ViewModel() {
     private val _viewState = mutableLiveData(ViewState())
@@ -152,14 +152,14 @@ class LoginViewModel @Inject constructor (
             return R.id.action_login_to_download_assets
 
         val onlineAssets = assetRepo.getAll()
-        val mapFoldersAsset = onlineAssets.find { it.id == OnlineAssetId.MAP_FOLDER_LIST.id } ?: throw IllegalStateException()
-        val mapListAsset = onlineAssets.find { it.id == OnlineAssetId.MAP_LIST.id } ?: throw IllegalStateException()
-        val worldMapAsset = onlineAssets.find { it.id == OnlineAssetId.WORLD_MAP.id } ?: throw IllegalStateException()
-        val plantNamesAsset = onlineAssets.find { it.id == OnlineAssetId.PLANT_NAMES.id } ?: throw IllegalStateException()
+        val mapFoldersAsset = onlineAssets.find { it.id == MAP_FOLDER_LIST.id } ?: throw IllegalStateException()
+        val mapListAsset = onlineAssets.find { it.id == MAP_LIST.id } ?: throw IllegalStateException()
+        val worldMapAsset = onlineAssets.find { it.id == WORLD_MAP.id } ?: throw IllegalStateException()
+        val plantNamesAsset = onlineAssets.find { it.id == PLANT_NAMES.id } ?: throw IllegalStateException()
 
 
-        return if (mapFoldersAsset.status != FileDownloader.DOWNLOADED || mapListAsset.status != FileDownloader.DOWNLOADED ||
-                worldMapAsset.status == FileDownloader.NOT_DOWNLOADED || plantNamesAsset.status == FileDownloader.NOT_DOWNLOADED)
+        return if (! mapFoldersAsset.isDownloaded  || ! mapListAsset.isDownloaded ||
+                ! worldMapAsset.isDownloaded || ! plantNamesAsset.isDownloaded)
         {
             R.id.action_login_to_download_assets
         } else if (mapRepo.getInitiatedDownloads().isEmpty()) {
@@ -168,12 +168,18 @@ class LoginViewModel @Inject constructor (
             R.id.action_login_to_map
     }
 
-    fun verifyDownloads() = viewModelScope.launch(dispatchers.io) {
-        fileDownloader.verifyAssets()
-        fileDownloader.verifyMaps()
+    fun syncDownloadsStatus() = viewModelScope.launch(dispatchers.io) {
+        importOnlineAssetList()
+        downloadStatusSynchronizer.syncAll()
+    }
+
+    private suspend fun importOnlineAssetList() {
+        if (assetRepo.isEmpty()) {
+            Lg.d("LoginViewModel: Importing onlineAssetList")
+            assetRepo.insert(onlineAssetList)
+        }
     }
 }
-
 
 data class ViewState(
         val nicknames: List<String> = emptyList(),
@@ -197,4 +203,52 @@ sealed class ViewEffect {
     object InitView : ViewEffect()
     data class ShowUserExistsSnackbar(val nickname: String) : ViewEffect()
     data class NavigateToNext(val userId: Long) : ViewEffect()
+}
+
+// TODO: Get from API
+val onlineAssetList = listOf(
+        OnlineAsset(
+                "Map metadata",
+                "http://people.okanagan.bc.ca/ailicic/Maps/map_folders.json.gz",
+                "",
+                false,
+                353,
+                1_407,
+                13
+        ),
+        OnlineAsset(
+                "Map list",
+                "http://people.okanagan.bc.ca/ailicic/Maps/maps.json.gz",
+                "",
+                false,
+                5_812,
+                41_751,
+                288
+        ),
+        OnlineAsset(
+                "World map",
+                "http://people.okanagan.bc.ca/ailicic/Maps/world.map.gz",
+                "",
+                false,
+                2_715_512,
+                3_276_950,
+                1
+        ),
+        OnlineAsset(
+                "Plant name database",
+                "http://people.okanagan.bc.ca/ailicic/Maps/taxa.db.gz",
+                "databases",
+                true,
+                29_037_482,
+                129_412_096,
+                1
+        )
+)
+
+// TODO: This is fragile. If asset list changes in updated version it will break.
+enum class OnlineAssetId(val id: Long) {
+    MAP_FOLDER_LIST(1L),
+    MAP_LIST(2L),
+    WORLD_MAP(3L),
+    PLANT_NAMES(4L)
 }

@@ -4,8 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import com.geobotanica.geobotanica.data.entity.OnlineAsset
-import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.DECOMPRESSING
-import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.DOWNLOADED
+import com.geobotanica.geobotanica.network.DownloadStatus.DOWNLOADED
 
 @Dao
 interface OnlineAssetDao : BaseDao<OnlineAsset> {
@@ -18,20 +17,8 @@ interface OnlineAssetDao : BaseDao<OnlineAsset> {
     @Query("SELECT * FROM assets WHERE id = :id")
     fun getLiveData(id: Long): LiveData<OnlineAsset>
 
-    @Query("SELECT * FROM assets WHERE status = :downloadId")
-    suspend fun getByDownloadId(downloadId: Long): OnlineAsset?
-
-    @Query("SELECT * FROM assets WHERE status > 0")
-    suspend fun getDownloading(): List<OnlineAsset>
-
-    @Query("SELECT * FROM assets WHERE status = :decompressing")
-    suspend fun getDecompressing(decompressing: Long = DECOMPRESSING): List<OnlineAsset>
-
-    @Query("SELECT * FROM assets WHERE  status > 0 OR status = :decompressing")
-    suspend fun getIncomplete(decompressing: Long = DECOMPRESSING): List<OnlineAsset>
-
     @Query("SELECT * FROM assets WHERE status = :downloaded")
-    suspend fun getDownloaded(downloaded: Long = DOWNLOADED): List<OnlineAsset>
+    suspend fun getDownloaded(downloaded: Int = DOWNLOADED.ordinal): List<OnlineAsset>
 
     @Query("SELECT * FROM assets")
     suspend fun getAll(): List<OnlineAsset>

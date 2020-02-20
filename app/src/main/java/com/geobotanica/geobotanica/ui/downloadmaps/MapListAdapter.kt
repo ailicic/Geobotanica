@@ -10,8 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.OnlineMap
 import com.geobotanica.geobotanica.data.entity.OnlineMapFolder
-import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.DOWNLOADED
-import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOWNLOADED
+import com.geobotanica.geobotanica.network.DownloadStatus
+import com.geobotanica.geobotanica.network.DownloadStatus.*
 import kotlinx.android.synthetic.main.map_list_item.view.*
 
 class MapListAdapter(
@@ -53,7 +53,7 @@ class MapViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
             view.setOnClickListener { onClickFolder(mapListItem) }
         } else {
             when {
-                mapListItem.status == NOT_DOWNLOADED -> {
+                mapListItem.isNotDownloaded -> {
                     view.icon.setImageResource(R.drawable.ic_file_download_24dp)
                     view.icon.isVisible = true
                     view.setOnClickListener{ onClickDownload(mapListItem) }
@@ -63,7 +63,7 @@ class MapViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
                     view.cancelButton.isVisible = true
                     view.cancelButton.setOnClickListener { onClickCancel(mapListItem) }
                 }
-                mapListItem.status == DOWNLOADED -> {
+                mapListItem.isDownloaded -> {
                     view.icon.setImageResource(R.drawable.ic_done_black_24dp)
                     view.icon.isVisible = true
                     view.deleteButton.isVisible = true
@@ -89,10 +89,11 @@ data class OnlineMapListItem(
         val id: Long,
         val isFolder: Boolean,
         val printName: String,
-        val status: Long = NOT_DOWNLOADED // Relevant only if isFolder = false
+        val status: DownloadStatus = NOT_DOWNLOADED // Relevant only if isFolder = false
 ) {
-    val isDownloading
-        get() = status > 0L
+    val isNotDownloaded: Boolean get() = status == NOT_DOWNLOADED
+    val isDownloading: Boolean get() = status == DOWNLOADING
+    val isDownloaded: Boolean get() = status == DOWNLOADED
 }
 
 fun OnlineMapFolder.toListItem(): OnlineMapListItem = OnlineMapListItem(id,true, printName)

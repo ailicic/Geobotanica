@@ -5,8 +5,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.geobotanica.geobotanica.data.entity.OnlineMap
 import com.geobotanica.geobotanica.data.entity.OnlineMapFolder
-import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.DOWNLOADED
-import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOWNLOADED
+import com.geobotanica.geobotanica.network.DownloadStatus.NOT_DOWNLOADED
 
 @Dao
 interface OnlineMapDao : BaseDao<OnlineMap> {
@@ -22,26 +21,23 @@ interface OnlineMapDao : BaseDao<OnlineMap> {
     @Query("SELECT * FROM maps WHERE parentFolderId = :parentFolderId")
     fun getChildMaps(parentFolderId: Long): LiveData<List<OnlineMap>>
 
-    @Query("SELECT * FROM maps WHERE status > 0")
-    suspend fun getDownloading(): List<OnlineMap>
+//    @Query("SELECT * FROM maps WHERE isDownloaded > 0")
+//    suspend fun getDownloading(): List<OnlineMap>
 
-    @Query("SELECT * FROM maps WHERE status == :downloaded")
-    suspend fun getDownloaded(downloaded: Long = DOWNLOADED): List<OnlineMap>
+    @Query("SELECT * FROM maps WHERE status = 1")
+    suspend fun getDownloaded(): List<OnlineMap>
+
+    @Query("SELECT * FROM maps WHERE status = 1")
+    fun getDownloadedLiveData(): LiveData<List<OnlineMap>>
 
     @Query("SELECT * FROM maps WHERE status != :notDownloaded")
-    suspend fun getInitiatedDownloads(notDownloaded: Long = NOT_DOWNLOADED): List<OnlineMap>
+    suspend fun getInitiatedDownloads(notDownloaded: Int = NOT_DOWNLOADED.ordinal): List<OnlineMap>
 
     @Query("SELECT * FROM maps WHERE status != :notDownloaded")
-    fun getInitiatedDownloadsLiveData(notDownloaded: Long = NOT_DOWNLOADED): LiveData<List<OnlineMap>>
-
-//    @Query("SELECT * FROM maps WHERE status = :decompressing")
-//    suspend fun getDecompressing(decompressing: Long = DECOMPRESSING): List<OnlineMap>
+    fun getInitiatedDownloadsLiveData(notDownloaded: Int = NOT_DOWNLOADED.ordinal): LiveData<List<OnlineMap>>
 
     @Query("SELECT * FROM maps WHERE url LIKE '%' || :filename")
     suspend fun getByFilename(filename: String): OnlineMap?
-
-    @Query("SELECT * FROM maps WHERE status = :downloadId")
-    suspend fun getByDownloadId(downloadId: Long): OnlineMap?
 
     @Query("""SELECT * FROM maps 
         WHERE :region IS NOT NULL AND url LIKE '%' || :region || '.map' OR

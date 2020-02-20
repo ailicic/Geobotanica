@@ -122,7 +122,7 @@ class BrowseMapsFragment : BaseFragment() {
 
     private fun onClickDownload(mapListItem: OnlineMapListItem) { viewModel.initDownload(mapListItem) }
 
-    private fun onClickCancel(mapListItem: OnlineMapListItem) { viewModel.cancelDownload(mapListItem.status) }
+    private fun onClickCancel(mapListItem: OnlineMapListItem) { viewModel.cancelDownloadWork(mapListItem.id) }
 
     private fun onClickDelete(mapListItem: OnlineMapListItem) {
         WarningDialog(
