@@ -57,7 +57,7 @@ class LocalMapsFragment : BaseFragment() {
         bindClickListeners()
         bindViewModel()
 
-        storageAvailableText.text = getString(R.string.storage_available, viewModel.getFreeExternalStorageInMb())
+        storageAvailableText.text = getString(R.string.mb_free, viewModel.getFreeExternalStorageInMb())
     }
 
     override fun onStart() {

@@ -72,7 +72,7 @@
     <string name="search_plant_name">Search Plant Name</string>
     <string name="plant_name">Plant Name</string>
     <string name="confirm_new_plant">Confirm New Plant</string>
-    <string name="storage_available" tools:ignore="UnusedResources">Storage available: %1$d MB</string>
+    <string name="mb_free" tools:ignore="UnusedResources">%1$d MB free</string>
     <string name="insufficient_storage" >Insufficient storage</string>
     <string name="Inspect">Inspect</string>
     <string name="download_maps">Download Maps</string>

@@ -63,7 +63,7 @@ class DownloadAssetsFragment : BaseFragment() {
     private suspend fun initUi() {
         worldMapText.text = viewModel.getWorldMapText()
         plantNameDbText.text = viewModel.getPlantNameDbText()
-        storageAvailableText.text = getString(R.string.storage_available, getInternalStorageFreeInMb())
+        storageAvailableText.text = getString(R.string.mb_free, getInternalStorageFreeInMb())
         if (viewModel.areOnlineAssetsInExtStorageRootDir())
             downloadButton.text = getString(R.string.import_assets)
     }

@@ -76,8 +76,8 @@
             android:id="@+id/browseMapsButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/medium_gap"
-            android:layout_marginStart="@dimen/small_gap"
+            android:layout_marginBottom="@dimen/tiny_gap"
+            android:layout_marginStart="@dimen/tiny_gap"
             android:padding="@dimen/small_gap"
             android:text="@string/browse_maps"
             android:textColor="@color/colorPrimary"
@@ -90,11 +90,11 @@
             android:id="@+id/storageAvailableText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/small_gap"
-            android:layout_marginStart="@dimen/medium_gap"
             android:textSize="@dimen/small_text"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintTop_toTopOf="@id/browseMapsButton"
+            app:layout_constraintBottom_toBottomOf="@id/browseMapsButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
