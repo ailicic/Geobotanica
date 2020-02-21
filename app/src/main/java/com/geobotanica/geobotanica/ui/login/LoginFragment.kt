@@ -10,8 +10,8 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.observe
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
@@ -109,8 +109,8 @@ class LoginFragment : BaseFragment() {
     }
 
     private fun bindViewModel() {
-        viewModel.viewState.observe(viewLifecycleOwner, Observer { render(it) })
-        viewModel.viewEffect.observe(viewLifecycleOwner, Observer { execute(it) })
+        viewModel.viewState.observe(viewLifecycleOwner) { render(it) }
+        viewModel.viewEffect.observe(viewLifecycleOwner) { execute(it) }
     }
 
     private fun arePermissionsGranted(): Boolean =

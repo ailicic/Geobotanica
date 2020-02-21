@@ -12,6 +12,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.databinding.FragmentBrowseMapsBinding
@@ -20,7 +21,6 @@ import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.dialog.WarningDialog
 import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.get
 import com.geobotanica.geobotanica.util.getFromBundle
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_browse_maps.*
@@ -94,20 +94,16 @@ class BrowseMapsFragment : BaseFragment() {
         recyclerView.isVisible = true
         recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
         recyclerView.adapter = mapListAdapter
-        viewModel.mapListItems.observe(viewLifecycleOwner, Observer {
-            mapListAdapter.submitList(it)
-        })
+        viewModel.mapListItems.observe(viewLifecycleOwner) { mapListAdapter.submitList(it) }
     }
 
     private fun bindClickListeners() = fab.setOnClickListener { navigateToNext() }
 
     private fun bindViewModel() {
-        viewModel.mapListItems.observe(viewLifecycleOwner, Observer { mapListAdapter.submitList(it) })
+        viewModel.mapListItems.observe(viewLifecycleOwner) { mapListAdapter.submitList(it) }
         viewModel.showMeteredNetworkDialog.observe(viewLifecycleOwner, onShowMeteredNetworkDialog)
         viewModel.showInsufficientStorageSnackbar.observe(viewLifecycleOwner, onShowInsufficientStorageSnackbar)
-        viewModel.showInternetUnavailableSnackbar.observe(viewLifecycleOwner, Observer {
-            showSnackbar(resources.getString(R.string.internet_unavailable))
-        })
+        viewModel.showInternetUnavailableSnackbar.observe(viewLifecycleOwner) { showSnackbar(resources.getString(R.string.internet_unavailable)) }
     }
 
     private val onShowMeteredNetworkDialog = Observer<Unit> {

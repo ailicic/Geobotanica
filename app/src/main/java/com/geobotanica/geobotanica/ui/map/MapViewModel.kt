@@ -26,8 +26,8 @@ import javax.inject.Singleton
 
 @Singleton
 class MapViewModel @Inject constructor(
+    mapRepo: MapRepo,
     private val storageHelper: StorageHelper,
-    private val mapRepo: MapRepo,
     private val assetRepo: AssetRepo,
     private val plantRepo: PlantRepo,
     private val plantMarkerDiffer: PlanterMarkerDiffer,

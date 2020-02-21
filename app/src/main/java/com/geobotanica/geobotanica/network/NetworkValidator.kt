@@ -20,6 +20,8 @@ class NetworkValidator @Inject constructor(appContext: Context) {
 
     private val sharedPrefsAllowMeteredNetwork = "allowMeteredNetwork"
 
+    fun allowMeteredNetwork() = defaultSharedPrefs.put(sharedPrefsAllowMeteredNetwork to true)
+
     fun getStatus(): NetworkState {
         return if (! isNetworkConnected())
             INVALID
@@ -29,9 +31,7 @@ class NetworkValidator @Inject constructor(appContext: Context) {
             VALID
     }
 
-    fun isNetworkMetered(): Boolean = connectivityManager.isActiveNetworkMetered
-
-    fun allowMeteredNetwork() = defaultSharedPrefs.put(sharedPrefsAllowMeteredNetwork to true)
+    private fun isNetworkMetered(): Boolean = connectivityManager.isActiveNetworkMetered
 
     private fun isNetworkConnected(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

@@ -8,7 +8,7 @@ import android.view.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
+import androidx.lifecycle.observe
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.PlantPhoto
 import com.geobotanica.geobotanica.databinding.FragmentPlantDetailBinding
@@ -110,10 +110,10 @@ class PlantDetailFragment : BaseFragment() {
 
     private fun bindViewModel() {
         with(viewModel) {
-            plantType.observe(viewLifecycleOwner, Observer { plantTypeButton.setPlantType(it) })
-            photoData.observe(viewLifecycleOwner, Observer { photoAdapter.submitList(it) })
-            startPhotoIntent.observe(viewLifecycleOwner, Observer { startPhotoIntent(it) })
-            showPlantDeletedToast.observe(viewLifecycleOwner, Observer { showToast(R.string.plant_deleted) })
+            plantType.observe(viewLifecycleOwner) { plantTypeButton.setPlantType(it) }
+            photoData.observe(viewLifecycleOwner) { photoAdapter.submitList(it) }
+            startPhotoIntent.observe(viewLifecycleOwner) { startPhotoIntent(it) }
+            showPlantDeletedToast.observe(viewLifecycleOwner) { showToast(R.string.plant_deleted) }
         }
     }
 

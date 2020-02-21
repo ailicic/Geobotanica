@@ -81,8 +81,6 @@
     <string name="searching_online_maps">Searching online maps…</string>
     <string name="find_local_maps">Find local maps</string>
     <string name="browse_maps">Browse maps</string>
-    <string name="exit_app">Exit App?</string>
-    <string name="exit_app_confirm">Are you sure you want to exit?</string>
     <string name="delete_map">Delete Map?</string>
     <string name="confirm_delete_map">Are you sure you want to delete the %1$s map?</string>
     <string name="geolocation_error">Geolocation error</string>
@@ -100,7 +98,6 @@
     <string name="permissions_required">Permissions are required.</string>
     <string name="update_location">Update location</string>
     <string name="import_assets">Import Assets</string>
-    <string name="import_map">Import Maps</string>
     <string name="downloading">Downloading</string>
     <string name="notification_channel_downloads">Downloads</string>
     <string name="notification_channel_description_downloads">Shows progress of downloads</string>

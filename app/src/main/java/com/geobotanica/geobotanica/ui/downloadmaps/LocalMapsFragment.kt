@@ -11,6 +11,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.databinding.FragmentLocalMapsBinding
@@ -31,7 +32,6 @@ class LocalMapsFragment : BaseFragment() {
     private lateinit var viewModel: LocalMapsViewModel
 
     private val mapListAdapter = MapListAdapter(::onClickDownload, ::onClickCancel, ::onClickDelete)
-    private val sharedPrefsExitOnBack = "exitOnBackPermitted"
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -85,7 +85,7 @@ class LocalMapsFragment : BaseFragment() {
         viewModel.localMaps.observe(viewLifecycleOwner, onLocalMaps)
         viewModel.showMeteredNetworkDialog.observe(viewLifecycleOwner, onShowMeteredNetworkDialog)
         viewModel.showInsufficientStorageSnackbar.observe(viewLifecycleOwner, onShowInsufficientStorageSnackbar)
-        viewModel.showInternetUnavailableSnackbar.observe(viewLifecycleOwner, Observer { showSnackbar(resources.getString(R.string.internet_unavailable)) })
+        viewModel.showInternetUnavailableSnackbar.observe(viewLifecycleOwner) { showSnackbar(resources.getString(R.string.internet_unavailable)) }
     }
 
     private fun rebindLocalMapsObserver() {

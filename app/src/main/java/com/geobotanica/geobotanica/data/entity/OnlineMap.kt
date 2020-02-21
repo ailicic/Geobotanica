@@ -8,6 +8,7 @@ import com.geobotanica.geobotanica.util.replacePrefix
 import com.squareup.moshi.JsonClass
 
 
+@Suppress("unused")
 @Entity(tableName = "maps",
 // NOTE: Disabled foreign key constraint as asynchronous nature of asset downloads causes crashes
 //    foreignKeys = [ForeignKey(
@@ -28,8 +29,8 @@ data class  OnlineMap(
         val timestamp: String,
         val parentFolderId: Long?,
 
-//        @Transient // Exclude from JSON serialization // TODO: REMOVE AFTER SCRAPER IS MOVED TO SERVER
-//        @ColumnInfo(name = "status") // Force include in Room DB, despite @Transient // TODO: REMOVE AFTER SCRAPER IS MOVED TO SERVER
+        @Transient // Exclude from JSON serialization // TODO: REMOVE AFTER SCRAPER IS MOVED TO SERVER
+        @ColumnInfo(name = "status") // Force include in Room DB, despite @Transient // TODO: REMOVE AFTER SCRAPER IS MOVED TO SERVER
         val status: DownloadStatus = NOT_DOWNLOADED,
 
         @PrimaryKey(autoGenerate = true)
@@ -51,10 +52,7 @@ data class  OnlineMap(
             .removeSuffix(">") // Present if filename is too long on scraped Mapsforge website
             .replace('-', ' ')
             .capitalizeWords() +
-            " ($printSize)"
-
-    val printSize: String
-        get() = "$sizeMb MB"
+            " $sizeMb MB"
 }
 
 

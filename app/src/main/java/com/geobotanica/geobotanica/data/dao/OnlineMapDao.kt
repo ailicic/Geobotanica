@@ -25,8 +25,8 @@ interface OnlineMapDao : BaseDao<OnlineMap> {
     @Query("SELECT * FROM maps WHERE status = :status")
     suspend fun getNotDownloaded(status: Int = NOT_DOWNLOADED.ordinal): List<OnlineMap>
 
-    @Query("SELECT * FROM maps WHERE status = :status")
-    suspend fun getDownloaded(status: Int = DOWNLOADED.ordinal): List<OnlineMap>
+//    @Query("SELECT * FROM maps WHERE status = :status")
+//    suspend fun getDownloaded(status: Int = DOWNLOADED.ordinal): List<OnlineMap>
 
     @Query("SELECT * FROM maps WHERE status = :status")
     fun getDownloadedLiveData(status: Int = DOWNLOADED.ordinal): LiveData<List<OnlineMap>>

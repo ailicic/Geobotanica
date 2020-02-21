@@ -25,15 +25,13 @@ import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.fragment_map.*
 import javax.inject.Inject
 
+// TODO: Bump versions on deps
 // TODO: Redo layout of BrowseMapsFragment. Put browse button on bottom left, storage label on bottom right
-// TODO: Remove all "Observer" in observe calls (use androidx helper with trailing lambda)
 // TODO: Fix/update tests
 // const val KEY_PERMIT_METERED_NETWORK = "KEY_PERMIT_METERED_NETWORK" // TODO: Use sharedPrefs instead
 // TODO: Fix location icon offset with zoom levels. Also plant marker tap is off.
 // TODO: Maybe apply INTERNET_CONNECTED constraint to download worker?
-// TODO: Cancel all OnlineAsset downloads + reset UI (eg progressBar) when DownloadAssetsFragment started/resumed (need to cancel here in case user presses HOME and comes back). Make it reactive
 // TODO: Check behaviour of OnlineMap downloads that must pause after losing internet.
-// TODO: Test navigating back and forth from DownloadAssetsFragment and check if nav error appears afterwards
 // TODO: Fix fragment animations when using popUpTo
 // TODO: Fix hidden FAB on Login screen after typed name is sufficiently long and keyboard visible (have coordinator layout already...)
 // TODO: Force GPS compound view to stay at bottom when keyboard visible
@@ -213,7 +211,7 @@ class MapFragment : BaseFragment() {
         locationMarker = null
 
         with(viewModel) { mapView.init(mapLatitude, mapLongitude, mapZoomLevel) }
-        mapView.loadMarkers.observe(viewLifecycleOwner, Observer { loadMarkers() })
+        mapView.loadMarkers.observe(viewLifecycleOwner) { loadMarkers() }
 
 //        if (viewModel.isFirstRun)
 //            viewModel.getLastLocation()?.let { centerMap(it, false) } // TODO: CHECK IF THIS SHOULD STAY (never worked)
@@ -325,9 +323,9 @@ class MapFragment : BaseFragment() {
 
     private fun createLocationMarker() {
         locationMarker = LocationMarker(resources.getDrawable(R.drawable.person, null), mapView)
-        locationMarker?.showLocationMarkerToast?.observe(viewLifecycleOwner, Observer {
+        locationMarker?.showLocationMarkerToast?.observe(viewLifecycleOwner) {
             showToast(R.string.you_are_here)
-        })
+        }
     }
 
     private fun forceLocationMarkerOnTop() {
@@ -341,4 +339,3 @@ class MapFragment : BaseFragment() {
         }
     }
 }
-

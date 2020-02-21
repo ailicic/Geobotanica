@@ -10,8 +10,8 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.Plant
@@ -132,9 +132,9 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     private fun bindViewModel() {
         with(viewModel) {
-            photoData.observe(viewLifecycleOwner, Observer { photoAdapter.submitList(it) } )
-            showPhotoDeletedToast.observe(viewLifecycleOwner, Observer { showToast(getString(R.string.photo_deleted)) })
-            startPhotoIntent.observe(viewLifecycleOwner, Observer { startPhotoIntent(it) })
+            photoData.observe(viewLifecycleOwner) { photoAdapter.submitList(it) }
+            showPhotoDeletedToast.observe(viewLifecycleOwner) { showToast(getString(R.string.photo_deleted)) }
+            startPhotoIntent.observe(viewLifecycleOwner) { startPhotoIntent(it) }
         }
     }
 

@@ -32,7 +32,6 @@ class DownloadAssetsViewModel @Inject constructor(
         private val downloadStatusSynchronizer: DownloadStatusSynchronizer
 ): ViewModel() {
     var userId = 0L
-    var shouldImportAssets = false // True if assets can be imported from storage instead of downloaded
 
     val showStorageSnackbar = SingleLiveEvent<OnlineAsset>()
 
@@ -57,6 +56,8 @@ class DownloadAssetsViewModel @Inject constructor(
     }
 
     val showProgressSpinner: LiveData<Boolean> = showDownloadButton.map { ! it }
+
+    private var shouldImportAssets = false // True if assets can be imported from storage instead of downloaded
 
     suspend fun areOnlineAssetsInExtStorageRootDir(): Boolean = withContext(Dispatchers.IO) {
         shouldImportAssets = assetRepo.getAll().all { storageHelper.isGzipAssetInExtStorageRootDir(it) }

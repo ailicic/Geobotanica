@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import com.geobotanica.geobotanica.data.entity.OnlineAsset
-import com.geobotanica.geobotanica.network.DownloadStatus.DOWNLOADED
 
 @Dao
 interface OnlineAssetDao : BaseDao<OnlineAsset> {
@@ -17,8 +16,8 @@ interface OnlineAssetDao : BaseDao<OnlineAsset> {
     @Query("SELECT * FROM assets WHERE id = :id")
     fun getLiveData(id: Long): LiveData<OnlineAsset>
 
-    @Query("SELECT * FROM assets WHERE status = :downloaded")
-    suspend fun getDownloaded(downloaded: Int = DOWNLOADED.ordinal): List<OnlineAsset>
+//    @Query("SELECT * FROM assets WHERE status = :downloaded")
+//    suspend fun getDownloaded(downloaded: Int = DOWNLOADED.ordinal): List<OnlineAsset>
 
     @Query("SELECT * FROM assets")
     suspend fun getAll(): List<OnlineAsset>

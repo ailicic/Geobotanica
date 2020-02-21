@@ -1,10 +1,10 @@
 package com.geobotanica.geobotanica.network
 
-import android.app.DownloadManager
-import android.app.DownloadManager.COLUMN_URI
-import android.app.DownloadManager.Query
 import androidx.lifecycle.LiveData
-import androidx.work.*
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.worker.*
 import com.geobotanica.geobotanica.data.entity.OnlineAsset
@@ -28,7 +28,6 @@ const val KEY_ITEM_COUNT = "KEY_ITEM_COUNT" // Optional. Used if JSON deserializ
 @Singleton
 class FileDownloader @Inject constructor (
         private val storageHelper: StorageHelper,
-        private val downloadManager: DownloadManager,
         private val workManager: WorkManager
 ) {
 
@@ -108,25 +107,6 @@ class FileDownloader @Inject constructor (
                 .then(validationWorker)
         work.enqueue()
         return work.workInfosLiveData
-    }
-
-    fun isMap(downloadId: Long): Boolean {
-        return downloadManager.query(Query().setFilterById(downloadId)).run {
-            if (! moveToFirst())
-                return false
-            val uri = getString(getColumnIndex(COLUMN_URI))
-            close()
-            uri.endsWith(".map")
-        }
-    }
-
-    fun filenameFrom(downloadId: Long): String {
-        return downloadManager.query(Query().setFilterById(downloadId)).run {
-            moveToFirst()
-            val uri = getString(getColumnIndex(COLUMN_URI))
-            close()
-            uri.substringAfterLast('/')
-        }
     }
 
     fun cancelDownloadWork(asset: OnlineAsset) = workManager.cancelAllWorkByTag(asset.filename)

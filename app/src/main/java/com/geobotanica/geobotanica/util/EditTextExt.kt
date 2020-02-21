@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.geobotanica.geobotanica.util
 
 import android.text.Editable
