@@ -1,25 +1,28 @@
 package com.geobotanica.geobotanica.ui.downloadmaps
 
 import androidx.lifecycle.*
+import androidx.work.WorkInfo
+import com.geobotanica.geobotanica.android.file.FileImporter
 import com.geobotanica.geobotanica.android.file.StorageHelper
+import com.geobotanica.geobotanica.android.worker.DownloadStatusSynchronizer
 import com.geobotanica.geobotanica.android.worker.MapValidator
+import com.geobotanica.geobotanica.data.entity.OnlineMap
 import com.geobotanica.geobotanica.data.repo.GeolocationRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
-import com.geobotanica.geobotanica.network.DownloadStatus.DOWNLOADED
-import com.geobotanica.geobotanica.network.DownloadStatus.NOT_DOWNLOADED
+import com.geobotanica.geobotanica.network.DownloadStatus.*
 import com.geobotanica.geobotanica.network.FileDownloader
 import com.geobotanica.geobotanica.network.NetworkValidator
 import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
 import com.geobotanica.geobotanica.network.Resource
 import com.geobotanica.geobotanica.network.ResourceStatus.*
-import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.SingleLiveEvent
-import com.geobotanica.geobotanica.util.liveData
+import com.geobotanica.geobotanica.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+
 
 // TODO: If/when tests are created, consider converting this to MVI first
 
@@ -28,8 +31,10 @@ class LocalMapsViewModel @Inject constructor(
         private val networkValidator: NetworkValidator,
         private val storageHelper: StorageHelper,
         private val fileDownloader: FileDownloader,
+        private val fileImporter: FileImporter,
         private val mapRepo: MapRepo,
         private val mapValidator: MapValidator,
+        private val downloadStatusSynchronizer: DownloadStatusSynchronizer,
         geolocationRepo: GeolocationRepo
 ): ViewModel() {
     var userId = 0L
@@ -64,19 +69,8 @@ class LocalMapsViewModel @Inject constructor(
 
     fun getFreeExternalStorageInMb() = storageHelper.getFreeExternalStorageInMb()
 
-    fun getMapsFromExtStorage() = viewModelScope.launch(Dispatchers.IO) {
-        File(storageHelper.getExtStorageRootPath()).listFiles()?.forEach { file ->
-            if (file.extension == "map") {
-                mapRepo.getByFilename(file.name)?.let { map ->
-                    if (map.isNotDownloaded) {
-                        Lg.d("Importing map from external storage: ${file.name}")
-                        file.copyTo(File(storageHelper.getMapsPath(), file.name), overwrite = true)
-                        mapRepo.update(map.copy(status = DOWNLOADED))
-                        Lg.d("Imported map from external storage: ${file.name}")
-                    }
-                }
-            }
-        }
+    fun syncDownloadStatuses() = viewModelScope.launch(Dispatchers.IO) {
+        downloadStatusSynchronizer.syncAll()
     }
 
     fun initDownload(mapListItem: OnlineMapListItem) {
@@ -93,40 +87,52 @@ class LocalMapsViewModel @Inject constructor(
         lastClickedMap?.let { downloadMap(it.id) }
     }
 
-    fun cancelDownload(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
-        val onlineMap = mapRepo.get(onlineMapId)
-        fileDownloader.cancelDownloadWork(onlineMap)
-        Lg.i("Cancelled map download: ${onlineMap.filename}")
-        // TODO: Ensure status is updated in db
+    fun cancelDownload(mapId: Long) = viewModelScope.launch(Dispatchers.IO) {
+        val map = mapRepo.get(mapId)
+        fileDownloader.cancelDownloadWork(map)
+        mapRepo.update(map.copy(status = NOT_DOWNLOADED).apply { id = mapId })
+        Lg.i("Clicked cancel on map download: ${map.filename}")
     }
 
-//    fun cancelDownload(downloadId: Long) = viewModelScope.launch(Dispatchers.IO) {
-//        val result = fileDownloader.cancelDownload(downloadId)
-//        mapRepo.getByDownloadId(downloadId)?.let { onlineMap ->
-//            mapRepo.update(onlineMap.copy(status = NOT_DOWNLOADED))
-//            Lg.i("Cancelled map download: ${onlineMap.filename} (Result=$result)")
-//        }
-//    }
-
-    fun deleteMap(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
-        val onlineMap = mapRepo.get(onlineMapId)
-        val mapFile = File(storageHelper.getMapsPath(), onlineMap.filename)
+    fun deleteMap(mapId: Long) = viewModelScope.launch(Dispatchers.IO) {
+        val map = mapRepo.get(mapId)
+        val mapFile = File(storageHelper.getMapsPath(), map.filename)
         val result = mapFile.delete()
-        mapRepo.update(onlineMap.copy(status = NOT_DOWNLOADED))
-        Lg.i("Deleted map: ${onlineMap.filename} (Result=$result)")
+        mapRepo.update(map.copy(status = NOT_DOWNLOADED).apply { id = mapId })
+        Lg.i("Clicked delete on map: ${map.filename} (deleted=$result)")
     }
 
-    fun verifyMaps() = viewModelScope.launch(Dispatchers.IO) {
-//        fileDownloader.verifyDownloadedMaps()
-        mapValidator.validateAll()
-    }
-
-    private fun downloadMap(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
-        val onlineMap = mapRepo.get(onlineMapId)
-        if (! storageHelper.isStorageAvailable(onlineMap)) {
+    private fun downloadMap(mapId: Long) = viewModelScope.launch(Dispatchers.IO) {
+        val map = mapRepo.get(mapId)
+        if (! storageHelper.isStorageAvailable(map)) {
             showInsufficientStorageSnackbar.postValue(Unit)
-            return@launch
+        } else if (storageHelper.isMapOnExtStorage(map)) {
+            val workInfo = fileImporter.importFromStorage(map)
+            registerMapObserver(workInfo, map)
+            mapRepo.update(map.copy(status = DOWNLOADING).apply { id = map.id })
+        } else {
+            val workInfo = fileDownloader.download(map)
+            registerMapObserver(workInfo, map)
+            mapRepo.update(map.copy(status = DOWNLOADING).apply { id = map.id })
         }
-        fileDownloader.downloadMap(onlineMap)
+    }
+
+
+    private suspend fun registerMapObserver(workInfo: LiveData<List<WorkInfo>>, map: OnlineMap) = withContext(Dispatchers.Main) {
+        workInfo.observeForever { // TODO: Is this the best way to catch failures? Memory leak?
+            viewModelScope.launch(Dispatchers.IO) {
+                when {
+                    it.isSuccessful -> { } // NOOP
+                    it.isCancelled -> {
+                        Lg.d("MapDownloadObserver: ${map.filename} cancelled")
+                        mapValidator.verifyStatus(map)
+                    }
+                    it.isFailed -> {
+                        Lg.d("MapDownloadObserver: ${map.filename} failed")
+                        mapValidator.verifyStatus(map)
+                    }
+                }
+            }
+        }
     }
 }

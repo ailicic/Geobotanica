@@ -64,21 +64,21 @@ class DownloadAssetsViewModel @Inject constructor(
     }
 
     fun downloadAssets() = viewModelScope.launch(Dispatchers.IO) {
-        if (shouldImportAssets) {
+        if (shouldImportAssets)
             importAssets()
-            return@launch
-        }
-        assetRepo.getAll().forEach { asset ->
-            if (asset.isDownloading)
-                Lg.d("${asset.filename}: Asset already downloading")
-            else if (asset.isDownloaded)
-                Lg.d("${asset.filename}: Asset already downloaded")
-            else if (! storageHelper.isStorageAvailable(asset))
-                showStorageSnackbar.postValue(asset)
-            else {
-                val workInfo = fileDownloader.downloadAsset(asset)
-                monitorAssetDownload(workInfo, asset)
-                assetRepo.update(asset.copy(status = DOWNLOADING).apply { id = asset.id })
+        else {
+            assetRepo.getAll().forEach { asset ->
+                if (asset.isDownloading)
+                    Lg.d("${asset.filename}: Asset already downloading")
+                else if (asset.isDownloaded)
+                    Lg.d("${asset.filename}: Asset already downloaded")
+                else if (!storageHelper.isStorageAvailable(asset))
+                    showStorageSnackbar.postValue(asset)
+                else {
+                    val workInfo = fileDownloader.download(asset)
+                    registerAssetObserver(workInfo, asset)
+                    assetRepo.update(asset.copy(status = DOWNLOADING).apply { id = asset.id })
+                }
             }
         }
     }
@@ -93,13 +93,13 @@ class DownloadAssetsViewModel @Inject constructor(
                 showStorageSnackbar.postValue(asset)
             else {
                 val workInfo = fileImporter.importFromStorage(asset)
-                monitorAssetDownload(workInfo, asset)
+                registerAssetObserver(workInfo, asset)
                 assetRepo.update(asset.copy(status = DOWNLOADING).apply { id = asset.id })
             }
         }
     }
 
-    private suspend fun monitorAssetDownload(workInfo: LiveData<List<WorkInfo>>, asset: OnlineAsset) = withContext(Dispatchers.Main) {
+    private suspend fun registerAssetObserver(workInfo: LiveData<List<WorkInfo>>, asset: OnlineAsset) = withContext(Dispatchers.Main) {
         workInfo.observeForever { // TODO: Is this the best way to catch failures? Memory leak?
             viewModelScope.launch(Dispatchers.IO) {
                 when {

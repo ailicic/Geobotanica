@@ -14,8 +14,6 @@ import com.geobotanica.geobotanica.data_taxa.TaxaDatabase
 import com.geobotanica.geobotanica.data_taxa.repo.TaxonRepo
 import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.network.KEY_FILE_NAME
-import com.geobotanica.geobotanica.network.KEY_ITEM_COUNT
-import com.geobotanica.geobotanica.network.KEY_DEST_PATH
 import com.geobotanica.geobotanica.network.KEY_TITLE
 import com.geobotanica.geobotanica.ui.NOTIFICATION_CHANNEL_ID_DOWNLOADS
 import com.geobotanica.geobotanica.ui.login.onlineAssetList
@@ -41,10 +39,8 @@ class ValidationWorker(val context: Context, workerParams: WorkerParameters) : C
 
     private fun extractInputData(): ValidationInputData {
         return ValidationInputData(
-                inputData.getString(KEY_DEST_PATH) ?: throw NoSuchElementException("ValidationWorker: missing local path"),
                 inputData.getString(KEY_FILE_NAME) ?: throw NoSuchElementException("ValidationWorker: missing file name"),
-                inputData.getString(KEY_TITLE) ?: throw NoSuchElementException("ValidationWorker: missing title"),
-                inputData.getInt(KEY_ITEM_COUNT, 0)
+                inputData.getString(KEY_TITLE) ?: throw NoSuchElementException("ValidationWorker: missing title")
         )
     }
 
@@ -79,10 +75,10 @@ class ValidationWorker(val context: Context, workerParams: WorkerParameters) : C
 
     private suspend fun validateAsset(data: ValidationInputData) = withContext(Dispatchers.IO) {
         val assetValidator = buildAssetValidator()
-        if (assetValidator.isValid(data.filename))
-            return@withContext Result.success(inputData)
+        return@withContext if (assetValidator.isValid(data.filename))
+            Result.success(inputData)
         else
-            return@withContext Result.failure()
+            Result.failure()
     }
 
     private fun buildAssetValidator(): AssetValidator {
@@ -101,7 +97,7 @@ class ValidationWorker(val context: Context, workerParams: WorkerParameters) : C
 
     private suspend fun validateMap(data: ValidationInputData) = withContext(Dispatchers.IO) {
         val mapValidator = buildMapValidator()
-        if (mapValidator.isValid(data.filename)) {
+        return@withContext if (mapValidator.isValid(data.filename)) {
             Result.success(inputData)
         } else {
             Result.failure()
@@ -117,9 +113,7 @@ class ValidationWorker(val context: Context, workerParams: WorkerParameters) : C
     }
 
     private data class ValidationInputData(
-            val localPath: String,
             val filename: String,
-            val title: String,
-            val count: Int
+            val title: String
     )
 }

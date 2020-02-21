@@ -27,6 +27,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 // TODO: Fix/update tests
+// const val KEY_PERMIT_METERED_NETWORK = "KEY_PERMIT_METERED_NETWORK" // TODO: Use sharedPrefs instead
+// TODO: Fix location icon offset with zoom levels
 // TODO: Maybe apply INTERNET_CONNECTED constraint to download worker?
 // TODO: Cancel all OnlineAsset downloads + reset UI (eg progressBar) when DownloadAssetsFragment started/resumed (need to cancel here in case user presses HOME and comes back). Make it reactive
 // TODO: Try making all entities with id as data class val, not var (requires apply { id = id } )

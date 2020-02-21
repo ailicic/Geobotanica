@@ -64,12 +64,11 @@ class LocalMapsFragment : BaseFragment() {
         bindViewModel()
 
         storageAvailableText.text = getString(R.string.storage_available, viewModel.getFreeExternalStorageInMb())
-        viewModel.getMapsFromExtStorage()
     }
 
     override fun onStart() {
         super.onStart()
-        viewModel.verifyMaps()
+        viewModel.syncDownloadStatuses()
     }
 
     override fun onDestroy() {

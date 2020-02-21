@@ -24,7 +24,7 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class  OnlineMap(
         val url: String,
-        val sizeMb: Long, // TODO: Get actual size in bytes during scrape?
+        val sizeMb: Long, // TODO: Get actual size in bytes when possible (prob after server is up)
         val timestamp: String,
         val parentFolderId: Long?,
 
@@ -36,6 +36,8 @@ data class  OnlineMap(
 
     val filename: String
         get() = url.substringAfterLast('/')
+
+    val filenameGzip: String get() = "$filename.gz"
 
     val isDownloaded: Boolean get() = status == DOWNLOADED
     val isDownloading: Boolean get() = status == DOWNLOADING

@@ -32,7 +32,7 @@ class FileDownloader @Inject constructor (
         private val workManager: WorkManager
 ) {
 
-    fun downloadAsset(asset: OnlineAsset): LiveData<List<WorkInfo>> {
+    fun download(asset: OnlineAsset): LiveData<List<WorkInfo>> {
 
         val inputData = workDataOf(
                 KEY_DOWNLOAD_URL to asset.url,
@@ -43,7 +43,7 @@ class FileDownloader @Inject constructor (
                 KEY_DECOMPRESSED_FILE_SIZE to asset.decompressedSize,
                 KEY_TITLE to asset.description,
                 KEY_ITEM_COUNT to asset.itemCount,
-                KEY_PERMIT_METERED_NETWORK to false // TODO: Need to pass in as argument
+                KEY_PERMIT_METERED_NETWORK to false
         )
 
         val downloadWorker = OneTimeWorkRequestBuilder<DownloadWorker>()
@@ -82,14 +82,17 @@ class FileDownloader @Inject constructor (
 
     fun isDownloading(asset: OnlineAsset): Boolean = workManager.getWorkInfosByTag(asset.filename).get().isRunning
 
-    fun downloadMap(map: OnlineMap): LiveData<Operation.State> {
+    fun isDownloading(map: OnlineMap): Boolean = workManager.getWorkInfosByTag(map.filename).get().isRunning
+
+    fun download(map: OnlineMap): LiveData<List<WorkInfo>> {
 
         val inputData = workDataOf(
                 KEY_DOWNLOAD_URL to map.url,
-                KEY_DEST_PATH to storageHelper.getMapsPath(),
+                KEY_SOURCE_PATH to storageHelper.getMapsPath(),
                 KEY_FILE_NAME to map.filename,
+//                KEY_FILE_SIZE to map.fileSize, // TODO: Include after map file sizes are known
                 KEY_TITLE to map.printName,
-                KEY_PERMIT_METERED_NETWORK to false // TODO: Need to pass in as argument
+                KEY_PERMIT_METERED_NETWORK to false
         )
 
         val downloadWorker = OneTimeWorkRequestBuilder<DownloadWorker>()
@@ -103,7 +106,8 @@ class FileDownloader @Inject constructor (
 
         val work = workManager.beginWith(downloadWorker)
                 .then(validationWorker)
-        return work.enqueue().state
+        work.enqueue()
+        return work.workInfosLiveData
     }
 
     fun isMap(downloadId: Long): Boolean {

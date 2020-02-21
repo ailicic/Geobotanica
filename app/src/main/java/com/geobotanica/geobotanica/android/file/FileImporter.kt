@@ -61,7 +61,34 @@ class FileImporter @Inject constructor(
         return work.workInfosLiveData
     }
 
-    fun importFromStorage(map: OnlineMap) {
+    fun importFromStorage(map: OnlineMap): LiveData<List<WorkInfo>> {
+        Lg.d("FileImporter: Importing ${map.filename} from storage")
 
+        val inputData = workDataOf(
+                KEY_SOURCE_PATH to storageHelper.getExtStorageRootPath(),
+                KEY_DEST_PATH to storageHelper.getMapsPath(),
+                KEY_FILE_NAME to map.filenameGzip,
+                KEY_DECOMPRESSED_FILE_SIZE to map.sizeMb * 1024 * 1024, // TODO: Make this more accurate after map sizes are available
+                KEY_TITLE to map.printName
+        )
+
+        val copyFileWorker = OneTimeWorkRequestBuilder<CopyFileWorker>()
+                .addTags(COPY_FILE_TAG, map.filename)
+                .setInputData(inputData)
+                .build()
+        var work = workManager.beginWith(copyFileWorker)
+
+        val decompressionWorker = OneTimeWorkRequestBuilder<DecompressionWorker>()
+                .addTags(DECOMPRESSION_TAG, map.filename)
+                .build()
+        work = work.then(decompressionWorker)
+
+        val validationWorker = OneTimeWorkRequestBuilder<ValidationWorker>()
+                .addTags(VALIDATION_TAG, map.filename)
+                .build()
+        work = work.then(validationWorker)
+
+        work.enqueue()
+        return work.workInfosLiveData
     }
 }

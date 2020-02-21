@@ -1,19 +1,23 @@
 package com.geobotanica.geobotanica.ui.downloadmaps
 
 import androidx.lifecycle.*
+import androidx.work.WorkInfo
+import com.geobotanica.geobotanica.android.file.FileImporter
 import com.geobotanica.geobotanica.android.file.StorageHelper
+import com.geobotanica.geobotanica.android.worker.DownloadStatusSynchronizer
+import com.geobotanica.geobotanica.android.worker.MapValidator
 import com.geobotanica.geobotanica.data.entity.OnlineMap
 import com.geobotanica.geobotanica.data.entity.OnlineMapFolder
 import com.geobotanica.geobotanica.data.repo.MapRepo
+import com.geobotanica.geobotanica.network.DownloadStatus
 import com.geobotanica.geobotanica.network.DownloadStatus.NOT_DOWNLOADED
 import com.geobotanica.geobotanica.network.FileDownloader
 import com.geobotanica.geobotanica.network.NetworkValidator
 import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
-import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.SingleLiveEvent
-import com.geobotanica.geobotanica.util.mutableLiveData
+import com.geobotanica.geobotanica.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,7 +29,10 @@ class BrowseMapsViewModel @Inject constructor(
         private val networkValidator: NetworkValidator,
         private val storageHelper: StorageHelper,
         private val fileDownloader: FileDownloader,
-        private val mapRepo: MapRepo
+        private val fileImporter: FileImporter,
+        private val mapRepo: MapRepo,
+        private val mapValidator: MapValidator,
+        private val downloadStatusSynchronizer: DownloadStatusSynchronizer
 ): ViewModel() {
     var userId = 0L
 
@@ -42,8 +49,11 @@ class BrowseMapsViewModel @Inject constructor(
 
     private var lastClickedMap: OnlineMapListItem? = null
 
-    fun browseMapFolder(folderId: Long?) { mapFolderId.value = folderId }
+    fun syncDownloadStatuses() = viewModelScope.launch(Dispatchers.IO) {
+        downloadStatusSynchronizer.syncAll()
+    }
 
+    fun browseMapFolder(folderId: Long?) { mapFolderId.value = folderId }
 
     fun initDownload(mapListItem: OnlineMapListItem) {
         lastClickedMap = mapListItem
@@ -59,30 +69,52 @@ class BrowseMapsViewModel @Inject constructor(
         lastClickedMap?.let { downloadMap(it.id) }
     }
 
-    fun cancelDownloadWork(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
-        val onlineMap = mapRepo.get(onlineMapId)
-        fileDownloader.cancelDownloadWork(onlineMap)
-        Lg.i("Cancelled map download: ${onlineMap.filename}")
-//        mapRepo.update(onlineMap.copy(status = NOT_DOWNLOADED))
-        // TODO: Ensure status is updated in db
+    fun cancelDownloadWork(mapId: Long) = viewModelScope.launch(Dispatchers.IO) {
+        val map = mapRepo.get(mapId)
+        fileDownloader.cancelDownloadWork(map)
+        mapRepo.update(map.copy(status = NOT_DOWNLOADED).apply { id = mapId })
+        Lg.i("Clicked cancel on map download: ${map.filename}")
     }
 
-    fun deleteMap(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
-        val onlineMap = mapRepo.get(onlineMapId)
-        val mapFile = File(storageHelper.getMapsPath(), onlineMap.filename)
+    fun deleteMap(mapId: Long) = viewModelScope.launch(Dispatchers.IO) {
+        val map = mapRepo.get(mapId)
+        val mapFile = File(storageHelper.getMapsPath(), map.filename)
         val result = mapFile.delete()
-//        onlineMap.status = FileDownloader.NOT_DOWNLOADED
-        mapRepo.update(onlineMap.copy(status = NOT_DOWNLOADED))
-        Lg.i("Deleted map: ${onlineMap.filename} (Result=$result)")
+        mapRepo.update(map.copy(status = NOT_DOWNLOADED).apply { id = mapId })
+        Lg.i("Clicked delete on map: ${map.filename} (deleted=$result)")
     }
 
-    private fun downloadMap(onlineMapId: Long) = viewModelScope.launch(Dispatchers.IO) {
-        val onlineMap = mapRepo.get(onlineMapId)
-        if (! storageHelper.isStorageAvailable(onlineMap)) {
+    private fun downloadMap(mapId: Long) = viewModelScope.launch(Dispatchers.IO) {
+        val map = mapRepo.get(mapId)
+        if (! storageHelper.isStorageAvailable(map)) {
             showInsufficientStorageSnackbar.postValue(Unit)
-            return@launch
+        } else if (storageHelper.isMapOnExtStorage(map)) {
+            val workInfo = fileImporter.importFromStorage(map)
+            registerMapObserver(workInfo, map)
+            mapRepo.update(map.copy(status = DownloadStatus.DOWNLOADING).apply { id = map.id })
+        } else {
+            val workInfo = fileDownloader.download(map)
+            registerMapObserver(workInfo, map)
+            mapRepo.update(map.copy(status = DownloadStatus.DOWNLOADING).apply { id = map.id })
         }
-        fileDownloader.downloadMap(onlineMap)
+    }
+
+    private suspend fun registerMapObserver(workInfo: LiveData<List<WorkInfo>>, map: OnlineMap) = withContext(Dispatchers.Main) {
+        workInfo.observeForever { // TODO: Is this the best way to catch failures? Memory leak?
+            viewModelScope.launch(Dispatchers.IO) {
+                when {
+                    it.isSuccessful -> { } // NOOP
+                    it.isCancelled -> {
+                        Lg.d("MapDownloadObserver: ${map.filename} cancelled")
+                        mapValidator.verifyStatus(map)
+                    }
+                    it.isFailed -> {
+                        Lg.d("MapDownloadObserver: ${map.filename} failed")
+                        mapValidator.verifyStatus(map)
+                    }
+                }
+            }
+        }
     }
 
     private fun childMapListItemsOf(mapFolderId: Long?): LiveData<List<OnlineMapListItem>> {

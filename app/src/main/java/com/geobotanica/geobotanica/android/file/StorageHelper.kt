@@ -60,7 +60,7 @@ class StorageHelper @Inject constructor(val appContext: Context) {
 
     @SuppressLint("UsableSpace")
     fun isStorageAvailable(onlineMap: OnlineMap): Boolean {
-        val requiredStorageMb = (onlineMap.sizeMb.toFloat() * 1.2f).toLong()
+        val requiredStorageMb = (onlineMap.sizeMb * 2L)
         val freeStorageMb = getFreeExternalStorageInMb()
         return if (requiredStorageMb > freeStorageMb) {
             Lg.e("Insufficient storage ($freeStorageMb MB) for map: ${onlineMap.printName})")
@@ -70,6 +70,12 @@ class StorageHelper @Inject constructor(val appContext: Context) {
     }
 
     fun getMapsPath() = "${getDownloadPath()}/maps"
+
+    fun isMapOnExtStorage(map: OnlineMap): Boolean {
+        val result = File(getExtStorageRootPath()).listFiles()?.any { it.name == map.filenameGzip } ?: false
+        Lg.v("isMapOnExtStorage(): ${map.filename} (result=$result)")
+        return result
+    }
 
     fun createPhotoFile(): File {
         val filename: String = GbTime.now().asFilename()

@@ -52,7 +52,7 @@ class OnlineMapScraper @Inject constructor (
                 val rows = doc.select("tr")
 
                 for (i in 3 until rows.size - 1) { // Skip first 3 rows and last row
-
+                    Lg.v("SCRAPER: row #$i = ${rows[i]}")
                     val columns = rows[i].select("td")
                     val url = baseUrl + columns[1].select("a[href]").text()
                     val timestamp = columns[2].text() // TODO: Parse to DateTime object to enable comparisons

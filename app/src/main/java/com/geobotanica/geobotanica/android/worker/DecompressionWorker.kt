@@ -33,7 +33,6 @@ class DecompressionWorker(val context: Context, workerParams: WorkerParameters) 
         return DecompressionInputData(
                 inputData.getString(KEY_DEST_PATH) ?: throw NoSuchElementException("DecompressionWorker: missing local path"),
                 inputData.getString(KEY_FILE_NAME) ?: throw NoSuchElementException("DecompressionWorker: missing file name"),
-                inputData.getLong(KEY_FILE_SIZE, 0L),
                 inputData.getLong(KEY_DECOMPRESSED_FILE_SIZE, 0L),
                 inputData.getString(KEY_TITLE) ?: throw NoSuchElementException("DecompressionWorker: missing title")
         )
@@ -76,9 +75,11 @@ class DecompressionWorker(val context: Context, workerParams: WorkerParameters) 
                 unGzipSink.close()
                 gzipSourceFile.delete()
                 if (bytesRead != data.decompressedFileSize) {
-                    Lg.e("DecompressionWorker: ${data.filename} bytesRead mismatch (expected ${data.decompressedFileSize} b, but found $bytesRead b)")
-                    deleteFiles(data)
-                    return Result.failure()
+                    Lg.w("DecompressionWorker: ${data.filename} bytesRead mismatch (expected ${data.decompressedFileSize} b, but found $bytesRead b)")
+                    // TODO: Think about how to handle this. Fail gracefully for now. Maybe change after map file sizes are available.
+//                    Lg.e("DecompressionWorker: ${data.filename} bytesRead mismatch (expected ${data.decompressedFileSize} b, but found $bytesRead b)")
+//                    deleteFiles(data)
+//                    return Result.failure()
                 }
             }
             Lg.d("${data.filename}: Decompression complete ($time ms)")
@@ -128,7 +129,6 @@ class DecompressionWorker(val context: Context, workerParams: WorkerParameters) 
     private data class DecompressionInputData(
             val localPath: String,
             val filename: String,
-            val fileSize: Long,
             val decompressedFileSize: Long,
             val title: String
     )

@@ -4,12 +4,13 @@ import androidx.lifecycle.*
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.Location
-import com.geobotanica.geobotanica.android.location.LocationSubscriber
 import com.geobotanica.geobotanica.android.location.LocationService
+import com.geobotanica.geobotanica.android.location.LocationSubscriber
 import com.geobotanica.geobotanica.data.repo.AssetRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
-import com.geobotanica.geobotanica.ui.login.OnlineAssetId.*
+import com.geobotanica.geobotanica.ui.login.OnlineAssetId.PLANT_NAMES
+import com.geobotanica.geobotanica.ui.login.OnlineAssetId.WORLD_MAP
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.*
 import com.geobotanica.geobotanica.ui.map.marker.PlantMarkerData
 import com.geobotanica.geobotanica.ui.map.marker.PlanterMarkerDiffer
@@ -87,12 +88,12 @@ class MapViewModel @Inject constructor(
     }
 
     suspend fun getDownloadedMapFileList(): List<File> {
-        val mapsPath = storageHelper.getMapsPath()
+        val worldMapAsset = assetRepo.get(WORLD_MAP.id)
         return mutableListOf(
-                File(mapsPath, assetRepo.get(WORLD_MAP.id).filenameUngzip)
+                File(storageHelper.getLocalPath(worldMapAsset), worldMapAsset.filenameUngzip)
         ).apply {
             mapRepo.getDownloaded().forEach { map ->
-                add(File(mapsPath, map.filename))
+                add(File(storageHelper.getMapsPath(), map.filename))
             }
         }
     }

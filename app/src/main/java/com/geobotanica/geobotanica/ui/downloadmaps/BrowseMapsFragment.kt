@@ -60,6 +60,11 @@ class BrowseMapsFragment : BaseFragment() {
         bindViewModel()
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.syncDownloadStatuses()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         activity.toolbar.setNavigationOnClickListener(null)

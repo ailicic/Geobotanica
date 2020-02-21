@@ -45,7 +45,6 @@ class DownloadWorker(val context: Context, parameters: WorkerParameters) : Corou
         return DownloadInputData(
                 inputData.getString(KEY_DOWNLOAD_URL) ?: throw IllegalArgumentException("DownloadWorker: missing download url"),
                 inputData.getString(KEY_SOURCE_PATH) ?: throw IllegalArgumentException("DownloadWorker: missing source path"),
-                inputData.getString(KEY_DEST_PATH) ?: throw IllegalArgumentException("DownloadWorker: missing dest path"),
                 inputData.getString(KEY_FILE_NAME) ?: throw IllegalArgumentException("DownloadWorker: missing file name"),
                 inputData.getLong(KEY_FILE_SIZE, 0L),
                 inputData.getString(KEY_TITLE) ?: throw IllegalArgumentException("DownloadWorker: missing title"),
@@ -93,7 +92,8 @@ class DownloadWorker(val context: Context, parameters: WorkerParameters) : Corou
             val currentTime = System.currentTimeMillis()
 
             getDownloadInfo(downloadId)?.run {
-                if (! isStarted && status == STATUS_RUNNING && totalBytes != -1L) {
+//                if (! isStarted && status == STATUS_RUNNING && totalBytes != -1L) {
+                if (data.fileSize != 0L && ! isStarted && status == STATUS_RUNNING && totalBytes != -1L) { // TODO: Revert after map file sizes are known
                     isStarted = true
                     if (totalBytes != data.fileSize)
                         Lg.w("DownloadWorker: Wrong file size for $title (expected ${data.fileSize} b, found $totalBytes b)")
@@ -165,9 +165,9 @@ class DownloadWorker(val context: Context, parameters: WorkerParameters) : Corou
     private data class DownloadInputData(
             val downloadUrl: String,
             val sourcePath: String,
-            val destPath: String,
             val filename: String,
-            val fileSize: Long,
+//            val fileSize: Long,
+            var fileSize: Long?, // TODO: Revert this after map file sizes are exactly known
             val title: String,
             val permitMeteredNetwork: Boolean
     )
