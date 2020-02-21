@@ -25,7 +25,6 @@ import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.fragment_map.*
 import javax.inject.Inject
 
-// TODO: Fix bad nav: From LocalMaps it sometimes goes back to Login (culprit must be sharedPrefs firstRun. Need to reset if all maps deleted. Or change logic)
 // TODO: Redo layout of BrowseMapsFragment. Put browse button on bottom left, storage label on bottom right
 // TODO: Remove all "Observer" in observe calls (use androidx helper with trailing lambda)
 // TODO: Fix/update tests
@@ -35,7 +34,7 @@ import javax.inject.Inject
 // TODO: Cancel all OnlineAsset downloads + reset UI (eg progressBar) when DownloadAssetsFragment started/resumed (need to cancel here in case user presses HOME and comes back). Make it reactive
 // TODO: Check behaviour of OnlineMap downloads that must pause after losing internet.
 // TODO: Test navigating back and forth from DownloadAssetsFragment and check if nav error appears afterwards
-// TODO: Check animations on initial flow
+// TODO: Fix fragment animations when using popUpTo
 // TODO: Fix hidden FAB on Login screen after typed name is sufficiently long and keyboard visible (have coordinator layout already...)
 // TODO: Force GPS compound view to stay at bottom when keyboard visible
 // TODO: Force keyboard to close when navigating away from text input screen (stays open during fragment animation sometimes!)
@@ -201,7 +200,6 @@ class MapFragment : BaseFragment() {
 
 
     private fun init() {
-        defaultSharedPrefs.put(sharedPrefsIsFirstRunKey to false)
         viewModel.wasGpsSubscribed = true // Enable GPS by default (GPS permission available now)
         viewModel.initGpsSubscribe()
         initMap()

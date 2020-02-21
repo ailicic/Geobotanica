@@ -145,10 +145,8 @@ class BrowseMapsFragment : BaseFragment() {
     }
 
     private fun navigateToNext() {
-        if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true))
-            navigateTo(R.id.action_browseMaps_to_map, createBundle(), R.id.browseMapsFragment)
-        else
-            popUpTo(R.id.mapFragment)
+        if (! popUpTo(R.id.mapFragment))
+            navigateTo(R.id.action_browseMaps_to_map, createBundle(), R.id.localMapsFragment)
     }
 
     private fun createBundle() = bundleOf(userIdKey to viewModel.userId)

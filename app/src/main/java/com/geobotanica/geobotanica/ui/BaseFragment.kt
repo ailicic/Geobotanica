@@ -55,9 +55,6 @@ abstract class BaseFragment : Fragment() {
     protected val diameterMeasurementKey = "diameterMeasurement"
     protected val trunkDiameterMeasurementKey = "trunkDiameterMeasurement"
 
-    // Default SharedPrefs keys
-    protected val sharedPrefsIsFirstRunKey = "isFirstRun"
-
     protected val requestTakePhoto = 1
 
     protected fun isPermissionGranted(permission: String) =

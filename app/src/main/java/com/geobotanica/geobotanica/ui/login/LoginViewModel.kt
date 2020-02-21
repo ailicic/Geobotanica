@@ -157,14 +157,13 @@ class LoginViewModel @Inject constructor (
         val worldMapAsset = onlineAssets.find { it.id == WORLD_MAP.id } ?: throw IllegalStateException()
         val plantNamesAsset = onlineAssets.find { it.id == PLANT_NAMES.id } ?: throw IllegalStateException()
 
-
         return if (! mapFoldersAsset.isDownloaded  || ! mapListAsset.isDownloaded ||
-                ! worldMapAsset.isDownloaded || ! plantNamesAsset.isDownloaded)
+                worldMapAsset.isNotDownloaded || plantNamesAsset.isNotDownloaded)
         {
             R.id.action_login_to_download_assets
-        } else if (mapRepo.getInitiatedDownloads().isEmpty()) {
+        } else if (mapRepo.getInitiatedDownloads().isEmpty())
             R.id.action_login_to_local_maps
-        } else
+        else
             R.id.action_login_to_map
     }
 

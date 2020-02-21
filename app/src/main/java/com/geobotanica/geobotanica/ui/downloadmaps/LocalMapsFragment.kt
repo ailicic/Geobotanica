@@ -7,11 +7,9 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.addCallback
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.geobotanica.geobotanica.R
@@ -22,10 +20,7 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.dialog.WarningDialog
-import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.get
 import com.geobotanica.geobotanica.util.getFromBundle
-import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_local_maps.*
 import javax.inject.Inject
@@ -58,7 +53,6 @@ class LocalMapsFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        addOnBackPressedCallback()
         initRecyclerView()
         bindClickListeners()
         bindViewModel()
@@ -74,29 +68,6 @@ class LocalMapsFragment : BaseFragment() {
     override fun onDestroy() {
         super.onDestroy()
         activity.toolbar.setNavigationOnClickListener(null)
-    }
-
-    private fun addOnBackPressedCallback() {
-        if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true)) {
-            activity.toolbar.setNavigationOnClickListener { exitAppWithWarning() }
-            requireActivity().onBackPressedDispatcher.addCallback(this) { exitAppWithWarning() }
-        }
-    }
-
-    private fun exitAppWithWarning() {
-        Lg.d("LocalMapsFragment: exitAppWithWarning()")
-        val isPermitted = sharedPrefs.get(sharedPrefsExitOnBack, false)
-        if (isPermitted)
-            activity.finish()
-        else {
-            WarningDialog(
-                    getString(R.string.exit_app),
-                    getString(R.string.exit_app_confirm)
-            ) {
-                sharedPrefs.put(sharedPrefsExitOnBack to true)
-                activity.finish()
-            }.show((activity as FragmentActivity).supportFragmentManager, "tag")
-        }
     }
 
     private fun initRecyclerView() {
@@ -191,10 +162,8 @@ class LocalMapsFragment : BaseFragment() {
     private fun browseMaps() = navigateTo(R.id.action_localMaps_to_browseMaps)
 
     private fun navigateToNext() {
-        if (defaultSharedPrefs.get(sharedPrefsIsFirstRunKey, true))
+        if (! popUpTo(R.id.mapFragment))
             navigateTo(R.id.action_localMaps_to_map, createBundle(), R.id.localMapsFragment)
-        else
-            navigateBack()
     }
 
     private fun createBundle() = bundleOf(userIdKey to viewModel.userId)
