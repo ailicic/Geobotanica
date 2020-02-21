@@ -7,7 +7,7 @@ import android.view.*
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.observe
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.network.FileDownloader
@@ -23,10 +23,9 @@ import com.geobotanica.geobotanica.util.get
 import com.geobotanica.geobotanica.util.getFromBundle
 import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.fragment_map.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// TODO: Auto-detect new map downloads in MapFragment (ensure cached tiles are deleted)
+// TODO: Fix bad nav: From LocalMaps it sometimes goes back to Login (culprit must be sharedPrefs firstRun. Need to reset if all maps deleted. Or change logic)
 // TODO: Redo layout of BrowseMapsFragment. Put browse button on bottom left, storage label on bottom right
 // TODO: Remove all "Observer" in observe calls (use androidx helper with trailing lambda)
 // TODO: Fix/update tests
@@ -201,7 +200,7 @@ class MapFragment : BaseFragment() {
     }
 
 
-    private fun init() = lifecycleScope.launch {
+    private fun init() {
         defaultSharedPrefs.put(sharedPrefsIsFirstRunKey to false)
         viewModel.wasGpsSubscribed = true // Enable GPS by default (GPS permission available now)
         viewModel.initGpsSubscribe()
@@ -210,33 +209,20 @@ class MapFragment : BaseFragment() {
         bindViewModel()
     }
 
-    private suspend fun initMap() {
+    private fun initMap() {
         coordinatorLayout.isVisible = true // TODO: Remove this after LoginScreen implemented
         locationPrecisionCircle = null
         locationMarker = null
 
-        with(viewModel) {
-            mapView.init(getDownloadedMapFileList(), mapLatitude, mapLongitude, mapZoomLevel)
-        }
-        registerMapDownloadObserver()
-        mapView.reloadMarkers.observe(viewLifecycleOwner, Observer { reloadMarkers() })
+        with(viewModel) { mapView.init(mapLatitude, mapLongitude, mapZoomLevel) }
+        mapView.loadMarkers.observe(viewLifecycleOwner, Observer { loadMarkers() })
 
 //        if (viewModel.isFirstRun)
 //            viewModel.getLastLocation()?.let { centerMap(it, false) } // TODO: CHECK IF THIS SHOULD STAY (never worked)
     }
 
-    private fun registerMapDownloadObserver() {
-        activity.downloadComplete.observe(viewLifecycleOwner, Observer { downloadId ->
-            if (fileDownloader.isMap(downloadId) && ! mapView.isMapLoaded(fileDownloader.filenameFrom(downloadId))) {
-                lifecycleScope.launch {
-                    mapView.reloadMaps(viewModel.getDownloadedMapFileList())
-                }
-            }
-        })
-    }
-
-    private fun reloadMarkers() {
-        Lg.d("reloadMarkers()")
+    private fun loadMarkers() {
+        Lg.d("MapFragment: loadMarkers()")
         viewModel.plantMarkerData.removeObserver(onPlantMarkers)
         viewModel.plantMarkerData.observe(viewLifecycleOwner, onPlantMarkers)
     }
@@ -248,13 +234,14 @@ class MapFragment : BaseFragment() {
 
     private fun bindViewModel() {
         with(viewModel) {
+            mapList.observe(viewLifecycleOwner) { mapView.loadMaps(it) }
+            redrawMapLayers.observe(viewLifecycleOwner) { mapView.layerManager.redrawLayers() }
+            centerMap.observe(viewLifecycleOwner) { mapView.centerMap(it) }
             gpsFabIcon.observe(viewLifecycleOwner, onGpsFabIcon)
             showGpsRequiredSnackbar.observe(viewLifecycleOwner, onGpsRequiredSnackbar)
             showPlantNamesMissingSnackbar.observe(viewLifecycleOwner, onPlantNamesMissingSnackbar)
             updateLocationPrecisionMarker.observe(viewLifecycleOwner, onUpdateLocationPrecision)
             updateLocationMarker.observe(viewLifecycleOwner, onUpdateLocationMarker)
-            centerMap.observe(viewLifecycleOwner, onEnsureMapBoundsIncludeLocation)
-            redrawMapLayers.observe(viewLifecycleOwner, onRedrawMapLayers)
             navigateToNewPlant.observe(viewLifecycleOwner, onNavigateToNewPlant)
             plantMarkerData.observe(viewLifecycleOwner, onPlantMarkers)
         }
@@ -282,10 +269,6 @@ class MapFragment : BaseFragment() {
         locationMarker ?: createLocationMarker()
         locationMarker?.updateLocation(location)
     }
-
-    private val onEnsureMapBoundsIncludeLocation = Observer<Location> { mapView.centerMap(it) }
-
-    private val onRedrawMapLayers = Observer<Unit> { mapView.layerManager.redrawLayers() }
 
     private val onNavigateToNewPlant = Observer<Unit> {
         navigateTo(

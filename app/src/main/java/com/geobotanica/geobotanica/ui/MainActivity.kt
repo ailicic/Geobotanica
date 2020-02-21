@@ -38,9 +38,6 @@ class MainActivity : AppCompatActivity() {
     private val className = "MainActivity"
     private var notificationManager: NotificationManager? = null
 
-    private val _downloadComplete = MutableLiveData<Long>()
-    val downloadComplete: LiveData<Long> = _downloadComplete // Emits downloadId. Used by FileDownloader.
-
     // TODO: Either serialize this into bundle or store it some other way
     var currentLocation: Location? = null // Easy solution to hold location between fragments during new plant flow
 

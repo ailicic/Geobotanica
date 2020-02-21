@@ -35,6 +35,20 @@ class MapViewModel @Inject constructor(
 ): ViewModel(), LocationSubscriber {
     var userId = 0L    // Field injected dynamic parameter
 
+    val mapList: LiveData<List<File>> = mapRepo.getDownloadedLiveData().switchMap { mapList ->
+        liveData {
+            val worldMapAsset = assetRepo.get(WORLD_MAP.id)
+            val mapFiles = mapList.map { File(storageHelper.getMapsPath(), it.filename) }
+                    .toMutableList()
+                    .apply {
+                        if (worldMapAsset.isDownloaded)
+                            add(File(storageHelper.getLocalPath(worldMapAsset), worldMapAsset.filenameUngzip) )
+                    }
+                    .toList()
+            emit(mapFiles)
+        }
+    }
+
     val plantMarkerData: LiveData< List<PlantMarkerData> > by lazy {
         plantRepo.getAllPlantComposites().map { plantCompositeList ->
             plantCompositeList.map { plantComposite -> PlantMarkerData(plantComposite) }
@@ -84,17 +98,6 @@ class MapViewModel @Inject constructor(
             }
             _updateLocationMarker.value = location
             redrawMapLayers.call()
-        }
-    }
-
-    suspend fun getDownloadedMapFileList(): List<File> {
-        val worldMapAsset = assetRepo.get(WORLD_MAP.id)
-        return mutableListOf(
-                File(storageHelper.getLocalPath(worldMapAsset), worldMapAsset.filenameUngzip)
-        ).apply {
-            mapRepo.getDownloaded().forEach { map ->
-                add(File(storageHelper.getMapsPath(), map.filename))
-            }
         }
     }
 

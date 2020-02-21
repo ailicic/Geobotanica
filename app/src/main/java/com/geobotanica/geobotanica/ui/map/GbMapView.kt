@@ -29,13 +29,13 @@ class GbMapView @JvmOverloads constructor(
         attrs: AttributeSet? = null
 ) : MapView(context, attrs) {
 
-    val reloadMarkers = SingleLiveEvent<Unit>()
+    val loadMarkers = SingleLiveEvent<Unit>()
 
-    private lateinit var tileRendererLayer: TileRendererLayer
+    private var tileRendererLayer: TileRendererLayer? = null
     private lateinit var tileCache: TileCache
     private val loadedMaps = mutableListOf<String>()
 
-    fun init(mapFiles: List<File>, latitude: Double, longitude: Double, zoomLevel: Int) {
+    fun init(latitude: Double, longitude: Double, zoomLevel: Int) {
         isClickable = true
         mapScaleBar.isVisible = true
         mapScaleBar.scaleBarPosition = MapScaleBar.ScaleBarPosition.TOP_LEFT
@@ -49,18 +49,13 @@ class GbMapView @JvmOverloads constructor(
                 model.displayModel.tileSize, 1f, model.frameBufferModel.overdrawFactor, true)
         Lg.v("tileCache: capacity = ${tileCache.capacity}, capacityFirstLevel = ${tileCache.capacityFirstLevel}")
 
-        tileRendererLayer = createTileRenderLayer(mapFiles)
-        layerManager.layers.add(tileRendererLayer)
-
-        val labelLayer = LabelLayer(AndroidGraphicFactory.INSTANCE, tileRendererLayer.labelStore)
-        layerManager.layers.add(labelLayer)
-
         registerZoomListener()
     }
 
     private fun createTileRenderLayer(mapFiles: List<File>): TileRendererLayer {
         return object : TileRendererLayer(
-                tileCache, createMultiMapDataStore(mapFiles),
+                tileCache,
+                createMultiMapDataStore(mapFiles),
                 model.mapViewPosition,
                 false, false, true,
                 AndroidGraphicFactory.INSTANCE)
@@ -87,26 +82,25 @@ class GbMapView @JvmOverloads constructor(
         return multiMapDataStore
     }
 
-    private fun registerZoomListener() {
-        addInputListener(object : InputListener {
-            override fun onZoomEvent() {
-                Lg.d("New zoom level = ${mapView.model.mapViewPosition.zoomLevel}")
-            }
+    fun loadMaps(mapFiles: List<File>) {
+        val mapFilenames = mapFiles.map { it.name }
 
-            override fun onMoveEvent() { }
-        })
-    }
+        if (! mapFiles.all { it.exists() }) // Filters out stale cached lists from LiveData
+            Lg.d("GbMapView.loadMaps(): Rejecting invalid mapFiles=$mapFilenames")
+        else if (mapFilenames.containsAll(loadedMaps) && loadedMaps.containsAll(mapFilenames))
+            Lg.d("GbMapView.loadMaps(): Ignoring stale mapFiles=$mapFilenames")
+        else {
+            Lg.d("GbMapView.loadMaps(): Loading mapFiles=$mapFilenames")
+            tileRendererLayer?.onDestroy()
+            tileCache.purge() // Delete all cache files. If omitted, existing cache will override new maps.
+            tileRendererLayer = createTileRenderLayer(mapFiles)
 
-    fun isMapLoaded(filename: String) = loadedMaps.contains(filename)
-
-    fun reloadMaps(mapFiles: List<File>) {
-        Lg.d("MapFragment: reloadMaps()")
-        tileRendererLayer.onDestroy()
-        tileCache.purge() // Delete all cache files. If omitted, existing cache will override new maps.
-        tileRendererLayer = createTileRenderLayer(mapFiles)
-        layerManager.layers.clear()
-        layerManager.layers.add(tileRendererLayer)
-        reloadMarkers.call()
+            layerManager.layers.clear()
+            layerManager.layers.add(tileRendererLayer)
+            val labelLayer = LabelLayer(AndroidGraphicFactory.INSTANCE, tileRendererLayer?.labelStore)
+            layerManager.layers.add(labelLayer)
+            loadMarkers.call()
+        }
     }
 
     fun hideAnyMarkerInfoBubble(): Boolean {
@@ -126,6 +120,16 @@ class GbMapView @JvmOverloads constructor(
             else
                 setCenter(location.toLatLong())
         }
+    }
+
+    private fun registerZoomListener() {
+        addInputListener(object : InputListener {
+            override fun onZoomEvent() {
+                Lg.d("New zoom level = ${mapView.model.mapViewPosition.zoomLevel}")
+            }
+
+            override fun onMoveEvent() { }
+        })
     }
 
     private fun isLocationOffScreen(location: Location): Boolean = ! boundingBox.contains(location.toLatLong())
