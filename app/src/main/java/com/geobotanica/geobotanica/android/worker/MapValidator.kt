@@ -32,13 +32,13 @@ class MapValidator @Inject constructor(
         ) {
             val changed = ! map.isDownloaded
             Lg.d("${map.filename}: Validated (changed=$changed)")
-            mapRepo.update(map.copy(status = DownloadStatus.DOWNLOADED).apply { id = map.id })
+            mapRepo.update(map.copy(status = DownloadStatus.DOWNLOADED))
             true
         } else {
             val changed = ! map.isNotDownloaded
             val result = mapFile.delete()
             Lg.w("MapValidator: ${map.filename} failed (changed=$changed, deleted=$result)")
-            mapRepo.update(map.copy(status = DownloadStatus.NOT_DOWNLOADED).apply { id = map.id })
+            mapRepo.update(map.copy(status = DownloadStatus.NOT_DOWNLOADED))
             false
         }
     }

@@ -14,7 +14,9 @@ class PlantPhotoRepo @Inject constructor(private val plantPhotoDao: PlantPhotoDa
 
     suspend fun delete(photo: PlantPhoto): Int = plantPhotoDao.delete(photo)
 
-    fun get(id: Long): LiveData<PlantPhoto> = plantPhotoDao.get(id)
+    suspend fun get(id: Long): PlantPhoto = plantPhotoDao.get(id)
+
+    fun getLiveData(id: Long): LiveData<PlantPhoto> = plantPhotoDao.getLiveData(id)
 
     suspend fun getAllPhotosOfPlant(plantId: Long): List<PlantPhoto> = plantPhotoDao.getAllPhotosOfPlant(plantId)
 

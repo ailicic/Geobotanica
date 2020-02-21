@@ -77,7 +77,7 @@ class DownloadAssetsViewModel @Inject constructor(
                 else {
                     val workInfo = fileDownloader.download(asset)
                     registerAssetObserver(workInfo, asset)
-                    assetRepo.update(asset.copy(status = DOWNLOADING).apply { id = asset.id })
+                    assetRepo.update(asset.copy(status = DOWNLOADING))
                 }
             }
         }
@@ -94,7 +94,7 @@ class DownloadAssetsViewModel @Inject constructor(
             else {
                 val workInfo = fileImporter.importFromStorage(asset)
                 registerAssetObserver(workInfo, asset)
-                assetRepo.update(asset.copy(status = DOWNLOADING).apply { id = asset.id })
+                assetRepo.update(asset.copy(status = DOWNLOADING))
             }
         }
     }

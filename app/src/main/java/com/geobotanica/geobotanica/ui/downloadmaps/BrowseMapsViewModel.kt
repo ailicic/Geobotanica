@@ -72,7 +72,7 @@ class BrowseMapsViewModel @Inject constructor(
     fun cancelDownloadWork(mapId: Long) = viewModelScope.launch(Dispatchers.IO) {
         val map = mapRepo.get(mapId)
         fileDownloader.cancelDownloadWork(map)
-        mapRepo.update(map.copy(status = NOT_DOWNLOADED).apply { id = mapId })
+        mapRepo.update(map.copy(status = NOT_DOWNLOADED))
         Lg.i("Clicked cancel on map download: ${map.filename}")
     }
 
@@ -80,7 +80,7 @@ class BrowseMapsViewModel @Inject constructor(
         val map = mapRepo.get(mapId)
         val mapFile = File(storageHelper.getMapsPath(), map.filename)
         val result = mapFile.delete()
-        mapRepo.update(map.copy(status = NOT_DOWNLOADED).apply { id = mapId })
+        mapRepo.update(map.copy(status = NOT_DOWNLOADED))
         Lg.i("Clicked delete on map: ${map.filename} (deleted=$result)")
     }
 
@@ -91,11 +91,11 @@ class BrowseMapsViewModel @Inject constructor(
         } else if (storageHelper.isMapOnExtStorage(map)) {
             val workInfo = fileImporter.importFromStorage(map)
             registerMapObserver(workInfo, map)
-            mapRepo.update(map.copy(status = DownloadStatus.DOWNLOADING).apply { id = map.id })
+            mapRepo.update(map.copy(status = DownloadStatus.DOWNLOADING))
         } else {
             val workInfo = fileDownloader.download(map)
             registerMapObserver(workInfo, map)
-            mapRepo.update(map.copy(status = DownloadStatus.DOWNLOADING).apply { id = map.id })
+            mapRepo.update(map.copy(status = DownloadStatus.DOWNLOADING))
         }
     }
 

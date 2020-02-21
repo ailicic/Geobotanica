@@ -100,14 +100,14 @@ class AssetValidator @Inject constructor (
     private suspend fun onValidationSuccessful(asset: OnlineAsset, time: Long) {
         val changed = ! asset.isDownloaded
         if (changed)
-            assetRepo.update(asset.copy(status = DOWNLOADED).apply { id = asset.id })
+            assetRepo.update(asset.copy(status = DOWNLOADED))
         Lg.d("${asset.filenameUngzip}: Validated (changed=$changed, $time ms)")
     }
 
     private suspend fun onValidationFailed(asset: OnlineAsset, actualCount: Int = 0) {
         val changed = ! asset.isNotDownloaded
         if (changed)
-            assetRepo.update(asset.copy(status = NOT_DOWNLOADED).apply { id = asset.id })
+            assetRepo.update(asset.copy(status = NOT_DOWNLOADED))
         when (asset.id) {
             MAP_FOLDER_LIST.id -> {
                 Lg.w("${asset.filenameUngzip}: Failed to validate " +

@@ -26,14 +26,15 @@ import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+// TODO: Auto-detect new map downloads in MapFragment (ensure cached tiles are deleted)
+// TODO: Redo layout of BrowseMapsFragment. Put browse button on bottom left, storage label on bottom right
+// TODO: Remove all "Observer" in observe calls (use androidx helper with trailing lambda)
 // TODO: Fix/update tests
 // const val KEY_PERMIT_METERED_NETWORK = "KEY_PERMIT_METERED_NETWORK" // TODO: Use sharedPrefs instead
-// TODO: Fix location icon offset with zoom levels
+// TODO: Fix location icon offset with zoom levels. Also plant marker tap is off.
 // TODO: Maybe apply INTERNET_CONNECTED constraint to download worker?
 // TODO: Cancel all OnlineAsset downloads + reset UI (eg progressBar) when DownloadAssetsFragment started/resumed (need to cancel here in case user presses HOME and comes back). Make it reactive
-// TODO: Try making all entities with id as data class val, not var (requires apply { id = id } )
 // TODO: Check behaviour of OnlineMap downloads that must pause after losing internet.
-// TODO: Remove all "Observer" in observe calls (use androidx helper with trailing lambda)
 // TODO: Test navigating back and forth from DownloadAssetsFragment and check if nav error appears afterwards
 // TODO: Check animations on initial flow
 // TODO: Fix hidden FAB on Login screen after typed name is sufficiently long and keyboard visible (have coordinator layout already...)

@@ -23,10 +23,11 @@ data class Geolocation (
         @Json(name = "geoplugin_latitude") val latitude: String = "",
         @Json(name = "geoplugin_longitude") val longitude: String = "",
         @Json(name = "geoplugin_locationAccuracyRadius") val locationAccuracyRadius: String = "",
-        val timestamp: Instant = GbTime.now()
-) {
-    @PrimaryKey(autoGenerate = true) var id: Long = 0L
-}
+        val timestamp: Instant = GbTime.now(),
+
+        @PrimaryKey(autoGenerate = true)
+        val id: Long = 0L
+)
 
 // Geolocation(city=Penticton, region=British Columbia, regionCode=BC,
 // regionName=British Columbia, countryCode=CA, countryName=Canada,

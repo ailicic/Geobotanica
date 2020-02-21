@@ -19,10 +19,11 @@ import com.geobotanica.geobotanica.android.location.Location
 
 data class PlantLocation(
     val plantId: Long,
-    @Embedded val location: Location
-) {
-    @PrimaryKey(autoGenerate = true) var id: Long = 0L
-}
+    @Embedded val location: Location,
+
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0L
+)
 
 val List<PlantLocation>.mostRecent: Location
     get() = this.maxBy { it.location.timestamp }?.location ?: throw IllegalStateException()

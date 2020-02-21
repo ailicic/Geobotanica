@@ -17,10 +17,11 @@ data class  OnlineAsset(
         val fileSize: Long,
         val decompressedSize: Long,
         val itemCount: Int,
-        val status: DownloadStatus = NOT_DOWNLOADED
-) {
-    @PrimaryKey(autoGenerate = true) var id: Long = 0L
+        val status: DownloadStatus = NOT_DOWNLOADED,
 
+        @PrimaryKey(autoGenerate = true)
+        val id: Long = 0L
+) {
     val filename: String get() = url.substringAfterLast('/')
 
     val filenameUngzip: String get() = filename.removeSuffix(".gz")

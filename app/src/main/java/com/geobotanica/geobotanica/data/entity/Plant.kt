@@ -21,10 +21,11 @@ data class Plant(
     val scientificName: String? = null,
     val vernacularId: Long? = null,
     val taxonId: Long? = null,
-    val timestamp: Instant = GbTime.now()
-) {
-    @PrimaryKey(autoGenerate = true) var id: Long = 0L
+    val timestamp: Instant = GbTime.now(),
 
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0L
+) {
     enum class Type(val flag: Int) {
         TREE(   0b0000_0001), // 1
         SHRUB(  0b0000_0010), // 2

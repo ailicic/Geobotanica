@@ -29,10 +29,11 @@ data class PlantPhoto(
     val plantId: Long,
     val type: Type,
     val filename: String,
-    val timestamp: Instant = GbTime.now()
-) {
-    @PrimaryKey(autoGenerate = true) var id: Long = 0
+    val timestamp: Instant = GbTime.now(),
 
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0
+) {
     enum class Type(val flag: Int) {
         COMPLETE(   0b0000_0001), // 1
         LEAF(       0b0000_0010), // 2

@@ -28,11 +28,11 @@ data class PlantMeasurement(
     val plantId: Long,
     val type: Type,
     val measurement: Float, // cm
-    val timestamp: Instant = GbTime.now()
-) {
-    @PrimaryKey(autoGenerate = true)
-    var id: Long = 0
+    val timestamp: Instant = GbTime.now(),
 
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0
+) {
     enum class Type(val flag: Int) {
         HEIGHT(         0b0000_0001), // 1
         DIAMETER(       0b0000_0010), // 2

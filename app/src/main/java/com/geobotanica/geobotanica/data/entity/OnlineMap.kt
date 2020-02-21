@@ -30,10 +30,11 @@ data class  OnlineMap(
 
 //        @Transient // Exclude from JSON serialization // TODO: REMOVE AFTER SCRAPER IS MOVED TO SERVER
 //        @ColumnInfo(name = "status") // Force include in Room DB, despite @Transient // TODO: REMOVE AFTER SCRAPER IS MOVED TO SERVER
-        val status: DownloadStatus = NOT_DOWNLOADED
-) {
-    @PrimaryKey(autoGenerate = true) var id: Long = 0L
+        val status: DownloadStatus = NOT_DOWNLOADED,
 
+        @PrimaryKey(autoGenerate = true)
+        val id: Long = 0L
+) {
     val filename: String
         get() = url.substringAfterLast('/')
 

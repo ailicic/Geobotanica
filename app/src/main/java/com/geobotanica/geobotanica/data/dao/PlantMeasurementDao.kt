@@ -8,7 +8,7 @@ import com.geobotanica.geobotanica.data.entity.PlantMeasurement
 @Dao
 interface PlantMeasurementDao : BaseDao<PlantMeasurement> {
     @Query("SELECT * FROM plantMeasurements WHERE id = :id")
-    fun get(id: Long): LiveData<PlantMeasurement>
+    suspend fun get(id: Long): PlantMeasurement
 
     @Query("SELECT * FROM plantMeasurements WHERE plantId = :plantId AND type & :typeFlags != 0 " +
             "ORDER BY timestamp DESC")

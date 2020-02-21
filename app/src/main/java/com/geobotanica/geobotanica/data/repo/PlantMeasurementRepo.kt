@@ -12,20 +12,13 @@ class PlantMeasurementRepo @Inject constructor(private val measurementDao: Plant
 
     suspend fun delete(vararg measurement: PlantMeasurement) = measurementDao.delete(*measurement)
 
+    suspend fun get(id: Long): PlantMeasurement = measurementDao.get(id)
+
     suspend fun getAllOfPlant(
             plantId: Long,
             typeFlags: Int = PlantMeasurement.Type.ALL.flag
     ): List<PlantMeasurement> =
             measurementDao.getAllOfPlant(plantId, typeFlags)
-
-//    fun getAllOfPlantLiveData(
-//            plantId: Long,
-//            typeFlags: Int = PlantMeasurement.Type.ALL.flag
-//    ): LiveData< List<PlantMeasurement> > =
-//            measurementDao.getAllOfPlantLiveData(plantId, typeFlags)
-
-//    suspend fun getLastOfPlant(plantId: Long, typeFlags: Int = PlantMeasurement.Type.ALL.flag): PlantMeasurement? =
-//            measurementDao.getLastOfPlant(plantId, typeFlags)
 
     fun getLastOfPlantLiveData(
             plantId: Long,

@@ -209,9 +209,10 @@ class NewPlantConfirmViewModel @Inject constructor (
     suspend fun savePlantComposite(location: Location) {
         database.withTransaction {
             Lg.d("Saving PlantComposite to database now...")
-            val plant = Plant(userId, plantType, commonName.value, scientificName.value, vernacularId, taxonId)
-            plant.id = plantRepo.insert(plant)
-            Lg.d("Saved: $plant (id=${plant.id})")
+            var plant = Plant(userId, plantType, commonName.value, scientificName.value, vernacularId, taxonId)
+            val plantId = plantRepo.insert(plant)
+            plant = plantRepo.get(plantId)
+            Lg.d("Saved: $plant")
 
             savePlantPhotos(plant)
             savePlantMeasurements(plant)
@@ -224,33 +225,38 @@ class NewPlantConfirmViewModel @Inject constructor (
     private suspend fun savePlantPhotos(plant: Plant) {
         photoData.value?.forEach { (_, photoType, photoUri) ->
             val photoFilename = photoUri.substringAfterLast('/')
-            val photo = PlantPhoto(userId, plant.id, photoType, photoFilename)
-            photo.id = plantPhotoRepo.insert(photo)
-            Lg.d("Saved: $photo (id=${photo.id})")
+            var photo = PlantPhoto(userId, plant.id, photoType, photoFilename)
+            val photoId = plantPhotoRepo.insert(photo)
+            photo = plantPhotoRepo.get(photoId)
+            Lg.d("Saved: $photo")
         }
     }
 
     private suspend fun savePlantMeasurements(plant: Plant) {
         height.value?.let {
-            val heightMeasurement = PlantMeasurement(userId, plant.id, HEIGHT, it.toCm())
-            heightMeasurement.id = plantMeasurementRepo.insert(heightMeasurement)
-            Lg.d("Saved: $heightMeasurement (id=${heightMeasurement.id})")
+            var heightMeasurement = PlantMeasurement(userId, plant.id, HEIGHT, it.toCm())
+            val heightMeasurementId = plantMeasurementRepo.insert(heightMeasurement)
+            heightMeasurement = plantMeasurementRepo.get(heightMeasurementId)
+            Lg.d("Saved: $heightMeasurement")
         }
         diameter.value?.let {
-            val diameterMeasurement = PlantMeasurement(userId, plant.id, DIAMETER, it.toCm())
-            diameterMeasurement.id = plantMeasurementRepo.insert(diameterMeasurement)
+            var diameterMeasurement = PlantMeasurement(userId, plant.id, DIAMETER, it.toCm())
+            val diameterMeasurementId = plantMeasurementRepo.insert(diameterMeasurement)
+            diameterMeasurement = plantMeasurementRepo.get(diameterMeasurementId)
             Lg.d("Saved: $diameterMeasurement (id=${diameterMeasurement.id})")
         }
         trunkDiameter.value?.let {
-            val trunkDiameterMeasurement = PlantMeasurement(userId, plant.id, TRUNK_DIAMETER, it.toCm())
-            trunkDiameterMeasurement.id = plantMeasurementRepo.insert(trunkDiameterMeasurement)
-            Lg.d("Saved: $trunkDiameterMeasurement (id=${trunkDiameterMeasurement.id})")
+            var trunkDiameterMeasurement = PlantMeasurement(userId, plant.id, TRUNK_DIAMETER, it.toCm())
+            val trunkDiameterMeasurementId = plantMeasurementRepo.insert(trunkDiameterMeasurement)
+            trunkDiameterMeasurement = plantMeasurementRepo.get(trunkDiameterMeasurementId)
+            Lg.d("Saved: $trunkDiameterMeasurement")
         }
     }
 
     private suspend fun savePlantLocation(plant: Plant, location: Location) {
-        val plantLocation = PlantLocation(plant.id, location)
-        plantLocation.id = plantLocationRepo.insert(plantLocation)
-        Lg.d("Saved: $plantLocation (id=${plantLocation.id})")
+        var plantLocation = PlantLocation(plant.id, location)
+        val plantLocationId = plantLocationRepo.insert(plantLocation)
+        plantLocation = plantLocationRepo.get(plantLocationId)
+        Lg.d("Saved: $plantLocation")
     }
 }

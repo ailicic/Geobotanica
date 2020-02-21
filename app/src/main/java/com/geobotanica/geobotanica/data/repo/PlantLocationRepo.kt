@@ -8,7 +8,9 @@ import javax.inject.Inject
 class PlantLocationRepo @Inject constructor(private val plantLocationDao: PlantLocationDao) {
     suspend fun insert(plantLocation: PlantLocation): Long = plantLocationDao.insert(plantLocation)
 
-    fun get(id: Long): LiveData<PlantLocation> = plantLocationDao.get(id)
+    suspend fun get(id: Long): PlantLocation = plantLocationDao.get(id)
+
+    fun getLiveData(id: Long): LiveData<PlantLocation> = plantLocationDao.getLiveData(id)
 
 //    fun getPlantLocations(plantId: Long): LiveData<List<PlantLocation>> = plantLocationDao.getPlantLocations(plantId)
 

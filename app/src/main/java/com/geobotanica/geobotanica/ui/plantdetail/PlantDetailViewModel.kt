@@ -157,8 +157,7 @@ class PlantDetailViewModel @Inject constructor(
     fun onNewPlantType(newPlantType: Plant.Type) {
         viewModelScope.launch(dispatchers.io) {
             plant.value?.let { plant ->
-                val updatedPlant = plant.copy(type = newPlantType).apply { id = plant.id }
-                val result = plantRepo.update(updatedPlant)
+                val result = plantRepo.update(plant.copy(type = newPlantType))
                 Lg.d("Updated plant type to $newPlantType (result = $result)")
             }
 
@@ -177,7 +176,7 @@ class PlantDetailViewModel @Inject constructor(
                 val updatedPlant = plant.copy(
                         commonName = newCommonName,
                         scientificName = newScientificName
-                ).apply { id = plantId }
+                )
                 val result = plantRepo.update(updatedPlant)
                 Lg.d("Updated plant names (result = $result)")
             }
@@ -187,8 +186,7 @@ class PlantDetailViewModel @Inject constructor(
     fun onUpdatePhotoType(photoIndex: Int, newPhotoType: PlantPhoto.Type) {
         viewModelScope.launch(dispatchers.io) {
             photos.value?.get(photoIndex)?.let { photo ->
-                val updatedPhoto = photo.copy(type = newPhotoType).apply { id = photo.id }
-                val result = plantPhotoRepo.update(updatedPhoto)
+                val result = plantPhotoRepo.update(photo.copy(type = newPhotoType))
                 Lg.d("Updated plant photo to $newPhotoType (result = $result)")
             }
         }
@@ -198,19 +196,22 @@ class PlantDetailViewModel @Inject constructor(
         viewModelScope.launch(dispatchers.io) {
             database.withTransaction {
                 height?.let {
-                    val heightMeasurement = PlantMeasurement(userId, plantId, HEIGHT, it.toCm())
-                    heightMeasurement.id = plantMeasurementRepo.insert(heightMeasurement)
-                    Lg.d("Saved: $heightMeasurement (id=${heightMeasurement.id})")
+                    var heightMeasurement = PlantMeasurement(userId, plantId, HEIGHT, it.toCm())
+                    val heightMeasurementId = plantMeasurementRepo.insert(heightMeasurement)
+                    heightMeasurement = plantMeasurementRepo.get(heightMeasurementId)
+                    Lg.d("Saved: $heightMeasurement")
                 }
                 diameter?.let {
-                    val diameterMeasurement = PlantMeasurement(userId, plantId, DIAMETER, it.toCm())
-                    diameterMeasurement.id = plantMeasurementRepo.insert(diameterMeasurement)
-                    Lg.d("Saved: $diameterMeasurement (id=${diameterMeasurement.id})")
+                    var diameterMeasurement = PlantMeasurement(userId, plantId, DIAMETER, it.toCm())
+                    val diameterMeasurementId = plantMeasurementRepo.insert(diameterMeasurement)
+                    diameterMeasurement = plantMeasurementRepo.get(diameterMeasurementId)
+                    Lg.d("Saved: $diameterMeasurement")
                 }
                 trunkDiameter?.let {
-                    val trunkDiameterMeasurement = PlantMeasurement(userId, plantId, TRUNK_DIAMETER, it.toCm())
-                    trunkDiameterMeasurement.id = plantMeasurementRepo.insert(trunkDiameterMeasurement)
-                    Lg.d("Saved: $trunkDiameterMeasurement (id=${trunkDiameterMeasurement.id})")
+                    var trunkDiameterMeasurement = PlantMeasurement(userId, plantId, TRUNK_DIAMETER, it.toCm())
+                    val trunkDiameterMeasurementId = plantMeasurementRepo.insert(trunkDiameterMeasurement)
+                    trunkDiameterMeasurement = plantMeasurementRepo.get(trunkDiameterMeasurementId)
+                    Lg.d("Saved: $trunkDiameterMeasurement")
                 }
             }
         }
@@ -229,7 +230,7 @@ class PlantDetailViewModel @Inject constructor(
     private fun updatePlantPhoto(photoIndex: Int, newPhotoUri: String) = viewModelScope.launch(dispatchers.io) {
         val photos = plantPhotoRepo.getAllPhotosOfPlant(plantId)
         val photo = photos[photoIndex]
-        val newPhoto = photo.copy(filename = newPhotoUri.substringAfterLast('/')).apply { id = photo.id}
+        val newPhoto = photo.copy(filename = newPhotoUri.substringAfterLast('/'))
         val result = plantPhotoRepo.update(newPhoto)
         Lg.d("Updated plant photo (result = $result)")
     }
