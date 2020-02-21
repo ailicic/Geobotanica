@@ -25,7 +25,6 @@ import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.fragment_map.*
 import javax.inject.Inject
 
-// TODO: Bump versions on deps
 // TODO: Redo layout of BrowseMapsFragment. Put browse button on bottom left, storage label on bottom right
 // TODO: Fix/update tests
 // const val KEY_PERMIT_METERED_NETWORK = "KEY_PERMIT_METERED_NETWORK" // TODO: Use sharedPrefs instead
