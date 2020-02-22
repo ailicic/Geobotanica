@@ -163,7 +163,7 @@ class LocalMapsFragment : BaseFragment() {
 
     private fun navigateToNext() {
         if (! popUpTo(R.id.mapFragment))
-            navigateTo(R.id.action_localMaps_to_map, createBundle(), R.id.localMapsFragment)
+            navigateTo(R.id.action_localMaps_to_map, createBundle())
     }
 
     private fun createBundle() = bundleOf(userIdKey to viewModel.userId)

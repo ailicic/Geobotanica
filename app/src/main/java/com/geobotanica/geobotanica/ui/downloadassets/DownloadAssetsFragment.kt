@@ -96,7 +96,7 @@ class DownloadAssetsFragment : BaseFragment() {
     private val onNavigateToNextObserver = Observer<Boolean> {
         if (it) {
             Lg.d("DownloadAssetsFragment: navigate")
-            navigateTo(R.id.action_downloadAssets_to_localMaps, createBundle(), R.id.downloadAssetsFragment)
+            navigateTo(R.id.action_downloadAssets_to_localMaps, createBundle())
         }
     }
 

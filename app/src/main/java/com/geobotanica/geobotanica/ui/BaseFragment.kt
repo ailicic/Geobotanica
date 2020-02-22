@@ -60,15 +60,7 @@ abstract class BaseFragment : Fragment() {
     protected fun isPermissionGranted(permission: String) =
         ContextCompat.checkSelfPermission(activity, permission) == PERMISSION_GRANTED
 
-    protected fun navigateTo(destination: Int, bundle: Bundle? = null, popUpTo: Int? = null) {
-        popUpTo?.let {
-            val navOptions = NavOptions.Builder().run {
-                setPopUpTo(it, true)
-                build()
-            }
-            findNavController().navigate(destination, bundle, navOptions)
-        } ?: findNavController().navigate(destination, bundle)
-    }
+    protected fun navigateTo(destination: Int, bundle: Bundle? = null) = findNavController().navigate(destination, bundle)
 
     protected fun navigateBack() = findNavController().popBackStack()
 

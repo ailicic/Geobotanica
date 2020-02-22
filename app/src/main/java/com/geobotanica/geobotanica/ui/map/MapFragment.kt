@@ -25,7 +25,6 @@ import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.fragment_map.*
 import javax.inject.Inject
 
-// TODO: Fix fragment animations when using popUpTo
 // TODO: Fix hidden FAB on Login screen after typed name is sufficiently long and keyboard visible (have coordinator layout already...)
 // TODO: Force GPS compound view to stay at bottom when keyboard visible
 // TODO: Force keyboard to close when navigating away from text input screen (stays open during fragment animation sometimes!)
