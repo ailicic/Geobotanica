@@ -91,21 +91,22 @@ class DownloadAssetsViewModel @Inject constructor(
             else if (asset.isDownloaded)
                 Lg.d("${asset.filename}: Asset already downloaded")
             else if (!storageHelper.isStorageAvailable(asset))
-                this@DownloadAssetsViewModel.showInsufficientStorageSnackbar.postValue(asset)
+                showInsufficientStorageSnackbar.postValue(asset)
             else {
                 val workInfo = if (shouldImportAssets)
                     fileImporter.importFromStorage(asset)
                 else
                     fileDownloader.download(asset)
                 assetRepo.update(asset.copy(status = DOWNLOADING))
-                registerAssetObserver(workInfo, asset)
+                registerAssetObserver(workInfo, asset.id)
             }
         }
     }
 
-    private suspend fun registerAssetObserver(workInfo: LiveData<List<WorkInfo>>, asset: OnlineAsset) = withContext(Dispatchers.Main) {
+    private suspend fun registerAssetObserver(workInfo: LiveData<List<WorkInfo>>, assetId: Long) = withContext(Dispatchers.Main) {
         workInfo.observeForever { // TODO: Is this the best way to catch failures? Memory leak?
             viewModelScope.launch(Dispatchers.IO) {
+                val asset = assetRepo.get(assetId)
                 when {
                     it.isSuccessful -> { } // NOOP
                     it.isCancelled -> {

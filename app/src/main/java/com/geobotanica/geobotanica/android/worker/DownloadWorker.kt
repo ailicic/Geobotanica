@@ -87,9 +87,8 @@ class DownloadWorker(val context: Context, parameters: WorkerParameters) : Corou
         val startTime =  System.currentTimeMillis()
 
         var isStarted = false
-        var isTimeout = false
 
-        while (! isTimeout) {
+        while (true) {
             val currentTime = System.currentTimeMillis()
 
             getDownloadInfo(downloadId)?.run {
@@ -100,9 +99,9 @@ class DownloadWorker(val context: Context, parameters: WorkerParameters) : Corou
                         Lg.w("DownloadWorker: Wrong file size for $title (expected ${data.fileSize} b, found $totalBytes b)")
                 }
                 if (currentTime - lastModifiedTimestamp > DOWNLOAD_TIMEOUT) {
-                    Lg.w("DownloadWorker: ${data.filename} timed out!")
-                    downloadManager.remove(id)
-                    isTimeout = true
+                    val result = downloadManager.remove(downloadId)
+                    Lg.w("DownloadWorker: ${data.filename} timed out! (cancelled=$result)")
+                    return Result.failure()
                 }
                 if (bytes == totalBytes) {
                     val duration = (currentTime - startTime) / 1000
@@ -115,7 +114,6 @@ class DownloadWorker(val context: Context, parameters: WorkerParameters) : Corou
                 delay(DOWNLOAD_POLL_TIME)
             }
         }
-        return Result.failure()
     }
 
     // NOTE: Manually cancelled downloads appear to be non-referencable by their downloadId

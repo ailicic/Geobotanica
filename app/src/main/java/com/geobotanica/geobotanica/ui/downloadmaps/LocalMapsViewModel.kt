@@ -94,7 +94,7 @@ class LocalMapsViewModel @Inject constructor(
 
     private suspend fun downloadMap(map: OnlineMap)  {
         val workInfo = fileDownloader.download(map)
-        registerMapObserver(workInfo, map)
+        registerMapObserver(workInfo, map.id)
         withContext(Dispatchers.IO) {
             mapRepo.update(map.copy(status = DOWNLOADING))
         }
@@ -102,15 +102,16 @@ class LocalMapsViewModel @Inject constructor(
 
     private suspend fun importMap(map: OnlineMap) {
         val workInfo = fileImporter.importFromStorage(map)
-        registerMapObserver(workInfo, map)
+        registerMapObserver(workInfo, map.id)
         withContext(Dispatchers.IO) {
             mapRepo.update(map.copy(status = DOWNLOADING))
         }
     }
 
-    private suspend fun registerMapObserver(workInfo: LiveData<List<WorkInfo>>, map: OnlineMap) = withContext(Dispatchers.Main) {
+    private suspend fun registerMapObserver(workInfo: LiveData<List<WorkInfo>>, mapId: Long) = withContext(Dispatchers.Main) {
         workInfo.observeForever { // TODO: Is this the best way to catch failures? Memory leak?
             viewModelScope.launch(Dispatchers.IO) {
+                val map = mapRepo.get(mapId)
                 when {
                     it.isSuccessful -> { } // NOOP
                     it.isCancelled -> {
