@@ -19,7 +19,7 @@ open class GbMarker(
         0, 0
 ) {
     init {
-        verticalOffset = (-1)  * bitmap.height / 2
+        verticalOffset = (-1) * bitmap.height / 2
     }
 
     override fun onTap(tapLatLong: LatLong?, layerXY: Point?, tapXY: Point?): Boolean {

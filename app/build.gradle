@@ -94,14 +94,14 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
 
     // MapsForge
-    def mapsforge_version = "0.12.0"
+    def mapsforge_version = "0.13.0"
     implementation "org.mapsforge:mapsforge-core:$mapsforge_version"
     implementation "org.mapsforge:mapsforge-map:$mapsforge_version"
     implementation "org.mapsforge:mapsforge-map-reader:$mapsforge_version"
     implementation "org.mapsforge:mapsforge-themes:$mapsforge_version"
     implementation "net.sf.kxml:kxml2:2.3.0"
     implementation "org.mapsforge:mapsforge-map-android:$mapsforge_version"
-    implementation "com.caverock:androidsvg:1.3"
+    implementation "com.caverock:androidsvg:1.4"
 
     // Room
     def room_version = "2.2.4"
