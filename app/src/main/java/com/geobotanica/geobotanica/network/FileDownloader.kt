@@ -21,7 +21,6 @@ const val KEY_DEST_PATH = "KEY_DEST_PATH"
 const val KEY_FILE_NAME = "KEY_FILE_NAME"
 const val KEY_FILE_SIZE = "KEY_FILE_SIZE"
 const val KEY_TITLE = "KEY_TITLE"
-const val KEY_PERMIT_METERED_NETWORK = "KEY_PERMIT_METERED_NETWORK"
 const val KEY_DECOMPRESSED_FILE_SIZE = "KEY_DECOMPRESSED_FILE_SIZE" // Optional
 const val KEY_ITEM_COUNT = "KEY_ITEM_COUNT" // Optional. Used if JSON deserialized for db import.
 
@@ -41,8 +40,7 @@ class FileDownloader @Inject constructor (
                 KEY_FILE_SIZE to asset.fileSize,
                 KEY_DECOMPRESSED_FILE_SIZE to asset.decompressedSize,
                 KEY_TITLE to asset.description,
-                KEY_ITEM_COUNT to asset.itemCount,
-                KEY_PERMIT_METERED_NETWORK to false
+                KEY_ITEM_COUNT to asset.itemCount
         )
 
         val downloadWorker = OneTimeWorkRequestBuilder<DownloadWorker>()
@@ -90,8 +88,7 @@ class FileDownloader @Inject constructor (
                 KEY_SOURCE_PATH to storageHelper.getMapsPath(),
                 KEY_FILE_NAME to map.filename,
 //                KEY_FILE_SIZE to map.fileSize, // TODO: Include after map file sizes are known
-                KEY_TITLE to map.printName,
-                KEY_PERMIT_METERED_NETWORK to false
+                KEY_TITLE to map.printName
         )
 
         val downloadWorker = OneTimeWorkRequestBuilder<DownloadWorker>()

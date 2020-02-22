@@ -8,6 +8,7 @@ import android.content.Context.DOWNLOAD_SERVICE
 import android.net.Uri
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
+import androidx.preference.PreferenceManager
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkManager
@@ -47,8 +48,7 @@ class DownloadWorker(val context: Context, parameters: WorkerParameters) : Corou
                 inputData.getString(KEY_SOURCE_PATH) ?: throw IllegalArgumentException("DownloadWorker: missing source path"),
                 inputData.getString(KEY_FILE_NAME) ?: throw IllegalArgumentException("DownloadWorker: missing file name"),
                 inputData.getLong(KEY_FILE_SIZE, 0L),
-                inputData.getString(KEY_TITLE) ?: throw IllegalArgumentException("DownloadWorker: missing title"),
-                inputData.getBoolean(KEY_PERMIT_METERED_NETWORK, false)
+                inputData.getString(KEY_TITLE) ?: throw IllegalArgumentException("DownloadWorker: missing title")
         )
     }
 
@@ -56,6 +56,8 @@ class DownloadWorker(val context: Context, parameters: WorkerParameters) : Corou
         val file = File(data.sourcePath, data.filename).apply {
             if (exists() && isFile) delete()
         }
+        val defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val isMeteredNetworkAllowed = defaultSharedPrefs.getBoolean(sharedPrefsAllowMeteredNetwork, false)
         val request = DownloadManager.Request(Uri.parse(data.downloadUrl)).run {
             setTitle(data.title)
             setDescription(context.getString(R.string.downloading))
@@ -63,10 +65,9 @@ class DownloadWorker(val context: Context, parameters: WorkerParameters) : Corou
             setNotificationVisibility(VISIBILITY_HIDDEN)
 
             @Suppress("DEPRECATION")
-            setVisibleInDownloadsUi(false) // True by default (allows user to delete misbehaving downloads). Ignored in Q+.
+            setVisibleInDownloadsUi(false) // True by default. Ignored in Q+.
 
-            // TODO: Add these options to a preferences page
-            setAllowedOverMetered(data.permitMeteredNetwork)
+            setAllowedOverMetered(isMeteredNetworkAllowed)
             setAllowedOverRoaming(false) // True by default.
         }
 
@@ -168,7 +169,6 @@ class DownloadWorker(val context: Context, parameters: WorkerParameters) : Corou
             val filename: String,
 //            val fileSize: Long,
             var fileSize: Long?, // TODO: Revert this after map file sizes are exactly known
-            val title: String,
-            val permitMeteredNetwork: Boolean
+            val title: String
     )
 }

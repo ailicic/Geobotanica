@@ -25,7 +25,6 @@ import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.fragment_map.*
 import javax.inject.Inject
 
-// const val KEY_PERMIT_METERED_NETWORK = "KEY_PERMIT_METERED_NETWORK" // TODO: Use sharedPrefs instead
 // TODO: Fix location icon offset with zoom levels. Also plant marker tap is off.
 // TODO: Fix/update tests
 // TODO: Check behaviour of OnlineMap downloads that must pause after losing internet.

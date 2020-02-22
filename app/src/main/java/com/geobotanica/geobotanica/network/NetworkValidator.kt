@@ -12,13 +12,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 
+const val sharedPrefsAllowMeteredNetwork = "allowMeteredNetwork"
+
 @Singleton
 class NetworkValidator @Inject constructor(appContext: Context) {
 
     private val connectivityManager = appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     private val defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(appContext)
-
-    private val sharedPrefsAllowMeteredNetwork = "allowMeteredNetwork"
 
     fun allowMeteredNetwork() = defaultSharedPrefs.put(sharedPrefsAllowMeteredNetwork to true)
 
