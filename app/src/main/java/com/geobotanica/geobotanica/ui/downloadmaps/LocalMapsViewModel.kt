@@ -65,7 +65,7 @@ class LocalMapsViewModel @Inject constructor(
     val showInsufficientStorageSnackbar = SingleLiveEvent<Unit>()
     val showInternetUnavailableSnackbar = SingleLiveEvent<Unit>()
 
-    private var lastClickedMap: OnlineMapListItem? = null
+    private var lastClickedMap: OnlineMap? = null
 
     fun getFreeExternalStorageInMb() = storageHelper.getFreeExternalStorageInMb()
 
@@ -73,50 +73,40 @@ class LocalMapsViewModel @Inject constructor(
         downloadStatusSynchronizer.syncAll()
     }
 
-    fun initDownload(mapListItem: OnlineMapListItem) {
-        lastClickedMap = mapListItem
-        when (networkValidator.getStatus()) {
-            INVALID -> showInternetUnavailableSnackbar.call()
-            VALID -> downloadMap(mapListItem.id)
-            VALID_IF_METERED_PERMITTED -> showMeteredNetworkDialog.call()
-        }
-    }
-
-    fun onMeteredNetworkAllowed() {
-        networkValidator.allowMeteredNetwork()
-        lastClickedMap?.let { downloadMap(it.id) }
-    }
-
-    fun cancelDownload(mapId: Long) = viewModelScope.launch(Dispatchers.IO) {
-        val map = mapRepo.get(mapId)
-        fileDownloader.cancelDownloadWork(map)
-        mapRepo.update(map.copy(status = NOT_DOWNLOADED))
-        Lg.i("Clicked cancel on map download: ${map.filename}")
-    }
-
-    fun deleteMap(mapId: Long) = viewModelScope.launch(Dispatchers.IO) {
-        val map = mapRepo.get(mapId)
-        val mapFile = File(storageHelper.getMapsPath(), map.filename)
-        val result = mapFile.delete()
-        mapRepo.update(map.copy(status = NOT_DOWNLOADED))
-        Lg.i("Clicked delete on map: ${map.filename} (deleted=$result)")
-    }
-
-    private fun downloadMap(mapId: Long) = viewModelScope.launch(Dispatchers.IO) {
-        val map = mapRepo.get(mapId)
-        if (! storageHelper.isStorageAvailable(map)) {
+    fun initDownload(mapListItem: OnlineMapListItem) = viewModelScope.launch(Dispatchers.IO) {
+        val map = mapRepo.get(mapListItem.id)
+        lastClickedMap = map
+        if (! storageHelper.isStorageAvailable(map))
             showInsufficientStorageSnackbar.postValue(Unit)
-        } else if (storageHelper.isMapOnExtStorage(map)) {
-            val workInfo = fileImporter.importFromStorage(map)
-            registerMapObserver(workInfo, map)
-            mapRepo.update(map.copy(status = DOWNLOADING))
-        } else {
-            val workInfo = fileDownloader.download(map)
-            registerMapObserver(workInfo, map)
+        else if (storageHelper.isMapOnExtStorage(map))
+            importMap(map)
+        else when (networkValidator.getStatus()) {
+            INVALID -> showInternetUnavailableSnackbar.postValue(Unit)
+            VALID_IF_METERED_PERMITTED -> showMeteredNetworkDialog.postValue(Unit)
+            VALID -> downloadMap(map)
+        }
+    }
+
+    fun onMeteredNetworkAllowed() = viewModelScope.launch {
+        networkValidator.allowMeteredNetwork()
+        lastClickedMap?.let { downloadMap(it) }
+    }
+
+    private suspend fun downloadMap(map: OnlineMap)  {
+        val workInfo = fileDownloader.download(map)
+        registerMapObserver(workInfo, map)
+        withContext(Dispatchers.IO) {
             mapRepo.update(map.copy(status = DOWNLOADING))
         }
     }
 
+    private suspend fun importMap(map: OnlineMap) {
+        val workInfo = fileImporter.importFromStorage(map)
+        registerMapObserver(workInfo, map)
+        withContext(Dispatchers.IO) {
+            mapRepo.update(map.copy(status = DOWNLOADING))
+        }
+    }
 
     private suspend fun registerMapObserver(workInfo: LiveData<List<WorkInfo>>, map: OnlineMap) = withContext(Dispatchers.Main) {
         workInfo.observeForever { // TODO: Is this the best way to catch failures? Memory leak?
@@ -134,5 +124,20 @@ class LocalMapsViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun cancelDownload(mapId: Long) = viewModelScope.launch(Dispatchers.IO) {
+        val map = mapRepo.get(mapId)
+        fileDownloader.cancelDownloadWork(map)
+        mapRepo.update(map.copy(status = NOT_DOWNLOADED))
+        Lg.i("Clicked cancel on map download: ${map.filename}")
+    }
+
+    fun deleteMap(mapId: Long) = viewModelScope.launch(Dispatchers.IO) {
+        val map = mapRepo.get(mapId)
+        val mapFile = File(storageHelper.getMapsPath(), map.filename)
+        val result = mapFile.delete()
+        mapRepo.update(map.copy(status = NOT_DOWNLOADED))
+        Lg.i("Clicked delete on map: ${map.filename} (deleted=$result)")
     }
 }

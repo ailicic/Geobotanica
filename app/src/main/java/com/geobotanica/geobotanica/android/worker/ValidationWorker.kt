@@ -62,8 +62,10 @@ class ValidationWorker(val context: Context, workerParams: WorkerParameters) : C
         return ForegroundInfo(notificationId, notification)
     }
 
-    private suspend fun validateDownload(data: ValidationInputData): Result { @Suppress("CascadeIf")
-        return if (onlineAssetList.any { it.filenameUngzip == data.filename }) // TODO: Use assetRepo instead?
+    @Suppress("CascadeIf")
+    private suspend fun validateDownload(data: ValidationInputData): Result {
+        val assetRepo = buildAssetRepo()
+        return if (assetRepo.getAll().any { it.filenameUngzip == data.filename })
             validateAsset(data)
         else if (data.filename.endsWith(".map"))
             validateMap(data)
@@ -71,6 +73,11 @@ class ValidationWorker(val context: Context, workerParams: WorkerParameters) : C
             Lg.e("ValidationWorker: ${data.filename} not recognized")
             Result.failure()
         }
+    }
+
+    private fun buildAssetRepo(): AssetRepo {
+        val db = GbDatabase.getInstance(context)
+        return AssetRepo(db.assetDao())
     }
 
     private suspend fun validateAsset(data: ValidationInputData) = withContext(Dispatchers.IO) {

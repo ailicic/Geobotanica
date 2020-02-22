@@ -42,19 +42,20 @@ class StorageHelper @Inject constructor(val appContext: Context) {
         return dir.usableSpace > 3 * onlineAsset.decompressedSize
     }
 
-    fun isGzipAssetInExtStorageRootDir(asset: OnlineAsset): Boolean {
-        return File(getExtStorageRootPath(), asset.filename).run {
-            var result = true
-            if (exists() && length() == asset.fileSize)
-                Lg.d("Found asset on external storage: $path")
-            else if (! exists()) {
-                Lg.d("Failed to find asset on external storage: $path")
-                result = false
-            } else {
-                Lg.d("Wrong file size of asset on external storage: $path (expected ${asset.fileSize} b, found ${length()} b)")
-                result = false
+    fun areGzipAssetsInExtStorageRootDir(assetList: List<OnlineAsset>): Boolean {
+        return assetList.all { asset ->
+            File(getExtStorageRootPath(), asset.filename).run {
+                if (exists() && length() == asset.fileSize) {
+                    Lg.d("Found asset on external storage: $path")
+                    true
+                } else if (! exists()) {
+                    Lg.d("Failed to find asset on external storage: $path")
+                    false
+                } else {
+                    Lg.d("Wrong file size of asset on external storage: $path (expected ${asset.fileSize} b, found ${length()} b)")
+                    false
+                }
             }
-            result
         }
     }
 

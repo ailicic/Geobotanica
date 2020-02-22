@@ -25,10 +25,9 @@ import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.fragment_map.*
 import javax.inject.Inject
 
-// TODO: Fix/update tests
 // const val KEY_PERMIT_METERED_NETWORK = "KEY_PERMIT_METERED_NETWORK" // TODO: Use sharedPrefs instead
 // TODO: Fix location icon offset with zoom levels. Also plant marker tap is off.
-// TODO: Maybe apply INTERNET_CONNECTED constraint to download worker?
+// TODO: Fix/update tests
 // TODO: Check behaviour of OnlineMap downloads that must pause after losing internet.
 // TODO: Fix fragment animations when using popUpTo
 // TODO: Fix hidden FAB on Login screen after typed name is sufficiently long and keyboard visible (have coordinator layout already...)

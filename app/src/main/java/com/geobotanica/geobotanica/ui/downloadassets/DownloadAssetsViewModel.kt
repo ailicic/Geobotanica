@@ -13,6 +13,8 @@ import com.geobotanica.geobotanica.data.entity.OnlineAsset
 import com.geobotanica.geobotanica.data.repo.AssetRepo
 import com.geobotanica.geobotanica.network.DownloadStatus.*
 import com.geobotanica.geobotanica.network.FileDownloader
+import com.geobotanica.geobotanica.network.NetworkValidator
+import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
 import com.geobotanica.geobotanica.ui.login.OnlineAssetId.*
 import com.geobotanica.geobotanica.util.*
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +27,7 @@ import javax.inject.Singleton
 @Singleton
 class DownloadAssetsViewModel @Inject constructor(
         private val storageHelper: StorageHelper,
+        private val networkValidator: NetworkValidator,
         private val fileDownloader: FileDownloader,
         private val fileImporter: FileImporter,
         private val assetRepo: AssetRepo,
@@ -33,7 +36,9 @@ class DownloadAssetsViewModel @Inject constructor(
 ): ViewModel() {
     var userId = 0L
 
-    val showStorageSnackbar = SingleLiveEvent<OnlineAsset>()
+    val showInsufficientStorageSnackbar = SingleLiveEvent<OnlineAsset>()
+    val showInternetUnavailableSnackbar = SingleLiveEvent<Unit>()
+    val showMeteredNetworkDialog = SingleLiveEvent<Unit>()
 
     val navigateToNext: LiveData<Boolean> = assetRepo.getAllLiveData().map { assetList ->
         val mapFoldersAsset = assetList.find { it.id == MAP_FOLDER_LIST.id } ?: throw IllegalStateException()
@@ -59,43 +64,41 @@ class DownloadAssetsViewModel @Inject constructor(
 
     private var shouldImportAssets = false // True if assets can be imported from storage instead of downloaded
 
-    suspend fun areOnlineAssetsInExtStorageRootDir(): Boolean = withContext(Dispatchers.IO) {
-        shouldImportAssets = assetRepo.getAll().all { storageHelper.isGzipAssetInExtStorageRootDir(it) }
+    suspend fun areAssetsInExtStorageRootDir(): Boolean = withContext(Dispatchers.IO) {
+        shouldImportAssets = storageHelper.areGzipAssetsInExtStorageRootDir(assetRepo.getAll())
         shouldImportAssets
     }
 
-    fun downloadAssets() = viewModelScope.launch(Dispatchers.IO) {
+    fun onMeteredNetworkAllowed() = viewModelScope.launch {
+        networkValidator.allowMeteredNetwork()
+        downloadAssets()
+    }
+
+    fun initAssetDownloads() {
         if (shouldImportAssets)
-            importAssets()
-        else {
-            assetRepo.getAll().forEach { asset ->
-                if (asset.isDownloading)
-                    Lg.d("${asset.filename}: Asset already downloading")
-                else if (asset.isDownloaded)
-                    Lg.d("${asset.filename}: Asset already downloaded")
-                else if (!storageHelper.isStorageAvailable(asset))
-                    showStorageSnackbar.postValue(asset)
-                else {
-                    val workInfo = fileDownloader.download(asset)
-                    registerAssetObserver(workInfo, asset)
-                    assetRepo.update(asset.copy(status = DOWNLOADING))
-                }
-            }
+            downloadAssets() // Skip network check if importing
+        else when (networkValidator.getStatus()) {
+            INVALID -> showInternetUnavailableSnackbar.call()
+            VALID_IF_METERED_PERMITTED -> showMeteredNetworkDialog.call()
+            VALID -> downloadAssets()
         }
     }
 
-    private fun importAssets() = viewModelScope.launch(Dispatchers.IO) {
+    private fun downloadAssets() = viewModelScope.launch(Dispatchers.IO) {
         assetRepo.getAll().forEach { asset ->
             if (asset.isDownloading)
                 Lg.d("${asset.filename}: Asset already downloading")
             else if (asset.isDownloaded)
                 Lg.d("${asset.filename}: Asset already downloaded")
-            else if (! storageHelper.isStorageAvailable(asset))
-                showStorageSnackbar.postValue(asset)
+            else if (!storageHelper.isStorageAvailable(asset))
+                this@DownloadAssetsViewModel.showInsufficientStorageSnackbar.postValue(asset)
             else {
-                val workInfo = fileImporter.importFromStorage(asset)
-                registerAssetObserver(workInfo, asset)
+                val workInfo = if (shouldImportAssets)
+                    fileImporter.importFromStorage(asset)
+                else
+                    fileDownloader.download(asset)
                 assetRepo.update(asset.copy(status = DOWNLOADING))
+                registerAssetObserver(workInfo, asset)
             }
         }
     }
@@ -126,5 +129,4 @@ class DownloadAssetsViewModel @Inject constructor(
 
     suspend fun getPlantNameDbText(): String = assetRepo.get(PLANT_NAMES.id).printName
 }
-
 

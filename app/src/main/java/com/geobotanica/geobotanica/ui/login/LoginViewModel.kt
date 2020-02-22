@@ -244,7 +244,7 @@ val onlineAssetList = listOf(
         )
 )
 
-// TODO: This is fragile. If asset list changes in updated version it will break.
+// TODO: This is fragile. If asset list changes in updated version it will break. Implement versioning and backwards compatibility.
 enum class OnlineAssetId(val id: Long) {
     MAP_FOLDER_LIST(1L),
     MAP_LIST(2L),

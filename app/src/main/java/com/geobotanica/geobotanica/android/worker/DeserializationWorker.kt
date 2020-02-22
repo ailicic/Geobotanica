@@ -9,14 +9,14 @@ import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.GbDatabase
 import com.geobotanica.geobotanica.data.entity.OnlineMap
 import com.geobotanica.geobotanica.data.entity.OnlineMapFolder
+import com.geobotanica.geobotanica.data.repo.AssetRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
-import com.geobotanica.geobotanica.network.KEY_FILE_NAME
 import com.geobotanica.geobotanica.network.KEY_DEST_PATH
+import com.geobotanica.geobotanica.network.KEY_FILE_NAME
 import com.geobotanica.geobotanica.network.KEY_TITLE
 import com.geobotanica.geobotanica.ui.NOTIFICATION_CHANNEL_ID_DOWNLOADS
 import com.geobotanica.geobotanica.ui.login.OnlineAssetId.MAP_FOLDER_LIST
 import com.geobotanica.geobotanica.ui.login.OnlineAssetId.MAP_LIST
-import com.geobotanica.geobotanica.ui.login.onlineAssetList
 import com.geobotanica.geobotanica.util.Lg
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -54,6 +54,8 @@ class DeserializationWorker(val context: Context, workerParams: WorkerParameters
         val file = File(data.localPath, data.filename)
         val moshi = Moshi.Builder().build()
         val db = GbDatabase.getInstance(context)
+        val assetRepo = AssetRepo(db.assetDao())
+        val assetList = assetRepo.getAll()
 
         var count = 0
 
@@ -64,7 +66,7 @@ class DeserializationWorker(val context: Context, workerParams: WorkerParameters
                 source.close()
 
                 when (data.filename) {
-                    onlineAssetList[MAP_LIST.ordinal].filenameUngzip -> {
+                    assetList[MAP_LIST.ordinal].filenameUngzip -> {
                         val mapRepo = MapRepo(db.mapDao(), db.mapFolderDao())
                         val mapListType = Types.newParameterizedType(List::class.java, OnlineMap::class.java)
                         val adapter = moshi.adapter<List<OnlineMap>>(mapListType)
@@ -72,7 +74,7 @@ class DeserializationWorker(val context: Context, workerParams: WorkerParameters
 
                         count = mapRepo.insert(mapList).size
                     }
-                    onlineAssetList[MAP_FOLDER_LIST.ordinal].filenameUngzip -> {
+                    assetList[MAP_FOLDER_LIST.ordinal].filenameUngzip -> {
                         val mapRepo = MapRepo(db.mapDao(), db.mapFolderDao())
                         val mapFolderListType = Types.newParameterizedType(List::class.java, OnlineMapFolder::class.java)
                         val adapter = moshi.adapter<List<OnlineMapFolder>>(mapFolderListType)

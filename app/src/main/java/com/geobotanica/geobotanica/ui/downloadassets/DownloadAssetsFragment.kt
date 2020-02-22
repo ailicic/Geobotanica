@@ -14,8 +14,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import com.geobotanica.geobotanica.R
 import com.geobotanica.geobotanica.data.entity.OnlineAsset
-import com.geobotanica.geobotanica.network.NetworkValidator
-import com.geobotanica.geobotanica.network.NetworkValidator.NetworkState.*
 import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
@@ -30,8 +28,6 @@ import javax.inject.Inject
 class DownloadAssetsFragment : BaseFragment() {
     @Inject lateinit var viewModelFactory: ViewModelFactory<DownloadAssetsViewModel>
     private lateinit var viewModel: DownloadAssetsViewModel
-
-    @Inject lateinit var networkValidator: NetworkValidator
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -64,7 +60,7 @@ class DownloadAssetsFragment : BaseFragment() {
         worldMapText.text = viewModel.getWorldMapText()
         plantNameDbText.text = viewModel.getPlantNameDbText()
         storageAvailableText.text = getString(R.string.mb_free, getInternalStorageFreeInMb())
-        if (viewModel.areOnlineAssetsInExtStorageRootDir())
+        if (viewModel.areAssetsInExtStorageRootDir())
             downloadButton.text = getString(R.string.import_assets)
     }
 
@@ -73,43 +69,39 @@ class DownloadAssetsFragment : BaseFragment() {
     }
 
     private fun bindViewModel() {
-        viewModel.showStorageSnackbar.observe(viewLifecycleOwner, onShowStorageSnackbar)
         viewModel.showDownloadButton.observe(viewLifecycleOwner) { downloadButton.isVisible = it }
         viewModel.showProgressSpinner.observe(viewLifecycleOwner) { progressSpinner.isVisible = it }
+        viewModel.showInternetUnavailableSnackbar.observe(viewLifecycleOwner) { showSnackbar(resources.getString(R.string.internet_unavailable)) }
+        viewModel.showInsufficientStorageSnackbar.observe(viewLifecycleOwner, onShowInsufficientStorageSnackbar)
+        viewModel.showMeteredNetworkDialog.observe(viewLifecycleOwner, onShowMeteredNetworkDialog)
         viewModel.navigateToNext.observe(viewLifecycleOwner, onNavigateToNextObserver)
     }
 
-    private val onShowStorageSnackbar = Observer<OnlineAsset> { onlineAsset ->
-        Lg.e("Error: Insufficient storage for ${onlineAsset.description}")
+    private val onShowInsufficientStorageSnackbar = Observer<OnlineAsset> { onlineAsset ->
+        Lg.e("Error: Insufficient storage for ${onlineAsset.filename}")
         showSnackbar(R.string.insufficient_storage, R.string.Inspect) {
             startActivity(Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS))
         }
     }
 
+    private val onShowMeteredNetworkDialog = Observer<Unit> {
+        WarningDialog(
+                getString(R.string.metered_network),
+                getString(R.string.metered_network_confirm)
+        ) {
+            viewModel.onMeteredNetworkAllowed()
+        }.show(parentFragmentManager, "tag")
+    }
+
     private val onNavigateToNextObserver = Observer<Boolean> {
         if (it) {
-            Lg.d("DownloadAssetsFragment: navigateToNext()")
+            Lg.d("DownloadAssetsFragment: navigate")
             navigateTo(R.id.action_downloadAssets_to_localMaps, createBundle(), R.id.downloadAssetsFragment)
         }
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    private fun onClickDownload(view: View?) {
-        when (networkValidator.getStatus()) {
-            INVALID -> showSnackbar(resources.getString(R.string.internet_unavailable))
-            VALID -> viewModel.downloadAssets()
-            VALID_IF_METERED_PERMITTED -> {
-                WarningDialog(
-                        getString(R.string.metered_network),
-                        getString(R.string.metered_network_confirm))
-                {
-                    networkValidator.allowMeteredNetwork()
-                    viewModel.downloadAssets()
-                }
-                .show(parentFragmentManager, "tag")
-            }
-        }
-    }
-
     private fun createBundle() = bundleOf(userIdKey to viewModel.userId)
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onClickDownload(view: View?) { viewModel.initAssetDownloads() }
 }
