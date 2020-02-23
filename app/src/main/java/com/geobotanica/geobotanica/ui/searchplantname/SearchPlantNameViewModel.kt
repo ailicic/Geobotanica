@@ -113,6 +113,7 @@ class SearchPlantNameViewModel @Inject constructor (
                 plantNameSearchService.search(searchEditText, searchFilterOptions).collect {
                     ensureActive()
                     emitViewEffect(UpdateSearchResults(it, showStars))
+                    updateViewState(searchResults = it)
                 }
             }
         }

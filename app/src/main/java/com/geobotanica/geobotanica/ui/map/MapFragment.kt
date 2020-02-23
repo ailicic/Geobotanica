@@ -25,7 +25,6 @@ import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.fragment_map.*
 import javax.inject.Inject
 
-// TODO: Prevent name from flashing before anim in NewPlantNameFragment
 // TODO: Fix userId missing somewhere between Login and Map
 // TODO: Add ripple to plant name search items and suggested plant name list items
 // TODO: Check Recyclerview layout on different screen sizes for NewPlantNameFragment (c.f. android:layout_height="350dp")

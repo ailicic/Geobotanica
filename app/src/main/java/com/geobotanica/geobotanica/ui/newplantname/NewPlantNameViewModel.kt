@@ -107,8 +107,9 @@ class NewPlantNameViewModel @Inject constructor (
             val isClickedResultSameAsLast = event.index == viewState.lastClickedResultIndex
             if (viewState.isCommonNameEditable) {
                 vernacularId = searchResult.id
+                val commonName = if (isClickedResultSameAsLast) searchResult.plantName else viewState.commonName
                 updateViewState(
-                        commonName = searchResult.plantName,
+                        commonName = commonName,
                         lastClickedResultIndex = index,
                         lastClickedResult = searchResult
                 )
@@ -117,8 +118,9 @@ class NewPlantNameViewModel @Inject constructor (
             }
             if (viewState.isScientificNameEditable) {
                 taxonId = searchResult.id
+                val scientificName = if (isClickedResultSameAsLast) searchResult.plantName else viewState.scientificName
                 updateViewState(
-                        scientificName = searchResult.plantName,
+                        scientificName = scientificName,
                         lastClickedResultIndex = index,
                         lastClickedResult = searchResult
                 )
