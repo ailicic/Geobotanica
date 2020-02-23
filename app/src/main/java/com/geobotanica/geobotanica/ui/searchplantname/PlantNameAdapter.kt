@@ -25,8 +25,8 @@ class PlantNameAdapter(
 
     var items: List<SearchResult> = emptyList()
 
-    var lastSelectedIndex:Int = RecyclerView.NO_POSITION
-    var isLastSelectedShown: Boolean = true // If true, last selected item will have darker background
+    var selectedPosition:Int = RecyclerView.NO_POSITION
+    var isSelectedShown: Boolean = false // If true, last selected item will have darker background
 
     var showStars: Boolean = true
 
@@ -98,10 +98,12 @@ class PlantNameAdapter(
         }
 
         @Suppress("DEPRECATION")
-        if (isLastSelectedShown && position == lastSelectedIndex)
-            holder.constraintLayout.setBackgroundColor(resources.getColor(R.color.colorLightGrey))
-        else
-            holder.constraintLayout.setBackgroundColor(resources.getColor(R.color.colorWhite))
+        if (isSelectedShown) {
+            if (position == selectedPosition)
+                holder.constraintLayout.setBackgroundColor(resources.getColor(R.color.colorLightGrey))
+            else
+                holder.constraintLayout.setBackgroundColor(resources.getColor(R.color.colorWhite))
+        }
 
         holder.view.setOnClickListener { onClickItem(position, item) }
     }

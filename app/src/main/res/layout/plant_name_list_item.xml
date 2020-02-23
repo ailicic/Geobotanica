@@ -8,7 +8,8 @@
     android:layout_height="wrap_content"
     android:clickable="true"
     android:focusable="true"
-    android:background="?android:attr/selectableItemBackground">
+    android:foreground="?android:attr/selectableItemBackground"
+    tools:ignore="UnusedAttribute">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/plantNameIcon"

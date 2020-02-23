@@ -78,11 +78,11 @@ class NewPlantNameFragment : BaseFragment() {
             suggestedText.text = viewState.suggestedText
 
             plantNamesAdapter?.run {
-                if (viewState.isLastClickedShown != isLastSelectedShown || viewState.lastClickedResultIndex != lastSelectedIndex) {
-                    isLastSelectedShown = viewState.isLastClickedShown
-                    notifyItemChanged(lastSelectedIndex)
-                    viewState.lastClickedResultIndex?.let { lastSelectedIndex = it }
-                    notifyItemChanged(lastSelectedIndex)
+                if (viewState.isLastClickedShown != isSelectedShown || viewState.lastClickedResultIndex != selectedPosition) {
+                    isSelectedShown = viewState.isLastClickedShown
+                    notifyItemChanged(selectedPosition)
+                    viewState.lastClickedResultIndex?.let { selectedPosition = it }
+                    notifyItemChanged(selectedPosition)
                 }
                 if (viewState.searchResults.size > items.size) {
                     items = viewState.searchResults
