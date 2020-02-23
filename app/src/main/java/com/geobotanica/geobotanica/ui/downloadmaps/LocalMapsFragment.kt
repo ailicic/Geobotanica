@@ -21,6 +21,7 @@ import com.geobotanica.geobotanica.ui.BaseFragment
 import com.geobotanica.geobotanica.ui.BaseFragmentExt.getViewModel
 import com.geobotanica.geobotanica.ui.ViewModelFactory
 import com.geobotanica.geobotanica.ui.dialog.WarningDialog
+import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.getFromBundle
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_local_maps.*
@@ -39,6 +40,7 @@ class LocalMapsFragment : BaseFragment() {
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
+            Lg.d("LocalMapsFragment bundle args: userId=$userId")
         }
     }
 
@@ -159,7 +161,7 @@ class LocalMapsFragment : BaseFragment() {
         }.show(parentFragmentManager, null)
     }
 
-    private fun browseMaps() = navigateTo(R.id.action_localMaps_to_browseMaps)
+    private fun browseMaps() = navigateTo(R.id.action_localMaps_to_browseMaps, createBundle())
 
     private fun navigateToNext() {
         if (! popUpTo(R.id.mapFragment))

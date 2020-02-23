@@ -31,7 +31,7 @@ class NewPlantPhotoFragment : BaseFragment() {
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
             currentSessionId = getFromBundle(newPlantSessionIdKey)
-            Lg.d("Fragment args: userId=$userId")
+            Lg.d("NewPlantPhotoFragment bundle args: userId=$userId")
         }
     }
 
@@ -42,7 +42,7 @@ class NewPlantPhotoFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.deleteLastPhoto()
+        viewModel.deleteLastPhoto()  // Required if user navigates back to re-take photo
         val photoFile = storageHelper.createPhotoFile()
         viewModel.photoUri = photoFile.absolutePath
         startPhotoIntent(photoFile)

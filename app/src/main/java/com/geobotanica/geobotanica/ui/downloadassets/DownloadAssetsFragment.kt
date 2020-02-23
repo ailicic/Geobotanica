@@ -35,6 +35,7 @@ class DownloadAssetsFragment : BaseFragment() {
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
+            Lg.d("DownloadAssetsFragment bundle args: userId=$userId")
         }
     }
 

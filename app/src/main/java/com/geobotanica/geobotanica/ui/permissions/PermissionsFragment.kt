@@ -32,6 +32,7 @@ class PermissionsFragment : BaseFragment() {
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
+            Lg.d("PermissionsFragment bundle args: userId=$userId")
         }
     }
 

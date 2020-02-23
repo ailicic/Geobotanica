@@ -40,6 +40,7 @@ class BrowseMapsFragment : BaseFragment() {
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
+            Lg.d("BrowseMapsFragment bundle args: userId=$userId")
         }
     }
 

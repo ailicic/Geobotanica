@@ -13,11 +13,9 @@ class NewPlantPhotoViewModel @Inject constructor (): ViewModel() {
     var photoUri: String = ""
     private var lastSessionId = 0L
 
-    fun deleteLastPhoto() {  // Required if user navigates back to re-take photo
-        if (currentSessionId == lastSessionId) {
-            Lg.d("Deleting old photo: photoUri")
-            Lg.d("Delete photo result = ${File(photoUri).delete()}")
-        }
+    fun deleteLastPhoto() {
+        if (currentSessionId == lastSessionId)
+            Lg.d("Deleting old photo: photoUri (result=${File(photoUri).delete()}")
         lastSessionId = currentSessionId
     }
 }

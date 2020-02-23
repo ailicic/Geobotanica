@@ -91,6 +91,7 @@ class NewPlantMeasurementFragment : BaseFragment() {
 
     @Suppress("UNUSED_PARAMETER")
     private fun onFabPressed(view: View) {
+        hideKeyboard(this)
         if (!isPlantValid()) {
             showSnackbar(resources.getString(R.string.provide_plant_measurements))
             return
