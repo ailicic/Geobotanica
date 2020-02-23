@@ -69,6 +69,16 @@
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintTop_toBottomOf="@id/suggestedText" />
 
+        <ProgressBar
+            android:id="@+id/loadingSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginBottom="@dimen/medium_gap"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
         <com.geobotanica.geobotanica.ui.compoundview.GpsCompoundView
             android:id="@+id/gps"
             android:layout_width="match_parent"

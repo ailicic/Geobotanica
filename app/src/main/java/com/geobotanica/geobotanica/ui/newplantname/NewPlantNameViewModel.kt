@@ -16,10 +16,7 @@ import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.*
 import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.NavViewEffect.NavigateToNewPlantMeasurement
 import com.geobotanica.geobotanica.ui.newplantname.ViewEffect.NavViewEffect.NavigateToNewPlantType
 import com.geobotanica.geobotanica.ui.newplantname.ViewEvent.*
-import com.geobotanica.geobotanica.util.GbDispatchers
-import com.geobotanica.geobotanica.util.Lg
-import com.geobotanica.geobotanica.util.SingleLiveEvent
-import com.geobotanica.geobotanica.util.mutableLiveData
+import com.geobotanica.geobotanica.util.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
@@ -60,22 +57,26 @@ class NewPlantNameViewModel @Inject constructor (
             when {
                 taxonId != null -> {
                     updateViewState(
+                            isLoadingSpinnerVisible = false,
                             isCommonNameEditable = true,
                             isScientificNameEditable = false,
                             commonName = "",
                             scientificName = "",
                             suggestedText = appContext.resources.getString(R.string.suggested_common),
-                            lastClickedResultIndex = null
+                            selectedPosition = null,
+                            searchResults = emptyList()
                     )
                 }
                 vernacularId != null -> {
                     updateViewState(
+                            isLoadingSpinnerVisible = false,
                             isCommonNameEditable = false,
                             isScientificNameEditable = true,
                             commonName = "",
                             scientificName = "",
                             suggestedText = appContext.resources.getString(R.string.suggested_scientific),
-                            lastClickedResultIndex = null
+                            selectedPosition = null,
+                            searchResults = emptyList()
                     )
                 }
                 else -> _viewState.value = ViewState()
@@ -86,45 +87,45 @@ class NewPlantNameViewModel @Inject constructor (
         is CommonEditTextChanged -> {
             Lg.v("onEvent(CommonEditTextChanged)")
             val editText = event.editText
-            val lastClickedResult = viewState.value?.lastClickedResult
-            val isTextSame = editText == lastClickedResult?.plantName ?: true
-            updateViewState(commonName = editText, isLastClickedShown = isTextSame)
-            vernacularId = if (isTextSame) lastClickedResult?.id else null
+            val selectedResult = viewState.value?.selectedResult
+            val isTextSame = editText == selectedResult?.plantName ?: true
+            updateViewState(commonName = editText, isSelectedShown = isTextSame)
+            vernacularId = if (isTextSame) selectedResult?.id else null
         }
         is ScientificEditTextChanged -> {
             Lg.v("onEvent(ScientificEditTextChanged)")
             val editText = event.editText
-            val lastClickedResult = viewState.value?.lastClickedResult
-            val isTextSame = editText == lastClickedResult?.plantName ?: true
-            updateViewState(scientificName = editText, isLastClickedShown = isTextSame)
-            taxonId = if (isTextSame) lastClickedResult?.id else null
+            val selectedResult = viewState.value?.selectedResult
+            val isTextSame = editText == selectedResult?.plantName ?: true
+            updateViewState(scientificName = editText, isSelectedShown = isTextSame)
+            taxonId = if (isTextSame) selectedResult?.id else null
         }
         is StarClicked -> { updateIsStarred(event.searchResult); Unit }
         is ResultClicked -> viewState.value?.let { viewState ->
             Lg.v("onEvent(ResultClicked)")
             val index = event.index
             val searchResult = event.searchResult
-            val isClickedResultSameAsLast = event.index == viewState.lastClickedResultIndex
+            val isSelectedResultSameAsLast = event.index == viewState.selectedPosition
             if (viewState.isCommonNameEditable) {
                 vernacularId = searchResult.id
-                val commonName = if (isClickedResultSameAsLast) searchResult.plantName else viewState.commonName
+                val commonName = if (isSelectedResultSameAsLast) searchResult.plantName else viewState.commonName
                 updateViewState(
                         commonName = commonName,
-                        lastClickedResultIndex = index,
-                        lastClickedResult = searchResult
+                        selectedPosition = index,
+                        selectedResult = searchResult
                 )
-                if (! isClickedResultSameAsLast)
+                if (! isSelectedResultSameAsLast)
                     emitViewEffect(ShowCommonNameAnimation(searchResult.plantName))
             }
             if (viewState.isScientificNameEditable) {
                 taxonId = searchResult.id
-                val scientificName = if (isClickedResultSameAsLast) searchResult.plantName else viewState.scientificName
+                val scientificName = if (isSelectedResultSameAsLast) searchResult.plantName else viewState.scientificName
                 updateViewState(
                         scientificName = scientificName,
-                        lastClickedResultIndex = index,
-                        lastClickedResult = searchResult
+                        selectedPosition = index,
+                        selectedResult = searchResult
                 )
-                if (! isClickedResultSameAsLast)
+                if (! isSelectedResultSameAsLast)
                     emitViewEffect(ShowScientificNameAnimation(searchResult.plantName))
             }
         } ?: Unit
@@ -147,9 +148,13 @@ class NewPlantNameViewModel @Inject constructor (
     @SuppressLint("DefaultLocale") // TODO: Remove this when capitalize(Locale) no longer requires @ExperimentalStdlibApi
     private fun loadPlantNames() {
         viewModelScope.launch(dispatchers.main) {
+            updateViewState(isLoadingSpinnerVisible = true)
+
             delay(appContext.resources.getInteger(R.integer.fragmentAnimTime).toLong())
             taxonId?.let {
                 val scientificName = taxonRepo.get(it)?.scientific?.capitalize() ?: ""
+                emitViewEffect(ShowScientificNameAnimation(scientificName))
+
                 plantNameSearchService.searchSuggestedCommonNames(it).collect { results ->
                     ensureActive()
                     updateViewState(commonName = "", scientificName = scientificName, searchResults = results)
@@ -157,17 +162,14 @@ class NewPlantNameViewModel @Inject constructor (
             }
             vernacularId?.let {
                 val commonName = vernacularRepo.get(it)?.vernacular?.capitalize() ?: ""
+                emitViewEffect(ShowCommonNameAnimation(commonName))
+
                 plantNameSearchService.searchSuggestedScientificNames(it).collect { results ->
                     ensureActive()
                     updateViewState(commonName = commonName, scientificName = "", searchResults = results)
                 }
             }
-        }.invokeOnCompletion { completionError ->
-            if (completionError != null) // Coroutine did not complete
-                return@invokeOnCompletion
-            taxonId?.let { emitViewEffect(ShowScientificNameAnimation(viewState.value?.scientificName ?: "")) }
-            vernacularId?.let { emitViewEffect(ShowCommonNameAnimation(viewState.value?.commonName ?: "")) }
-        }
+        }.invokeOnCompletion { updateViewState(isLoadingSpinnerVisible = false) }
     }
 
     private fun updateIsStarred(result: SearchResult) = viewModelScope.launch(dispatchers.main) {
@@ -187,26 +189,28 @@ class NewPlantNameViewModel @Inject constructor (
     private fun isSinglePlantType(plantTypeFlags: Int): Boolean = Plant.Type.flagsToList(plantTypeFlags).size == 1
 
     private fun updateViewState(
+            isLoadingSpinnerVisible: Boolean = viewState.value?.isLoadingSpinnerVisible ?: false,
             isCommonNameEditable: Boolean = viewState.value?.isCommonNameEditable ?: true,
             isScientificNameEditable: Boolean = viewState.value?.isScientificNameEditable ?: true,
             commonName: String = viewState.value?.commonName ?: "",
             scientificName: String = viewState.value?.scientificName ?: "",
             suggestedText: String = viewState.value?.suggestedText ?: "",
-            isLastClickedShown: Boolean = viewState.value?.isLastClickedShown ?: true,
+            isSelectedShown: Boolean = viewState.value?.isSelectedShown ?: true,
             searchResults: List<SearchResult> = viewState.value?.searchResults ?: emptyList(),
-            lastClickedResult: SearchResult? = viewState.value?.lastClickedResult,
-            lastClickedResultIndex: Int? = viewState.value?.lastClickedResultIndex
+            selectedResult: SearchResult? = viewState.value?.selectedResult,
+            selectedPosition: Int? = viewState.value?.selectedPosition
     ) {
         _viewState.value = viewState.value?.copy(
+                isLoadingSpinnerVisible = isLoadingSpinnerVisible,
                 isCommonNameEditable = isCommonNameEditable,
                 isScientificNameEditable = isScientificNameEditable,
                 commonName = commonName,
                 scientificName = scientificName,
                 suggestedText = suggestedText,
-                isLastClickedShown = isLastClickedShown,
+                isSelectedShown = isSelectedShown,
                 searchResults = searchResults,
-                lastClickedResult = lastClickedResult,
-                lastClickedResultIndex = lastClickedResultIndex
+                selectedResult = selectedResult,
+                selectedPosition = selectedPosition
         )
     }
 
@@ -216,15 +220,16 @@ class NewPlantNameViewModel @Inject constructor (
 }
 
 data class ViewState(
+        val isLoadingSpinnerVisible: Boolean = false,
         val isCommonNameEditable: Boolean = true,
         val isScientificNameEditable: Boolean = true,
         val commonName: String = "",
         val scientificName: String = "",
         val suggestedText: String = "",
         val searchResults: List<SearchResult> = emptyList(),
-        val lastClickedResult: SearchResult? = null,
-        val lastClickedResultIndex: Int? = null,
-        val isLastClickedShown: Boolean = true
+        val selectedResult: SearchResult? = null,
+        val selectedPosition: Int? = null,
+        val isSelectedShown: Boolean = true
 )
 
 sealed class ViewEvent {

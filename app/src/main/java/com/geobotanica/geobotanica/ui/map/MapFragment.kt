@@ -25,9 +25,8 @@ import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.fragment_map.*
 import javax.inject.Inject
 
-// TODO: Check Recyclerview layout on different screen sizes for NewPlantNameFragment (c.f. android:layout_height="350dp")
-// TODO: Fix/update tests
 // TODO: Consider removing appContext and activity from Dagger (or at least not injecting these into BaseFragment)
+// TODO: Fix/update tests
 // TODO: Fix hidden FAB on Login screen after typed name is sufficiently long and keyboard visible (have coordinator layout already...)
     // RELATED TODO: Force GPS compound view to stay at bottom when keyboard visible (inconsistent behaviour across fragments)
 // TODO: Remove "-r -t" flags in run config after AS 3.6
@@ -43,6 +42,7 @@ import javax.inject.Inject
 // TODO: Allow synchronization of plant records with server
 
 // LONG TERM
+// TODO: Check Recyclerview layout on different screen sizes for NewPlantNameFragment (c.f. android:layout_height="350dp")
 // TODO: Use Okio everywhere
 // https://developer.android.com/training/id-auth/identify.html
 // https://developer.android.com/training/id-auth/custom_auth

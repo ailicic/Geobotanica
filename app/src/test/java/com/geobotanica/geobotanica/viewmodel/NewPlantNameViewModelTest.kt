@@ -213,8 +213,8 @@ object NewPlantNameViewModelTest : Spek({
                                 scientificName = tSearchResult1.plantName,  // Important
                                 suggestedText = "Suggested scientific",     // From ViewCreated
                                 searchResults = tSearchResults,             // From ViewCreated
-                                lastClickedResult = tSearchResult1,         // Important
-                                lastClickedResultIndex = 0                  // Important
+                                selectedResult = tSearchResult1,         // Important
+                                selectedPosition = 0                  // Important
                         ))
                         viewStateObserver.onChanged(ViewState(
                                 isCommonNameEditable = false,               // From ViewCreated
@@ -223,8 +223,8 @@ object NewPlantNameViewModelTest : Spek({
                                 scientificName = tSearchResult2.plantName,  // Important
                                 suggestedText = "Suggested scientific",     // From ViewCreated
                                 searchResults = tSearchResults,             // From ViewCreated
-                                lastClickedResult = tSearchResult2,         // Important
-                                lastClickedResultIndex = 1                  // Important
+                                selectedResult = tSearchResult2,         // Important
+                                selectedPosition = 1                  // Important
                         ))
                     }
                 }
@@ -252,8 +252,8 @@ object NewPlantNameViewModelTest : Spek({
                                 scientificName = tSearchResult1.plantName,  // Important
                                 suggestedText = "Suggested scientific",     // From ViewCreated
                                 searchResults = tSearchResults,             // From ViewCreated
-                                lastClickedResult = tSearchResult1,         // Important
-                                lastClickedResultIndex = 0                  // Important
+                                selectedResult = tSearchResult1,         // Important
+                                selectedPosition = 0                  // Important
                         ))
                     }
                 }
@@ -285,8 +285,8 @@ object NewPlantNameViewModelTest : Spek({
                                 scientificName = taxon1.generic ?: "",  // From ViewCreated
                                 suggestedText = "Suggested common",     // From ViewCreated
                                 searchResults = vSearchResults,         // From ViewCreated
-                                lastClickedResult = vSearchResult1,     // Important
-                                lastClickedResultIndex = 0              // Important
+                                selectedResult = vSearchResult1,     // Important
+                                selectedPosition = 0              // Important
                         ))
                         viewStateObserver.onChanged(ViewState(
                                 isCommonNameEditable = true,            // From ViewCreated
@@ -295,8 +295,8 @@ object NewPlantNameViewModelTest : Spek({
                                 scientificName = taxon1.generic ?: "",  // From ViewCreated
                                 suggestedText = "Suggested common",     // From ViewCreated
                                 searchResults = vSearchResults,         // From ViewCreated
-                                lastClickedResult = vSearchResult2,     // Important
-                                lastClickedResultIndex = 1              // Important
+                                selectedResult = vSearchResult2,     // Important
+                                selectedPosition = 1              // Important
                         ))
                     }
                 }
@@ -324,8 +324,8 @@ object NewPlantNameViewModelTest : Spek({
                                 scientificName = taxon1.generic ?: "",  // From ViewCreated
                                 suggestedText = "Suggested common",     // From ViewCreated
                                 searchResults = vSearchResults,         // From ViewCreated
-                                lastClickedResult = vSearchResult1,     // Important
-                                lastClickedResultIndex = 0              // Important
+                                selectedResult = vSearchResult1,     // Important
+                                selectedPosition = 0              // Important
                         ))
                     }
                 }
@@ -356,9 +356,9 @@ object NewPlantNameViewModelTest : Spek({
                             scientificName = taxon1.generic ?: "",  // From ViewCreated
                             suggestedText = "Suggested common",     // From ViewCreated
                             searchResults = vSearchResults,         // From ViewCreated
-                            lastClickedResult = vSearchResult1,     // Important
-                            lastClickedResultIndex = 0,             // From ResultClicked
-                            isLastClickedShown = true               // Important
+                            selectedResult = vSearchResult1,     // Important
+                            selectedPosition = 0,             // From ResultClicked
+                            isSelectedShown = true               // Important
                     ))
                 }
             }
@@ -376,9 +376,9 @@ object NewPlantNameViewModelTest : Spek({
                             scientificName = taxon1.generic ?: "",  // From ViewCreated
                             suggestedText = "Suggested common",     // From ViewCreated
                             searchResults = vSearchResults,         // From ViewCreated
-                            lastClickedResult = vSearchResult1,     // Important
-                            lastClickedResultIndex = 0,             // From ResultClicked
-                            isLastClickedShown = true               // Important
+                            selectedResult = vSearchResult1,     // Important
+                            selectedPosition = 0,             // From ResultClicked
+                            isSelectedShown = true               // Important
                     ))
                     viewStateObserver.onChanged(ViewState(
                             isScientificNameEditable = false,       // From ViewCreated
@@ -387,9 +387,9 @@ object NewPlantNameViewModelTest : Spek({
                             scientificName = taxon1.generic ?: "",  // From ViewCreated
                             suggestedText = "Suggested common",     // From ViewCreated
                             searchResults = vSearchResults,         // From ViewCreated
-                            lastClickedResult = vSearchResult1,     // Important
-                            lastClickedResultIndex = 0,             // From ResultClicked
-                            isLastClickedShown = false              // Important
+                            selectedResult = vSearchResult1,     // Important
+                            selectedPosition = 0,             // From ResultClicked
+                            isSelectedShown = false              // Important
                     ))
                 }
             }
@@ -415,9 +415,9 @@ object NewPlantNameViewModelTest : Spek({
                             scientificName = tSearchResult1.plantName,  // Important
                             suggestedText = "Suggested scientific",     // From ViewCreated
                             searchResults = tSearchResults,             // From ViewCreated
-                            lastClickedResult = tSearchResult1,         // Important
-                            lastClickedResultIndex = 0,                 // From ResultClicked
-                            isLastClickedShown = true                   // Important
+                            selectedResult = tSearchResult1,         // Important
+                            selectedPosition = 0,                 // From ResultClicked
+                            isSelectedShown = true                   // Important
                     ))
                 }
             }
@@ -435,9 +435,9 @@ object NewPlantNameViewModelTest : Spek({
                             scientificName = tSearchResult1.plantName,  // Important
                             suggestedText = "Suggested scientific",     // From ViewCreated
                             searchResults = tSearchResults,             // From ViewCreated
-                            lastClickedResult = tSearchResult1,         // Important
-                            lastClickedResultIndex = 0,                 // From ResultClicked
-                            isLastClickedShown = true                   // Important
+                            selectedResult = tSearchResult1,         // Important
+                            selectedPosition = 0,                 // From ResultClicked
+                            isSelectedShown = true                   // Important
                     ))
                     viewStateObserver.onChanged(ViewState(
                             isCommonNameEditable = false,               // From ViewCreated
@@ -446,9 +446,9 @@ object NewPlantNameViewModelTest : Spek({
                             scientificName = "not same",                // Important
                             suggestedText = "Suggested scientific",     // From ViewCreated
                             searchResults = tSearchResults,             // From ViewCreated
-                            lastClickedResult = tSearchResult1,         // Important
-                            lastClickedResultIndex = 0,                 // From ResultClicked
-                            isLastClickedShown = false                  // Important
+                            selectedResult = tSearchResult1,         // Important
+                            selectedPosition = 0,                 // From ResultClicked
+                            isSelectedShown = false                  // Important
                     ))
                 }
             }

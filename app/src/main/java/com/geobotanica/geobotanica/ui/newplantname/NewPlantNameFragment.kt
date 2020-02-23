@@ -65,6 +65,8 @@ class NewPlantNameFragment : BaseFragment() {
 
     private fun render(viewState: ViewState) {
         Lg.v("render()")
+        loadingSpinner.isVisible = viewState.isLoadingSpinnerVisible
+
         commonNameEditText.isEnabled = viewState.isCommonNameEditable
         commonNameEditText.setText(viewState.commonName)
         commonNameEditText.setSelection(viewState.commonName.length)
@@ -78,10 +80,10 @@ class NewPlantNameFragment : BaseFragment() {
             suggestedText.text = viewState.suggestedText
 
             plantNamesAdapter?.run {
-                if (viewState.isLastClickedShown != isSelectedShown || viewState.lastClickedResultIndex != selectedPosition) {
-                    isSelectedShown = viewState.isLastClickedShown
+                if (viewState.isSelectedShown != isSelectedShown || viewState.selectedPosition != selectedPosition) {
+                    isSelectedShown = viewState.isSelectedShown
                     notifyItemChanged(selectedPosition)
-                    viewState.lastClickedResultIndex?.let { selectedPosition = it }
+                    viewState.selectedPosition?.let { selectedPosition = it }
                     notifyItemChanged(selectedPosition)
                 }
                 if (viewState.searchResults.size > items.size) {
