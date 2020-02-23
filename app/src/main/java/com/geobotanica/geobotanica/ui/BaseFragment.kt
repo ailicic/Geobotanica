@@ -12,12 +12,12 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.PermissionChecker.PERMISSION_GRANTED
 import androidx.fragment.app.Fragment
-import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.geobotanica.geobotanica.util.Lg
 import com.google.android.material.snackbar.Snackbar
@@ -82,6 +82,12 @@ abstract class BaseFragment : Fragment() {
     protected fun showSnackbar(stringId: Int, buttonStringId: Int = 0, action: ((View) -> Unit)? = null) {
         val buttonString = if (buttonStringId != 0) getString(buttonStringId) else ""
         showSnackbar(resources.getString(stringId), buttonString, action)
+    }
+
+    protected fun hideKeyboard(fragment: Fragment) {
+        val windowToken = fragment.view?.windowToken
+        val imm = appContext.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(windowToken, 0)
     }
 
     // TODO: Remove after better approach to create test images

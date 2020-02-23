@@ -104,6 +104,7 @@ class NewPlantNameFragment : BaseFragment() {
             is ShowScientificNameAnimation -> showTypedNameAnimation(viewEffect.name, scientificNameEditText)
             is NavViewEffect -> {
                 animateTextJob?.cancel()
+                hideKeyboard(this)
                 when (viewEffect) {
                     is NavigateToNewPlantMeasurement ->
                         navigateTo(R.id.action_newPlantName_to_newPlantMeasurement, createBundle(viewEffect))

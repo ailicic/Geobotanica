@@ -25,13 +25,14 @@ import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.fragment_map.*
 import javax.inject.Inject
 
-// TODO: Fix hidden FAB on Login screen after typed name is sufficiently long and keyboard visible (have coordinator layout already...)
-// TODO: Force GPS compound view to stay at bottom when keyboard visible
-// TODO: Force keyboard to close when navigating away from text input screen (stays open during fragment animation sometimes!)
+// TODO: Prevent name from flashing before anim in NewPlantNameFragment
+// TODO: Fix userId missing somewhere between Login and Map
 // TODO: Add ripple to plant name search items and suggested plant name list items
 // TODO: Check Recyclerview layout on different screen sizes for NewPlantNameFragment (c.f. android:layout_height="350dp")
 // TODO: Fix/update tests
 // TODO: Consider removing appContext and activity from Dagger (or at least not injecting these into BaseFragment)
+// TODO: Fix hidden FAB on Login screen after typed name is sufficiently long and keyboard visible (have coordinator layout already...)
+    // TODO: Force GPS compound view to stay at bottom when keyboard visible (inconsistent behaviour across fragments)
 // TODO: Remove "-r -t" flags in run config after AS 3.6
 
 

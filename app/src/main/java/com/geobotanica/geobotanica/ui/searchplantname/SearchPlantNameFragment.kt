@@ -128,8 +128,10 @@ class SearchPlantNameFragment : BaseFragment() {
         skipButton.setOnClickListener { viewModel.onEvent(SkipClicked) }
     }
 
-    private fun navigateToNext(viewEffect: NavigateToNext) =
-            navigateTo(R.id.action_searchPlantName_to_newPlantName, createBundle(viewEffect))
+    private fun navigateToNext(viewEffect: NavigateToNext) {
+        hideKeyboard(this)
+        navigateTo(R.id.action_searchPlantName_to_newPlantName, createBundle(viewEffect))
+    }
 
     private fun createBundle(viewEffect: NavigateToNext): Bundle {
         return bundleOf(

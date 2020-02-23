@@ -83,6 +83,7 @@ class LoginFragment : BaseFragment() {
         }
         is ShowUserExistsSnackbar -> showSnackbar(getString(R.string.userExists, viewEffect.nickname))
         is NavigateToNext -> {
+            hideKeyboard(this)
             val userId = viewEffect.userId
             sharedPrefs.put(sharedPrefsLastUserId to userId)
             if (! arePermissionsGranted())

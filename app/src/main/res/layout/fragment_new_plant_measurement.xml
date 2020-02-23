@@ -6,9 +6,9 @@
     android:layout_height="match_parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/constraintLayout">
+        android:layout_height="match_parent">
 
         <TextView
             android:id="@+id/addMeasurementsText"
@@ -62,13 +62,14 @@
             app:layout_constraintTop_toBottomOf="@id/measurementRadioGroup"
             app:layout_constraintStart_toStartOf="parent" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <com.geobotanica.geobotanica.ui.compoundview.GpsCompoundView
+            android:id="@+id/gps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <com.geobotanica.geobotanica.ui.compoundview.GpsCompoundView
-        android:id="@+id/gps"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
