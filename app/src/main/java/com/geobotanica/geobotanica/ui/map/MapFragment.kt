@@ -25,7 +25,6 @@ import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.fragment_map.*
 import javax.inject.Inject
 
-// TODO: Consider removing appContext and activity from Dagger (or at least not injecting these into BaseFragment)
 // TODO: Fix/update tests
 // TODO: Fix hidden FAB on Login screen after typed name is sufficiently long and keyboard visible (have coordinator layout already...)
     // RELATED TODO: Force GPS compound view to stay at bottom when keyboard visible (inconsistent behaviour across fragments)
@@ -89,7 +88,7 @@ class MapFragment : BaseFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        activity.applicationComponent.inject(this)
+        mainActivity.applicationComponent.inject(this)
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
@@ -296,7 +295,7 @@ class MapFragment : BaseFragment() {
                 .forEach { mapView.layerManager.layers.remove(it, false) } // Note: removeAll fails due to COW array internal to layers
 
         mapView.layerManager.layers.addAll(
-                plantMarkerDiffs.toInsert.map { PlantMarker(it, activity, mapView, ::onPlantMarkerLongPress) },
+                plantMarkerDiffs.toInsert.map { PlantMarker(it, mainActivity, mapView, ::onPlantMarkerLongPress) },
                 false
         )
 

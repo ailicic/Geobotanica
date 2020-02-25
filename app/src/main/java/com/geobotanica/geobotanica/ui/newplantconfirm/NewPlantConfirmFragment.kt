@@ -42,7 +42,7 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        activity.applicationComponent.inject(this)
+        mainActivity.applicationComponent.inject(this)
 
         viewModel = getViewModel(viewModelFactory) {
             init(
@@ -79,7 +79,7 @@ class NewPlantConfirmFragment : BaseFragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        activity.toolbar.setNavigationOnClickListener(null)
+        mainActivity.toolbar.setNavigationOnClickListener(null)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -93,17 +93,17 @@ class NewPlantConfirmFragment : BaseFragment() {
     }
 
     private fun addOnBackPressedCallback() {
-        activity.toolbar.setNavigationOnClickListener { onClickBackButton() }
+        mainActivity.toolbar.setNavigationOnClickListener { onClickBackButton() }
         requireActivity().onBackPressedDispatcher.addCallback(this) { onClickBackButton() }
     }
 
     private fun onClickBackButton() {
-        AlertDialog.Builder(activity).apply {
+        AlertDialog.Builder(mainActivity).apply {
             setTitle(getString(R.string.discard_new_plant))
             setMessage(getString(R.string.discard_new_plant_confirm))
             setPositiveButton(getString(R.string.yes)) { _, _ ->
                 viewModel.deleteAllPhotos()
-                activity.currentLocation = null
+                mainActivity.currentLocation = null
                 showToast(getString(R.string.plant_discarded))
                 popUpTo(R.id.mapFragment)
             }
@@ -176,7 +176,7 @@ class NewPlantConfirmFragment : BaseFragment() {
 
             showToast("Plant saved")
             findNavController().popBackStack(R.id.mapFragment, false)
-            activity.currentLocation = null
+            mainActivity.currentLocation = null
         }
     }
 

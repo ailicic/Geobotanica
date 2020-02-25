@@ -33,7 +33,7 @@ class LoginFragment : BaseFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        activity.applicationComponent.inject(this)
+        mainActivity.applicationComponent.inject(this)
 
         viewModel = getViewModel(viewModelFactory)
     }
@@ -97,7 +97,7 @@ class LoginFragment : BaseFragment() {
     }
 
     private fun initSpinner() {
-        spinnerAdapter = ArrayAdapter(activity, R.layout.spinner_user_item)
+        spinnerAdapter = ArrayAdapter(mainActivity, R.layout.spinner_user_item)
         spinnerAdapter?.setDropDownViewResource(R.layout.spinner_user_dropdown_item)
         nicknameSpinner.adapter = spinnerAdapter
     }

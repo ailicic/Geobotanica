@@ -36,7 +36,7 @@ class BrowseMapsFragment : BaseFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        activity.applicationComponent.inject(this)
+        mainActivity.applicationComponent.inject(this)
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
@@ -68,11 +68,11 @@ class BrowseMapsFragment : BaseFragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        activity.toolbar.setNavigationOnClickListener(null)
+        mainActivity.toolbar.setNavigationOnClickListener(null)
     }
 
     private fun addOnBackPressedCallback() {
-        activity.toolbar.setNavigationOnClickListener { onClickBackButton() }
+        mainActivity.toolbar.setNavigationOnClickListener { onClickBackButton() }
         requireActivity().onBackPressedDispatcher.addCallback(this) { onClickBackButton() }
     }
 

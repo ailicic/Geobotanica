@@ -26,7 +26,7 @@ class NewPlantPhotoFragment : BaseFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        activity.applicationComponent.inject(this)
+        mainActivity.applicationComponent.inject(this)
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
@@ -50,7 +50,7 @@ class NewPlantPhotoFragment : BaseFragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        activity.currentLocation = null // Delete since exiting New Plant flow
+        mainActivity.currentLocation = null // Delete since exiting New Plant flow
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -36,7 +36,7 @@ class LocalMapsFragment : BaseFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        activity.applicationComponent.inject(this)
+        mainActivity.applicationComponent.inject(this)
 
         viewModel = getViewModel(viewModelFactory) {
             userId = getFromBundle(userIdKey)
@@ -69,7 +69,7 @@ class LocalMapsFragment : BaseFragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        activity.toolbar.setNavigationOnClickListener(null)
+        mainActivity.toolbar.setNavigationOnClickListener(null)
     }
 
     private fun initRecyclerView() {

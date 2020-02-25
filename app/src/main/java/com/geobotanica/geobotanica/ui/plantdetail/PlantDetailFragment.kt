@@ -32,7 +32,7 @@ class PlantDetailFragment : BaseFragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        activity.applicationComponent.inject(this)
+        mainActivity.applicationComponent.inject(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -160,7 +160,7 @@ class PlantDetailFragment : BaseFragment() {
 
     @Suppress("UNUSED_PARAMETER")
     private fun onClickDelete(view: View) {
-        AlertDialog.Builder(activity).apply {
+        AlertDialog.Builder(mainActivity).apply {
             setTitle(getString(R.string.delete_plant))
             setMessage(getString(R.string.delete_plant_confirm))
             setPositiveButton(getString(R.string.yes)) { _, _ ->

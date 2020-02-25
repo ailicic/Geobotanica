@@ -24,20 +24,18 @@ import com.google.android.material.snackbar.Snackbar
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import javax.inject.Inject
 
 // NavBundle keys
 const val plantNameFilterOptionsKey = "plantNameFilterOptions" // Used by PlantNameFilterDialog : DialogFragment()
 
 @Suppress("unused")
 abstract class BaseFragment : Fragment() {
-    @Inject lateinit var appContext: Context
-    @Inject lateinit var activity: MainActivity
-    @Inject lateinit var defaultSharedPrefs: SharedPreferences
+    protected val appContext: Context by lazy { requireContext() }
+    val mainActivity: MainActivity by lazy { appContext as MainActivity }
 
     private val className: String by lazy { this.toString().substringBefore('{') }
     val sharedPrefs: SharedPreferences by lazy { // Each fragment has private sharedPrefs
-        activity.getSharedPreferences(className, Context.MODE_PRIVATE)
+        appContext.getSharedPreferences(className, Context.MODE_PRIVATE)
     }
 
     // NavBundle keys
@@ -58,7 +56,7 @@ abstract class BaseFragment : Fragment() {
     protected val requestTakePhoto = 1
 
     protected fun isPermissionGranted(permission: String) =
-        ContextCompat.checkSelfPermission(activity, permission) == PERMISSION_GRANTED
+        ContextCompat.checkSelfPermission(appContext, permission) == PERMISSION_GRANTED
 
     protected fun navigateTo(destination: Int, bundle: Bundle? = null) = findNavController().navigate(destination, bundle)
 
@@ -68,7 +66,7 @@ abstract class BaseFragment : Fragment() {
 
     protected fun showToast(stringResId: Int) = showToast(getString(stringResId))
 
-    protected fun showToast(message: String) = Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+    protected fun showToast(message: String) = Toast.makeText(appContext, message, Toast.LENGTH_SHORT).show()
 
     protected fun showSnackbar(message: String, button: String = "", action: ((View) -> Unit)? = null) {
         view?.let { view ->
@@ -94,7 +92,7 @@ abstract class BaseFragment : Fragment() {
     // TODO: Remove after better approach to create test images
     protected fun fileFromDrawable(resId: Int, filename: String): String {
         val bitmap = BitmapFactory.decodeResource(resources, resId)
-        val extStorageDir = activity.getExternalFilesDir(null).toString()
+        val extStorageDir = appContext.getExternalFilesDir(null).toString()
         val file = File(extStorageDir, "$filename.png")
         val outStream = FileOutputStream(file)
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream)
@@ -105,12 +103,12 @@ abstract class BaseFragment : Fragment() {
 
     protected fun startPhotoIntent(photoFile: File) {
         val capturePhotoIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        capturePhotoIntent.resolveActivity(activity.packageManager)
+        capturePhotoIntent.resolveActivity(appContext.packageManager)
 
         try {
-            val authorities = "${activity.packageName}.fileprovider"
+            val authorities = "${appContext.packageName}.fileprovider"
 //            Lg.v("authorities = $authorities")
-            val photoUri: Uri? = FileProvider.getUriForFile(activity, authorities, photoFile) // Adds 12 digits to filename
+            val photoUri: Uri? = FileProvider.getUriForFile(appContext, authorities, photoFile) // Adds 12 digits to filename
             capturePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
             startActivityForResult(capturePhotoIntent, requestTakePhoto)
 
@@ -126,7 +124,6 @@ abstract class BaseFragment : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         Lg.v("$className: onAttach()")
-        (context as MainActivity).applicationComponent.inject(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

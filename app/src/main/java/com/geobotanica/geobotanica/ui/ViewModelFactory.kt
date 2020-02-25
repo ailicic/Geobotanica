@@ -2,7 +2,6 @@ package com.geobotanica.geobotanica.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import javax.inject.Inject
 
 
@@ -16,7 +15,7 @@ object BaseFragmentExt {
             viewModelFactory: ViewModelFactory<T>,
             block: T.() -> Unit = { }
     ): T {
-        return ViewModelProviders.of(activity, viewModelFactory)
+        return ViewModelProvider(mainActivity, viewModelFactory)
             .get(T::class.java)
             .apply { block() }
     }

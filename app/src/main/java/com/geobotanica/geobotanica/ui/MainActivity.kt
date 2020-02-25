@@ -20,7 +20,6 @@ import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.di.components.ApplicationComponent
 import com.geobotanica.geobotanica.di.components.DaggerApplicationComponent
 import com.geobotanica.geobotanica.di.modules.ApplicationModule
-import com.geobotanica.geobotanica.di.modules.RepoModule
 import com.geobotanica.geobotanica.util.Lg
 import com.geobotanica.geobotanica.util.isEmulator
 import com.jakewharton.threetenabp.AndroidThreeTen
@@ -50,8 +49,7 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(this, navController)
 
         applicationComponent = DaggerApplicationComponent.builder()
-                .applicationModule(ApplicationModule(applicationContext, this))
-                .repoModule(RepoModule())
+                .applicationModule(ApplicationModule(applicationContext))
                 .build()
 
         applicationComponent.inject(this)
