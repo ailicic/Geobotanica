@@ -16,7 +16,6 @@ import com.geobotanica.geobotanica.data_taxa.repo.VernacularRepo
 import com.geobotanica.geobotanica.network.KEY_FILE_NAME
 import com.geobotanica.geobotanica.network.KEY_TITLE
 import com.geobotanica.geobotanica.ui.NOTIFICATION_CHANNEL_ID_DOWNLOADS
-import com.geobotanica.geobotanica.ui.login.onlineAssetList
 import com.geobotanica.geobotanica.util.Lg
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

@@ -2,9 +2,7 @@ package com.geobotanica.geobotanica.di.modules
 
 import android.app.DownloadManager
 import android.content.Context
-import android.content.SharedPreferences
 import android.location.LocationManager
-import androidx.preference.PreferenceManager
 import androidx.work.WorkManager
 import com.geobotanica.geobotanica.util.DefaultDispatchers
 import com.geobotanica.geobotanica.util.GbDispatchers

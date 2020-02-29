@@ -39,7 +39,7 @@
                 app:maxImageSize="@dimen/mini_fab_max_image_size"
                 app:backgroundTint="@color/colorWhite"
                 app:tint="@color/colorPrimaryDark"
-                app:srcCompat="@drawable/ic_edit_black_24dp"
+                app:srcCompat="@drawable/ic_edit_black"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"  />
 
@@ -150,7 +150,7 @@
                 app:maxImageSize="@dimen/mini_fab_max_image_size"
                 app:backgroundTint="@color/colorWhite"
                 app:tint="@color/colorPrimaryDark"
-                app:srcCompat="@drawable/ic_edit_black_24dp"
+                app:srcCompat="@drawable/ic_edit_black"
                 app:layout_constraintBottom_toTopOf="@id/measurementsDivider"
                 app:layout_constraintEnd_toEndOf="parent" />
 
