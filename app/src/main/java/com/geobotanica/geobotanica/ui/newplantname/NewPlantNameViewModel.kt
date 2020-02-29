@@ -110,6 +110,7 @@ class NewPlantNameViewModel @Inject constructor (
                 vernacularId = searchResult.id
                 val commonName = if (isSelectedResultSameAsLast) searchResult.plantName else viewState.commonName
                 updateViewState(
+                        isLoadingSpinnerVisible = false,
                         commonName = commonName,
                         selectedPosition = index,
                         selectedResult = searchResult
@@ -121,6 +122,7 @@ class NewPlantNameViewModel @Inject constructor (
                 taxonId = searchResult.id
                 val scientificName = if (isSelectedResultSameAsLast) searchResult.plantName else viewState.scientificName
                 updateViewState(
+                        isLoadingSpinnerVisible = false,
                         scientificName = scientificName,
                         selectedPosition = index,
                         selectedResult = searchResult

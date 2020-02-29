@@ -93,6 +93,7 @@ object PlantDetailViewModelTest : Spek({
         coEvery { insert(any()) } returns 0L
     }
     val plantMeasurementRepo = mockkBeforeGroup<PlantMeasurementRepo> {
+        coEvery { get(any<Long>()) } returns fakeHeight 
         coEvery { getLastOfPlantLiveData(any(), HEIGHT.flag) } returns liveData(fakeHeight)
         coEvery { getLastOfPlantLiveData(any(), DIAMETER.flag) } returns liveData(fakeDiameter)
         coEvery { getLastOfPlantLiveData(any(), TRUNK_DIAMETER.flag) } returns liveData(fakeTrunkDiameter)
@@ -218,7 +219,7 @@ object PlantDetailViewModelTest : Spek({
         beforeEachTest { plantDetailViewModel.onNewPlantType(SHRUB) }
 
         it("Should update plant type") {
-            coVerifyOne { plantRepo.update(fakePlant.copy(type = SHRUB).apply { id = fakePlant.id }) }
+            coVerifyOne { plantRepo.update(fakePlant.copy(type = SHRUB)) }
         }
         it("Should delete trunk diameters") { coVerifyOne { plantMeasurementRepo.delete(fakeTrunkDiameter) } }
     }
@@ -233,7 +234,8 @@ object PlantDetailViewModelTest : Spek({
                 plantRepo.update(fakePlant.copy(
                         commonName = "common2",
                         scientificName = "scientific2"
-                ).apply { id = fakePlant.id }) }
+                ))
+            }
         }
     }
 
@@ -241,7 +243,7 @@ object PlantDetailViewModelTest : Spek({
         beforeEachTest { plantDetailViewModel.onUpdatePhotoType(0, FLOWER) }
 
         it("Should update photo type") {
-            coVerifyOne { plantPhotoRepo.update(fakePhoto.copy(type = FLOWER).apply { id = fakePhoto.id }) }
+            coVerifyOne { plantPhotoRepo.update(fakePhoto.copy(type = FLOWER)) }
         }
     }
 

@@ -22,10 +22,9 @@ object PlantMarkerDataTest : Spek({
                     "scientific",
                     1L,
                     1L,
-                    later
-            ).apply{
-                id = 1L
-            }
+                    later,
+                    1L
+            )
             plantLocations = listOf(
                     PlantLocation(1L, Location(1.0, 2.0, 3.0, 1.0f, 10, 20, sooner)),
                     PlantLocation(2L, Location(4.0, 5.0, 6.0, 0.1f, 15, 22, later))

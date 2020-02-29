@@ -32,7 +32,7 @@ data class PlantPhoto(
     val timestamp: Instant = GbTime.now(),
 
     @PrimaryKey(autoGenerate = true)
-    val id: Long = 0
+    val id: Long = 0L
 ) {
     enum class Type(val flag: Int) {
         COMPLETE(   0b0000_0001), // 1

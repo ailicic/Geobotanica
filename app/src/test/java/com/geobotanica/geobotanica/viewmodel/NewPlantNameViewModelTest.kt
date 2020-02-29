@@ -114,9 +114,10 @@ object NewPlantNameViewModelTest : Spek({
             }
 
             it("Should emit correct ViewStates") {
-                verifySequence {
+                verifyOrder {
                     viewStateObserver.onChanged(ViewState())
                     viewStateObserver.onChanged(ViewState(
+                            isLoadingSpinnerVisible = true,
                             isCommonNameEditable = true,
                             isScientificNameEditable = false,
                             suggestedText = "Suggested common"
@@ -145,9 +146,10 @@ object NewPlantNameViewModelTest : Spek({
             }
 
             it("Should emit correct ViewStates") {
-                verifySequence {
+                verifyOrder {
                     viewStateObserver.onChanged(ViewState())
                     viewStateObserver.onChanged(ViewState(
+                            isLoadingSpinnerVisible = true,
                             isCommonNameEditable = false,
                             isScientificNameEditable = true,
                             suggestedText = "Suggested scientific"
@@ -210,21 +212,19 @@ object NewPlantNameViewModelTest : Spek({
                                 isCommonNameEditable = false,               // From ViewCreated
                                 isScientificNameEditable = true,            // From ViewCreated
                                 commonName = vernacular1.vernacular ?: "",  // From ViewCreated
-                                scientificName = tSearchResult1.plantName,  // Important
                                 suggestedText = "Suggested scientific",     // From ViewCreated
                                 searchResults = tSearchResults,             // From ViewCreated
-                                selectedResult = tSearchResult1,         // Important
-                                selectedPosition = 0                  // Important
+                                selectedResult = tSearchResult1,            // Important
+                                selectedPosition = 0                        // Important
                         ))
                         viewStateObserver.onChanged(ViewState(
                                 isCommonNameEditable = false,               // From ViewCreated
                                 isScientificNameEditable = true,            // From ViewCreated
                                 commonName = vernacular1.vernacular ?: "",  // From ViewCreated
-                                scientificName = tSearchResult2.plantName,  // Important
                                 suggestedText = "Suggested scientific",     // From ViewCreated
                                 searchResults = tSearchResults,             // From ViewCreated
-                                selectedResult = tSearchResult2,         // Important
-                                selectedPosition = 1                  // Important
+                                selectedResult = tSearchResult2,            // Important
+                                selectedPosition = 1                        // Important
                         ))
                     }
                 }
@@ -244,7 +244,7 @@ object NewPlantNameViewModelTest : Spek({
                 }
 
                 it("Should emit correct ViewState") {
-                    verify(exactly = 2) {
+                    verify {
                         viewStateObserver.onChanged(ViewState(
                                 isCommonNameEditable = false,               // From ViewCreated
                                 isScientificNameEditable = true,            // From ViewCreated
@@ -252,8 +252,8 @@ object NewPlantNameViewModelTest : Spek({
                                 scientificName = tSearchResult1.plantName,  // Important
                                 suggestedText = "Suggested scientific",     // From ViewCreated
                                 searchResults = tSearchResults,             // From ViewCreated
-                                selectedResult = tSearchResult1,         // Important
-                                selectedPosition = 0                  // Important
+                                selectedResult = tSearchResult1,            // Important
+                                selectedPosition = 0                        // Important
                         ))
                     }
                 }
@@ -281,22 +281,20 @@ object NewPlantNameViewModelTest : Spek({
                         viewStateObserver.onChanged(ViewState(
                                 isCommonNameEditable = true,            // From ViewCreated
                                 isScientificNameEditable = false,       // From ViewCreated
-                                commonName = vSearchResult1.plantName,  // Important
                                 scientificName = taxon1.generic ?: "",  // From ViewCreated
                                 suggestedText = "Suggested common",     // From ViewCreated
                                 searchResults = vSearchResults,         // From ViewCreated
-                                selectedResult = vSearchResult1,     // Important
-                                selectedPosition = 0              // Important
+                                selectedResult = vSearchResult1,        // Important
+                                selectedPosition = 0                    // Important
                         ))
                         viewStateObserver.onChanged(ViewState(
                                 isCommonNameEditable = true,            // From ViewCreated
                                 isScientificNameEditable = false,       // From ViewCreated
-                                commonName = vSearchResult2.plantName,  // Important
                                 scientificName = taxon1.generic ?: "",  // From ViewCreated
                                 suggestedText = "Suggested common",     // From ViewCreated
                                 searchResults = vSearchResults,         // From ViewCreated
-                                selectedResult = vSearchResult2,     // Important
-                                selectedPosition = 1              // Important
+                                selectedResult = vSearchResult2,        // Important
+                                selectedPosition = 1                    // Important
                         ))
                     }
                 }
@@ -316,7 +314,7 @@ object NewPlantNameViewModelTest : Spek({
                 }
 
                 it("Should emit correct ViewStates") {
-                    verify(exactly = 2) {
+                    verify {
                         viewStateObserver.onChanged(ViewState(
                                 isCommonNameEditable = true,            // From ViewCreated
                                 isScientificNameEditable = false,       // From ViewCreated
@@ -324,8 +322,8 @@ object NewPlantNameViewModelTest : Spek({
                                 scientificName = taxon1.generic ?: "",  // From ViewCreated
                                 suggestedText = "Suggested common",     // From ViewCreated
                                 searchResults = vSearchResults,         // From ViewCreated
-                                selectedResult = vSearchResult1,     // Important
-                                selectedPosition = 0              // Important
+                                selectedResult = vSearchResult1,        // Important
+                                selectedPosition = 0                    // Important
                         ))
                     }
                 }
@@ -348,7 +346,7 @@ object NewPlantNameViewModelTest : Spek({
             beforeEachTest { newPlantNameViewModel.onEvent(CommonEditTextChanged(vernacular1.vernacular ?: "")) }
 
             it("Should emit correct ViewStates") {
-                verify(exactly = 2) {
+                verify {
                     viewStateObserver.onChanged(ViewState(
                             isCommonNameEditable = true,            // From ViewCreated
                             isScientificNameEditable = false,       // From ViewCreated
@@ -356,9 +354,9 @@ object NewPlantNameViewModelTest : Spek({
                             scientificName = taxon1.generic ?: "",  // From ViewCreated
                             suggestedText = "Suggested common",     // From ViewCreated
                             searchResults = vSearchResults,         // From ViewCreated
-                            selectedResult = vSearchResult1,     // Important
-                            selectedPosition = 0,             // From ResultClicked
-                            isSelectedShown = true               // Important
+                            selectedResult = vSearchResult1,        // Important
+                            selectedPosition = 0,                   // From ResultClicked
+                            isSelectedShown = true                  // Important
                     ))
                 }
             }
@@ -372,13 +370,12 @@ object NewPlantNameViewModelTest : Spek({
                     viewStateObserver.onChanged(ViewState(
                             isCommonNameEditable = true,            // From ViewCreated
                             isScientificNameEditable = false,       // From ViewCreated
-                            commonName = vSearchResult1.plantName,  // Important
                             scientificName = taxon1.generic ?: "",  // From ViewCreated
                             suggestedText = "Suggested common",     // From ViewCreated
                             searchResults = vSearchResults,         // From ViewCreated
-                            selectedResult = vSearchResult1,     // Important
-                            selectedPosition = 0,             // From ResultClicked
-                            isSelectedShown = true               // Important
+                            selectedResult = vSearchResult1,        // Important
+                            selectedPosition = 0,                   // From ResultClicked
+                            isSelectedShown = true                  // Important
                     ))
                     viewStateObserver.onChanged(ViewState(
                             isScientificNameEditable = false,       // From ViewCreated
@@ -387,9 +384,9 @@ object NewPlantNameViewModelTest : Spek({
                             scientificName = taxon1.generic ?: "",  // From ViewCreated
                             suggestedText = "Suggested common",     // From ViewCreated
                             searchResults = vSearchResults,         // From ViewCreated
-                            selectedResult = vSearchResult1,     // Important
-                            selectedPosition = 0,             // From ResultClicked
-                            isSelectedShown = false              // Important
+                            selectedResult = vSearchResult1,        // Important
+                            selectedPosition = 0,                   // From ResultClicked
+                            isSelectedShown = false                 // Important
                     ))
                 }
             }
@@ -407,7 +404,7 @@ object NewPlantNameViewModelTest : Spek({
             beforeEachTest { newPlantNameViewModel.onEvent(ScientificEditTextChanged(taxon1.generic ?: "")) }
 
             it("Should emit correct ViewStates") {
-                verify(exactly = 2) {
+                verify {
                     viewStateObserver.onChanged(ViewState(
                             isCommonNameEditable = false,               // From ViewCreated
                             isScientificNameEditable = true,            // From ViewCreated
@@ -432,12 +429,11 @@ object NewPlantNameViewModelTest : Spek({
                             isCommonNameEditable = false,               // From ViewCreated
                             isScientificNameEditable = true,            // From ViewCreated
                             commonName = vernacular1.vernacular ?: "",  // From ViewCreated
-                            scientificName = tSearchResult1.plantName,  // Important
                             suggestedText = "Suggested scientific",     // From ViewCreated
                             searchResults = tSearchResults,             // From ViewCreated
-                            selectedResult = tSearchResult1,         // Important
-                            selectedPosition = 0,                 // From ResultClicked
-                            isSelectedShown = true                   // Important
+                            selectedResult = tSearchResult1,            // Important
+                            selectedPosition = 0,                       // From ResultClicked
+                            isSelectedShown = true                      // Important
                     ))
                     viewStateObserver.onChanged(ViewState(
                             isCommonNameEditable = false,               // From ViewCreated
@@ -446,9 +442,9 @@ object NewPlantNameViewModelTest : Spek({
                             scientificName = "not same",                // Important
                             suggestedText = "Suggested scientific",     // From ViewCreated
                             searchResults = tSearchResults,             // From ViewCreated
-                            selectedResult = tSearchResult1,         // Important
-                            selectedPosition = 0,                 // From ResultClicked
-                            isSelectedShown = false                  // Important
+                            selectedResult = tSearchResult1,            // Important
+                            selectedPosition = 0,                       // From ResultClicked
+                            isSelectedShown = false                     // Important
                     ))
                 }
             }

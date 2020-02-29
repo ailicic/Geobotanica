@@ -4,12 +4,11 @@ import com.geobotanica.geobotanica.android.file.StorageHelper
 import com.geobotanica.geobotanica.android.location.Location
 import com.geobotanica.geobotanica.android.location.LocationService
 import com.geobotanica.geobotanica.data.entity.OnlineAsset
-import com.geobotanica.geobotanica.data.entity.OnlineAssetId
 import com.geobotanica.geobotanica.data.repo.AssetRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
 import com.geobotanica.geobotanica.data.repo.PlantRepo
-import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.DOWNLOADED
-import com.geobotanica.geobotanica.network.FileDownloader.DownloadStatus.NOT_DOWNLOADED
+import com.geobotanica.geobotanica.network.DownloadStatus.*
+import com.geobotanica.geobotanica.ui.login.OnlineAssetId
 import com.geobotanica.geobotanica.ui.map.MapViewModel
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_FIX
 import com.geobotanica.geobotanica.ui.map.MapViewModel.GpsFabDrawable.GPS_OFF
@@ -47,7 +46,7 @@ object MapViewModelTest : Spek({
     }
 
     val mapViewModel by memoized {
-        MapViewModel(storageHelper, mapRepo, assetRepo, plantRepo, plantMarkerDiffer, locationService).apply {
+        MapViewModel(mapRepo, storageHelper, assetRepo, plantRepo, plantMarkerDiffer, locationService).apply {
             wasGpsSubscribed = true
             showGpsRequiredSnackbar.observeForever(gpsRequiredSnackbarObserver)
             showPlantNamesMissingSnackbar.observeForever(plantNamesMissingSnackbarObserver)
@@ -232,7 +231,8 @@ object MapViewModelTest : Spek({
 
             context("When plant names not available") {
                 beforeEachTest {
-                    val missingAsset = OnlineAsset("", "", "", false, 0L, 0L, NOT_DOWNLOADED)
+                    val missingAsset =
+                            OnlineAsset("", "", "", false, 0L, 0L, 0, NOT_DOWNLOADED)
                     coEvery { assetRepo.get(OnlineAssetId.PLANT_NAMES.id) } returns missingAsset
                     mapViewModel.onClickNewPlantFab()
                 }
@@ -244,7 +244,8 @@ object MapViewModelTest : Spek({
 
             context("When plant names available") {
                 beforeEachTest {
-                    val downloadedAsset = OnlineAsset("", "", "", false, 0L, 0L, DOWNLOADED)
+                    val downloadedAsset =
+                            OnlineAsset("", "", "", false, 0L, 0L, 0, DOWNLOADED)
                     coEvery { assetRepo.get(OnlineAssetId.PLANT_NAMES.id) } returns downloadedAsset
                     mapViewModel.onClickNewPlantFab()
                 }

@@ -83,10 +83,12 @@ object SearchPlantNameViewModelTest : Spek({
 
         it("Should emit correct ViewStates/ViewEffects") {
             verifyOrder {
-                viewStateObserver.onChanged(ViewState(searchEditText = "string"))
+                viewStateObserver.onChanged(ViewState())
                 viewStateObserver.onChanged(ViewState(searchEditText = "string", isLoadingSpinnerVisible = true))
                 viewEffectObserver.onChanged(UpdateSearchResults(searchResults))
-                viewStateObserver.onChanged(ViewState(searchEditText = "string", isLoadingSpinnerVisible = false))
+                viewStateObserver.onChanged(
+                        ViewState(searchEditText = "string", isLoadingSpinnerVisible = false, searchResults = searchResults)
+                )
             }
         }
     }

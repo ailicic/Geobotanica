@@ -25,7 +25,6 @@ import com.geobotanica.geobotanica.util.put
 import kotlinx.android.synthetic.main.fragment_map.*
 import javax.inject.Inject
 
-// TODO: Fix/update tests
 // TODO: Fix hidden FAB on Login screen after typed name is sufficiently long and keyboard visible (have coordinator layout already...)
     // RELATED TODO: Force GPS compound view to stay at bottom when keyboard visible (inconsistent behaviour across fragments)
 // TODO: Remove "-r -t" flags in run config after AS 3.6

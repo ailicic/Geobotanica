@@ -230,66 +230,42 @@ object NewPlantConfirmViewModelTest : Spek({
             val location by memoized { // memoized required for mocked/frozen timestamp
                 Location(1.0, 2.0, 3.0, 0.1f, 10, 20)
             }
-            beforeEachBlockingTest(testDispatchers) { newPlantConfirmViewModel.savePlantComposite(location) }
+
+            val plant by memoized {
+                Plant(0L, Plant.Type.SHRUB, "common", "scientific", 1L, 2L)
+            }
+            val plantPhoto by memoized { PlantPhoto(0L, 0L, PlantPhoto.Type.COMPLETE, "photoUri") }
+            val heightMeasurement by memoized { PlantMeasurement(0L, 0L, HEIGHT, 1.0F) }
+            val diameterMeasurement by memoized { PlantMeasurement(0L, 0L, DIAMETER, 2.0F) }
+            val trunkDiameterMeasurement by memoized { PlantMeasurement(0L, 0L, TRUNK_DIAMETER, 3.0F) }
+            val plantLocation by memoized { PlantLocation(0L, location) }
+
+            beforeEachBlockingTest(testDispatchers) {
+                coEvery { plantRepo.get(any()) } returns plant
+                coEvery { plantLocationRepo.get(any()) } returns plantLocation
+                coEvery { plantPhotoRepo.get(any()) } returns plantPhoto
+                coEvery { plantMeasurementRepo.get(any()) } returns heightMeasurement
+                newPlantConfirmViewModel.savePlantComposite(location)
+            }
 
             it("Should insert plant in db") {
-                coVerifyOne { plantRepo.insert(
-                        Plant(
-                                0L,
-                                Plant.Type.SHRUB,
-                                "common",
-                                "scientific",
-                                1L,
-                                2L
-                        )
-                ) }
-                confirmVerified(plantRepo)
+                coVerifyOne { plantRepo.insert(plant) }
             }
 
             it("Should insert photo in db") {
-                coVerifyOne {
-                    plantPhotoRepo.insert(PlantPhoto(
-                            0L,
-                            10L,
-                            PlantPhoto.Type.COMPLETE,
-                            "photoUri"
-                    ))
-                }
-                confirmVerified(plantPhotoRepo)
+                coVerifyOne { plantPhotoRepo.insert(plantPhoto) }
             }
 
             it("Should insert measurements in db") {
-                coVerifySequence {
-                    plantMeasurementRepo.insert(PlantMeasurement(
-                            0L,
-                            10L,
-                            HEIGHT,
-                            1.0F
-                    ))
-                    plantMeasurementRepo.insert(PlantMeasurement(
-                            0L,
-                            10L,
-                            DIAMETER,
-                            2.0F
-                    ))
-                    plantMeasurementRepo.insert(PlantMeasurement(
-                            0L,
-                            10L,
-                            TRUNK_DIAMETER,
-                            3.0F
-                    ))
+                coVerifyOrder {
+                    plantMeasurementRepo.insert(heightMeasurement)
+                    plantMeasurementRepo.insert(diameterMeasurement)
+                    plantMeasurementRepo.insert(trunkDiameterMeasurement)
                 }
-                confirmVerified(plantMeasurementRepo)
             }
 
             it("Should insert location in db") {
-                coVerifyOne {
-                    plantLocationRepo.insert(PlantLocation(
-                            10L,
-                            Location(1.0, 2.0, 3.0, 0.1f, 10, 20)
-                    ))
-                }
-                confirmVerified(plantLocationRepo)
+                coVerifyOne { plantLocationRepo.insert(plantLocation) }
             }
         }
     }

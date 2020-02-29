@@ -1,5 +1,6 @@
 package com.geobotanica.geobotanica.viewmodel
 
+import com.geobotanica.geobotanica.android.worker.DownloadStatusSynchronizer
 import com.geobotanica.geobotanica.data.entity.User
 import com.geobotanica.geobotanica.data.repo.AssetRepo
 import com.geobotanica.geobotanica.data.repo.MapRepo
@@ -33,9 +34,10 @@ object LoginViewModelTest : Spek({
     val userRepo = mockk<UserRepo>()
     val assetRepo = mockk<AssetRepo>()
     val mapRepo = mockk<MapRepo>()
+    val downloadStatusSynchronizer = mockk<DownloadStatusSynchronizer>()
 
     val loginViewModel by memoized {
-        LoginViewModel(testDispatchers, userRepo, assetRepo, mapRepo).apply {
+        LoginViewModel(testDispatchers, userRepo, assetRepo, mapRepo, downloadStatusSynchronizer).apply {
             viewState.observeForever(viewStateObserver)
             viewEffect.observeForever(viewEffectObserver)
         }
